@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Decks — Anime Arc</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bangers&family=Black+Han+Sans&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: #0a0a0a;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+font-family: 'Bangers', cursive;
+}
+
+.poster {
+width: 680px;
+height: 960px;
+position: relative;
+overflow: hidden;
+background: #0d0010;
+}
+
+/* Screentone halftone background */
+.bg-halftone {
+position: absolute;
+inset: 0;
+background:
+radial-gradient(circle at 20% 80%, #ff003322 0%, transparent 50%),
+radial-gradient(circle at 80% 20%, #0033ff22 0%, transparent 50%),
+radial-gradient(circle at 50% 50%, #ff990011 0%, transparent 70%);
+background-color: #f5e8c0;
+}
+
+/* Manga speed lines radiating from center */
+.speed-lines {
+position: absolute;
+inset: 0;
+background: conic-gradient(
+from 0deg at 50% 55%,
+#e8d5a0 0deg, #c9b87a 2deg, #e8d5a0 4deg,
+#c9b87a 6deg, #e8d5a0 8deg, #c9b87a 10deg,
+#e8d5a0 12deg, #c9b87a 14deg, #e8d5a0 16deg,
+#c9b87a 18deg, #e8d5a0 20deg, #c9b87a 22deg,
+#e8d5a0 24deg, #c9b87a 26deg, #e8d5a0 28deg,
+#c9b87a 30deg, #e8d5a0 32deg, #c9b87a 34deg,
+#e8d5a0 36deg, #c9b87a 38deg, #e8d5a0 40deg,
+#c9b87a 42deg, #e8d5a0 44deg, #c9b87a 46deg,
+#e8d5a0 48deg, #c9b87a 50deg, #e8d5a0 52deg,
+#c9b87a 54deg, #e8d5a0 56deg, #c9b87a 58deg,
+#e8d5a0 60deg, #c9b87a 62deg, #e8d5a0 64deg,
+#c9b87a 66deg, #e8d5a0 68deg, #c9b87a 70deg,
+#e8d5a0 72deg, #c9b87a 74deg, #e8d5a0 76deg,
+#c9b87a 78deg, #e8d5a0 80deg, #c9b87a 82deg,
+#e8d5a0 84deg, #c9b87a 86deg, #e8d5a0 88deg,
+#c9b87a 90deg, #e8d5a0 92deg, #c9b87a 94deg,
+#e8d5a0 96deg, #c9b87a 98deg, #e8d5a0 100deg,
+#c9b87a 102deg, #e8d5a0 104deg, #c9b87a 106deg,
+#e8d5a0 108deg, #c9b87a 110deg, #e8d5a0 112deg,
+#c9b87a 114deg, #e8d5a0 116deg, #c9b87a 118deg,
+#e8d5a0 120deg, #c9b87a 122deg, #e8d5a0 124deg,
+#c9b87a 126deg, #e8d5a0 128deg, #c9b87a 130deg,
+#e8d5a0 132deg, #c9b87a 134deg, #e8d5a0 136deg,
+#c9b87a 138deg, #e8d5a0 140deg, #c9b87a 142deg,
+#e8d5a0 144deg, #c9b87a 146deg, #e8d5a0 148deg,
+#c9b87a 150deg, #e8d5a0 152deg, #c9b87a 154deg,
+#e8d5a0 156deg, #c9b87a 158deg, #e8d5a0 160deg,
+#c9b87a 162deg, #e8d5a0 164deg, #c9b87a 166deg,
+#e8d5a0 168deg, #c9b87a 170deg, #e8d5a0 172deg,
+#c9b87a 174deg, #e8d5a0 176deg, #c9b87a 178deg,
+#e8d5a0 180deg, #c9b87a 182deg, #e8d5a0 184deg,
+#c9b87a 186deg, #e8d5a0 188deg, #c9b87a 190deg,
+#e8d5a0 192deg, #c9b87a 194deg, #e8d5a0 196deg,
+#c9b87a 198deg, #e8d5a0 200deg, #c9b87a 202deg,
+#e8d5a0 204deg, #c9b87a 206deg, #e8d5a0 208deg,
+#c9b87a 210deg, #e8d5a0 212deg, #c9b87a 214deg,
+#e8d5a0 216deg, #c9b87a 218deg, #e8d5a0 220deg,
+#c9b87a 222deg, #e8d5a0 224deg, #c9b87a 226deg,
+#e8d5a0 228deg, #c9b87a 230deg, #e8d5a0 232deg,
+#c9b87a 234deg, #e8d5a0 236deg, #c9b87a 238deg,
+#e8d5a0 240deg, #c9b87a 242deg, #e8d5a0 244deg,
+#c9b87a 246deg, #e8d5a0 248deg, #c9b87a 250deg,
+#e8d5a0 252deg, #c9b87a 254deg, #e8d5a0 256deg,
+#c9b87a 258deg, #e8d5a0 260deg, #c9b87a 262deg,
+#e8d5a0 264deg, #c9b87a 266deg, #e8d5a0 268deg,
+#c9b87a 270deg, #e8d5a0 272deg, #c9b87a 274deg,
+#e8d5a0 276deg, #c9b87a 278deg, #e8d5a0 280deg,
+#c9b87a 282deg, #e8d5a0 284deg, #c9b87a 286deg,
+#e8d5a0 288deg, #c9b87a 290deg, #e8d5a0 292deg,
+#c9b87a 294deg, #e8d5a0 296deg, #c9b87a 298deg,
+#e8d5a0 300deg, #c9b87a 302deg, #e8d5a0 304deg,
+#c9b87a 306deg, #e8d5a0 308deg, #c9b87a 310deg,
+#e8d5a0 312deg, #c9b87a 314deg, #e8d5a0 316deg,
+#c9b87a 318deg, #e8d5a0 320deg, #c9b87a 322deg,
+#e8d5a0 324deg, #c9b87a 326deg, #e8d5a0 328deg,
+#c9b87a 330deg, #e8d5a0 332deg, #c9b87a 334deg,
+#e8d5a0 336deg, #c9b87a 338deg, #e8d5a0 340deg,
+#c9b87a 342deg, #e8d5a0 344deg, #c9b87a 346deg,
+#e8d5a0 348deg, #c9b87a 350deg, #e8d5a0 352deg,
+#c9b87a 354deg, #e8d5a0 356deg, #c9b87a 358deg,
+#e8d5a0 360deg
+);
+opacity: 0.6;
+}
+
+/* Red dramatic flash behind character */
+.drama-flash {
+position: absolute;
+bottom: 200px;
+left: 50%;
+transform: translateX(-50%);
+width: 500px;
+height: 500px;
+background: radial-gradient(ellipse, #ff000055 0%, #ff660022 40%, transparent 70%);
+border-radius: 50%;
+}
+
+/* Top banner — VHS label style */
+.top-band {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 56px;
+background: #cc0000;
+border-bottom: 4px solid #000;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 18px;
+z-index: 10;
+}
+.top-band .ep-label {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 13px;
+color: #fff;
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+.top-band .katakana {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 700;
+font-size: 18px;
+color: #ffe500;
+letter-spacing: 4px;
+}
+
+/* Main title block */
+.title-block {
+position: absolute;
+top: 60px;
+left: 0;
+right: 0;
+z-index: 10;
+text-align: center;
+padding: 10px 20px 0;
+}
+
+.title-jp {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 15px;
+color: #000;
+letter-spacing: 8px;
+display: block;
+margin-bottom: 2px;
+}
+
+.title-main {
+font-family: 'Bangers', cursive;
+font-size: 88px;
+line-height: 0.88;
+color: #fff;
+text-shadow:
+4px 4px 0 #000,
+-2px -2px 0 #000,
+6px 0 0 #000,
+-6px 0 0 #000,
+0 6px 0 #000,
+0 -6px 0 #000;
+display: block;
+letter-spacing: 3px;
+}
+
+.title-sub {
+font-family: 'Bangers', cursive;
+font-size: 34px;
+color: #ffe500;
+text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+letter-spacing: 6px;
+display: block;
+margin-top: 2px;
+}
+
+/* Arc badge */
+.arc-badge {
+display: inline-block;
+background: #000;
+color: #ffe500;
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 11px;
+letter-spacing: 3px;
+text-transform: uppercase;
+padding: 5px 16px;
+border: 2px solid #ffe500;
+margin-top: 6px;
+}
+
+/* Photo zone */
+.photo-zone {
+position: absolute;
+bottom: 200px;
+left: 50%;
+transform: translateX(-50%);
+width: 360px;
+height: 460px;
+z-index: 5;
+}
+
+/* Placeholder for the photo — user inserts their image here */
+.photo-placeholder {
+width: 100%;
+height: 100%;
+background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+border: 3px solid #000;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+position: relative;
+overflow: hidden;
+clip-path: polygon(
+10px 0%, calc(100% - 10px) 0%,
+100% 10px, 100% calc(100% - 10px),
+calc(100% - 10px) 100%, 10px 100%,
+0% calc(100% - 10px), 0% 10px
+);
+}
+
+.photo-placeholder img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+object-position: top center;
+filter: contrast(1.15) saturate(0.7) brightness(1.05);
+mix-blend-mode: normal;
+}
+
+/* Anime cel-shading overlay on photo */
+.photo-overlay {
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg,
+transparent 30%,
+#00000033 60%,
+#00000099 100%
+);
+mix-blend-mode: multiply;
+}
+
+/* Manga ink outline effect on photo edges */
+.photo-ink-border {
+position: absolute;
+inset: -4px;
+border: 8px solid #000;
+clip-path: polygon(
+10px 0%, calc(100% - 10px) 0%,
+100% 10px, 100% calc(100% - 10px),
+calc(100% - 10px) 100%, 10px 100%,
+0% calc(100% - 10px), 0% 10px
+);
+pointer-events: none;
+}
+
+/* Floating energy orbs / vinyl records as power orbs */
+.orb {
+position: absolute;
+border-radius: 50%;
+z-index: 6;
+}
+
+.vinyl-orb {
+width: 70px;
+height: 70px;
+background: radial-gradient(circle, #555 20%, #111 40%, #333 60%, #000 80%);
+border: 3px solid #000;
+box-shadow: 0 0 20px #ff6600, 0 0 40px #ff330055;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.vinyl-orb::after {
+content: '';
+width: 18px;
+height: 18px;
+background: radial-gradient(circle, #ffe500, #ff8800);
+border-radius: 50%;
+border: 2px solid #000;
+box-shadow: 0 0 10px #ffe500;
+}
+.vinyl-orb.left {
+left: 40px;
+top: 380px;
+animation: float1 3s ease-in-out infinite;
+}
+.vinyl-orb.right {
+right: 40px;
+top: 340px;
+animation: float2 3.5s ease-in-out infinite;
+}
+.vinyl-orb.top-left {
+left: 70px;
+top: 280px;
+width: 45px;
+height: 45px;
+animation: float3 2.8s ease-in-out infinite;
+}
+.vinyl-orb.top-right {
+right: 60px;
+top: 260px;
+width: 50px;
+height: 50px;
+animation: float1 4s ease-in-out infinite;
+}
+
+@keyframes float1 {
+0%, 100% { transform: translateY(0px) rotate(0deg); }
+50% { transform: translateY(-12px) rotate(180deg); }
+}
+@keyframes float2 {
+0%, 100% { transform: translateY(-8px) rotate(0deg); }
+50% { transform: translateY(8px) rotate(-180deg); }
+}
+@keyframes float3 {
+0%, 100% { transform: translateY(-4px) rotate(0deg); }
+50% { transform: translateY(12px) rotate(360deg); }
+}
+
+/* Manga sound effects */
+.sfx {
+position: absolute;
+font-family: 'Bangers', cursive;
+z-index: 8;
+}
+.sfx-groove {
+font-size: 52px;
+color: #fff;
+text-shadow: 3px 3px 0 #ff0000, 5px 5px 0 #000;
+top: 290px;
+left: 18px;
+transform: rotate(-15deg);
+letter-spacing: 2px;
+}
+.sfx-drop {
+font-size: 38px;
+color: #ffe500;
+text-shadow: 2px 2px 0 #000, 4px 4px 0 #cc0000;
+top: 320px;
+right: 10px;
+transform: rotate(8deg);
+letter-spacing: 1px;
+}
+.sfx-dooon {
+font-size: 28px;
+color: #fff;
+text-shadow: 2px 2px 0 #000;
+bottom: 260px;
+left: 22px;
+transform: rotate(-5deg);
+opacity: 0.85;
+}
+
+/* Power level box */
+.power-box {
+position: absolute;
+top: 285px;
+right: 16px;
+background: #000;
+border: 3px solid #ffe500;
+padding: 6px 10px;
+z-index: 9;
+transform: rotate(2deg);
+}
+.power-label {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 8px;
+color: #ffe500;
+letter-spacing: 2px;
+display: block;
+}
+.power-num {
+font-family: 'Bangers', cursive;
+font-size: 28px;
+color: #ff3300;
+line-height: 1;
+text-shadow: 1px 1px 0 #fff;
+}
+.power-unit {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 700;
+font-size: 8px;
+color: #fff;
+display: block;
+letter-spacing: 1px;
+}
+
+/* Stat card */
+.stat-card {
+position: absolute;
+top: 290px;
+left: 14px;
+background: rgba(0,0,0,0.88);
+border: 2px solid #cc0000;
+padding: 7px 10px;
+z-index: 9;
+transform: rotate(-2deg);
+min-width: 110px;
+}
+.stat-name {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 9px;
+color: #cc0000;
+letter-spacing: 1px;
+border-bottom: 1px solid #cc0000;
+padding-bottom: 3px;
+margin-bottom: 4px;
+text-transform: uppercase;
+}
+.stat-row {
+display: flex;
+justify-content: space-between;
+font-family: 'Noto Sans JP', sans-serif;
+font-size: 8px;
+color: #fff;
+margin-bottom: 2px;
+gap: 8px;
+}
+.stat-bar {
+display: flex;
+gap: 2px;
+align-items: center;
+}
+.bar-pip {
+width: 7px;
+height: 7px;
+background: #ffe500;
+border: 1px solid #000;
+}
+.bar-pip.empty {
+background: #333;
+}
+
+/* Bottom footer */
+.footer {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 190px;
+background: #000;
+border-top: 5px solid #cc0000;
+z-index: 10;
+padding: 14px 24px 12px;
+}
+
+.footer-episode {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 10px;
+color: #cc0000;
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-bottom: 2px;
+}
+
+.footer-title-jp {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 700;
+font-size: 13px;
+color: #ffe500;
+letter-spacing: 4px;
+margin-bottom: 6px;
+}
+
+.footer-main {
+font-family: 'Bangers', cursive;
+font-size: 38px;
+color: #fff;
+letter-spacing: 3px;
+line-height: 1;
+margin-bottom: 4px;
+text-shadow: 2px 2px 0 #cc0000;
+}
+
+.footer-rule {
+border: none;
+border-top: 1px solid #333;
+margin: 8px 0;
+}
+
+.footer-info {
+display: flex;
+justify-content: space-between;
+align-items: flex-end;
+}
+
+.footer-date {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 16px;
+color: #fff;
+letter-spacing: 1px;
+}
+
+.footer-sub {
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 400;
+font-size: 10px;
+color: #888;
+margin-top: 2px;
+}
+
+.footer-warning {
+text-align: right;
+}
+.warning-box {
+display: inline-block;
+background: #cc0000;
+color: #fff;
+font-family: 'Noto Sans JP', sans-serif;
+font-weight: 900;
+font-size: 9px;
+padding: 3px 8px;
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-bottom: 3px;
+}
+.footer-handle {
+font-family: 'Noto Sans JP', sans-serif;
+font-size: 10px;
+color: #666;
+letter-spacing: 1px;
+}
+
+/* Scan lines overlay for VHS feel */
+.scanlines {
+position: absolute;
+inset: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(0,0,0,0.06) 2px,
+rgba(0,0,0,0.06) 4px
+);
+pointer-events: none;
+z-index: 20;
+}
+
+/* Torn paper top edge detail */
+.top-corner-left {
+position: absolute;
+top: 56px;
+left: 0;
+width: 0;
+height: 0;
+border-left: 24px solid #cc0000;
+border-bottom: 24px solid transparent;
+z-index: 11;
+}
+.top-corner-right {
+position: absolute;
+top: 56px;
+right: 0;
+width: 0;
+height: 0;
+border-right: 24px solid #cc0000;
+border-bottom: 24px solid transparent;
+z-index: 11;
+}
+
+/* Instruction note for the user */
+.user-note {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: rgba(0,0,0,0.75);
+color: #ffe500;
+font-family: 'Noto Sans JP', sans-serif;
+font-size: 12px;
+padding: 12px 18px;
+border: 2px dashed #ffe500;
+text-align: center;
+z-index: 30;
+width: 280px;
+display: none; /* hidden by default — shown only if no image */
+}
+
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- Background layers -->
+
+  <div class="bg-halftone"></div>
+  <div class="speed-lines"></div>
+  <div class="drama-flash"></div>
+
+  <!-- Top VHS band -->
+
+  <div class="top-band">
+    <span class="ep-label">Vol.03 — Martinique Open Decks</span>
+    <span class="katakana">オープンデッキ</span>
+  </div>
+
+  <!-- Corner details -->
+
+  <div class="top-corner-left"></div>
+  <div class="top-corner-right"></div>
+
+  <!-- TITLE -->
+
+  <div class="title-block">
+    <span class="title-jp">— ビニール・バトル・トーナメント —</span>
+    <span class="title-main">OPEN<br>DECKS</span>
+    <span class="title-sub">★ ROUND THREE ★</span>
+    <div><span class="arc-badge">THE GROOVE TOURNAMENT ARC</span></div>
+  </div>
+
+  <!-- Power level box -->
+
+  <div class="power-box">
+    <span class="power-label">POWER LEVEL</span>
+    <span class="power-num">45RPM</span>
+    <span class="power-unit">∞ BPM DETECTED</span>
+  </div>
+
+  <!-- Stat card -->
+
+  <div class="stat-card">
+    <div class="stat-name">DJ Thomas · Stats</div>
+    <div class="stat-row">
+      <span>Groove</span>
+      <div class="stat-bar">
+        <div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <span>Crate IQ</span>
+      <div class="stat-bar">
+        <div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip empty"></div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <span>Funk</span>
+      <div class="stat-bar">
+        <div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div><div class="bar-pip"></div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <span>Digital</span>
+      <div class="stat-bar">
+        <div class="bar-pip empty"></div><div class="bar-pip empty"></div><div class="bar-pip empty"></div><div class="bar-pip empty"></div><div class="bar-pip empty"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SFX -->
+
+  <div class="sfx sfx-groove">GROOVE!!</div>
+  <div class="sfx sfx-drop">ドロップ!!</div>
+  <div class="sfx sfx-dooon">ドーン...</div>
+
+  <!-- Floating vinyl orbs -->
+
+  <div class="vinyl-orb orb left"></div>
+  <div class="vinyl-orb orb right"></div>
+  <div class="vinyl-orb orb top-left"></div>
+  <div class="vinyl-orb orb top-right"></div>
+
+  <!-- PHOTO ZONE -->
+
+  <div class="photo-zone">
+    <div class="photo-placeholder">
+      <!--
+        INSTRUCTIONS: Replace the src below with your photo.
+        The photo will be cropped to fit and styled with anime contrast.
+        Best result: a straight-on or slightly angled upper body photo.
+      -->
+      <img
+        src="/mnt/user-data/uploads/IMG_7575.png"
+        alt="DJ Thomas"
+        onerror="this.style.display='none'; document.querySelector('.user-note').style.display='block';"
+      />
+      <div class="photo-overlay"></div>
+    </div>
+    <div class="photo-ink-border"></div>
+    <div class="user-note">Replace the photo src with your image path to see yourself as the anime protagonist!</div>
+  </div>
+
+  <!-- FOOTER -->
+
+  <div class="footer">
+    <div class="footer-episode">Episode 47 — Special Live Event</div>
+    <div class="footer-title-jp">「最後のビニールを誰が守るか」</div>
+    <div class="footer-main">NO DIGITAL WEAPONS.</div>
+    <hr class="footer-rule">
+    <div class="footer-info">
+      <div>
+        <div class="footer-date">ONSDAG — TBA — 18:00–23:00</div>
+        <div class="footer-sub">30 MINUTTERS SLOTS · TA MED PLATENE DU SPILLER HJEMME</div>
+        <div class="footer-sub" style="margin-top:4px; color:#555;">@ Martinique, Stavanger</div>
+      </div>
+      <div class="footer-warning">
+        <div><span class="warning-box">Vinyl Only</span></div>
+        <div class="footer-handle">@Martinique_1985</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VHS scanlines -->
+
+  <div class="scanlines"></div>
+
+</div>
+</body>
+</html>
