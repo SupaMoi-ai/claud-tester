@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpriteGen — AI Sprite Animation Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d1a;
+      --surface:  #13132a;
+      --card:     #1a1a35;
+      --border:   #2a2a55;
+      --accent:   #7c3aed;
+      --accent2:  #a855f7;
+      --text:     #e2e8f0;
+      --muted:    #8892a4;
+      --success:  #10b981;
+      --error:    #ef4444;
+      --warn:     #f59e0b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .logo svg { width: 28px; height: 28px; }
+    .logo span { background: linear-gradient(135deg, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tagline { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(124,58,237,.35);
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-sm { padding: 5px 12px; font-size: .8rem; }
+    .btn-group { display: flex; gap: 1px; }
+    .btn-group .btn {
+      border-radius: 0;
+      background: var(--card);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      flex: 1;
+    }
+    .btn-group .btn:first-child { border-radius: 8px 0 0 8px; }
+    .btn-group .btn:last-child  { border-radius: 0 8px 8px 0; }
+    .btn-group .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-group .btn:hover:not(.active) { background: var(--border); color: var(--text); }
+
+    /* ── Layout ── */
+    .app {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 300px;
+      min-width: 300px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    textarea, input[type=text], input[type=password], select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .875rem;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+    textarea:focus, input:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+    select option { background: var(--card); }
+
+    .api-key-row { display: flex; gap: 8px; }
+    .api-key-row input { flex: 1; font-family: monospace; }
+
+    .generate-btn {
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 10px;
+      width: 100%;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* ── Main preview area ── */
+    .preview-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: .9rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+    .card-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .empty-state svg { width: 56px; height: 56px; opacity: .3; }
+    .empty-state p { font-size: .9rem; max-width: 280px; line-height: 1.6; }
+
+    /* ── Progress ── */
+    #progressSection { display: none; }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: .85rem;
+      margin-bottom: 10px;
+    }
+    .progress-bar-track {
+      background: var(--surface);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+    .frames-progress {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .frame-dot {
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .7rem;
+      color: var(--muted);
+      transition: all .3s;
+      overflow: hidden;
+    }
+    .frame-dot.generating { border-color: var(--warn); animation: pulse 1s infinite; }
+    .frame-dot.done { border-color: var(--success); }
+    .frame-dot img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+    /* ── Animation Preview ── */
+    #animSection { display: none; }
+    .anim-canvas-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: repeating-conic-gradient(#1e1e3a 0% 25%, #252545 0% 50%) 0 0 / 16px 16px;
+      border-radius: 10px;
+      padding: 24px;
+      min-height: 200px;
+    }
+    #animCanvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .anim-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .fps-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 120px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent2);
+      cursor: pointer;
+    }
+    .frame-counter { font-size: .8rem; color: var(--muted); margin-left: auto; }
+
+    /* ── Sprite Sheet ── */
+    #sheetSection { display: none; }
+    .sheet-wrap {
+      background: repeating-conic-gradient(#1e1e3a 0% 25%, #252545 0% 50%) 0 0 / 16px 16px;
+      border-radius: 10px;
+      padding: 20px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+    }
+    #sheetCanvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border-radius: 2px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .sheet-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      flex-wrap: gap;
+    }
+    .sheet-info { font-size: .8rem; color: var(--muted); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: .875rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all .25s;
+      z-index: 100;
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.error { border-color: var(--error); color: var(--error); }
+    #toast.success { border-color: var(--success); color: var(--success); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ───── Header ───── -->
+<header>
+  <div>
+    <div class="logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="8" height="8" fill="#a855f7"/>
+        <rect x="12" y="4" width="8" height="8" fill="#7c3aed"/>
+        <rect x="20" y="4" width="8" height="8" fill="#a855f7"/>
+        <rect x="4" y="12" width="8" height="8" fill="#7c3aed"/>
+        <rect x="12" y="12" width="8" height="8" fill="#c084fc"/>
+        <rect x="20" y="12" width="8" height="8" fill="#7c3aed"/>
+        <rect x="4" y="20" width="8" height="8" fill="#a855f7"/>
+        <rect x="12" y="20" width="8" height="8" fill="#7c3aed"/>
+        <rect x="20" y="20" width="8" height="8" fill="#a855f7"/>
+      </svg>
+      <span>SpriteGen</span>
+    </div>
+    <div class="tagline">AI Sprite Animation Generator</div>
+  </div>
+  <div class="header-right">
+    <span style="font-size:.8rem;color:var(--muted)">Powered by Replicate</span>
+  </div>
+</header>
+
+<!-- ───── App ───── -->
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+
+    <!-- API Key -->
+    <div class="field">
+      <div class="section-label">Replicate API Key</div>
+      <div class="api-key-row">
+        <input type="password" id="apiKey" placeholder="r8_••••••••••••••••" autocomplete="off" />
+        <button class="btn btn-ghost btn-sm" id="saveKeyBtn">Save</button>
+      </div>
+      <div id="keyStatus" style="font-size:.75rem;color:var(--muted);display:none"></div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border)"/>
+
+    <!-- Character description -->
+    <div class="field">
+      <div class="section-label">Character Description</div>
+      <textarea id="prompt" rows="4" placeholder="e.g. a cute red dragon knight with golden armor and a small sword"></textarea>
+    </div>
+
+    <!-- Art Style -->
+    <div class="field">
+      <div class="section-label">Art Style</div>
+      <div class="btn-group" id="styleGroup">
+        <button class="btn active" data-value="pixel">Pixel Art</button>
+        <button class="btn" data-value="cartoon">Cartoon</button>
+        <button class="btn" data-value="painted">Painted</button>
+      </div>
+    </div>
+
+    <!-- Animation Type -->
+    <div class="field">
+      <div class="section-label">Animation Type</div>
+      <select id="animType">
+        <option value="idle">Idle</option>
+        <option value="walk">Walk</option>
+        <option value="run">Run</option>
+        <option value="attack">Attack</option>
+        <option value="jump">Jump</option>
+        <option value="death">Death</option>
+      </select>
+    </div>
+
+    <!-- Frame Count -->
+    <div class="field">
+      <div class="section-label">Frame Count</div>
+      <div class="btn-group" id="frameGroup">
+        <button class="btn" data-value="4">4</button>
+        <button class="btn active" data-value="6">6</button>
+        <button class="btn" data-value="8">8</button>
+      </div>
+    </div>
+
+    <!-- Sprite Size -->
+    <div class="field">
+      <div class="section-label">Sprite Size</div>
+      <div class="btn-group" id="sizeGroup">
+        <button class="btn active" data-value="256">256px</button>
+        <button class="btn" data-value="512">512px</button>
+      </div>
+    </div>
+
+    <!-- Generate button -->
+    <button class="btn btn-primary generate-btn" id="generateBtn">
+      <div class="spinner" id="spinner"></div>
+      <svg id="genIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span id="genLabel">Generate Sprites</span>
+    </button>
+
+  </aside>
+
+  <!-- ── Preview Area ── -->
+  <main class="preview-area">
+
+    <!-- Empty state -->
+    <div id="emptyState">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="3" y="3" width="5" height="5" rx=".5"/><rect x="10" y="3" width="5" height="5" rx=".5"/>
+          <rect x="17" y="3" width="5" height="5" rx=".5"/><rect x="3" y="10" width="5" height="5" rx=".5"/>
+          <rect x="10" y="10" width="5" height="5" rx=".5"/><rect x="17" y="10" width="5" height="5" rx=".5"/>
+          <rect x="3" y="17" width="5" height="5" rx=".5"/><rect x="10" y="17" width="5" height="5" rx=".5"/>
+          <rect x="17" y="17" width="5" height="5" rx=".5"/>
+        </svg>
+        <p>Enter a character description and click <strong>Generate Sprites</strong> to create an animated sprite sheet.</p>
+        <p style="font-size:.8rem">Each frame is generated individually using SDXL on Replicate.</p>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card" id="progressSection">
+      <div class="card-title"><div class="dot"></div> Generating</div>
+      <div class="progress-header">
+        <span id="progressLabel">Starting…</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="frames-progress" id="frameDots"></div>
+    </div>
+
+    <!-- Animation Preview -->
+    <div class="card" id="animSection">
+      <div class="card-title"><div class="dot"></div> Animation Preview</div>
+      <div class="anim-canvas-wrap">
+        <canvas id="animCanvas"></canvas>
+      </div>
+      <div class="anim-controls">
+        <button class="btn btn-ghost btn-sm" id="playPauseBtn">⏸ Pause</button>
+        <div class="fps-row">
+          <span>FPS</span>
+          <input type="range" id="fpsSlider" min="1" max="24" value="8" />
+          <span id="fpsVal">8</span>
+        </div>
+        <div class="frame-counter" id="frameCounter">Frame 1 / 6</div>
+      </div>
+    </div>
+
+    <!-- Sprite Sheet -->
+    <div class="card" id="sheetSection">
+      <div class="card-title"><div class="dot"></div> Sprite Sheet</div>
+      <div class="sheet-wrap">
+        <canvas id="sheetCanvas"></canvas>
+      </div>
+      <div class="sheet-meta" style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+        <div class="sheet-info" id="sheetInfo"></div>
+        <button class="btn btn-primary btn-sm" id="downloadBtn">⬇ Download PNG</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let generatedFrames = [];   // array of HTMLImageElement
+let animInterval   = null;
+let currentFrame   = 0;
+let isPlaying      = true;
+let fps            = 8;
+let selectedStyle  = 'pixel';
+let selectedFrames = 6;
+let selectedSize   = 256;
+
+// ─── Pose library ────────────────────────────────────────────────────────────
+const POSES = {
+  idle: [
+    'standing upright, relaxed neutral pose',
+    'standing, breathing in, chest slightly expanded',
+    'standing, tilted slightly to one side',
+    'standing, breathing out, relaxed stance',
+    'neutral upright standing pose',
+    'slight head tilt, relaxed standing',
+    'arms loosely at sides standing',
+    'weight shifted to one leg, standing',
+  ],
+  walk: [
+    'walking, right foot forward, left arm swinging forward',
+    'walking, mid-stride, feet passing each other',
+    'walking, left foot forward, right arm swinging forward',
+    'walking, weight on right foot, transition pose',
+    'walking, right foot lifted, mid-step',
+    'walking, both feet nearly together, balance point',
+    'walking, left heel striking ground',
+    'walking, completing stride, arms neutral',
+  ],
+  run: [
+    'running, right leg lunging forward, left arm pumping forward',
+    'running, both feet off ground, leaning forward',
+    'running, left leg extended back, right arm driving forward',
+    'running, airborne crouch, legs tucked',
+    'running, full stride with right leg forward',
+    'running, explosive push-off pose',
+    'running, left leg extended, sprinting form',
+    'running, arms crossing body, sprinting',
+  ],
+  attack: [
+    'combat stance, weapon raised, ready to strike',
+    'winding up for a powerful swing',
+    'mid-swing, weapon traveling forward',
+    'full extension, weapon at maximum reach',
+    'follow-through after strike, weapon past target',
+    'recovery pose, returning to guard stance',
+    'back-swing for second attack',
+    'guard stance, weapon lowered momentarily',
+  ],
+  jump: [
+    'crouching to jump, knees bent, arms down',
+    'launching upward, legs straightening, arms rising',
+    'rising through the air, arms spread',
+    'peak of jump, fully airborne, highest point',
+    'beginning to fall, arms adjusting for balance',
+    'descending, preparing for landing',
+    'about to land, knees bending',
+    'landing impact, knees deeply bent, arms wide',
+  ],
+  death: [
+    'staggering backward, hit by impact',
+    'stumbling, losing balance',
+    'leaning heavily to one side, faltering',
+    'halfway to the ground, falling',
+    'nearly collapsed, arm reaching out',
+    'hitting the ground, final fall',
+    'lying on the ground, motionless',
+    'flat on ground, defeated, completely still',
+  ],
+};
+
+const STYLE_PREFIXES = {
+  pixel: 'pixel art, 8-bit retro game sprite, pixelated, crisp pixels, classic video game style,',
+  cartoon: 'cartoon character, flat color illustration, bold outlines, vibrant colors, 2D game art style,',
+  painted: 'digital painting, illustrated game character, painterly style, detailed fantasy art,',
+};
+
+const STYLE_NEG = {
+  pixel: 'realistic, photograph, 3d render, blurry, noise, watermark, complex background,',
+  cartoon: 'realistic, photograph, 3d render, blurry, noise, watermark, complex background, pixel art,',
+  painted: 'pixel art, cartoon, realistic photograph, 3d render, blurry, noise, watermark,',
+};
+
+// ─── Replicate API ───────────────────────────────────────────────────────────
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function generateFrame(apiKey, prompt, size) {
+  const negPrompt = STYLE_NEG[selectedStyle] +
+    ' multiple characters, text, ui elements, hud, multiple sprites, tiling, sheet layout, gradient background, colored background';
+
+  const res = await fetch('https://api.replicate.com/v1/models/stability-ai/sdxl/predictions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      input: {
+        prompt,
+        negative_prompt: negPrompt,
+        width: size,
+        height: size,
+        num_inference_steps: 25,
+        guidance_scale: 7.5,
+        num_outputs: 1,
+        refine: 'no_refiner',
+      }
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+
+  let prediction = await res.json();
+
+  // Poll until done
+  for (let i = 0; i < 120; i++) {
+    if (prediction.status === 'succeeded') {
+      return prediction.output[0];
+    }
+    if (prediction.status === 'failed') {
+      throw new Error(prediction.error || 'Generation failed');
+    }
+    await sleep(1500);
+    const poll = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+    if (!poll.ok) throw new Error(`Poll failed: HTTP ${poll.status}`);
+    prediction = await poll.json();
+  }
+  throw new Error('Timed out waiting for generation');
+}
+
+// ─── Load image from URL ──────────────────────────────────────────────────────
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => resolve(img);
+    img.onerror = () => reject(new Error('Failed to load image: ' + url));
+    img.src = url;
+  });
+}
+
+// ─── Build sprite sheet canvas ───────────────────────────────────────────────
+function buildSpriteSheet(images, size) {
+  const canvas = document.getElementById('sheetCanvas');
+  canvas.width  = images.length * size;
+  canvas.height = size;
+  canvas.style.maxWidth = '100%';
+  canvas.style.height   = 'auto';
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  images.forEach((img, i) => ctx.drawImage(img, i * size, 0, size, size));
+  document.getElementById('sheetInfo').textContent =
+    `${images.length} frames · ${images.length * size}×${size}px · PNG`;
+}
+
+// ─── Animation loop ───────────────────────────────────────────────────────────
+function startAnimation(images, size) {
+  const canvas = document.getElementById('animCanvas');
+  canvas.width  = size;
+  canvas.height = size;
+  const displaySize = Math.min(size, 320);
+  canvas.style.width  = displaySize + 'px';
+  canvas.style.height = displaySize + 'px';
+
+  if (animInterval) clearInterval(animInterval);
+  currentFrame = 0;
+  isPlaying = true;
+  document.getElementById('playPauseBtn').textContent = '⏸ Pause';
+
+  function drawFrame() {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(images[currentFrame], 0, 0, size, size);
+    document.getElementById('frameCounter').textContent =
+      `Frame ${currentFrame + 1} / ${images.length}`;
+  }
+
+  animInterval = setInterval(() => {
+    drawFrame();
+    currentFrame = (currentFrame + 1) % images.length;
+  }, 1000 / fps);
+  drawFrame();
+}
+
+// ─── Main generation handler ──────────────────────────────────────────────────
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) { showToast('Please enter your Replicate API key.', 'error'); return; }
+
+  const promptText = document.getElementById('prompt').value.trim();
+  if (!promptText) { showToast('Please describe your character.', 'error'); return; }
+
+  const animType = document.getElementById('animType').value;
+  const frameCount = selectedFrames;
+  const size = selectedSize;
+  const poses = POSES[animType].slice(0, frameCount);
+  const stylePrefix = STYLE_PREFIXES[selectedStyle];
+
+  // UI: start state
+  setGenerating(true);
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('animSection').style.display = 'none';
+  document.getElementById('sheetSection').style.display = 'none';
+  document.getElementById('progressSection').style.display = 'block';
+  generatedFrames = [];
+
+  // Build frame dots
+  const dotsContainer = document.getElementById('frameDots');
+  dotsContainer.innerHTML = '';
+  poses.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'frame-dot';
+    dot.id = `fdot-${i}`;
+    dot.textContent = i + 1;
+    dotsContainer.appendChild(dot);
+  });
+
+  updateProgress(0, frameCount, 'Preparing prompts…');
+
+  try {
+    for (let i = 0; i < poses.length; i++) {
+      const dot = document.getElementById(`fdot-${i}`);
+      dot.classList.add('generating');
+      updateProgress(i, frameCount, `Generating frame ${i + 1} of ${frameCount}…`);
+
+      const fullPrompt =
+        `${stylePrefix} ${promptText}, ${poses[i]}, ` +
+        `game character sprite, isolated on pure white background, ` +
+        `centered composition, full body view, no background elements, clean`;
+
+      const url = await generateFrame(apiKey, fullPrompt, size);
+      const img = await loadImage(url);
+      generatedFrames.push(img);
+
+      dot.classList.remove('generating');
+      dot.classList.add('done');
+      dot.innerHTML = '';
+      const thumb = new Image();
+      thumb.src = url;
+      thumb.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:5px;';
+      dot.appendChild(thumb);
+    }
+
+    updateProgress(frameCount, frameCount, 'Done!');
+
+    // Show results
+    document.getElementById('animSection').style.display = 'block';
+    document.getElementById('sheetSection').style.display = 'block';
+    startAnimation(generatedFrames, size);
+    buildSpriteSheet(generatedFrames, size);
+    showToast(`Generated ${frameCount} frames successfully!`, 'success');
+
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+    console.error(err);
+    if (generatedFrames.length > 0) {
+      document.getElementById('animSection').style.display = 'block';
+      document.getElementById('sheetSection').style.display = 'block';
+      startAnimation(generatedFrames, size);
+      buildSpriteSheet(generatedFrames, size);
+    }
+  } finally {
+    setGenerating(false);
+  }
+});
+
+function updateProgress(done, total, label) {
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function setGenerating(on) {
+  const btn    = document.getElementById('generateBtn');
+  const icon   = document.getElementById('genIcon');
+  const label  = document.getElementById('genLabel');
+  const spinner= document.getElementById('spinner');
+  btn.disabled = on;
+  icon.style.display    = on ? 'none' : 'block';
+  spinner.style.display = on ? 'block' : 'none';
+  label.textContent = on ? 'Generating…' : 'Generate Sprites';
+}
+
+// ─── Controls ────────────────────────────────────────────────────────────────
+document.getElementById('playPauseBtn').addEventListener('click', () => {
+  if (!generatedFrames.length) return;
+  isPlaying = !isPlaying;
+  document.getElementById('playPauseBtn').textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+  if (isPlaying) {
+    startAnimation(generatedFrames, selectedSize);
+  } else {
+    clearInterval(animInterval);
+  }
+});
+
+document.getElementById('fpsSlider').addEventListener('input', function() {
+  fps = parseInt(this.value, 10);
+  document.getElementById('fpsVal').textContent = fps;
+  if (isPlaying && generatedFrames.length) {
+    startAnimation(generatedFrames, selectedSize);
+  }
+});
+
+// ─── Download ────────────────────────────────────────────────────────────────
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const canvas = document.getElementById('sheetCanvas');
+  const animType = document.getElementById('animType').value;
+  const a = document.createElement('a');
+  a.download = `sprite_${animType}_${selectedFrames}frames_${selectedSize}px.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+});
+
+// ─── Button groups ────────────────────────────────────────────────────────────
+function setupBtnGroup(id, callback) {
+  const group = document.getElementById(id);
+  group.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      callback(btn.dataset.value);
+    });
+  });
+}
+
+setupBtnGroup('styleGroup',  v => { selectedStyle  = v; });
+setupBtnGroup('frameGroup',  v => { selectedFrames = parseInt(v, 10); });
+setupBtnGroup('sizeGroup',   v => { selectedSize   = parseInt(v, 10); });
+
+// ─── API Key save/load ────────────────────────────────────────────────────────
+const KEY_STORE = 'spritegen_api_key';
+
+document.getElementById('saveKeyBtn').addEventListener('click', () => {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) { showToast('Enter a key first.', 'error'); return; }
+  localStorage.setItem(KEY_STORE, k);
+  const s = document.getElementById('keyStatus');
+  s.style.display = 'block';
+  s.style.color = 'var(--success)';
+  s.textContent = '✓ Key saved to browser storage';
+});
+
+(function loadSavedKey() {
+  const saved = localStorage.getItem(KEY_STORE);
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    const s = document.getElementById('keyStatus');
+    s.style.display = 'block';
+    s.textContent = '✓ Key loaded from storage';
+  }
+})();
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3500);
+}
+</script>
+</body>
+</html>
