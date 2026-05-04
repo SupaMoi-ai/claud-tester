@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Single ticket</title>
+<style>
+  :root {
+    --header-bg: #1f2d3d;
+    --bg: #f2f2f2;
+    --card: #ffffff;
+    --green: #74a93f;
+    --blue-link: #1f6fd1;
+    --inspection: #2178e8;
+    --text: #1d1d1d;
+    --muted: #6b6b6b;
+    --border: #e3e3e3;
+    --pill-bg: #f4f4f4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background: #000;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* iOS-style status bar */
+  .status-bar {
+    background: var(--header-bg);
+    color: #fff;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .status-left { display: flex; align-items: center; gap: 6px; }
+  .status-left .arrow {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-top: 2px solid #fff;
+    border-right: 2px solid #fff;
+    transform: rotate(45deg);
+    margin-left: 2px;
+  }
+  .vipps-back { font-size: 14px; opacity: .85; margin-left: 4px; font-weight: 500; }
+  .status-right { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .signal-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .signal-bars i { width: 3px; background: #fff; border-radius: 1px; display: inline-block; }
+  .signal-bars i:nth-child(1) { height: 4px; }
+  .signal-bars i:nth-child(2) { height: 6px; }
+  .signal-bars i:nth-child(3) { height: 9px; }
+  .signal-bars i:nth-child(4) { height: 12px; }
+  .wifi { width: 16px; height: 12px; position: relative; }
+  .wifi::before, .wifi::after, .wifi span {
+    content: ""; position: absolute; left: 50%; bottom: 0;
+    border: 2px solid #fff; border-radius: 50%;
+    border-bottom-color: transparent; border-left-color: transparent; border-right-color: transparent;
+    transform: translateX(-50%);
+  }
+  .wifi::before { width: 14px; height: 14px; }
+  .wifi::after { width: 8px; height: 8px; }
+  .wifi span { width: 3px; height: 3px; background: #fff; border-radius: 50%; border: none; bottom: 0; }
+  .battery {
+    width: 26px; height: 12px;
+    border: 1.5px solid #fff;
+    border-radius: 3px;
+    position: relative;
+    padding: 1px;
+    display: flex;
+    align-items: center;
+  }
+  .battery::after {
+    content: ""; position: absolute; right: -3px; top: 3px;
+    width: 2px; height: 4px; background: #fff; border-radius: 0 1px 1px 0;
+  }
+  .battery .lvl { background: #fff; height: 100%; border-radius: 1px; width: 44%; }
+  .battery .num {
+    position: absolute; left: 0; right: 4px; top: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--header-bg); font-weight: 700;
+  }
+
+  /* Page header */
+  .page-header {
+    background: var(--header-bg);
+    color: #fff;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    position: relative;
+  }
+  .back-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .back-btn::before {
+    content: "";
+    width: 12px; height: 12px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(45deg);
+    margin-left: 4px;
+  }
+  .page-title {
+    position: absolute;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    padding: 14px 12px 90px;
+  }
+
+  .ticket-card {
+    background: var(--card);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    margin-bottom: 12px;
+  }
+
+  .valid-banner {
+    background: var(--green);
+    color: #fff;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .valid-banner.expired {
+    background: #c64a3a;
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    color: #5a5a5a;
+    font-size: 14px;
+  }
+  .time-row .clock { color: #6e6e6e; }
+  .time-row .code { color: #6e6e6e; letter-spacing: 1px; }
+
+  .expires-section {
+    padding: 18px 0 8px;
+    text-align: center;
+  }
+  .expires-label {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .counter {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .counter .box {
+    background: var(--pill-bg);
+    border-radius: 6px;
+    width: 86px;
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    font-weight: 600;
+    color: #1d1d1d;
+    font-variant-numeric: tabular-nums;
+  }
+  .counter-units {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  .counter-units div {
+    width: 86px;
+    text-align: center;
+  }
+
+  .dashed {
+    border: 0;
+    border-top: 1px dashed #cfcfcf;
+    margin: 0 18px;
+  }
+
+  .info-row {
+    display: flex;
+    padding: 16px 18px 6px;
+    gap: 24px;
+  }
+  .info-row .col { flex: 1; }
+  .info-row .label {
+    color: var(--muted);
+    font-size: 12.5px;
+    letter-spacing: .8px;
+    margin-bottom: 6px;
+  }
+  .info-row .value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .ticket-link {
+    display: block;
+    padding: 10px 18px 18px;
+    color: var(--blue-link);
+    text-decoration: underline;
+    font-size: 16px;
+    line-height: 1.35;
+    cursor: pointer;
+  }
+
+  /* Details card */
+  .details-card {
+    background: var(--card);
+    border-radius: 4px;
+    border: 1px solid #e8e8e8;
+    padding: 14px 18px 0;
+    text-align: center;
+  }
+  .hide-details {
+    color: var(--blue-link);
+    font-size: 17px;
+    padding: 4px 0 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .hide-details .chev {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-top: 2px solid var(--blue-link);
+    border-right: 2px solid var(--blue-link);
+    transform: rotate(-45deg);
+    transition: transform .2s;
+  }
+  .details-body { display: block; }
+  .details-body.collapsed { display: none; }
+  .detail-line {
+    color: #555;
+    font-size: 17px;
+    padding: 8px 0;
+  }
+
+  .inspection-btn {
+    width: calc(100% + 36px);
+    margin: 14px -18px 0;
+    background: var(--inspection);
+    color: #fff;
+    border: 0;
+    padding: 16px 0;
+    font-size: 22px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .qr-icon {
+    width: 22px; height: 22px;
+    display: inline-grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    gap: 2px;
+  }
+  .qr-icon i {
+    background: #fff;
+    border-radius: 1px;
+  }
+  .qr-icon i:nth-child(2),
+  .qr-icon i:nth-child(4),
+  .qr-icon i:nth-child(8) { background: transparent; }
+
+  .receipt-peek {
+    margin-top: -2px;
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-top: 0;
+    border-radius: 0 0 22px 22px;
+    width: 60%;
+    margin: 0 auto;
+    padding: 10px 0 4px;
+    background: #fff;
+    position: relative;
+    top: -2px;
+  }
+
+  /* Bottom tab bar */
+  .tabbar {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-top: 1px solid #e3e3e3;
+    display: flex;
+    height: 72px;
+    padding-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #6b6b6b;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--inspection); }
+  .tab .icon-wrap {
+    width: 40px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tab.active .icon-wrap {
+    background: #e6f0fc;
+    border-radius: 14px;
+    padding: 4px 12px;
+  }
+  .tab .arrow-icon {
+    width: 14px; height: 14px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+  .tab .more-dots {
+    display: flex; gap: 4px;
+  }
+  .tab .more-dots i {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .tab .bike-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+
+    <div class="status-bar">
+      <div class="status-left">
+        <span id="status-time">09:53</span>
+        <span class="arrow"></span>
+        <span class="vipps-back">◀ Vipps</span>
+      </div>
+      <div class="status-right">
+        <span class="signal-bars"><i></i><i></i><i></i><i></i></span>
+        <span class="wifi"><span></span></span>
+        <span class="battery"><span class="lvl"></span><span class="num">44</span></span>
+      </div>
+    </div>
+
+    <div class="page-header">
+      <div class="back-btn"></div>
+      <div class="page-title">Single ticket</div>
+    </div>
+
+    <div class="content">
+
+      <div class="ticket-card">
+        <div class="valid-banner" id="valid-banner">Valid</div>
+
+        <div class="time-row">
+          <span class="clock" id="ticket-time">09:53</span>
+          <span class="code">DC</span>
+        </div>
+
+        <div class="expires-section">
+          <div class="expires-label">EXPIRES IN:</div>
+          <div class="counter">
+            <div class="box" id="min-box">59</div>
+            <div class="box" id="sec-box">54</div>
+          </div>
+          <div class="counter-units">
+            <div>min</div>
+            <div>sec</div>
+          </div>
+        </div>
+
+        <hr class="dashed" />
+
+        <div class="info-row">
+          <div class="col">
+            <div class="label">TRAVELLERS</div>
+            <div class="value">1 Adult</div>
+          </div>
+          <div class="col">
+            <div class="label">VALID IN</div>
+            <div class="value">Nord-Jæren</div>
+          </div>
+        </div>
+
+        <a class="ticket-link">See which means of transport this ticket covers.</a>
+      </div>
+
+      <div class="details-card">
+        <div class="hide-details" onclick="toggleDetails(this)">
+          <span id="hd-text">Hide details</span><span class="chev"></span>
+        </div>
+        <div class="details-body" id="details-body">
+          <div class="detail-line">Single ticket</div>
+          <div class="detail-line" id="expires-text">Expires Wednesday 29. April 2026 10:53</div>
+          <div class="detail-line" id="purchased-text">Purchased 29. April 09:52</div>
+          <div class="detail-line">Price kr 49.00 of which VAT kr 5.25</div>
+          <div class="detail-line">Paid with Vipps</div>
+          <button class="inspection-btn">
+            <span class="qr-icon"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            Inspection
+          </button>
+        </div>
+      </div>
+
+      <div class="receipt-peek">Receipt</div>
+    </div>
+
+    <div class="tabbar">
+      <div class="tab active">
+        <div class="icon-wrap"><span class="arrow-icon"></span></div>
+        <div>Tickets</div>
+      </div>
+      <div class="tab">
+        <div class="icon-wrap"><span class="bike-icon">🚲</span></div>
+        <div>City Bike</div>
+      </div>
+      <div class="tab">
+        <div class="icon-wrap"><span class="more-dots"><i></i><i></i><i></i></span></div>
+        <div>More</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ----- Config: school play ticket -----
+  // Ticket is valid for this many minutes from page load.
+  const VALID_FOR_MINUTES = 60;
+
+  const purchasedAt = new Date();
+  const expiresAt = new Date(purchasedAt.getTime() + VALID_FOR_MINUTES * 60 * 1000);
+
+  const pad = n => String(n).padStart(2, '0');
+
+  const formatTime = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function formatExpires(d) {
+    return 'Expires ' + dayNames[d.getDay()] + ' ' + d.getDate() + '. ' + monthNames[d.getMonth()] + ' ' + d.getFullYear() + ' ' + formatTime(d);
+  }
+  function formatPurchased(d) {
+    return 'Purchased ' + d.getDate() + '. ' + monthNames[d.getMonth()] + ' ' + formatTime(d);
+  }
+
+  document.getElementById('expires-text').textContent = formatExpires(expiresAt);
+  document.getElementById('purchased-text').textContent = formatPurchased(purchasedAt);
+
+  const minBox = document.getElementById('min-box');
+  const secBox = document.getElementById('sec-box');
+  const banner = document.getElementById('valid-banner');
+  const statusTime = document.getElementById('status-time');
+  const ticketTime = document.getElementById('ticket-time');
+
+  function tick() {
+    const now = new Date();
+    statusTime.textContent = formatTime(now);
+    ticketTime.textContent = formatTime(purchasedAt);
+
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) {
+      minBox.textContent = '00';
+      secBox.textContent = '00';
+      banner.textContent = 'Expired';
+      banner.classList.add('expired');
+      return;
+    }
+    const totalSec = Math.floor(diffMs / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    minBox.textContent = pad(mins);
+    secBox.textContent = pad(secs);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  function toggleDetails(el) {
+    const body = document.getElementById('details-body');
+    const txt = document.getElementById('hd-text');
+    const chev = el.querySelector('.chev');
+    const collapsed = body.classList.toggle('collapsed');
+    txt.textContent = collapsed ? 'Show details' : 'Hide details';
+    chev.style.transform = collapsed ? 'rotate(135deg)' : 'rotate(-45deg)';
+  }
+</script>
+</body>
+</html>
