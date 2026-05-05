@@ -63,6 +63,7 @@ export default function App() {
             cycleDay={cycleDay}
             phase={phase}
             onGoToProfile={() => setActiveTab('profile')}
+            onProfileChange={setProfile}
           />
         )}
         {activeTab === 'calendar' && (

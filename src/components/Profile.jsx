@@ -131,7 +131,8 @@ export default function Profile({ profile, onChange }) {
         <div className="label">// section :: profile builder</div>
         <h2 className="display text-3xl sm:text-5xl text-cream mt-2">HER PROFILE</h2>
         <p className="text-cream/70 mt-2 max-w-2xl">
-          The more you fill in, the smarter the playbook gets. Auto-saves as you type.
+          Only Basics is required. Everything else levels up the code — fill what you know,
+          skip what you don't. Auto-saves as you go.
         </p>
       </header>
 
@@ -181,7 +182,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 2 — Personality */}
-      <ProfileSection number={2} title="Her Personality">
+      <ProfileSection number={2} title="Her Personality" optional>
         <Field label="Type">
           <PillGroup
             multi={false}
@@ -231,7 +232,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 3 — Neurology */}
-      <ProfileSection number={3} title="Neurology & Mental Health">
+      <ProfileSection number={3} title="Neurology & Mental Health" optional>
         <p className="text-cream/70 text-sm mb-4">
           Hover the ⓘ on each item for context. Be honest — it shapes the personalized guide.
         </p>
@@ -257,7 +258,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 4 — Comfort */}
-      <ProfileSection number={4} title="What Comforts Her">
+      <ProfileSection number={4} title="What Comforts Her" optional>
         <PillGroup
           value={data.comfort}
           onChange={(v) => set('comfort', v)}
@@ -275,7 +276,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 5 — Entertainment */}
-      <ProfileSection number={5} title="Entertainment & Hobbies">
+      <ProfileSection number={5} title="Entertainment & Hobbies" optional>
         <PillGroup
           value={data.entertainment}
           onChange={(v) => set('entertainment', v)}
@@ -293,7 +294,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 6 — Food */}
-      <ProfileSection number={6} title="Food & Drinks">
+      <ProfileSection number={6} title="Food & Drinks" optional>
         <Field label="Cravings">
           <PillGroup
             value={data.food.cravings}
@@ -340,7 +341,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 7 — Things that make her happy (gifts) */}
-      <ProfileSection number={7} title="Things That Make Her Happy">
+      <ProfileSection number={7} title="Things That Make Her Happy" optional>
         <PillGroup
           value={data.gifts.types}
           onChange={(v) => setNested('gifts', 'types', v)}
@@ -377,7 +378,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 8 — Love Languages */}
-      <ProfileSection number={8} title="Love Languages">
+      <ProfileSection number={8} title="Love Languages" optional>
         <p className="text-cream/70 text-sm mb-4">
           Pick all that apply. The first ones you choose carry the most weight.
         </p>
@@ -395,7 +396,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 9 — Background */}
-      <ProfileSection number={9} title="Her World & Background">
+      <ProfileSection number={9} title="Her World & Background" optional>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Cultural background">
             <input
@@ -458,7 +459,7 @@ export default function Profile({ profile, onChange }) {
       </ProfileSection>
 
       {/* 10 — Notes */}
-      <ProfileSection number={10} title="Notes — The Unwritten Rules">
+      <ProfileSection number={10} title="Notes — The Unwritten Rules" optional>
         <Field label="The stuff only you would know">
           <textarea
             className="input min-h-[160px]"
@@ -469,7 +470,7 @@ export default function Profile({ profile, onChange }) {
         </Field>
       </ProfileSection>
 
-      <div className="card flex flex-wrap items-center justify-between gap-3 sticky bottom-4">
+      <div className="card flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className={`label transition-opacity ${savedFlash ? 'opacity-100 text-green' : 'opacity-50'}`}>
             {savedFlash ? '✓ SAVED' : '// auto-save on'}

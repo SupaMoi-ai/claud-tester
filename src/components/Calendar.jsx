@@ -43,7 +43,7 @@ function getMonthGrid(viewDate) {
 
 function tintFor(phase) {
   if (!phase) return 'transparent'
-  return PHASE_COLORS[phase] + '22'
+  return PHASE_COLORS[phase] + '14'
 }
 
 function DayCell({ cell, profile, today, hovered, setHovered }) {
@@ -56,22 +56,22 @@ function DayCell({ cell, profile, today, hovered, setHovered }) {
     <div
       onMouseEnter={() => setHovered(cell.date)}
       onMouseLeave={() => setHovered(null)}
-      className={`relative h-20 sm:h-24 p-2 border border-border transition-all ${
-        cell.inMonth ? '' : 'opacity-30'
-      } ${isToday ? 'ring-2 ring-cream' : ''}`}
+      className={`relative h-16 sm:h-20 p-2 border-r border-b border-border transition-all ${
+        cell.inMonth ? '' : 'opacity-25'
+      } ${isToday ? 'ring-2 ring-inset ring-cream z-10' : ''}`}
       style={{
         background: tintFor(phase),
-        borderLeftColor: PHASE_COLORS[phase] || '#2A3547',
-        borderLeftWidth: phase ? '4px' : '1px',
+        borderLeftColor: PHASE_COLORS[phase] || 'transparent',
+        borderLeftWidth: phase ? '3px' : '0',
       }}
     >
-      <div className="flex items-start justify-between">
-        <span className={`display text-lg ${isToday ? 'text-cream' : 'text-cream/85'}`}>
+      <div className="flex items-start justify-between gap-1">
+        <span className={`display text-base sm:text-lg ${isToday ? 'text-cream' : 'text-cream/80'}`}>
           {cell.date.getDate()}
         </span>
         {phase && (
           <span
-            className="display text-[10px] w-5 h-5 rounded-full flex items-center justify-center"
+            className="display text-[9px] w-4 h-4 rounded-full flex items-center justify-center"
             style={{ background: PHASE_COLORS[phase], color: '#0D1117' }}
           >
             {PHASE_INITIALS[phase]}
@@ -79,13 +79,13 @@ function DayCell({ cell, profile, today, hovered, setHovered }) {
         )}
       </div>
       {isToday && (
-        <div className="absolute bottom-1 left-2 label text-[9px] text-cream">TODAY</div>
+        <div className="absolute bottom-1 left-1.5 label text-[8px] text-cream">TODAY</div>
       )}
       {phase === 'menstrual' && info.cycleDay === 1 && (
-        <div className="absolute bottom-1 right-2 text-xs">🩸</div>
+        <div className="absolute bottom-1 right-1.5 text-[10px]">🩸</div>
       )}
-      {phase === 'ovulation' && (
-        <div className="absolute bottom-1 right-2 text-xs">⭐</div>
+      {phase === 'ovulation' && info.cycleDay === 14 && (
+        <div className="absolute bottom-1 right-1.5 text-[10px]">⭐</div>
       )}
       {isHover && cell.inMonth && phase && (
         <div className="absolute z-20 left-1/2 -translate-x-1/2 top-full mt-1 w-56 p-3 bg-night border border-red rounded shadow-2xl text-xs">
@@ -204,15 +204,15 @@ export default function Calendar({ profile, onGoToProfile }) {
         </div>
       </div>
 
-      <div className="card p-0 overflow-hidden">
+      <div className="card !p-0 overflow-hidden">
         <div className="grid grid-cols-7 bg-mid">
           {WEEKDAYS.map((d) => (
-            <div key={d} className="label text-center py-2 border-r border-border last:border-r-0">
+            <div key={d} className="label text-center py-2.5 border-r border-border last:border-r-0">
               {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 border-t border-border">
           {cells.map((cell, i) => (
             <DayCell
               key={i}
