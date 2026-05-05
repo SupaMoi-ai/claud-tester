@@ -1,18 +1,1176 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,Anton,sans-serif' font-size='36' fill='%23C8322C'>BC</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0D1117" />
-    <meta name="description" content="BRO CODE — the playbook for showing up. Track. Understand. Support." />
-    <title>BRO CODE — The Playbook</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0D1117" />
+<meta name="description" content="BRO CODE - the playbook for showing up." />
+<title>BRO CODE</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --red: #C8322C;
+    --orange: #E07A4A;
+    --cream: #F5ECD7;
+    --night: #0D1117;
+    --dark: #161B24;
+    --mid: #1F2837;
+    --border: #2A3547;
+    --green: #3DAA6A;
+    --alert: #E8B84B;
+    --m: #C8322C;
+    --f: #3DAA6A;
+    --o: #E8B84B;
+    --l: #7B68B8;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--night); color: var(--cream); }
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  #app { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: 0 16px 80px; }
+  .display { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 400; }
+  .label { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: #b8b0a0; }
+  .mono { font-family: 'Courier New', monospace; }
+
+  /* Header */
+  header.app {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo .badge { width: 32px; height: 32px; background: var(--red); display: grid; place-items: center; border-radius: 4px; }
+  .logo .badge span { font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: var(--cream); }
+  .logo .name { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 18px; }
+  .menu-btn { background: none; border: 1px solid var(--border); color: var(--cream); padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 18px; }
+
+  /* Tab strip - horizontal scroll on mobile */
+  nav.tabs {
+    position: sticky; top: 57px; z-index: 29;
+    background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs .row { display: flex; gap: 4px; padding: 8px 16px; min-width: max-content; }
+  nav.tabs button {
+    background: none; border: none; color: rgba(245,236,215,0.7); padding: 8px 10px;
+    font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  nav.tabs button.active { color: var(--red); border-bottom-color: var(--red); }
+
+  main { padding: 20px 0; }
+
+  /* Card */
+  .card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card + .card, .card + .alert, .alert + .card, .hero + * { margin-top: 16px; }
+  .corners { position: relative; }
+  .corners::before, .corners::after {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    border-color: var(--red); border-style: solid;
+  }
+  .corners::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .corners::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  /* Hero */
+  .hero {
+    border-radius: 14px; padding: 28px 22px; min-height: 180px;
+    position: relative; overflow: hidden;
+  }
+  .hero[data-phase="menstrual"] { background: linear-gradient(135deg, #C8322C, #8B1F1B); }
+  .hero[data-phase="follicular"] { background: linear-gradient(135deg, #3DAA6A, #1F6B40); }
+  .hero[data-phase="ovulation"] { background: linear-gradient(135deg, #E8B84B, #B08A20); }
+  .hero[data-phase="luteal"] { background: linear-gradient(135deg, #7B68B8, #4A3D80); }
+  .hero .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .hero h1 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
+    font-size: clamp(40px, 11vw, 72px); margin: 8px 0 0; line-height: 1; color: var(--cream); }
+  .hero .sub { color: rgba(245,236,215,0.95); margin-top: 14px; font-size: 16px; max-width: 28ch; }
+  .hero .day { text-align: right; }
+  .hero .day .emoji { font-size: 44px; }
+  .hero .day .num { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 18px; color: var(--cream); margin-top: 6px; }
+
+  /* Alert */
+  .alert {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--dark); border-left: 4px solid var(--alert);
+    padding: 14px 16px; border-radius: 4px;
+  }
+  .alert.red { border-left-color: var(--red); }
+  .alert .icon { font-size: 22px; }
+  .alert .text { flex: 1; }
+  .alert .title { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; color: var(--alert); }
+  .alert.red .title { color: var(--red); }
+  .alert .body { color: rgba(245,236,215,0.85); font-size: 14px; margin-top: 2px; }
+  .alert .x { background: none; border: none; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
+
+  /* Progress bar */
+  .progress {
+    position: relative; height: 12px; border-radius: 999px; overflow: hidden;
+    background: var(--night); display: flex;
+  }
+  .progress > span { display: block; height: 100%; }
+  .progress .dot {
+    position: absolute; top: 50%; transform: translate(-50%, -50%);
+    width: 12px; height: 12px; background: var(--cream);
+    border: 2px solid var(--night); border-radius: 999px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 50% { transform: translate(-50%,-50%) scale(1.6); opacity: 0.5; } }
+  .progress-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 9px; letter-spacing: 0.18em; color: rgba(245,236,215,0.6); font-family: 'Courier New', monospace; }
+
+  /* Next days */
+  .next { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 540px) { .next { grid-template-columns: repeat(4, 1fr); } }
+  .next .day {
+    background: var(--night); border: 1px solid var(--border); border-left-width: 4px;
+    border-radius: 6px; padding: 10px;
+  }
+  .next .day .lab { font-family: 'Courier New', monospace; font-size: 9px; color: rgba(245,236,215,0.6); letter-spacing: 0.18em; text-transform: uppercase; }
+  .next .day .d { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 16px; margin-top: 4px; }
+  .next .day .mood { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; margin-top: 4px; }
+
+  /* Form */
+  input, textarea, select {
+    width: 100%; background: var(--night); border: 1px solid var(--border); color: var(--cream);
+    padding: 11px 12px; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 16px;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--red); }
+  label.field { display: block; margin-bottom: 14px; }
+  label.field > span { display: block; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 18px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
+    letter-spacing: 0.08em; font-size: 15px; border-radius: 4px;
+    cursor: pointer; border: 1px solid transparent; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-primary { background: var(--red); color: var(--cream); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--cream); border-color: var(--border); }
+  .btn-ghost:hover { border-color: var(--red); color: var(--red); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px;
+    cursor: pointer; font-size: 14px; user-select: none; background: transparent;
+    color: var(--cream); margin: 0 6px 6px 0;
+    transition: all 0.15s ease;
+  }
+  .pill.active { background: var(--red); border-color: var(--red); }
+  .pill:not(.active):active { background: var(--mid); }
+
+  /* Collapsible */
+  .acc { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .acc summary { list-style: none; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .acc summary::-webkit-details-marker { display: none; }
+  .acc[open] { border-color: var(--red); }
+  .acc summary .title-row { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+  .acc summary .num { font-family: 'Anton', Impact, sans-serif; color: var(--red); font-size: 18px; min-width: 26px; }
+  .acc summary .name { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 16px; flex: 1; }
+  .acc summary .opt { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.18em; color: rgba(245,236,215,0.4); text-transform: uppercase; }
+  .acc summary .plus { font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: rgba(245,236,215,0.6); transition: transform 0.2s ease; }
+  .acc[open] summary .plus { transform: rotate(45deg); }
+  .acc .body { border-top: 1px solid var(--border); padding: 16px; background: rgba(13,17,23,0.45); }
+
+  /* Calendar */
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 14px; gap: 8px; flex-wrap: wrap; }
+  .cal-head .month { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 28px; }
+  .cal-head .month .year { color: var(--red); }
+  .cal-grid { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--mid); }
+  .cal-week .wd { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.18em; text-align: center; padding: 8px 0; color: #b8b0a0; border-right: 1px solid var(--border); }
+  .cal-week .wd:last-child { border-right: none; }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); }
+  .cal-day {
+    aspect-ratio: 1 / 1; padding: 4px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; justify-content: space-between; position: relative;
+  }
+  .cal-day.out { opacity: 0.25; }
+  .cal-day.today { box-shadow: inset 0 0 0 2px var(--cream); }
+  .cal-day .num { font-family: 'Anton', Impact, sans-serif; font-size: 14px; }
+  .cal-day .badge { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 999px; font-family: 'Anton', Impact, sans-serif; font-size: 9px; display: grid; place-items: center; color: var(--night); }
+  .cal-day .marker { position: absolute; bottom: 2px; right: 4px; font-size: 10px; }
+  .cal-day .lab { position: absolute; bottom: 2px; left: 4px; font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.1em; }
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 16px 0; font-size: 12px; }
+  .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+  /* Lists */
+  ul.bullets { margin: 0; padding: 0; list-style: none; }
+  ul.bullets li { display: flex; gap: 10px; padding: 4px 0; color: rgba(245,236,215,0.92); }
+
+  .red-strike { text-decoration: line-through; color: var(--red); font-family: 'Anton', Impact, sans-serif; font-size: 18px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pro-tip { background: var(--mid); padding: 14px 16px; border-radius: 6px; border-left: 4px solid var(--red); }
+
+  /* Welcome modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(13,17,23,0.85); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; z-index: 100; }
+  .modal { background: var(--dark); border: 1px solid var(--border); border-radius: 14px; padding: 22px; max-width: 380px; width: 100%; }
+
+  /* Saved flash */
+  .saved { color: var(--green); }
+
+  footer.app { text-align: center; margin: 32px 0 12px; opacity: 0.5; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+  .hidden { display: none !important; }
+
+  /* Stagger entrance */
+  .stagger > * { opacity: 0; animation: rise 0.45s ease forwards; }
+  .stagger > *:nth-child(1) { animation-delay: 0.04s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.16s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.22s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.28s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.34s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ============================================================
+// BRO CODE - single-file mobile build
+// ============================================================
+
+// ---------- DATA ----------
+const PHASES = ['menstrual','follicular','ovulation','luteal'];
+const PHASE_LABEL = { menstrual:'Menstrual', follicular:'Follicular', ovulation:'Ovulation', luteal:'Luteal' };
+const PHASE_COLOR = { menstrual:'#C8322C', follicular:'#3DAA6A', ovulation:'#E8B84B', luteal:'#7B68B8' };
+const PHASE_INIT  = { menstrual:'M', follicular:'F', ovulation:'O', luteal:'L' };
+const PHASE_EMOJI = { menstrual:'🩸', follicular:'🌱', ovulation:'⭐', luteal:'🌙' };
+const PHASE_HERO  = {
+  menstrual: "She's in recovery mode. Be the one who shows up.",
+  follicular:"Energy is rising. Match it, support it, enjoy it.",
+  ovulation: "Peak power. Peak you. This is the superpower window.",
+  luteal:    "She's reading everything. Be someone worth reading.",
+};
+const PHASE_MOOD = { menstrual:'Tired', follicular:'Rising', ovulation:'Peak', luteal:'Introspective' };
+
+const TIPS = {
+  menstrual: {
+    early: [
+      "Go get her favorite snacks right now. Don't ask, just do it.",
+      "Run her a hot bath tonight. Have towels ready.",
+      "Take over dinner. Completely. Don't ask what she wants.",
+      "Top up the heating pad. Make sure ibuprofen is within reach.",
+      "Cancel anything optional this week. Make space for rest."
+    ],
+    late: [
+      "She's coming out of the heavy days. Plan something small to look forward to.",
+      "Check in tonight. 'How are you feeling?' and actually listen.",
+      "Energy is returning. Suggest a low-key walk together.",
+      "Make her the meal she always asks for."
+    ]
+  },
+  follicular: {
+    early: [
+      "Energy is climbing. Suggest something fun for the weekend.",
+      "Plan a date - pick the place, pick the time, just tell her.",
+      "She's open to new things this week. Suggest one."
+    ],
+    late: [
+      "Match her momentum. If she's planning, plan with her.",
+      "Hype her up about the project she keeps mentioning.",
+      "Cook together tonight. It's the energy match she wants."
+    ]
+  },
+  ovulation: {
+    early: [
+      "Tell her she's stunning today. Mean it.",
+      "Initiate intimacy. She wants to be desired right now.",
+      "Big conversations land easy this week. Have the one you've been avoiding."
+    ],
+    late: [
+      "Peak window. Plan the dinner you keep saying you will.",
+      "She's confident - back her loudly in front of others.",
+      "Capture this energy. Photo, memory, moment. She'll appreciate it later."
+    ]
+  },
+  luteal: {
+    early: [
+      "Cozy mode starts. Less plans, more presence.",
+      "Order in tonight. Pick the comfort food. Surprise her.",
+      "Notice the small stuff. Compliment something specific."
+    ],
+    late: [
+      "Late luteal. She's reading everything you do. Be steady.",
+      "No big discussions. No big surprises. Just presence.",
+      "Get the supplies ready. Period is close. Don't make her ask.",
+      "Tonight: blanket, her show, no phone. Just be there."
+    ]
+  }
+};
+
+const ALERTS = {
+  P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:'Stock up on supplies. Plan something cozy.', icon:'🚨' },
+  P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Get ibuprofen, heating pad, her favorites.', icon:'🚨' },
+  P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Be extra patient. No big discussions tonight.', icon:'🚨' },
+  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'She needs you. Go check on her.', icon:'🩸' },
+  OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"She's at her peak. Match that energy.", icon:'⭐' },
+  LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Cozy mode. Less plans, more presence.', icon:'🌙' }
+};
+
+const RULES = [
+  'Never say "Are you on your period?" as an explanation for anything.',
+  'Her pain is real. Always. Full stop.',
+  'Acts of service speak louder than words during hard days.',
+  'Validation before solutions. Always.',
+  'Track the cycle. Know it before she has to tell you.',
+  'Food in the house = love language. Learn her favorites.',
+  'Never compare phases: "You were fine last week." Dead wrong.',
+  'Silence is sometimes the best answer. Learn when.',
+  'Plan ahead. Knowing her cycle is your secret weapon.',
+  "She doesn't need you to fix it. She needs you to show up."
+];
+
+const PHRASE_BANK = [
+  { s:"She's in pain", lines:["I'm so sorry. What can I do right now?","Let me get the heating pad. Stay there.","I'm not going anywhere. Tell me what helps."] },
+  { s:"She's crying", lines:["Come here. I've got you.","You don't have to explain anything.","I'm not going anywhere."] },
+  { s:"She's irritable", lines:["I hear you. That sounds frustrating.","What do you need from me right now?","Take your time. I'll be here."] },
+  { s:"She wants space", lines:["I'm here when you're ready.","Take whatever time you need.","I'll handle dinner. Don't worry about anything."] },
+  { s:"She wants to talk", lines:["I'm listening. Tell me everything.","That makes sense. What else?","I get why you'd feel that way."] },
+  { s:"She's doubting herself", lines:["I've watched you do harder things than this.","You're not wrong about this. I see it too.","You've got this. And I've got you."] },
+  { s:"She needs validation", lines:["You're not crazy. That was unfair.","Your feelings make complete sense.","I would have felt the same way."] },
+  { s:"She's at peak energy", lines:["You're glowing today. I noticed.","Tell me what you're working on. I want to hear it.","Whatever you want to do tonight - I'm in."] }
+];
+
+const RED_LIST = [
+  { phrase:"Calm down", why:"It signals you don't think her feelings are valid." },
+  { phrase:"You're overreacting", why:"Her feelings are real, even if intense." },
+  { phrase:"Is this PMS?", why:"Reduces her emotions to biology, dismisses the real issue." },
+  { phrase:"Just relax", why:"She's not choosing to feel this way." },
+  { phrase:"Other women don't make this big a deal", why:"Never compare her to other women." },
+  { phrase:"I can't say anything right", why:"This makes it about you." }
+];
+
+const FAQ = [
+  { q:"Is PMS real?", a:"Yes - it's documented in medical literature, with 3-8% of women experiencing PMDD. Hormonal changes in the luteal phase have measurable effects on mood, energy, pain tolerance, and cognition." },
+  { q:"Should we have sex during her period?", a:"Up to you both. Some women experience increased desire during menstruation; others want zero touch. Communicate. Read her cues. Don't assume either way." },
+  { q:"What if she says the cycle doesn't affect her?", a:"Believe her. Cycles affect women differently. Some feel almost no change; some feel everything. Either way, knowing the cycle and being kind never hurts." },
+  { q:"What if she gets angry at me?", a:"Validate first, fix second. Don't blame the cycle - that's dismissive. Address what she actually said. Then, if needed, follow up about the dynamic later, calmly." },
+  { q:"Should I ever mention her cycle?", a:"Rarely, carefully - and never as a dismissal. Saying 'I know this week is harder, I've got you' is care. Saying 'Are you on your period?' is the opposite." },
+  { q:"What's the difference between PMS and PMDD?", a:"PMS = mild-to-moderate pre-period symptoms. PMDD = severe, life-disrupting symptoms (deep depression, rage, intense anxiety) that need medical support." },
+  { q:"How do I bring this up without being weird?", a:"\"I want to understand you better - and your cycle is part of that. I built/got this thing to help me show up better.\" Most partners receive that as care, not surveillance." }
+];
+
+const NEUROLOGY = [
+  { id:'adhd', label:'ADHD', info:'Cycle phases amplify ADHD symptoms. Structure and low-stim helps.' },
+  { id:'anxiety', label:'Anxiety', info:'Luteal phase can spike anxiety. Extra calm, extra reassurance.' },
+  { id:'depression', label:'Depression / Mood', info:'Hormone dips in late luteal can deepen depressive episodes.' },
+  { id:'autism', label:'Autism / Neurodivergent', info:'Sensory and routine changes hit harder. Predictability is caring.' },
+  { id:'sensory', label:'Sensory Sensitivity', info:'Noise, light, smell all matter more during menstruation.' }
+];
+
+const GUIDE = {
+  menstrual: {
+    days:'Days 1-5',
+    bio:'Estrogen and progesterone are at their lowest. The uterine lining is shedding. Energy is down, pain is up, sleep is broken. Her body is doing real, measurable work.',
+    say:["I'm taking care of dinner. Don't lift a finger.","What sounds good? Snack run, food, anything.","You don't owe anyone productivity this week."],
+    never:["Aren't you done with that yet?","You were fine yesterday.","It can't be that bad."],
+    pro:'The first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week.'
+  },
+  follicular: {
+    days:'Days 6-13',
+    bio:'Estrogen is climbing. Energy returns. Mood lifts. Cognition sharpens. She wants new things, social connection, motion. This is her building phase.',
+    say:["What's the plan this weekend? I'm in.","You're on fire lately. I see it.","Want to try something new tonight?"],
+    never:["Why are you suddenly so busy?","Calm down with all the plans.","You're being too much."],
+    pro:'Plan adventures now. Book the trip. Start the project together. The momentum here is real and finite - use it.'
+  },
+  ovulation: {
+    days:'Days 14-17',
+    bio:'Estrogen peaks. Testosterone spikes. She is at maximum cognitive performance, social confidence, and libido. This is her sharpest, boldest, most magnetic window.',
+    say:["You look incredible.","Whatever you want to do - yes.","Tell me about the thing you're working on."],
+    never:["You're full of yourself today.","Why are you so flirty?","Slow down a bit."],
+    pro:"Have the important conversation now - about money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it."
+  },
+  luteal: {
+    days:'Days 18-28',
+    bio:'Progesterone rises then crashes. Sensitivity to noise, smell, social slights goes up. Patience for nonsense goes down. Her bullshit detector is at peak. Be honest, be steady, be present.',
+    say:["I noticed you handled that today. That was strong.","Tonight is whatever you want it to be.","I'm not going anywhere. We're good."],
+    never:["Why are you so emotional?","It's just the cycle, right?","Can you let it go?"],
+    pro:"Late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here - she's reading the truth more clearly than usual."
+  }
+};
+
+const PERSONALIZE = {
+  menstrual: [
+    [p => has(p.neurology,'adhd'),    "Keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
+    [p => has(p.neurology,'anxiety'), "Extra physical closeness helps. Don't leave her alone if she seems distressed."],
+    [p => p.social==='introvert',     "Don't fill the silence. Presence without pressure."],
+    [p => p.social==='extrovert',     "She still wants company - just low-energy company."],
+    [p => has(p.love,'acts'),         "Do the dishes, laundry, dinner. No asking. Just do."],
+    [p => has(p.love,'words'),        "Tell her she's strong. Her body is doing something incredible."],
+    [p => has(p.love,'touch'),        "Hold her. Back rubs. Warm presence."],
+    [p => p.type==='a-type',          "She'll hate feeling unproductive. Normalize rest as productive."]
+  ],
+  follicular: [
+    [p => p.social==='extrovert',     "She wants social. Be her hype man and plan something."],
+    [p => p.type==='a-type',          "She's in optimal mode. Support ambitious plans."],
+    [p => has(p.neurology,'adhd'),    "She may hyperfocus on a new project. Support it."],
+    [p => has(p.love,'time'),         "She wants adventures together. Plan it."]
+  ],
+  ovulation: [
+    [p => p.type==='a-type',          "This is her peak performance window. Don't slow her down."],
+    [p => has(p.love,'touch'),        "She's most interested in intimacy now. Match that energy."],
+    [p => has(p.love,'words'),        "Tell her she's incredible. She wants to hear it from you."],
+    [p => has(p.neurology,'adhd'),    "Great window for important conversations - she's most focused."]
+  ],
+  luteal: [
+    [p => has(p.neurology,'anxiety'),    "Late luteal amplifies anxiety. Be extra steady."],
+    [p => has(p.neurology,'depression'), "Most vulnerable window. Watch for mood drops. Be present."],
+    [p => p.social==='introvert',        "Give her the quiet she needs without making her feel guilty."],
+    [p => p.type==='a-type',             "Her productivity dips naturally. Normalize this, don't comment on it."],
+    [p => has(p.love,'acts'),            "This is when acts of service matter most. Do everything."],
+    [p => has(p.neurology,'adhd'),       "Routine matters more now. Don't disrupt it."]
+  ]
+};
+
+function has(arr, val) { return Array.isArray(arr) && arr.includes(val); }
+
+// ---------- CYCLE MATH ----------
+const DAY = 86400000;
+function midnight(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function cycleDay(p, today=new Date()) {
+  if (!p?.lastPeriod) return null;
+  const len = p.cycleLength || 28;
+  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
+  if (diff < 0) return null;
+  return ((diff % len) + len) % len + 1;
+}
+function phaseFor(day, len=28) {
+  if (!day) return null;
+  const fEnd = Math.floor(len*0.46), oEnd = Math.floor(len*0.61);
+  if (day <= 5) return 'menstrual';
+  if (day <= fEnd) return 'follicular';
+  if (day <= oEnd) return 'ovulation';
+  return 'luteal';
+}
+function phaseRanges(len=28) {
+  const fEnd = Math.floor(len*0.46), oEnd = Math.floor(len*0.61);
+  return { menstrual:[1,5], follicular:[6,fEnd], ovulation:[fEnd+1,oEnd], luteal:[oEnd+1,len] };
+}
+function dayInPhase(day, len=28) {
+  const r = phaseRanges(len)[phaseFor(day,len)];
+  return day - r[0] + 1;
+}
+function daysToNextPeriod(p, today=new Date()) {
+  if (!p?.lastPeriod) return null;
+  const len = p.cycleLength || 28;
+  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
+  const cycles = diff < 0 ? 0 : Math.floor(diff/len) + 1;
+  const next = new Date(midnight(p.lastPeriod).getTime() + cycles*len*DAY);
+  return Math.max(0, Math.ceil((next - midnight(today)) / DAY));
+}
+function infoFor(p, date) {
+  if (!p?.lastPeriod) return { phase:null, day:null };
+  const len = p.cycleLength || 28;
+  const diff = Math.floor((midnight(date) - midnight(p.lastPeriod)) / DAY);
+  if (diff < 0) return { phase:null, day:null };
+  const day = (diff % len) + 1;
+  return { day, phase: phaseFor(day, len) };
+}
+function pickTip(profile, phase, dInPhase) {
+  const personal = (PERSONALIZE[phase]||[])
+    .filter(([m])=>{ try { return m(profile); } catch { return false; } })
+    .map(([,line])=>line);
+  const seed = (new Date(profile.lastPeriod).getDate() || 0) + (dInPhase||1);
+  if (personal.length && seed % 3 !== 0) return personal[seed % personal.length];
+  const t = TIPS[phase];
+  if (!t) return null;
+  const list = (dInPhase||1) <= 3 ? t.early : t.late;
+  return list[seed % list.length];
+}
+function buildAlert(profile, day) {
+  if (!profile) return null;
+  const days = daysToNextPeriod(profile);
+  if (day === 1) return ALERTS.P0;
+  if (days === 1) return ALERTS.P1;
+  if (days === 2) return ALERTS.P2;
+  if (days === 3) return ALERTS.P3;
+  if (day === 14) return ALERTS.OVU;
+  if (day === 18) return ALERTS.LUT;
+  return null;
+}
+
+// ---------- STORAGE ----------
+const KEY = 'brocode_profile';
+const SEEN = 'brocode_seen';
+const DISMISS = 'brocode_dismiss';
+function loadProfile() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
+function saveProfile(p) {
+  const stamped = { ...p, updatedAt: new Date().toISOString() };
+  if (!stamped.createdAt) stamped.createdAt = stamped.updatedAt;
+  localStorage.setItem(KEY, JSON.stringify(stamped));
+  return stamped;
+}
+function clearProfile() { localStorage.removeItem(KEY); }
+function dismissedToday(id) {
+  const today = new Date().toISOString().slice(0,10);
+  try {
+    const m = JSON.parse(localStorage.getItem(DISMISS)) || {};
+    return (m[today]||[]).includes(id);
+  } catch { return false; }
+}
+function dismissAlert(id) {
+  const today = new Date().toISOString().slice(0,10);
+  let m = {}; try { m = JSON.parse(localStorage.getItem(DISMISS)) || {}; } catch {}
+  m[today] = m[today] || [];
+  if (!m[today].includes(id)) m[today].push(id);
+  localStorage.setItem(DISMISS, JSON.stringify(m));
+}
+
+// ---------- HELPERS ----------
+const h = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+// ---------- STATE ----------
+let state = {
+  tab: 'dashboard',
+  profile: loadProfile(),
+  view: new Date(),
+  showWelcome: localStorage.getItem(SEEN) !== '1',
+  guideOpen: null
+};
+
+function setState(patch) {
+  state = { ...state, ...patch };
+  render();
+}
+
+// ---------- RENDER ----------
+const TABS = [
+  { id:'dashboard', label:'Dashboard' },
+  { id:'calendar',  label:'Calendar' },
+  { id:'profile',   label:'Her Profile' },
+  { id:'guide',     label:'The Guide' },
+  { id:'code',      label:'The Code' }
+];
+
+function render() {
+  const root = $('#app');
+  const day = cycleDay(state.profile);
+  const len = state.profile?.cycleLength || 28;
+  const phase = phaseFor(day, len);
+
+  let body = '';
+  if (state.tab === 'dashboard') body = renderDashboard(day, phase, len);
+  else if (state.tab === 'calendar') body = renderCalendar();
+  else if (state.tab === 'profile') body = renderProfile();
+  else if (state.tab === 'guide') body = renderGuide(phase);
+  else if (state.tab === 'code') body = renderCode();
+
+  root.innerHTML = `
+    <header class="app">
+      <div class="logo" onclick="go('dashboard')">
+        <div class="badge"><span>BC</span></div>
+        <div class="name">Bro Code</div>
+      </div>
+    </header>
+    <nav class="tabs">
+      <div class="row">
+        ${TABS.map(t => `<button class="${state.tab===t.id?'active':''}" onclick="go('${t.id}')">${t.label}</button>`).join('')}
+      </div>
+    </nav>
+    <main>${body}</main>
+    <footer class="app">BRO CODE · v1.0 · Know the code</footer>
+    ${state.showWelcome ? renderWelcome() : ''}
+  `;
+}
+
+function renderWelcome() {
+  return `
+    <div class="modal-bg" onclick="dismissWelcome()">
+      <div class="modal corners" onclick="event.stopPropagation()">
+        <div class="label" style="margin-bottom:14px">// system :: welcome</div>
+        <h2 class="display" style="font-size:34px;line-height:1;margin:0 0 16px">BRO CODE.</h2>
+        <p style="margin:0 0 12px;color:rgba(245,236,215,0.85)">The guys who show up don't do it by accident. They learn. They track. They adjust.</p>
+        <p class="display" style="color:var(--red);font-size:16px;margin:0 0 18px">This is your playbook.</p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissWelcome()">ENTER →</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboard(day, phase, len) {
+  if (!state.profile?.lastPeriod) return renderQuickStart();
+
+  const days = daysToNextPeriod(state.profile);
+  const tip = pickTip(state.profile, phase, dayInPhase(day, len));
+  const alert = buildAlert(state.profile, day);
+  const showAlert = alert && !dismissedToday(alert.id);
+  const ranges = phaseRanges(len);
+  const pct = ((day-1)/len)*100;
+
+  const today = new Date();
+  const next = [1,2,3,4].map(i => {
+    const d = new Date(today); d.setDate(d.getDate()+i);
+    const info = infoFor(state.profile, d);
+    return { d, ...info, label: i===1?'Tomorrow':'+ '+i };
+  });
+
+  const segments = PHASES.map(p => {
+    const [s,e] = ranges[p];
+    return `<span style="background:${PHASE_COLOR[p]};width:${((e-s+1)/len)*100}%"></span>`;
+  }).join('');
+
+  const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
+
+  return `
+  <div class="stagger">
+    <div class="hero corners" data-phase="${phase}">
+      <div class="top">
+        <div>
+          <div class="label" style="color:rgba(245,236,215,0.8)">// ${h(heroName)} :: phase</div>
+          <h1>${PHASE_LABEL[phase]}</h1>
+          <div class="sub">${PHASE_HERO[phase]}</div>
+        </div>
+        <div class="day">
+          <div class="emoji">${PHASE_EMOJI[phase]}</div>
+          <div class="num">DAY ${day} / ${len}</div>
+        </div>
+      </div>
+    </div>
+
+    ${showAlert ? `
+      <div class="alert ${alert.tone==='red'?'red':''}">
+        <div class="icon">${alert.icon}</div>
+        <div class="text">
+          <div class="title">${alert.title}</div>
+          <div class="body">${alert.body}</div>
+        </div>
+        <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
+      </div>` : ''}
+
+    <div class="card corners">
+      <div class="label" style="margin-bottom:10px">// today's move</div>
+      <p style="font-size:20px;line-height:1.35;margin:0;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="label">// cycle progress</div>
+        <div class="label">${days===0?'PERIOD TODAY':`${days} ${days===1?'DAY':'DAYS'} TO PERIOD`}</div>
+      </div>
+      <div class="progress">
+        ${segments}
+        <span class="dot" style="left:${pct}%"></span>
+      </div>
+      <div class="progress-row"><span>MENSTRUAL</span><span>FOLLICULAR</span><span>OVULATION</span><span>LUTEAL</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label" style="margin-bottom:14px">// what's coming</div>
+      <div class="next">
+        ${next.map(n => `
+          <div class="day" style="border-left-color:${PHASE_COLOR[n.phase]}">
+            <div class="lab">${n.label}</div>
+            <div class="d">${n.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase()}</div>
+            <div class="mood" style="color:${PHASE_COLOR[n.phase]}">${PHASE_MOOD[n.phase]}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderQuickStart() {
+  const today = new Date().toISOString().slice(0,10);
+  return `
+  <div class="stagger">
+    <div class="hero corners" data-phase="menstrual">
+      <div class="label" style="color:rgba(245,236,215,0.8)">// new playbook</div>
+      <h1 style="font-size:clamp(34px,9vw,56px)">START THE CODE.</h1>
+      <div class="sub">Two fields. One minute. The whole app lights up.</div>
+    </div>
+    <div class="card">
+      <div class="label" style="margin-bottom:14px">// quick start</div>
+      <form onsubmit="quickStart(event)">
+        <label class="field">
+          <span class="label" style="margin-bottom:8px">Her name (optional)</span>
+          <input id="qs-name" placeholder="e.g., Maya" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:8px">First day of her last period</span>
+          <input id="qs-date" type="date" max="${today}" required />
+        </label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">
+          <button class="btn btn-primary" type="submit">ENTER THE CODE →</button>
+          <button class="btn btn-ghost" type="button" onclick="go('profile')">Or build full profile</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+
+function renderCalendar() {
+  if (!state.profile?.lastPeriod) {
+    return `
+    <div class="card corners stagger" style="text-align:center;padding:32px 18px">
+      <div class="label" style="margin-bottom:10px">// status :: no profile</div>
+      <h2 class="display" style="font-size:24px;margin:0 0 12px">BUILD HER PROFILE FIRST.</h2>
+      <p style="color:rgba(245,236,215,0.75);margin-bottom:20px">The calendar needs her last period date.</p>
+      <button class="btn btn-primary" onclick="go('dashboard')">QUICK START →</button>
+    </div>`;
+  }
+
+  const v = state.view;
+  const year = v.getFullYear(), month = v.getMonth();
+  const monthName = v.toLocaleDateString('en-US',{month:'long'}).toUpperCase();
+  const first = new Date(year, month, 1);
+  const startWd = first.getDay();
+  const daysIn = new Date(year, month+1, 0).getDate();
+  const today = midnight(new Date());
+
+  const cells = [];
+  for (let i = 0; i < startWd; i++) {
+    const d = new Date(year, month, 1 - (startWd - i));
+    cells.push({ date:d, inMonth:false });
+  }
+  for (let d = 1; d <= daysIn; d++) cells.push({ date:new Date(year, month, d), inMonth:true });
+  while (cells.length < 42) {
+    const last = cells[cells.length-1].date;
+    const next = new Date(last); next.setDate(next.getDate()+1);
+    cells.push({ date:next, inMonth: next.getMonth()===month });
+  }
+
+  const wd = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+  // Upcoming
+  const events = [];
+  for (let m = 0; m < 3; m++) {
+    const len = state.profile.cycleLength || 28;
+    const future = new Date(today); future.setDate(future.getDate() + m*len);
+    const days = daysToNextPeriod(state.profile, future);
+    const date = new Date(midnight(today).getTime() + (days + m*len)*DAY);
+    if (days >= 0) events.push({ days: days + m*len, label:'Period starts', icon:'🩸', date });
+  }
+  for (let m = 0; m < 2; m++) {
+    const start = new Date(state.profile.lastPeriod);
+    start.setDate(start.getDate() + m*(state.profile.cycleLength || 28));
+    const ovu = new Date(start); ovu.setDate(ovu.getDate()+13);
+    const d = Math.ceil((ovu - today) / DAY);
+    if (d >= 0 && d < 70) events.push({ days:d, label:'Ovulation window opens', icon:'⭐', date:ovu });
+  }
+  events.sort((a,b)=>a.days-b.days);
+
+  return `
+  <div class="stagger">
+    <div class="cal-head">
+      <div class="month">${monthName} <span class="year">${year}</span></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" onclick="navMonth(-1)">←</button>
+        <button class="btn btn-ghost" onclick="navMonth(0)">Today</button>
+        <button class="btn btn-ghost" onclick="navMonth(1)">→</button>
+      </div>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-week">${wd.map(w => `<div class="wd">${w}</div>`).join('')}</div>
+      <div class="cal-days">
+        ${cells.map(c => {
+          const info = infoFor(state.profile, c.date);
+          const isToday = midnight(c.date).getTime() === today.getTime();
+          const tint = info.phase ? PHASE_COLOR[info.phase] + '1A' : 'transparent';
+          const left = info.phase ? `border-left:3px solid ${PHASE_COLOR[info.phase]}` : '';
+          return `
+            <div class="cal-day ${c.inMonth?'':'out'} ${isToday?'today':''}" style="background:${tint};${left}">
+              <div class="num">${c.date.getDate()}</div>
+              ${info.phase?`<div class="badge" style="background:${PHASE_COLOR[info.phase]}">${PHASE_INIT[info.phase]}</div>`:''}
+              ${isToday?`<div class="lab">TODAY</div>`:''}
+              ${info.phase==='menstrual'&&info.day===1?`<div class="marker">🩸</div>`:''}
+              ${info.phase==='ovulation'&&info.day===14?`<div class="marker">⭐</div>`:''}
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="legend">
+      ${PHASES.map(p => `<div><span class="swatch" style="background:${PHASE_COLOR[p]}"></span><span class="label">${PHASE_LABEL[p]}</span></div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="label" style="margin-bottom:14px">// upcoming</div>
+      ${events.length===0 ? '<p style="color:rgba(245,236,215,0.6);margin:0">No upcoming events.</p>' : `
+        <ul class="bullets">
+          ${events.slice(0,6).map(e => `
+            <li style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:16px">${e.icon}</span>
+              <span class="display" style="min-width:78px">In ${e.days} ${e.days===1?'day':'days'}</span>
+              <span style="flex:1;color:rgba(245,236,215,0.85)">${e.label}</span>
+              <span style="color:rgba(245,236,215,0.5);font-size:12px">${e.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+            </li>
+          `).join('')}
+        </ul>`}
+    </div>
+  </div>`;
+}
+
+function renderProfile() {
+  const p = state.profile || {};
+  const today = new Date().toISOString().slice(0,10);
+  const lp = p.lastPeriod || '';
+
+  const pillGroup = (key, opts, multi=true, val) => {
+    const current = val !== undefined ? val : (p[key] || (multi ? [] : ''));
+    return opts.map(o => {
+      const active = multi ? (Array.isArray(current) && current.includes(o.id)) : current === o.id;
+      return `<button type="button" class="pill ${active?'active':''}" onclick="togglePill('${key}','${o.id}',${multi})">${h(o.label)}</button>`;
+    }).join('');
+  };
+
+  return `
+  <div class="stagger">
+    <div>
+      <div class="label">// section :: profile builder</div>
+      <h2 class="display" style="font-size:36px;margin:6px 0 8px">HER PROFILE</h2>
+      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Only Basics is required. Everything else levels up the code. Auto-saves as you go.</p>
+    </div>
+
+    <details class="acc" open>
+      <summary>
+        <div class="title-row"><span class="num">01</span><span class="name">The Basics</span></div>
+        <span class="plus">+</span>
+      </summary>
+      <div class="body">
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">Her name</span>
+          <input data-field="name" value="${h(p.name||'')}" placeholder="e.g., Maya" oninput="updateField(event)" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">Cycle length (days)</span>
+          <input type="number" min="21" max="35" data-field="cycleLength" value="${p.cycleLength||28}" oninput="updateField(event)" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">First day of her last period *</span>
+          <input type="date" max="${today}" data-field="lastPeriod" value="${h(lp)}" onchange="updateField(event)" />
+        </label>
+        <div class="label" style="margin-bottom:8px">Relationship</div>
+        ${pillGroup('relationship', [
+          {id:'girlfriend',label:'Girlfriend'},{id:'wife',label:'Wife'},
+          {id:'partner',label:'Partner'},{id:'other',label:'Other'}], false, p.relationship||'girlfriend')}
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">02</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <div class="label" style="margin-bottom:8px">Type</div>
+        ${pillGroup('type', [{id:'a-type',label:'A-Type'},{id:'b-type',label:'B-Type'}], false)}
+        <div class="label" style="margin:14px 0 8px">Social</div>
+        ${pillGroup('social', [{id:'introvert',label:'Introvert'},{id:'extrovert',label:'Extrovert'},{id:'ambivert',label:'Ambivert'}], false)}
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">03</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Tap to toggle. Be honest - it shapes the code.</p>
+        ${pillGroup('neurology', NEUROLOGY.map(n => ({id:n.id,label:n.label})))}
+        <div class="label" style="margin-top:14px;line-height:1.6">
+          ${NEUROLOGY.map(n => `<div style="margin-bottom:6px"><strong style="color:var(--cream)">${n.label}</strong>: ${n.info}</div>`).join('')}
+        </div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">04</span><span class="name">What Comforts Her</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        ${pillGroup('comfort', [
+          {id:'cuddles',label:'Touch / Cuddles'},{id:'massage',label:'Massage'},{id:'heat',label:'Heat (bath, pad)'},
+          {id:'space',label:'Space'},{id:'blanket',label:'Weighted blanket'},{id:'held',label:'Being held'},
+          {id:'acts',label:'Acts of service'},{id:'verbal',label:'Verbal reassurance'}])}
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">05</span><span class="name">Food &amp; Drinks</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <div class="label" style="margin-bottom:8px">Cravings</div>
+        ${pillGroup('cravings', [{id:'sweet',label:'Sweet'},{id:'salty',label:'Salty'},{id:'carbs',label:'Comfort carbs'},{id:'spicy',label:'Spicy'},{id:'healthy',label:'Healthy'}])}
+        <label class="field" style="margin-top:14px">
+          <span class="label" style="margin-bottom:6px">Her favorites</span>
+          <input data-field="favorites" value="${h(p.favorites||'')}" placeholder="e.g., dark chocolate, ramen" oninput="updateField(event)" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">Dietary restrictions</span>
+          <input data-field="dietary" value="${h(p.dietary||'')}" placeholder="e.g., vegetarian" oninput="updateField(event)" />
+        </label>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">06</span><span class="name">Love Languages</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        ${pillGroup('love', [
+          {id:'words',label:'Words of Affirmation'},{id:'acts',label:'Acts of Service'},
+          {id:'gifts',label:'Receiving Gifts'},{id:'time',label:'Quality Time'},{id:'touch',label:'Physical Touch'}])}
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">07</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <textarea data-field="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
+      </div>
+    </details>
+
+    <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+      <span id="save-status" class="label">// auto-save on</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="exportProfile()">Export</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">Import</button>
+        <input id="imp" type="file" accept="application/json" style="display:none" onchange="importProfile(event)" />
+        <button class="btn btn-ghost" onclick="confirmClear()">Clear</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderGuide(currentPhase) {
+  if (!state.profile?.lastPeriod) {
+    return `
+    <div class="card corners stagger" style="text-align:center;padding:32px 18px">
+      <div class="label" style="margin-bottom:10px">// status :: no profile</div>
+      <h2 class="display" style="font-size:24px;margin:0 0 12px">BUILD HER PROFILE FIRST.</h2>
+      <button class="btn btn-primary" onclick="go('dashboard')" style="margin-top:8px">QUICK START →</button>
+    </div>`;
+  }
+  const open = state.guideOpen || currentPhase || 'menstrual';
+
+  const cards = PHASES.map(p => {
+    const g = GUIDE[p];
+    const isOpen = p === open;
+    const color = PHASE_COLOR[p];
+    const personal = (PERSONALIZE[p]||[])
+      .filter(([m])=>{ try { return m(state.profile); } catch { return false; } })
+      .map(([,line])=>line);
+    return `
+      <div class="card" style="padding:0;overflow:hidden;${isOpen?`border-color:${color}`:''}">
+        <button onclick="toggleGuide('${p}')" style="width:100%;text-align:left;background:none;border:0;color:inherit;padding:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;cursor:pointer">
+          <div>
+            <div class="label" style="display:flex;gap:10px;align-items:center">
+              <span style="color:${color}">// phase</span>
+              ${p===currentPhase?`<span class="display" style="background:${color};color:#0D1117;padding:1px 8px;border-radius:999px;font-size:10px;letter-spacing:0.18em">CURRENT</span>`:''}
+            </div>
+            <h3 class="display" style="font-size:30px;color:${color};margin:6px 0 2px">${PHASE_LABEL[p]}</h3>
+            <div class="label" style="color:rgba(245,236,215,0.5)">${g.days}</div>
+          </div>
+          <div style="font-size:28px">${PHASE_EMOJI[p]}</div>
+        </button>
+        ${isOpen ? `
+          <div style="padding:0 18px 18px;border-top:1px solid var(--border)">
+            <div style="margin-top:14px"><div class="label" style="margin-bottom:8px">// what's happening in her body</div><p style="margin:0;color:rgba(245,236,215,0.85);line-height:1.5">${g.bio}</p></div>
+            <div style="margin-top:18px">
+              <div class="label" style="margin-bottom:8px;color:${color}">// for her</div>
+              ${personal.length ? `<ul class="bullets">${personal.map(x=>`<li><span style="color:${color}">▸</span><span>${h(x)}</span></li>`).join('')}</ul>` :
+                `<p style="margin:0;color:rgba(245,236,215,0.7);font-style:italic">Fill in more of her profile to unlock personalized cues.</p>`}
+            </div>
+            <div style="margin-top:18px"><div class="label" style="margin-bottom:8px;color:var(--green)">// the code says</div>
+              <ul class="bullets">${g.say.map(x=>`<li><span style="color:var(--green)">✓</span><span>"${h(x)}"</span></li>`).join('')}</ul>
+            </div>
+            <div style="margin-top:18px"><div class="label" style="margin-bottom:8px;color:var(--red)">// never say</div>
+              <ul class="bullets">${g.never.map(x=>`<li><span style="color:var(--red)">✕</span><span style="text-decoration:line-through;opacity:0.85">"${h(x)}"</span></li>`).join('')}</ul>
+            </div>
+            <div class="pro-tip" style="margin-top:18px;border-left-color:${color}">
+              <div class="label" style="margin-bottom:6px;color:${color}">// pro tip</div>
+              <p style="margin:0;color:var(--cream);line-height:1.5">${g.pro}</p>
+            </div>
+          </div>` : ''}
+      </div>
+      <div style="height:14px"></div>
+    `;
+  }).join('');
+
+  return `
+  <div class="stagger">
+    <div>
+      <div class="label">// section :: the guide</div>
+      <h2 class="display" style="font-size:36px;margin:6px 0 8px">THE GUIDE</h2>
+      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Phase-by-phase. Personalized to her profile.</p>
+    </div>
+    ${cards}
+  </div>`;
+}
+
+function renderCode() {
+  return `
+  <div class="stagger">
+    <div>
+      <div class="label">// section :: the playbook</div>
+      <h2 class="display" style="font-size:36px;margin:6px 0 8px">THE CODE</h2>
+      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">The non-negotiables. The phrases that work. The phrases that don't.</p>
+    </div>
+
+    <div style="margin:24px 0 14px">
+      <h3 class="display" style="font-size:24px;color:var(--red);margin:0 0 10px">The Golden Rules</h3>
+    </div>
+    <ol style="list-style:none;padding:0;margin:0">
+      ${RULES.map((r,i)=>`
+        <li class="card corners" style="display:flex;gap:14px;align-items:flex-start;margin-bottom:10px">
+          <span class="display" style="color:var(--red);font-size:22px;min-width:32px">${String(i+1).padStart(2,'0')}</span>
+          <span style="line-height:1.5">${h(r)}</span>
+        </li>`).join('')}
+    </ol>
+
+    <div style="margin:32px 0 14px">
+      <h3 class="display" style="font-size:24px;color:var(--green);margin:0 0 10px">What To Say</h3>
+    </div>
+    ${PHRASE_BANK.map(g => `
+      <div class="card" style="margin-bottom:10px">
+        <div class="display" style="font-size:15px;margin-bottom:8px">${h(g.s)}</div>
+        ${g.lines.map(x=>`<div style="color:rgba(245,236,215,0.85);margin-bottom:4px">"${h(x)}"</div>`).join('')}
+      </div>`).join('')}
+
+    <div style="margin:32px 0 14px">
+      <h3 class="display" style="font-size:24px;color:var(--red);margin:0 0 10px">What Not To Say</h3>
+    </div>
+    ${RED_LIST.map(item => `
+      <div class="card" style="border-left:4px solid var(--red);margin-bottom:10px">
+        <div class="red-strike">${h(item.phrase)}</div>
+        <p style="margin:6px 0 0;color:rgba(245,236,215,0.75);font-size:13px;font-style:italic">${h(item.why)}</p>
+      </div>`).join('')}
+
+    <div style="margin:32px 0 14px">
+      <h3 class="display" style="font-size:24px;margin:0 0 10px">FAQ</h3>
+    </div>
+    ${FAQ.map(f => `
+      <details class="acc">
+        <summary>
+          <div class="title-row"><span class="name">${h(f.q)}</span></div>
+          <span class="plus">+</span>
+        </summary>
+        <div class="body" style="color:rgba(245,236,215,0.85);line-height:1.55">${h(f.a)}</div>
+      </details>`).join('')}
+  </div>`;
+}
+
+// ---------- ACTIONS ----------
+function go(tab) {
+  state.guideOpen = null;
+  setState({ tab });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function dismissWelcome() { localStorage.setItem(SEEN, '1'); setState({ showWelcome: false }); }
+function quickStart(e) {
+  e.preventDefault();
+  const name = $('#qs-name').value.trim();
+  const lastPeriod = $('#qs-date').value;
+  if (!lastPeriod) return;
+  const profile = saveProfile({
+    name, lastPeriod, cycleLength: 28, relationship: 'girlfriend',
+    neurology: [], comfort: [], cravings: [], love: [], notes: ''
+  });
+  setState({ profile });
+}
+function navMonth(delta) {
+  if (delta === 0) { setState({ view: new Date() }); return; }
+  const v = state.view;
+  setState({ view: new Date(v.getFullYear(), v.getMonth()+delta, 1) });
+}
+function dismissAlertNow(id) { dismissAlert(id); render(); }
+function toggleGuide(p) { setState({ guideOpen: state.guideOpen === p ? null : p }); }
+
+let saveTimer = null;
+function flashSaved() {
+  const el = $('#save-status');
+  if (!el) return;
+  el.textContent = '✓ SAVED';
+  el.classList.add('saved');
+  clearTimeout(flashSaved._t);
+  flashSaved._t = setTimeout(() => {
+    if (el) { el.textContent = '// auto-save on'; el.classList.remove('saved'); }
+  }, 1400);
+}
+function debouncedSave(p) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!p.lastPeriod) return;
+    state.profile = saveProfile(p);
+    flashSaved();
+  }, 500);
+}
+function updateField(e) {
+  const field = e.target.dataset.field;
+  let value = e.target.value;
+  if (field === 'cycleLength') value = Math.max(21, Math.min(35, parseInt(value) || 28));
+  const next = { ...(state.profile || {}), [field]: value };
+  state.profile = next;
+  debouncedSave(next);
+}
+function togglePill(key, id, multi) {
+  const p = state.profile || {};
+  let next;
+  if (multi) {
+    const arr = Array.isArray(p[key]) ? p[key].slice() : [];
+    const i = arr.indexOf(id);
+    if (i >= 0) arr.splice(i, 1); else arr.push(id);
+    next = { ...p, [key]: arr };
+  } else {
+    next = { ...p, [key]: p[key] === id ? '' : id };
+  }
+  state.profile = next;
+  debouncedSave(next);
+  render();
+}
+function exportProfile() {
+  if (!state.profile) return;
+  const blob = new Blob([JSON.stringify(state.profile, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `brocode-profile-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+function importProfile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data.lastPeriod) throw new Error('No lastPeriod field.');
+      state.profile = saveProfile(data);
+      render();
+      alert('Profile imported.');
+    } catch (err) { alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+function confirmClear() {
+  if (confirm('Clear her profile? This cannot be undone.')) {
+    clearProfile();
+    state.profile = null;
+    render();
+  }
+}
+
+// ---------- BOOT ----------
+render();
+</script>
+</body>
 </html>
