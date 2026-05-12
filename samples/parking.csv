@@ -1,0 +1,6 @@
+slug,name,parking_type,latitude,longitude,capacity,covered,operator,address,source_url,rule_text_original,rule_text_simple,price_hourly_nok
+sandnes-ruten,Sandnes Rutenparkering,GARAGE,58.852,5.737,420,true,Sandnes Parkering,Vågsgata 40 4306 Sandnes,https://www.sandnes.kommune.no/parkering,Avgift hele døgnet,Paid 24/7,25
+sandnes-jernbaneveien,Sandnes Jernbaneveien gateparkering,STREET,58.851,5.738,,false,,Jernbaneveien Sandnes,https://www.sandnes.kommune.no/parkering,Avgift man-fre 09-17 gratis ellers,Paid Mon-Fri 09-17 free otherwise,18
+sola-rorholmen,Sola Rørholmen P-plass,LOT,58.886,5.633,80,false,Sola kommune,Rørholmen Sola,https://www.sola.kommune.no/parkering,Gratis hele døgnet,Free 24/7,
+haugesund-flotmyr,Haugesund Flotmyr P-hus,GARAGE,59.413,5.275,580,true,Haugesund Parkering,Flotmyrgata Haugesund,https://www.haugesund.kommune.no/parkering,Avgift man-lor 08-18,Paid Mon-Sat 08-18,22
+stavanger-paradis-pr,Paradis innfartsparkering,LOT,58.940,5.732,140,false,Kolumbus,Paradis stasjon,https://www.kolumbus.no/innfartsparkering,Gratis innfartsparkering for kollektivreisende,Free park-and-ride for transit users,
