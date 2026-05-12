@@ -1,5 +1,5 @@
 // BRO CODE service worker — offline-first for app shell, network-first for fonts.
-const CACHE = 'brocode-v1';
+const CACHE = 'brocode-v2';
 const SHELL = [
   './',
   './index.html',

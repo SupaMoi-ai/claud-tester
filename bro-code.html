@@ -242,6 +242,33 @@
 
   .hidden { display: none !important; }
 
+  /* Situation chips */
+  .sit-row {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    margin-bottom: 14px;
+  }
+  .sit-chip {
+    background: transparent; color: rgba(245,236,215,0.85);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 11px; font-size: 12px;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .sit-chip:hover, .sit-chip:active { border-color: var(--red); color: var(--cream); }
+  .sit-chip.active { background: var(--red); border-color: var(--red); color: var(--cream); }
+
+  .sit-panel {
+    background: rgba(13,17,23,0.55); border: 1px solid var(--border);
+    border-left: 4px solid var(--red); border-radius: 8px;
+    padding: 14px; margin-bottom: 14px;
+  }
+  .sit-panel .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
+
+  /* Plays card */
+  .plays-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .plays-tabs .pill { margin: 0; font-size: 13px; padding: 6px 12px; }
+
   /* Install hint */
   .install-hint {
     position: fixed; left: 12px; right: 12px;
@@ -385,6 +412,198 @@ const RED_LIST = [
   { phrase:"Other women don't make this big a deal", why:"Never compare her to other women." },
   { phrase:"I can't say anything right", why:"This makes it about you." }
 ];
+
+const CONVERSATIONS = {
+  menstrual: [
+    "What's the one thing that would actually help today?",
+    "Want me to handle the next decision so you don't have to think?",
+    "Is there anyone you want me to text on your behalf?",
+    "What show do you want to disappear into tonight?"
+  ],
+  follicular: [
+    "What's the thing you've been wanting to try?",
+    "If we could plan anything for next weekend - what?",
+    "What's a project you're excited about right now?",
+    "What's something new you want us to do together?"
+  ],
+  ovulation: [
+    "What's the conversation we've been avoiding? Let's have it.",
+    "Tell me about the thing you're proudest of this month.",
+    "What do you want more of in our life right now?",
+    "Where do you want to travel - one trip, any budget?"
+  ],
+  luteal: [
+    "Is there anything I haven't been seeing this week?",
+    "What's been weighing on you that we haven't talked about?",
+    "What can I take off your plate tonight?",
+    "Have I been showing up the way you need me to?"
+  ]
+};
+
+const DATES = {
+  menstrual: [
+    "Cancel everything. Build a fort. Her show, your job: snacks.",
+    "Order in from her favorite place. Run her a bath after.",
+    "Movie night, low lights, weighted blanket. No talking required."
+  ],
+  follicular: [
+    "Try the new place you've both been curious about.",
+    "Saturday hike + coffee shop after. Fresh-energy match.",
+    "Cook something neither of you has made before. Together."
+  ],
+  ovulation: [
+    "The dinner reservation you keep delaying. Tonight.",
+    "Dress up. Go out. Take a photo. She wants the memory.",
+    "Drinks somewhere with a view. Have the real conversation."
+  ],
+  luteal: [
+    "Order in. Same couch. Her pick. Phone face-down.",
+    "Cozy dinner at home. Light a candle. Make it intentional.",
+    "Hot chocolate + a walk if the weather's right. Low stakes."
+  ]
+};
+
+const APOLOGY = {
+  menstrual: {
+    moves: [
+      "Acknowledge what you actually did - no \"I'm sorry you feel\".",
+      "Do not defend, do not explain. Just sit with it.",
+      "Then ask: what would help right now?"
+    ],
+    lines: [
+      "I was wrong. What I did wasn't okay.",
+      "You don't have to forgive me right now. I'll be here when you're ready.",
+      "I'm taking everything off your plate tonight. Don't lift a finger."
+    ]
+  },
+  follicular: {
+    moves: [
+      "Apologize cleanly, then redirect to action - she has energy for repair now.",
+      "Plan something concrete that shows you heard her.",
+      "Don't over-talk it. Repair, then move forward together."
+    ],
+    lines: [
+      "You were right. I see it now. Here's what I'll do differently.",
+      "Let me make it up to you - this weekend, your call, my plan.",
+      "I want to do better. Tell me what better looks like."
+    ]
+  },
+  ovulation: {
+    moves: [
+      "Bring it up directly - she's clearest and most generous here.",
+      "Be specific about what you got wrong.",
+      "Have the bigger conversation she's been wanting to have."
+    ],
+    lines: [
+      "I owe you a real apology. Not a quick one.",
+      "I should have shown up. I didn't. That's on me.",
+      "Walk me through what hurt - I want to actually understand it."
+    ]
+  },
+  luteal: {
+    moves: [
+      "Lead with humility - her bullshit detector is at peak.",
+      "Do not minimize. Do not bring up your side.",
+      "Then go quiet. Presence beats words this week."
+    ],
+    lines: [
+      "You weren't wrong. I was. I'm sorry.",
+      "You don't have to explain why it hurt. I get it.",
+      "I'm not going anywhere. Take whatever space you need."
+    ]
+  }
+};
+
+const TIME_TIPS = {
+  menstrual: {
+    morning:   ["Coffee in her hand before she asks. Ibuprofen on the nightstand.","Make her breakfast. Don't ask what she wants - just bring something soft.","Lay out the heating pad. Quietly. She'll find it."],
+    afternoon: ["Text 'I'm picking up groceries - what do you need?' Don't ask if. Just do.","Send her a 'thinking of you' text mid-day. No question attached.","Order her favorite snack to her work."],
+    evening:   ["Run her a bath. Have the towel warm. No talking required.","Dinner is handled. Tell her not to even look at the kitchen.","Light dim, blanket warm, her show queued up."],
+    night:     ["She's wired or tired - read her. Quiet presence wins.","Foot rub or back rub if she's awake. No agenda.","Tuck her in. Phone on silent. You're a guard dog tonight."]
+  },
+  follicular: {
+    morning:   ["Match her rising energy. Make a plan for the day together over coffee.","She's open to new things this week - suggest one for today.","Hype her up about whatever she's working on this morning."],
+    afternoon: ["Pick a weekend plan and tell her - she likes initiative right now.","Send her something that made you think of her - song, photo, anything.","Suggest cooking together tonight."],
+    evening:   ["Plan tonight or tomorrow - she has the energy for both.","Try the new place. Tonight's the night to use the 'we should go someday' list.","Cook together. Music on. This is the easy week."],
+    night:     ["Don't crash the energy with a heavy talk - save it for ovulation.","Late-night walk if the night's good. Movement matches her phase.","Set tomorrow up together before bed - she likes structure right now."]
+  },
+  ovulation: {
+    morning:   ["She's at peak clarity - have the real conversation over breakfast.","Tell her she looks incredible. Specific. Mean it.","Match her ambition. What's the win today?"],
+    afternoon: ["Surprise her with something mid-day - peak energy = peak memory.","Send the photo of her you've been keeping. Tell her why you love it.","Plan the dinner you keep delaying. Reserve it now."],
+    evening:   ["Tonight is the night for the conversation you've been avoiding.","Dress up. Go out. She wants to be seen with you.","Initiate. She wants to be desired this week."],
+    night:     ["Capture the moment - photo, voice note, anything. Future-you will thank you.","Don't drift into your phone. Her, eyes, presence.","Late dinner, dim light, real talk. This window is rare."]
+  },
+  luteal: {
+    morning:   ["Bring her tea, not coffee, if she's wired. Watch which she reaches for.","Keep the morning soft. No big asks. Let her ease in.","Check the comfort drawer - heating pad, ibuprofen, her favorite tea."],
+    afternoon: ["Text her one specific thing you appreciate. Not generic.","Pick up dinner so she doesn't have to think about it.","Cancel the optional plan tonight - she won't ask, but she'll thank you."],
+    evening:   ["Cozy mode. Order in. Phone face down. Same couch.","Don't bring up anything heavy tonight. Save it for follicular.","Light a candle. Make tonight feel intentional, not just default."],
+    night:     ["She's reading everything you do tonight. Be calm, be steady, be present.","No phone. No drift. Just be next to her.","Tomorrow's gentler if tonight is. Tuck in early."]
+  }
+};
+
+const TRANSITION_TIPS = {
+  menstrual:  "Tomorrow she enters menstrual. Stock the comfort drawer tonight - heating pad, ibuprofen, her favorites. Cancel anything optional this week.",
+  follicular: "Tomorrow she enters follicular - energy is climbing back. Have one fun plan in your back pocket to suggest.",
+  ovulation:  "Tomorrow she enters ovulation - peak window. If there's a real conversation you've been holding, this is the week.",
+  luteal:     "Tomorrow she enters luteal - sensitivity rises. Lower the noise, raise the patience. Big talks can wait."
+};
+
+const FOLLOWUP_TIPS = {
+  menstrual:  "You had a conflict recently. She's in recovery mode now - don't bring it up. Act it out: show up, do the things, don't make her ask.",
+  follicular: "You had a conflict recently. She has energy to repair this week. A clean apology + a concrete plan lands well now.",
+  ovulation:  "You had a conflict recently. This week she's clearest - have the real follow-up conversation. Lead with what you got wrong.",
+  luteal:     "You had a conflict recently. She remembers. A clean apology now beats waiting - silence reads as not caring.",
+  generic:    "You had a conflict recently. Don't let it sit. A specific 'I was wrong about X' is the move."
+};
+
+const NON_GIFT_TIPS = {
+  menstrual:  "You gave a gift recently - good. Now switch tracks: acts of service. Do the dishes, take the chore, no announcement.",
+  follicular: "You gave a gift recently. This week she wants you, not stuff - plan something to do together.",
+  ovulation:  "You gave a gift recently. This week she wants your attention - phone away, eyes up, real conversation.",
+  luteal:     "You gave a gift recently. This week she wants presence over presents - same couch, no agenda.",
+  generic:    "Recent gift logged - don't stack. Switch love languages: words, time, touch, or service today."
+};
+
+const SITUATIONS = [
+  { id:'crying',  label:"She's crying",     emoji:'💧' },
+  { id:'angry',   label:"She's angry",      emoji:'⚡' },
+  { id:'quiet',   label:"She's quiet",      emoji:'🌫️' },
+  { id:'messup',  label:"I messed up",      emoji:'🆘' }
+];
+
+const SITUATION_FIRST = {
+  crying: {
+    menstrual:  "Sit down next to her. Don't talk. Hand on her back. That's the whole first move.",
+    follicular: "Ask once: 'do you want to be held or do you want space?' Then do exactly that.",
+    ovulation:  "Hold her. She's allowed to cry at peak too. Don't try to fix it.",
+    luteal:     "Get next to her. Quiet body language. Don't ask why - she'll tell you when she's ready."
+  },
+  angry: {
+    menstrual:  "Lower your voice. Don't match her temperature. Acknowledge, don't defend.",
+    follicular: "Listen all the way to the end before you say anything. Then repeat back what you heard.",
+    ovulation:  "She's clear-headed - the anger is information. Take it seriously, not personally.",
+    luteal:     "Don't argue. Don't fix. Validate: 'you're not wrong to be upset.' Then go quiet."
+  },
+  quiet: {
+    menstrual:  "Don't fill the silence. Bring her tea. Sit nearby. Available, not pressing.",
+    follicular: "Light check-in: 'you doing okay?' If she says yes, drop it. Believe her.",
+    ovulation:  "Direct: 'something on your mind?' She'll tell you straight this week.",
+    luteal:     "Don't ask why she's quiet. Just be steady. She's processing - presence is enough."
+  },
+  messup: {
+    menstrual:  APOLOGY.menstrual.moves[0],
+    follicular: APOLOGY.follicular.moves[0],
+    ovulation:  APOLOGY.ovulation.moves[0],
+    luteal:     APOLOGY.luteal.moves[0]
+  }
+};
+
+const SITUATION_NEVER = {
+  crying:  "Why are you crying?",
+  angry:   "You're being irrational.",
+  quiet:   "What's wrong with you tonight?",
+  messup:  "I'm sorry you feel that way."
+};
 
 const FAQ = [
   { q:"Is PMS real?", a:"Yes - it's documented in medical literature, with 3-8% of women experiencing PMDD. Hormonal changes in the luteal phase have measurable effects on mood, energy, pain tolerance, and cognition." },
@@ -542,6 +761,91 @@ function pickTip(profile, phase, dInPhase) {
   const list = (dInPhase||1) <= 3 ? t.early : t.late;
   return list[seed % list.length];
 }
+function timeOfDay(d = new Date()) {
+  const h = d.getHours();
+  if (h < 5)  return 'night';
+  if (h < 12) return 'morning';
+  if (h < 17) return 'afternoon';
+  if (h < 22) return 'evening';
+  return 'night';
+}
+function nextPhase(p) {
+  const i = PHASES.indexOf(p);
+  return PHASES[(i + 1) % PHASES.length];
+}
+function nextPhaseTransition(day, len) {
+  const r = phaseRanges(len);
+  for (const p of PHASES) if (r[p] && day === r[p][1]) return { from: p, next: nextPhase(p), daysAway: 1 };
+  return null;
+}
+function daysAgo(ts) {
+  return Math.floor((Date.now() - ts) / DAY);
+}
+function lastLog(kind, withinDays = 7) {
+  const log = loadLog();
+  const cutoff = Date.now() - withinDays * DAY;
+  for (let i = log.length - 1; i >= 0; i--) {
+    if ((!kind || log[i].kind === kind) && (log[i].at || 0) >= cutoff) return log[i];
+  }
+  return null;
+}
+function pickSmartTip(profile, phase, dInPhase) {
+  if (!profile?.lastPeriod) return null;
+  const len = profile.cycleLength || 28;
+  const day = cycleDay(profile);
+
+  // 1) phase transition next-day heads-up
+  const tx = nextPhaseTransition(day, len);
+  if (tx && TRANSITION_TIPS[tx.next]) return TRANSITION_TIPS[tx.next];
+
+  // 2) recent conflict — push a follow-up move
+  const conf = lastLog('conflict', 3);
+  if (conf && daysAgo(conf.at) >= 1) return FOLLOWUP_TIPS[phase] || FOLLOWUP_TIPS.generic;
+
+  // 3) recent gift — switch love language
+  const gift = lastLog('gift', 4);
+  if (gift && daysAgo(gift.at) <= 2) return NON_GIFT_TIPS[phase] || NON_GIFT_TIPS.generic;
+
+  // 4) time-of-day awareness
+  const tod = timeOfDay();
+  const arr = TIME_TIPS[phase]?.[tod];
+  if (arr && arr.length) {
+    const seed = new Date().getDate() + (dInPhase || 1);
+    return arr[seed % arr.length];
+  }
+
+  // 5) fallback to existing tip engine
+  return pickTip(profile, phase, dInPhase);
+}
+function pickGifts(profile) {
+  const out = [];
+  const cravings = profile?.cravings || [];
+  const love = profile?.love || [];
+  const comfort = profile?.comfort || [];
+  const fav = (profile?.favorites || '').trim();
+
+  if (has(cravings,'sweet'))   out.push(fav ? `Her favorite — ${fav.split(',')[0].trim()}.` : 'Dark chocolate + a handwritten note tucked in.');
+  if (has(cravings,'salty'))   out.push('Her go-to salty snack stash refilled. No announcement.');
+  if (has(cravings,'carbs'))   out.push('Pick up the comfort-carb she always craves. Pre-warmed.');
+  if (has(cravings,'spicy'))   out.push('Surprise takeout from her favorite spicy place.');
+  if (has(comfort,'heat'))     out.push('Her hoodie pre-warmed in the dryer. Heating pad ready.');
+  if (has(comfort,'cuddles'))  out.push('Cancel tonight. Couch, blanket, no agenda. You\'re the gift.');
+  if (has(comfort,'massage'))  out.push('30-min back-rub coupon. Cash it in tonight.');
+  if (has(comfort,'blanket'))  out.push('The weighted blanket she keeps eyeing. Buy it.');
+  if (has(love,'touch'))       out.push('Slow morning. Coffee in bed. Hand on her back.');
+  if (has(love,'words'))       out.push('Write the specific thing you appreciate. Not a text — a note.');
+  if (has(love,'acts'))        out.push('Take a chore she hates and do it without telling her first.');
+  if (has(love,'time'))        out.push('Block the night. Phones away. Two hours, fully present.');
+  if (has(love,'gifts'))       out.push('Something tiny but specific — flowers in her favorite, not generic roses.');
+
+  // Fallbacks if profile has nothing matched
+  if (!out.length) {
+    out.push('Her favorite takeout, ordered without asking.');
+    out.push('A note. Three sentences. What you actually appreciate.');
+    out.push('Take a chore off her plate. Don\'t mention it.');
+  }
+  return out.slice(0, 4);
+}
 function buildAlert(profile, day) {
   if (!profile) return null;
   const days = daysToNextPeriod(profile);
@@ -623,7 +927,10 @@ let state = {
   showWelcome: localStorage.getItem(SEEN) !== '1',
   guideOpen: null,
   notifEnabled: localStorage.getItem(NOTIF_KEY) === '1' && (typeof Notification !== 'undefined') && Notification.permission === 'granted',
-  showInstallHint: false
+  showInstallHint: false,
+  playsTab: 'ask',
+  playsSeed: 0,
+  situation: null
 };
 
 function setState(patch) {
@@ -666,7 +973,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.1 · Know the code</footer>
+    <footer class="app">BRO CODE · v2.2 · Know the code</footer>
     ${state.showInstallHint ? `
       <div class="install-hint">
         <div style="flex:1;line-height:1.35">
@@ -699,7 +1006,7 @@ function renderDashboard(day, phase, len) {
   const late = latePeriodState(state.profile);
   if (late) { day = len; phase = 'luteal'; }
   const days = late ? 0 : daysToNextPeriod(state.profile);
-  const tip = pickTip(state.profile, phase, dayInPhase(day, len));
+  const tip = pickSmartTip(state.profile, phase, dayInPhase(day, len));
   const alert = late ? null : buildAlert(state.profile, day);
   const showAlert = alert && !dismissedToday(alert.id);
   const ranges = phaseRanges(len);
@@ -781,7 +1088,18 @@ function renderDashboard(day, phase, len) {
         <div class="label">// daily brief</div>
         ${streak > 0 ? `<div class="label" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
       </div>
-      <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+
+      <div class="sit-row">
+        <div class="label" style="margin-right:4px">// right now</div>
+        ${SITUATIONS.map(s => `
+          <button class="sit-chip ${state.situation===s.id?'active':''}" onclick="openSituation('${s.id}')">${s.emoji} ${h(s.label)}</button>
+        `).join('')}
+      </div>
+
+      ${state.situation ? renderSituationPanel(state.situation, phase) : `
+        <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+      `}
+
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:6px">
         <div class="label" style="color:var(--red);margin-bottom:6px">// avoid today</div>
         <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="red-strike" style="font-size:15px">${h(avoid.phrase)}</span><span style="color:rgba(245,236,215,0.6);font-size:13px">${h(avoid.why)}</span></div>
@@ -795,6 +1113,8 @@ function renderDashboard(day, phase, len) {
         </div>
       </div>
     </div>
+
+    ${renderPlaysCard(phase)}
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -821,6 +1141,80 @@ function renderDashboard(day, phase, len) {
       </div>
     </div>
   </div>`;
+}
+
+function renderSituationPanel(sit, phase) {
+  const first = SITUATION_FIRST[sit]?.[phase] || 'Slow down. Breathe. She doesn\'t need you to fix it.';
+  const never = SITUATION_NEVER[sit] || '';
+  const label = SITUATIONS.find(s => s.id === sit)?.label || '';
+
+  let phrases = [];
+  if (sit === 'messup') {
+    phrases = APOLOGY[phase]?.lines || [];
+  } else {
+    const map = { crying:"She's crying", angry:"She's irritable", quiet:"She wants space" };
+    const bank = PHRASE_BANK.find(g => g.s === map[sit]);
+    phrases = bank ? bank.lines.slice(0, 3) : [];
+  }
+
+  return `
+    <div class="sit-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="display" style="font-size:18px;color:var(--red)">${h(label)}</div>
+        <button class="x" onclick="closeSituation()" aria-label="Close">×</button>
+      </div>
+      <div class="label" style="margin-bottom:6px">// first move</div>
+      <p style="margin:0 0 14px;color:var(--cream);line-height:1.4">${h(first)}</p>
+      ${phrases.length ? `
+        <div class="label" style="color:var(--green);margin-bottom:6px">// say this</div>
+        <ul class="bullets" style="margin-bottom:14px">
+          ${phrases.map(p => `<li><span style="color:var(--green)">✓</span><span>"${h(p)}"</span></li>`).join('')}
+        </ul>
+      ` : ''}
+      ${never ? `
+        <div class="label" style="color:var(--red);margin-bottom:6px">// don't say</div>
+        <div style="display:flex;align-items:baseline;gap:8px"><span class="red-strike" style="font-size:14px">${h(never)}</span></div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderPlaysCard(phase) {
+  const tab = state.playsTab || 'ask';
+  const seed = state.playsSeed || 0;
+  let title = '', items = [];
+  if (tab === 'ask') {
+    title = 'ASK HER TONIGHT';
+    items = CONVERSATIONS[phase] || [];
+  } else if (tab === 'date') {
+    title = 'DATE IDEA';
+    items = DATES[phase] || [];
+  } else if (tab === 'gift') {
+    title = 'GIFT MOVE';
+    items = pickGifts(state.profile);
+  }
+  const rotated = items.length ? items.slice(seed % items.length).concat(items.slice(0, seed % items.length)) : [];
+  const shown = rotated.slice(0, tab === 'ask' ? 3 : (tab === 'gift' ? 3 : 2));
+
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
+        <div class="label">// tonight's plays</div>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollPlays()">⟳ ROTATE</button>
+      </div>
+      <div class="plays-tabs">
+        <button class="pill ${tab==='ask'?'active':''}" onclick="setPlaysTab('ask')">💬 ASK</button>
+        <button class="pill ${tab==='date'?'active':''}" onclick="setPlaysTab('date')">🍽️ DATE</button>
+        <button class="pill ${tab==='gift'?'active':''}" onclick="setPlaysTab('gift')">🎁 GIFT</button>
+      </div>
+      <div class="label" style="margin:14px 0 8px;color:var(--cream)">${title}</div>
+      ${shown.length ? `
+        <ul class="bullets">
+          ${shown.map(line => `<li><span style="color:var(--orange)">▸</span><span>${h(line)}</span></li>`).join('')}
+        </ul>
+      ` : `<p style="color:rgba(245,236,215,0.6);margin:0;font-style:italic">Fill in her profile to unlock gift moves.</p>`}
+    </div>
+  `;
 }
 
 function renderQuickStart() {
@@ -1207,6 +1601,7 @@ function renderCode() {
 // ---------- ACTIONS ----------
 function go(tab) {
   state.guideOpen = null;
+  state.situation = null;
   setState({ tab });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1233,6 +1628,12 @@ function quickLog(kind, phase) {
   addLog(kind, phase);
   render();
 }
+function openSituation(name) {
+  setState({ situation: state.situation === name ? null : name });
+}
+function closeSituation() { setState({ situation: null }); }
+function setPlaysTab(t) { setState({ playsTab: t, playsSeed: 0 }); }
+function rerollPlays() { setState({ playsSeed: (state.playsSeed || 0) + 1 }); }
 
 let saveTimer = null;
 function flashSaved() {
