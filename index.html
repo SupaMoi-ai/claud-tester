@@ -7,6 +7,11 @@
 <meta name="description" content="BRO CODE - the playbook for showing up." />
 <title>BRO CODE</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="BRO CODE" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -236,6 +241,20 @@
   footer.app { text-align: center; margin: 32px 0 12px; opacity: 0.5; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
 
   .hidden { display: none !important; }
+
+  /* Install hint */
+  .install-hint {
+    position: fixed; left: 12px; right: 12px;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    z-index: 50;
+    background: rgba(13,17,23,0.96); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-left: 4px solid var(--red);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+    max-width: 520px; margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .install-hint .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
 
   /* Stagger entrance */
   .stagger > * { opacity: 0; animation: rise 0.45s ease forwards; }
@@ -485,6 +504,25 @@ function daysToNextPeriod(p, today=new Date()) {
   const next = new Date(midnight(p.lastPeriod).getTime() + cycles*len*DAY);
   return Math.max(0, Math.ceil((next - midnight(today)) / DAY));
 }
+function fertilityFor(day, len=28) {
+  if (!day) return { state:'unknown', label:'—' };
+  const ovuDay = Math.max(1, Math.round(len - 14));
+  const distance = day - ovuDay;
+  if (distance === 0) return { state:'peak', label:'Peak fertility', ovuDay, distance };
+  if (distance >= -5 && distance <= 1) return { state:'fertile', label:'Fertile window', ovuDay, distance };
+  return { state:'low', label:'Low chance', ovuDay, distance };
+}
+function latePeriodState(p, today=new Date()) {
+  if (!p?.lastPeriod) return null;
+  const len = p.cycleLength || 28;
+  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
+  if (diff < 0) return null;
+  const lateBy = diff - len + 1;
+  if (lateBy < 1) return null;
+  if (lateBy >= 7) return { lateBy, severity:'high' };
+  if (lateBy >= 3) return { lateBy, severity:'medium' };
+  return { lateBy, severity:'low' };
+}
 function infoFor(p, date) {
   if (!p?.lastPeriod) return { phase:null, day:null };
   const len = p.cycleLength || 28;
@@ -520,6 +558,10 @@ function buildAlert(profile, day) {
 const KEY = 'brocode_profile';
 const SEEN = 'brocode_seen';
 const DISMISS = 'brocode_dismiss';
+const LOG_KEY = 'brocode_log';
+const NOTIF_KEY = 'brocode_notif';
+const NOTIF_LAST = 'brocode_notif_last';
+const INSTALL_DISMISS = 'brocode_install_dismissed';
 function loadProfile() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
 function saveProfile(p) {
   const stamped = { ...p, updatedAt: new Date().toISOString() };
@@ -542,6 +584,31 @@ function dismissAlert(id) {
   if (!m[today].includes(id)) m[today].push(id);
   localStorage.setItem(DISMISS, JSON.stringify(m));
 }
+function loadLog() { try { return JSON.parse(localStorage.getItem(LOG_KEY)) || []; } catch { return []; } }
+function addLog(kind, phase) {
+  const log = loadLog();
+  log.push({ date: new Date().toISOString().slice(0,10), kind, phase, at: Date.now() });
+  if (log.length > 365) log.splice(0, log.length - 365);
+  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+}
+function loggedToday() {
+  const today = new Date().toISOString().slice(0,10);
+  return loadLog().some(l => l.date === today);
+}
+function currentStreak() {
+  const log = loadLog();
+  if (!log.length) return 0;
+  const days = new Set(log.map(l => l.date));
+  let streak = 0;
+  let d = new Date();
+  for (let i = 0; i < 365; i++) {
+    const key = d.toISOString().slice(0,10);
+    if (days.has(key)) streak++;
+    else if (i > 0) break;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
 
 // ---------- HELPERS ----------
 const h = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -554,7 +621,9 @@ let state = {
   profile: loadProfile(),
   view: new Date(),
   showWelcome: localStorage.getItem(SEEN) !== '1',
-  guideOpen: null
+  guideOpen: null,
+  notifEnabled: localStorage.getItem(NOTIF_KEY) === '1' && (typeof Notification !== 'undefined') && Notification.permission === 'granted',
+  showInstallHint: false
 };
 
 function setState(patch) {
@@ -597,7 +666,15 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v1.0 · Know the code</footer>
+    <footer class="app">BRO CODE · v2.1 · Know the code</footer>
+    ${state.showInstallHint ? `
+      <div class="install-hint">
+        <div style="flex:1;line-height:1.35">
+          <div class="display" style="color:var(--cream);font-size:14px;letter-spacing:0.08em">ADD TO HOME SCREEN</div>
+          <div style="font-size:12px;color:rgba(245,236,215,0.75);margin-top:2px">Tap <strong>Share</strong> → <strong>Add to Home Screen</strong> for offline + daily reminders.</div>
+        </div>
+        <button class="x" onclick="dismissInstallHint()" aria-label="Dismiss">×</button>
+      </div>` : ''}
     ${state.showWelcome ? renderWelcome() : ''}
   `;
 }
@@ -619,12 +696,20 @@ function renderWelcome() {
 function renderDashboard(day, phase, len) {
   if (!state.profile?.lastPeriod) return renderQuickStart();
 
-  const days = daysToNextPeriod(state.profile);
+  const late = latePeriodState(state.profile);
+  if (late) { day = len; phase = 'luteal'; }
+  const days = late ? 0 : daysToNextPeriod(state.profile);
   const tip = pickTip(state.profile, phase, dayInPhase(day, len));
-  const alert = buildAlert(state.profile, day);
+  const alert = late ? null : buildAlert(state.profile, day);
   const showAlert = alert && !dismissedToday(alert.id);
   const ranges = phaseRanges(len);
   const pct = ((day-1)/len)*100;
+  const fert = fertilityFor(day, len);
+  const mode = state.profile.fertilityMode || 'off';
+  const streak = currentStreak();
+  const didToday = loggedToday();
+  const todayIdx = Math.floor((midnight(new Date()) - midnight(new Date('2024-01-01'))) / DAY);
+  const avoid = RED_LIST[todayIdx % RED_LIST.length];
 
   const today = new Date();
   const next = [1,2,3,4].map(i => {
@@ -640,6 +725,28 @@ function renderDashboard(day, phase, len) {
 
   const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
 
+  let fertPill = '';
+  if (fert.state !== 'low' && fert.state !== 'unknown') {
+    const peak = fert.state === 'peak';
+    let bg = 'rgba(245,236,215,0.18)', fg = 'var(--cream)', txt = peak ? 'PEAK FERTILITY' : 'FERTILE WINDOW';
+    if (mode === 'ttc')   { bg = 'rgba(61,170,106,0.22)'; fg = '#7DE0A5'; txt = peak ? 'PEAK • TRY TONIGHT' : 'FERTILE • TRY TONIGHT'; }
+    if (mode === 'avoid') { bg = 'rgba(200,50,44,0.25)';  fg = '#FF9B96'; txt = peak ? 'PEAK • HIGH RISK'  : 'FERTILE • PROTECT'; }
+    fertPill = `<div style="display:inline-flex;align-items:center;gap:6px;background:${bg};color:${fg};font-family:'Anton',Impact,sans-serif;letter-spacing:0.1em;font-size:11px;padding:4px 10px;border-radius:999px;margin-top:8px">${peak?'🔴':'🟡'} ${txt}</div>`;
+  }
+
+  let lateBanner = '';
+  if (late) {
+    const high = late.severity === 'high';
+    lateBanner = `
+      <div class="alert ${high?'red':''}">
+        <div class="icon">${high?'⚠️':'⏳'}</div>
+        <div class="text">
+          <div class="title">${high?'PERIOD LATE BY '+late.lateBy+' DAYS':'PERIOD RUNNING LATE'}</div>
+          <div class="body">${high?'Consider a pregnancy test. Could also be stress, travel, or illness. Be calm. Be present.':'Late by '+late.lateBy+' day'+(late.lateBy===1?'':'s')+'. Not unusual — but worth noting. Watch for symptoms.'}</div>
+        </div>
+      </div>`;
+  }
+
   return `
   <div class="stagger">
     <div class="hero corners" data-phase="${phase}">
@@ -648,6 +755,7 @@ function renderDashboard(day, phase, len) {
           <div class="label" style="color:rgba(245,236,215,0.8)">// ${h(heroName)} :: phase</div>
           <h1>${PHASE_LABEL[phase]}</h1>
           <div class="sub">${PHASE_HERO[phase]}</div>
+          ${fertPill}
         </div>
         <div class="day">
           <div class="emoji">${PHASE_EMOJI[phase]}</div>
@@ -655,6 +763,8 @@ function renderDashboard(day, phase, len) {
         </div>
       </div>
     </div>
+
+    ${lateBanner}
 
     ${showAlert ? `
       <div class="alert ${alert.tone==='red'?'red':''}">
@@ -667,8 +777,23 @@ function renderDashboard(day, phase, len) {
       </div>` : ''}
 
     <div class="card corners">
-      <div class="label" style="margin-bottom:10px">// today's move</div>
-      <p style="font-size:20px;line-height:1.35;margin:0;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
+        <div class="label">// daily brief</div>
+        ${streak > 0 ? `<div class="label" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
+      </div>
+      <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:6px">
+        <div class="label" style="color:var(--red);margin-bottom:6px">// avoid today</div>
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="red-strike" style="font-size:15px">${h(avoid.phrase)}</span><span style="color:rgba(245,236,215,0.6);font-size:13px">${h(avoid.why)}</span></div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
+        <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT</button>
+          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK</button>
+          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT</button>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -873,6 +998,16 @@ function renderProfile() {
         ${pillGroup('relationship', [
           {id:'girlfriend',label:'Girlfriend'},{id:'wife',label:'Wife'},
           {id:'partner',label:'Partner'},{id:'other',label:'Other'}], false, p.relationship||'girlfriend')}
+        <div class="label" style="margin:18px 0 8px">Fertility mode</div>
+        ${pillGroup('fertilityMode', [
+          {id:'off',label:'Not tracking'},{id:'ttc',label:'Trying to conceive'},{id:'avoid',label:'Avoiding pregnancy'}], false, p.fertilityMode||'off')}
+        <div class="label" style="margin:18px 0 8px">Daily reminder</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button type="button" class="pill ${state.notifEnabled?'active':''}" onclick="toggleNotif()" id="notif-pill">
+            ${state.notifEnabled ? '🔔 ON · DAILY 8 AM' : '🔕 OFF · TAP TO ENABLE'}
+          </button>
+          <span class="label" style="color:rgba(245,236,215,0.55)">Phase-aware tip, once a day.</span>
+        </div>
       </div>
     </details>
 
@@ -1094,6 +1229,10 @@ function navMonth(delta) {
 }
 function dismissAlertNow(id) { dismissAlert(id); render(); }
 function toggleGuide(p) { setState({ guideOpen: state.guideOpen === p ? null : p }); }
+function quickLog(kind, phase) {
+  addLog(kind, phase);
+  render();
+}
 
 let saveTimer = null;
 function flashSaved() {
@@ -1169,8 +1308,92 @@ function confirmClear() {
   }
 }
 
+// ---------- NOTIFICATIONS ----------
+async function toggleNotif() {
+  if (typeof Notification === 'undefined') {
+    alert('This browser does not support notifications.\n\nTip: install the app to your Home Screen (Share → Add to Home Screen) and reopen for full support.');
+    return;
+  }
+  if (state.notifEnabled) {
+    localStorage.setItem(NOTIF_KEY, '0');
+    setState({ notifEnabled: false });
+    return;
+  }
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
+    alert('Notification permission was not granted. Enable it in your browser settings to receive daily reminders.');
+    return;
+  }
+  localStorage.setItem(NOTIF_KEY, '1');
+  setState({ notifEnabled: true });
+  scheduleNotification();
+}
+function notifBody() {
+  const p = state.profile;
+  if (!p?.lastPeriod) return { title: 'BRO CODE', body: 'Open the app and set her last period to unlock today\'s move.' };
+  const day = cycleDay(p);
+  const len = p.cycleLength || 28;
+  const phase = phaseFor(day, len);
+  const tip = pickTip(p, phase, dayInPhase(day, len)) || 'Show up today.';
+  const days = daysToNextPeriod(p);
+  const subtitle = days === 0 ? 'Day 1' : (days === 1 ? 'Period tomorrow' : (PHASE_LABEL[phase] + ' · Day ' + day + '/' + len));
+  return { title: 'BRO CODE · ' + subtitle, body: tip };
+}
+function scheduleNotification() {
+  if (!state.notifEnabled) return;
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const today = new Date().toISOString().slice(0,10);
+  const last = localStorage.getItem(NOTIF_LAST);
+  const now = new Date();
+  const target = new Date(now); target.setHours(8, 0, 0, 0);
+  if (last !== today && now.getHours() >= 8) {
+    try { fireNotification(); } catch {}
+  } else if (last !== today) {
+    const delay = Math.max(1000, target - now);
+    setTimeout(() => { try { fireNotification(); } catch {} }, delay);
+  }
+  const next = new Date(now); next.setDate(next.getDate()+1); next.setHours(8,0,0,0);
+  setTimeout(scheduleNotification, Math.max(60000, next - now));
+}
+function fireNotification() {
+  const today = new Date().toISOString().slice(0,10);
+  if (localStorage.getItem(NOTIF_LAST) === today) return;
+  const { title, body } = notifBody();
+  if (navigator.serviceWorker?.controller) {
+    navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'brocode-daily-'+today }));
+  } else {
+    new Notification(title, { body, icon: 'icon-192.png', tag: 'brocode-daily-'+today });
+  }
+  localStorage.setItem(NOTIF_LAST, today);
+}
+
+// ---------- INSTALL HINT ----------
+function detectInstallHint() {
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isIOS && isSafari && !standalone && localStorage.getItem(INSTALL_DISMISS) !== '1') {
+    state.showInstallHint = true;
+  }
+}
+function dismissInstallHint() {
+  localStorage.setItem(INSTALL_DISMISS, '1');
+  setState({ showInstallHint: false });
+}
+
+// ---------- PWA ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
 // ---------- BOOT ----------
+detectInstallHint();
 render();
+if (state.notifEnabled) scheduleNotification();
 </script>
 </body>
 </html>
