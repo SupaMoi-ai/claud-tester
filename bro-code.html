@@ -12,10 +12,24 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="BRO CODE" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
+  @font-face {
+    font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('fonts/Anton-Regular.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url('fonts/DMSans.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap;
+    src: url('fonts/DMSans.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap;
+    src: url('fonts/DMSans.woff2') format('woff2');
+  }
   :root {
     --red: #C8322C;
     --orange: #E07A4A;
@@ -281,7 +295,19 @@
     max-width: 520px; margin: 0 auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   }
+  .install-hint.update { border-left-color: var(--green); cursor: pointer; }
   .install-hint .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
+
+  /* Offline pill */
+  .offline-pill {
+    display: none; align-items: center;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 0.18em; padding: 3px 9px;
+    border: 1px solid rgba(245,236,215,0.3); border-radius: 999px;
+    color: rgba(245,236,215,0.75); text-transform: uppercase;
+  }
+  .offline-pill.on { display: inline-flex; }
+  .offline-pill::before { content: '●'; color: var(--alert); margin-right: 6px; font-size: 10px; }
 
   /* Stagger entrance */
   .stagger > * { opacity: 0; animation: rise 0.45s ease forwards; }
@@ -930,7 +956,8 @@ let state = {
   showInstallHint: false,
   playsTab: 'ask',
   playsSeed: 0,
-  situation: null
+  situation: null,
+  updateReady: false
 };
 
 function setState(patch) {
@@ -966,6 +993,7 @@ function render() {
         <div class="badge"><span>BC</span></div>
         <div class="name">Bro Code</div>
       </div>
+      <span class="offline-pill" id="offline-pill">OFFLINE · cache</span>
     </header>
     <nav class="tabs">
       <div class="row">
@@ -973,7 +1001,15 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.2 · Know the code</footer>
+    <footer class="app">BRO CODE · v2.3 · Know the code</footer>
+    ${state.updateReady ? `
+      <div class="install-hint update" onclick="applyUpdate()">
+        <div style="flex:1;line-height:1.35">
+          <div class="display" style="color:var(--cream);font-size:14px;letter-spacing:0.08em">NEW VERSION READY</div>
+          <div style="font-size:12px;color:rgba(245,236,215,0.75);margin-top:2px">Tap anywhere on this banner to refresh.</div>
+        </div>
+        <button class="x" onclick="event.stopPropagation(); dismissUpdate()" aria-label="Dismiss">×</button>
+      </div>` : ''}
     ${state.showInstallHint ? `
       <div class="install-hint">
         <div style="flex:1;line-height:1.35">
@@ -984,6 +1020,7 @@ function render() {
       </div>` : ''}
     ${state.showWelcome ? renderWelcome() : ''}
   `;
+  applyOnlineStatus();
 }
 
 function renderWelcome() {
@@ -1784,16 +1821,41 @@ function dismissInstallHint() {
   setState({ showInstallHint: false });
 }
 
+// ---------- ONLINE / OFFLINE ----------
+function applyOnlineStatus() {
+  const pill = document.getElementById('offline-pill');
+  if (!pill) return;
+  pill.classList.toggle('on', !navigator.onLine);
+}
+window.addEventListener('online',  applyOnlineStatus);
+window.addEventListener('offline', applyOnlineStatus);
+
+// ---------- UPDATE PROMPT ----------
+function applyUpdate() { window.location.reload(); }
+function dismissUpdate() { setState({ updateReady: false }); }
+
 // ---------- PWA ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      if (!reg) return;
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            setState({ updateReady: true });
+          }
+        });
+      });
+    }).catch(()=>{});
   });
 }
 
 // ---------- BOOT ----------
 detectInstallHint();
 render();
+applyOnlineStatus();
 if (state.notifEnabled) scheduleNotification();
 </script>
 </body>

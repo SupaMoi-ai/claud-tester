@@ -1,12 +1,14 @@
-// BRO CODE service worker — offline-first for app shell, network-first for fonts.
-const CACHE = 'brocode-v2';
+// BRO CODE service worker — offline-first for the whole app (HTML + fonts + icons).
+const CACHE = 'brocode-v3';
 const SHELL = [
   './',
   './index.html',
   './bro-code.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './fonts/Anton-Regular.woff2',
+  './fonts/DMSans.woff2'
 ];
 
 self.addEventListener('install', e => {
@@ -28,7 +30,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Cache-first for our own shell.
+  // Same-origin: cache-first, fall back to network, fall back to root shell.
   if (url.origin === location.origin) {
     e.respondWith(
       caches.match(req).then(hit => hit || fetch(req).then(res => {
@@ -38,18 +40,6 @@ self.addEventListener('fetch', e => {
         }
         return res;
       }).catch(() => caches.match('./index.html')))
-    );
-    return;
-  }
-
-  // Network-first with cache fallback for Google Fonts.
-  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com') {
-    e.respondWith(
-      fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
-        return res;
-      }).catch(() => caches.match(req))
     );
   }
 });
