@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ParkingType {
+  STREET
+  GARAGE
+  LOT
+  RESIDENT
+  EV
+  DISABLED
+  LOADING
+}
+
+enum PriceType {
+  HOURLY
+  DAILY
+  MONTHLY
+  EVENING
+  WEEKEND
+  FREE
+}
+
+enum ReportType {
+  OCCUPANCY
+  PRICE_CORRECTION
+  RULE_CORRECTION
+  OTHER
+}
+
+enum ImpactLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model ParkingLocation {
+  id                  String                 @id @default(cuid())
+  slug                String                 @unique
+  name                String
+  parkingType         ParkingType
+  latitude            Float
+  longitude           Float
+  capacity            Int?
+  capacityDisabled    Int?
+  capacityCharging    Int?
+  covered             Boolean                @default(false)
+  operator            String?
+  address             String?
+  notes               String?
+  sourceUrl           String?
+  sourceType          String?
+  sourceId            String?
+  lastVerifiedAt      DateTime?
+  confidenceScore     Float                  @default(0.5)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  rules               ParkingRule[]
+  prices              ParkingPrice[]
+  availability        AvailabilityEstimate[]
+  reports             UserReport[]
+
+  @@unique([sourceType, sourceId])
+  @@index([latitude, longitude])
+}
+
+model ParkingRule {
+  id                 String          @id @default(cuid())
+  locationId         String
+  location           ParkingLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  ruleTextOriginal   String
+  ruleTextSimple     String
+  freeWindow         Json?
+  enforcementWindow  Json?
+  maxStayMinutes     Int?
+  permitRequired     Boolean         @default(false)
+  appliesDays        String?
+  sourceUrl          String?
+  lastVerifiedAt     DateTime?
+  createdAt          DateTime        @default(now())
+}
+
+model ParkingPrice {
+  id            String          @id @default(cuid())
+  locationId    String
+  location      ParkingLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  priceType     PriceType
+  amountNok     Float
+  startsAt      String?
+  endsAt        String?
+  appliesDays   String?
+  notes         String?
+  sourceUrl     String?
+  lastVerifiedAt DateTime?
+  createdAt     DateTime        @default(now())
+}
+
+model AvailabilityEstimate {
+  id              String          @id @default(cuid())
+  locationId      String
+  location        ParkingLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  weekday         Int
+  hour            Int
+  occupancyPercent Float
+  confidenceScore Float           @default(0.3)
+  sampleSize      Int             @default(0)
+  trafficPressure Float?
+  createdAt       DateTime        @default(now())
+
+  @@unique([locationId, weekday, hour])
+}
+
+model ParkingEvent {
+  id              String      @id @default(cuid())
+  name            String
+  latitude        Float
+  longitude       Float
+  startsAt        DateTime
+  endsAt          DateTime
+  impactLevel     ImpactLevel
+  expectedPeople  Int?
+  notes           String?
+  sourceUrl       String?
+  createdAt       DateTime    @default(now())
+
+  @@index([startsAt, endsAt])
+}
+
+model LocalTip {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  latitude  Float?
+  longitude Float?
+  sourceUrl String?
+  createdAt DateTime @default(now())
+}
+
+model UserReport {
+  id                 String           @id @default(cuid())
+  locationId         String?
+  location           ParkingLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  reportType         ReportType
+  occupancyPercent   Float?
+  textBody           String?
+  contactEmail       String?
+  clientFingerprint  String?
+  createdAt          DateTime         @default(now())
+
+  @@index([locationId, reportType, createdAt])
+}
