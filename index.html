@@ -54,10 +54,38 @@
   .search li button{display:block;width:100%;text-align:left;background:transparent;border:0;
     padding:8px 12px;font-size:13px;border-radius:0}
   .search li button:hover{background:rgba(28,27,23,.05)}
-  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0;align-items:center}
   .chip{flex:0 0 auto;background:rgba(247,244,236,.95);border:1px solid rgba(28,27,23,.15);
     border-radius:9999px;padding:6px 12px;font-size:12px}
   .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filter-pop{display:flex;align-items:center;gap:8px}
+  .filter-pop > summary{list-style:none;cursor:pointer;background:rgba(247,244,236,.95);
+    border:1px solid rgba(28,27,23,.15);border-radius:9999px;padding:6px 12px;font-size:12px;
+    flex:0 0 auto;white-space:nowrap}
+  .filter-pop > summary::-webkit-details-marker{display:none}
+  .filter-pop[open] > summary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filter-pop > .chips{flex:1 1 auto;margin-left:0}
+  .filter-pop:not([open]) > .chips{display:none}
+  .nearme{flex:0 0 auto;background:rgba(247,244,236,.95);border:1px solid rgba(28,27,23,.15);
+    border-radius:9999px;padding:6px 12px;font-size:12px;cursor:pointer}
+  .nearme.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  #pinnedBar{position:fixed;top:env(safe-area-inset-top);left:0;right:0;z-index:25;
+    background:var(--zone-free);color:#fff;padding:8px 14px;font-size:13px;display:none;
+    align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
+    box-shadow:0 1px 0 rgba(0,0,0,.06)}
+  #pinnedBar .name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
+  #pinnedBar .left{font-variant-numeric:tabular-nums;font-size:12px;opacity:.95}
+  #pinnedBar.shown{display:flex}
+  body.pinned header.app{top:calc(env(safe-area-inset-top) + 36px)}
+  body.pinned .legend{top:calc(154px + env(safe-area-inset-top))}
+
+  .pulse-ring{animation:parkingPulse 1.8s ease-out infinite}
+  @keyframes parkingPulse{
+    0%{stroke-opacity:.85;r:9}
+    100%{stroke-opacity:0;r:30}
+  }
+  .pulse-ring-static{stroke-opacity:.45}
 
   .legend{position:fixed;top:calc(118px + env(safe-area-inset-top));left:12px;z-index:10;
     background:rgba(247,244,236,.95);border:1px solid rgba(28,27,23,.1);
@@ -73,12 +101,17 @@
   section.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);
     border-top:1px solid rgba(28,27,23,.1);border-top-left-radius:18px;border-top-right-radius:18px;
     transition:height .28s ease-out;padding-bottom:env(safe-area-inset-bottom)}
-  .sheet[data-snap=peek]{height:14vh}
+  .sheet[data-snap=peek]{height:24vh}
   .sheet[data-snap=list]{height:58vh}
   .sheet[data-snap=detail]{height:92vh}
-  .handle{width:100%;background:transparent;border:0;padding:8px 0;display:flex;justify-content:center}
+  .handle{width:100%;background:transparent;border:0;padding:16px 0 10px;display:flex;justify-content:center;min-height:48px}
   .handle .bar{display:block;width:48px;height:6px;border-radius:9999px;background:rgba(28,27,23,.2)}
-  .sheet-body{height:calc(100% - 28px);overflow-y:auto;padding:0 12px 24px}
+  .sheet-body{height:calc(100% - 48px);overflow-y:auto;padding:0 12px 24px}
+  .more{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(28,27,23,.6);
+    background:transparent;border:0;padding:6px 4px;margin-top:6px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .pin-toggle{margin-top:8px;background:transparent;border:1px solid rgba(28,27,23,.2);
+    border-radius:9999px;padding:8px 14px;font-size:12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+  .pin-toggle.on{background:var(--zone-free);color:#fff;border-color:var(--zone-free)}
 
   .summary{font-size:11px;color:rgba(28,27,23,.6);padding:0 4px 8px}
   .list{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
@@ -121,6 +154,7 @@
 </head>
 <body>
 <div id="errorOverlay"></div>
+<div id="pinnedBar" role="button" tabindex="0"></div>
 <div id="map"></div>
 
 <header class="app">
@@ -131,11 +165,17 @@
       <ul id="searchResults" hidden></ul>
     </div>
   </div>
-  <div class="chips" id="filters">
-    <button class="chip" data-key="free">Free now</button>
-    <button class="chip" data-key="ev">EV charge</button>
-    <button class="chip" data-key="covered">Covered</button>
-    <button class="chip" data-key="disabled">Disabled</button>
+  <div class="row">
+    <details class="filter-pop">
+      <summary>Filter</summary>
+      <div class="chips" id="filters">
+        <button class="chip" data-key="free">Free now</button>
+        <button class="chip" data-key="ev">EV charge</button>
+        <button class="chip" data-key="covered">Covered</button>
+        <button class="chip" data-key="disabled">Disabled</button>
+      </div>
+    </details>
+    <button class="nearme" id="nearMeBtn" type="button">Near me</button>
   </div>
 </header>
 
@@ -148,7 +188,7 @@
 
 <div class="offline" id="offline">Offline</div>
 
-<section class="sheet" data-snap="list" id="sheet">
+<section class="sheet" data-snap="peek" id="sheet">
   <button class="handle" id="handle" aria-label="Toggle sheet"><span class="bar"></span></button>
   <div class="sheet-body" id="sheetBody"></div>
 </section>
@@ -451,16 +491,59 @@ function clearReports(){localStorage.removeItem("parking-reports")}
 
 /* ====== State ====== */
 const state={
-  origin:null,           // {lat,lng,label}
+  origin:null,                                             // {lat,lng,label}
   filters:new Set(),
   selectedSlug:null,
-  sheetSnap:"list",      // peek | list | detail
+  sheetSnap:"peek",                                        // peek | list | detail
+  pinnedSlug:localStorage.getItem("parking-pinned")||null,
+  watchNearby:localStorage.getItem("parking-watch-near")==="1",
+  userPos:null,                                            // {lat,lng} from geolocation
 };
+
+/* ====== Notify ====== */
+const notify={
+  supported:typeof window!=="undefined" && "Notification" in window,
+  asked:false,
+  async ensurePermission(){
+    if(!this.supported)return false;
+    if(Notification.permission==="granted")return true;
+    if(Notification.permission==="denied")return false;
+    if(this.asked)return false;
+    this.asked=true;
+    try{const r=await Notification.requestPermission();return r==="granted"}catch{return false}
+  },
+  fire(title,body,tag){
+    if(!this.supported||Notification.permission!=="granted")return;
+    try{new Notification(title,{body,tag})}catch{}
+  }
+};
+
+/* ====== Helpers used by notifications ====== */
+function nextFreeStart(rules,now){
+  let best=null;
+  for(const r of rules){
+    if(!r.freeWindow)continue;
+    if(windowApplies(r.freeWindow,now))continue;
+    const t=nextBoundary(r.freeWindow,now,"start");
+    if(t&&(!best||t<best))best=t;
+  }
+  return best;
+}
+function getNotifiedFree(){try{return JSON.parse(localStorage.getItem("parking-notified-free")||"{}")}catch{return{}}}
+function setNotifiedFree(map){localStorage.setItem("parking-notified-free",JSON.stringify(map))}
+function getNotifiedNear(){try{return JSON.parse(localStorage.getItem("parking-notified-near")||"{}")}catch{return{}}}
+function setNotifiedNear(map){localStorage.setItem("parking-notified-near",JSON.stringify(map))}
 
 /* ====== Map (Leaflet — works on every iOS/Android phone, no WebGL needed) ====== */
 let map=null;
 const markersBySlug={};
+const prevZoneStatus={};
+const newlyFreeUntil={};
+const pulseBySlug={};
+const freeStartTimeouts={};
 let originMarker=null;
+let userPosMarker=null;
+let geoWatchId=null;
 
 function toLatLngRing(ring){return ring.map(([lng,lat])=>[lat,lng])}
 
@@ -509,6 +592,7 @@ function colorFor(status){
 function pushItemsToMap(){
   if(!map)return;
   const now=new Date();
+  const nowMs=now.getTime();
   for(const loc of LOCATIONS){
     const occ=estimateOccupancy(loc,now);
     const status=currentZoneStatus(loc,occ,now);
@@ -533,6 +617,49 @@ function pushItemsToMap(){
         fillColor:color,
       });
     }
+
+    // Newly-free pulse: detect a transition INTO free
+    const prev=prevZoneStatus[loc.slug];
+    if(prev && prev!=="free" && status==="free"){
+      newlyFreeUntil[loc.slug]=nowMs+120_000;
+    }
+    prevZoneStatus[loc.slug]=status;
+
+    // Manage pulse layer
+    const expiresAt=newlyFreeUntil[loc.slug];
+    if(expiresAt && nowMs<expiresAt){
+      if(!pulseBySlug[loc.slug]){
+        const ring=L.circleMarker([loc.latitude,loc.longitude],{
+          radius:9,color:"#3A8A4A",weight:2,fill:false,opacity:0.85,
+          interactive:false,className:"pulse-ring",
+        }).addTo(map);
+        pulseBySlug[loc.slug]=ring;
+      }
+    }else if(pulseBySlug[loc.slug]){
+      map.removeLayer(pulseBySlug[loc.slug]);
+      delete pulseBySlug[loc.slug];
+      delete newlyFreeUntil[loc.slug];
+    }
+
+    // Schedule "Free in 1 min" notification
+    const start=nextFreeStart(loc.rules,now);
+    if(start){
+      const fireAt=start.getTime()-60_000;
+      const startKey=start.toISOString();
+      const notified=getNotifiedFree();
+      const existing=freeStartTimeouts[loc.slug];
+      if(fireAt>nowMs && notified[loc.slug]!==startKey){
+        if(!existing || existing.key!==startKey){
+          if(existing)clearTimeout(existing.timer);
+          const delay=Math.min(fireAt-nowMs, 2_147_000_000); // cap setTimeout
+          const timer=setTimeout(()=>{
+            notify.fire("Free parking starts in 1 min", loc.name, "free-"+loc.slug);
+            const n=getNotifiedFree(); n[loc.slug]=startKey; setNotifiedFree(n);
+          },delay);
+          freeStartTimeouts[loc.slug]={timer,key:startKey};
+        }
+      }
+    }
   }
   const origin=state.origin;
   if(originMarker){map.removeLayer(originMarker);originMarker=null}
@@ -541,6 +668,16 @@ function pushItemsToMap(){
       radius:6,color:"#F7F4EC",weight:2,fillColor:"#1C1B17",fillOpacity:1,
     }).addTo(map);
   }
+  if(state.userPos){
+    if(!userPosMarker){
+      userPosMarker=L.circleMarker([state.userPos.lat,state.userPos.lng],{
+        radius:7,color:"#F7F4EC",weight:2,fillColor:"#1C1B17",fillOpacity:1,interactive:false,
+      }).addTo(map);
+    }else{
+      userPosMarker.setLatLng([state.userPos.lat,state.userPos.lng]);
+    }
+  }
+  renderPinnedBar();
 }
 
 /* ====== Ranked list ====== */
@@ -583,6 +720,17 @@ function renderSheet(){
 function renderList(){
   const now=new Date();
   const items=rankedItems(now);
+  if(state.sheetSnap==="peek"){
+    const top=items[0];
+    if(!top){
+      return `<div class="summary">No parking found</div>`;
+    }
+    return `
+      <div class="summary">Best pick now</div>
+      <ul class="list">${renderCard(top,now)}</ul>
+      <button class="more" id="seeMore">Show all ${items.length} ↑</button>
+    `;
+  }
   const summary=`${items.length} parking ${items.length===1?"spot":"spots"} nearby`;
   const cards=items.map(it=>renderCard(it,now)).join("");
   return `
@@ -676,6 +824,9 @@ function renderDetail(slug){
             ${walkM!=null?` · ${walkingMin(walkM)} min walk`:""}
           </div>
           ${countdown?`<div style="margin-top:4px;font-size:13px">${countdown}</div>`:""}
+          <button id="pinToggle" type="button" class="pin-toggle ${state.pinnedSlug===slug?"on":""}">
+            ${state.pinnedSlug===slug?"✓ Reminding while free":"🔔 Remind me while free"}
+          </button>
         </div>
       </div>
       <p class="disclaimer">Always check signs on site. Parking rules may change.</p>
@@ -726,10 +877,25 @@ function wireListEvents(){
   document.querySelectorAll(".card[data-slug]").forEach(btn=>{
     btn.addEventListener("click",()=>selectSlug(btn.dataset.slug));
   });
+  document.getElementById("seeMore")?.addEventListener("click",()=>{
+    state.sheetSnap="list"; applySheet(); renderSheet();
+  });
 }
 function wireDetailEvents(){
   document.getElementById("backBtn")?.addEventListener("click",()=>{
     state.sheetSnap="list"; state.selectedSlug=null; applySheet(); renderSheet(); pushItemsToMap();
+  });
+  document.getElementById("pinToggle")?.addEventListener("click",async ()=>{
+    if(state.pinnedSlug===state.selectedSlug){
+      state.pinnedSlug=null; localStorage.removeItem("parking-pinned");
+      toast("Reminder off");
+    }else{
+      const ok=await notify.ensurePermission();
+      state.pinnedSlug=state.selectedSlug;
+      localStorage.setItem("parking-pinned",state.pinnedSlug);
+      toast(ok?"Reminding while free":"Pinned (enable notifications for alerts)");
+    }
+    renderSheet(); renderPinnedBar();
   });
   document.querySelectorAll(".reportRow button").forEach(btn=>{
     btn.addEventListener("click",()=>{
@@ -748,6 +914,77 @@ function selectSlug(slug){
 }
 function applySheet(){document.getElementById("sheet").dataset.snap=state.sheetSnap}
 
+/* ====== Pinned bar ====== */
+function renderPinnedBar(){
+  const bar=document.getElementById("pinnedBar");
+  const slug=state.pinnedSlug;
+  const loc=slug?LOCATIONS.find(l=>l.slug===slug):null;
+  const now=new Date();
+  if(!loc || !isFreeNow(loc.rules,now)){
+    bar.classList.remove("shown"); document.body.classList.remove("pinned"); return;
+  }
+  const fu=freeUntil(loc.rules,now);
+  const remain=fu?fmtRemain(fu,now):"";
+  bar.innerHTML=`<span class="name">🅿 ${escapeHtml(loc.name)}</span><span class="left">Free ${remain} left</span>`;
+  bar.classList.add("shown"); document.body.classList.add("pinned");
+}
+const pinnedBarEl=document.getElementById("pinnedBar");
+let pinPressTimer=null;
+pinnedBarEl.addEventListener("click",()=>{ if(state.pinnedSlug){ selectSlug(state.pinnedSlug) } });
+pinnedBarEl.addEventListener("touchstart",()=>{ pinPressTimer=setTimeout(()=>{
+  state.pinnedSlug=null; localStorage.removeItem("parking-pinned"); renderPinnedBar(); renderSheet(); toast("Unpinned");
+},700) },{passive:true});
+pinnedBarEl.addEventListener("touchend",()=>clearTimeout(pinPressTimer));
+pinnedBarEl.addEventListener("touchmove",()=>clearTimeout(pinPressTimer));
+
+/* ====== Near me (geofence) ====== */
+const nearMeBtn=document.getElementById("nearMeBtn");
+function applyNearMeBtn(){nearMeBtn.classList.toggle("on",state.watchNearby)}
+applyNearMeBtn();
+function startGeoWatch(){
+  if(!("geolocation" in navigator)) return;
+  geoWatchId=navigator.geolocation.watchPosition(
+    pos=>{
+      state.userPos={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      pushItemsToMap();
+      checkNearby();
+    },
+    err=>{ toast("Location: "+err.message); },
+    {enableHighAccuracy:false,maximumAge:30000,timeout:15000}
+  );
+}
+function stopGeoWatch(){
+  if(geoWatchId!=null){navigator.geolocation.clearWatch(geoWatchId);geoWatchId=null}
+  state.userPos=null;
+  if(userPosMarker){map.removeLayer(userPosMarker);userPosMarker=null}
+}
+function checkNearby(){
+  if(!state.userPos)return;
+  const now=Date.now();
+  const seen=getNotifiedNear();
+  for(const loc of LOCATIONS){
+    const d=haversine(state.userPos.lat,state.userPos.lng,loc.latitude,loc.longitude);
+    if(d>150)continue;
+    const last=seen[loc.slug]||0;
+    if(now-last < 30*60*1000) continue;
+    notify.fire("Parking nearby", `${loc.name} · ${Math.round(d)} m away`, "near-"+loc.slug);
+    seen[loc.slug]=now;
+  }
+  setNotifiedNear(seen);
+}
+nearMeBtn.addEventListener("click",async ()=>{
+  if(state.watchNearby){
+    state.watchNearby=false; localStorage.setItem("parking-watch-near","0");
+    stopGeoWatch(); applyNearMeBtn(); toast("Near me off");
+  }else{
+    const ok=await notify.ensurePermission();
+    state.watchNearby=true; localStorage.setItem("parking-watch-near","1");
+    startGeoWatch(); applyNearMeBtn();
+    toast(ok?"Watching nearby":"Tracking on (enable notifications for alerts)");
+  }
+});
+if(state.watchNearby)startGeoWatch();
+
 /* ====== Filters ====== */
 document.getElementById("filters").addEventListener("click",e=>{
   const t=e.target.closest(".chip"); if(!t)return;
@@ -765,15 +1002,15 @@ handle.addEventListener("click",()=>{
   if(state.sheetSnap==="peek")state.sheetSnap="list";
   else if(state.sheetSnap==="list")state.sheetSnap="detail";
   else state.sheetSnap="list";
-  applySheet();
+  applySheet(); renderSheet();
 });
 handle.addEventListener("touchstart",e=>{dragStart=e.touches[0]?.clientY??null},{passive:true});
 handle.addEventListener("touchend",e=>{
   const end=e.changedTouches[0]?.clientY??null;
   if(dragStart==null||end==null)return;
   const dy=end-dragStart; dragStart=null;
-  if(dy<-30){state.sheetSnap=state.sheetSnap==="peek"?"list":"detail";applySheet();}
-  else if(dy>30){state.sheetSnap=state.sheetSnap==="detail"?"list":"peek";applySheet();}
+  if(dy<-30){state.sheetSnap=state.sheetSnap==="peek"?"list":"detail";applySheet();renderSheet();}
+  else if(dy>30){state.sheetSnap=state.sheetSnap==="detail"?"list":"peek";applySheet();renderSheet();}
 });
 
 /* ====== Search (Nominatim, Rogaland-bounded) ====== */
@@ -846,12 +1083,12 @@ window.addEventListener("offline",updateOffline);
 updateOffline();
 
 /* ====== Time tick: repaint zones every 60s, re-render list every 30s ====== */
-setInterval(()=>{pushItemsToMap();if(state.sheetSnap!=="detail")renderSheet()},60000);
-setInterval(()=>{if(state.sheetSnap!=="detail")renderSheet()},30000);
+setInterval(()=>{pushItemsToMap();if(state.sheetSnap!=="detail")renderSheet();renderPinnedBar()},60000);
+setInterval(()=>{if(state.sheetSnap!=="detail")renderSheet();renderPinnedBar()},15000);
 
 /* ====== Boot ====== */
 try{ initMap(); }catch(e){ if(window.__appBootError)window.__appBootError("Boot error: <code>"+(e&&e.message||e)+"</code>"); }
-try{ renderSheet(); }catch(e){ if(window.__appBootError)window.__appBootError("Render error: <code>"+(e&&e.message||e)+"</code>"); }
+try{ renderSheet(); renderPinnedBar(); }catch(e){ if(window.__appBootError)window.__appBootError("Render error: <code>"+(e&&e.message||e)+"</code>"); }
 </script>
 </body>
 </html>
