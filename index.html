@@ -27,8 +27,9 @@
   a{color:inherit}
   .no-scrollbar::-webkit-scrollbar{display:none}
   .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-  #map{position:fixed;inset:0;background:#e6e1d3}
-  .leaflet-container{background:#e6e1d3;font-family:inherit}
+  #map{position:fixed;inset:0;background:#EDEDED}
+  .leaflet-container{background:#EDEDED;font-family:inherit}
+  .leaflet-tile-pane{filter:grayscale(1) contrast(.95) brightness(1.04)}
   .leaflet-control-attribution{background:rgba(247,244,236,.85)!important;color:#1C1B17!important;font-size:10px!important}
   .leaflet-control-attribution a{color:#1C1B17}
   .leaflet-bar a{background:rgba(247,244,236,.95);color:#1C1B17;border-color:rgba(28,27,23,.15)}
@@ -478,14 +479,15 @@ function initMap(){
       attributionControl:true,
       tap:true,
     });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",{
       maxZoom:19,
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains:"abcd",
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       crossOrigin:true,
     }).addTo(map);
 
     L.polygon([toLatLngRing(WORLD_RING),toLatLngRing(ROGALAND_POLY)],{
-      stroke:false,fillColor:"#1C1B17",fillOpacity:0.55,interactive:false,
+      stroke:false,fillColor:"#1C1B17",fillOpacity:0.32,interactive:false,
     }).addTo(map);
 
     pushItemsToMap();
