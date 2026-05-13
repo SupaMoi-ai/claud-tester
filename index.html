@@ -98,6 +98,13 @@
   .offline{position:fixed;bottom:58vh;right:12px;z-index:20;background:rgba(247,244,236,.95);
     border:1px solid rgba(28,27,23,.15);border-radius:9999px;padding:4px 10px;font-size:11px;display:none}
 
+  #versionStamp{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom) + 6px);
+    z-index:5;font-size:9px;color:rgba(28,27,23,.55);
+    background:rgba(247,244,236,.7);padding:2px 7px;border-radius:9999px;
+    font-variant-numeric:tabular-nums;pointer-events:none;letter-spacing:.02em}
+  .sheet[data-snap=list] ~ #versionStamp,
+  .sheet[data-snap=detail] ~ #versionStamp{display:none}
+
   section.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);
     border-top:1px solid rgba(28,27,23,.1);border-top-left-radius:18px;border-top-right-radius:18px;
     transition:height .28s ease-out;padding-bottom:env(safe-area-inset-bottom)}
@@ -1090,5 +1097,6 @@ setInterval(()=>{if(state.sheetSnap!=="detail")renderSheet();renderPinnedBar()},
 try{ initMap(); }catch(e){ if(window.__appBootError)window.__appBootError("Boot error: <code>"+(e&&e.message||e)+"</code>"); }
 try{ renderSheet(); renderPinnedBar(); }catch(e){ if(window.__appBootError)window.__appBootError("Render error: <code>"+(e&&e.message||e)+"</code>"); }
 </script>
+<div id="versionStamp">v 0.4 · 2026-05-13</div>
 </body>
 </html>
