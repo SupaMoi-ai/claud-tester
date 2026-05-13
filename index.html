@@ -29,7 +29,7 @@
   .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
   #map{position:fixed;inset:0;background:#EDEDED}
   .leaflet-container{background:#EDEDED;font-family:inherit}
-  .leaflet-tile-pane{filter:grayscale(1) contrast(.95) brightness(1.04)}
+  .leaflet-tile-pane{filter:grayscale(1) contrast(.78) brightness(1.12);opacity:.75}
   .leaflet-control-attribution{background:rgba(247,244,236,.85)!important;color:#1C1B17!important;font-size:10px!important}
   .leaflet-control-attribution a{color:#1C1B17}
   .leaflet-bar a{background:rgba(247,244,236,.95);color:#1C1B17;border-color:rgba(28,27,23,.15)}
@@ -479,12 +479,18 @@ function initMap(){
       attributionControl:true,
       tap:true,
     });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",{
+    const tiles=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
       maxZoom:19,
-      subdomains:"abcd",
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       crossOrigin:true,
     }).addTo(map);
+    let tileErrCount=0;
+    tiles.on("tileerror",(e)=>{
+      tileErrCount++;
+      if(tileErrCount===5 && window.__appBootError){
+        window.__appBootError("Map tiles aren't loading. Check phone network or a content blocker. URL: <code>"+(e.tile&&e.tile.src||"")+"</code>");
+      }
+    });
 
     L.polygon([toLatLngRing(WORLD_RING),toLatLngRing(ROGALAND_POLY)],{
       stroke:false,fillColor:"#1C1B17",fillOpacity:0.32,interactive:false,
