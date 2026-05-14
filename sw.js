@@ -1,9 +1,10 @@
-// BRO CODE service worker — offline-first for the whole app (HTML + fonts + icons).
-const CACHE = 'brocode-v4';
+// BRO CODE service worker — network-first for HTML, cache-first for static assets.
+const CACHE = 'brocode-v5';
 const SHELL = [
   './',
   './index.html',
   './bro-code.html',
+  './app.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -29,19 +30,37 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
 
-  // Same-origin: cache-first, fall back to network, fall back to root shell.
-  if (url.origin === location.origin) {
+  const isHTML = req.mode === 'navigate'
+    || (req.headers.get('accept') || '').includes('text/html')
+    || /\.html?$/.test(url.pathname)
+    || url.pathname.endsWith('/');
+
+  if (isHTML) {
+    // Network-first for HTML so updates ship instantly. Fall back to cache only offline.
     e.respondWith(
-      caches.match(req).then(hit => hit || fetch(req).then(res => {
-        if (res && res.status === 200 && res.type === 'basic') {
+      fetch(req).then(res => {
+        if (res && res.status === 200) {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
         }
         return res;
-      }).catch(() => caches.match('./index.html')))
+      }).catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
     );
+    return;
   }
+
+  // Cache-first for static assets (fonts, icons, manifest).
+  e.respondWith(
+    caches.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res && res.status === 200 && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
+      }
+      return res;
+    }).catch(() => caches.match('./index.html')))
+  );
 });
 
 self.addEventListener('notificationclick', e => {
@@ -51,3 +70,4 @@ self.addEventListener('notificationclick', e => {
     if (clients.openWindow) return clients.openWindow('./');
   }));
 });
+
