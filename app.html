@@ -335,88 +335,88 @@ const PHASE_COLOR = { menstrual:'#C8322C', follicular:'#3DAA6A', ovulation:'#E8B
 const PHASE_INIT  = { menstrual:'M', follicular:'F', ovulation:'O', luteal:'L' };
 const PHASE_EMOJI = { menstrual:'🩸', follicular:'🌱', ovulation:'⭐', luteal:'🌙' };
 const PHASE_HERO  = {
-  menstrual: "She's in recovery mode. Be the one who shows up.",
-  follicular:"Energy is rising. Match it, support it, enjoy it.",
-  ovulation: "Peak power. Peak you. This is the superpower window.",
-  luteal:    "She's reading everything. Be someone worth reading.",
+  menstrual: "Bro, she's in recovery mode. Be the one who shows up.",
+  follicular:"Brooooo, her energy's climbing. Match it, support it, ride the wave.",
+  ovulation: "Bro listen — peak window. Peak her. This is the superpower week.",
+  luteal:    "Psst bro — she's reading everything. Be someone worth reading.",
 };
 const PHASE_MOOD = { menstrual:'Tired', follicular:'Rising', ovulation:'Peak', luteal:'Introspective' };
 
 const TIPS = {
   menstrual: {
     early: [
-      "Go get her favorite snacks right now. Don't ask, just do it.",
-      "Run her a hot bath tonight. Have towels ready.",
-      "Take over dinner. Completely. Don't ask what she wants.",
-      "Top up the heating pad. Make sure ibuprofen is within reach.",
-      "Cancel anything optional this week. Make space for rest."
+      "Bro, go get her favorite snacks right now. Don't ask, just do it.",
+      "Brooooo, run her a hot bath tonight. Towels ready. Phone on silent.",
+      "Psst bro — take over dinner. Completely. Don't ask what she wants.",
+      "Bro listen — top up the heating pad. Make sure ibuprofen is within reach.",
+      "Real talk bro, cancel anything optional this week. Make space for rest."
     ],
     late: [
-      "She's coming out of the heavy days. Plan something small to look forward to.",
-      "Check in tonight. 'How are you feeling?' and actually listen.",
-      "Energy is returning. Suggest a low-key walk together.",
-      "Make her the meal she always asks for."
+      "Bro, she's coming out of the heavy days. Plan something small to look forward to.",
+      "Psst bro — check in tonight. 'How are you feeling?' and actually listen.",
+      "Brooooo, energy's coming back. Suggest a low-key walk together.",
+      "Bro, make her the meal she always asks for. Don't announce it. Just do."
     ]
   },
   follicular: {
     early: [
-      "Energy is climbing. Suggest something fun for the weekend.",
-      "Plan a date - pick the place, pick the time, just tell her.",
-      "She's open to new things this week. Suggest one."
+      "Brooooo, energy's climbing. Suggest something fun for the weekend.",
+      "Bro, plan a date. Pick the place, pick the time, just tell her.",
+      "Psst bro — she's open to new things this week. Suggest one. Anything."
     ],
     late: [
-      "Match her momentum. If she's planning, plan with her.",
-      "Hype her up about the project she keeps mentioning.",
-      "Cook together tonight. It's the energy match she wants."
+      "Bro listen — match her momentum. If she's planning, plan with her.",
+      "Real talk bro, hype her up about the project she keeps mentioning.",
+      "Brooooo, cook together tonight. It's the energy match she wants."
     ]
   },
   ovulation: {
     early: [
-      "Tell her she's stunning today. Mean it.",
-      "Initiate intimacy. She wants to be desired right now.",
-      "Big conversations land easy this week. Have the one you've been avoiding."
+      "Bro, tell her she looks incredible today. Mean it. Be specific.",
+      "Psst bro — initiate. She wants to be desired right now.",
+      "Bro listen — big conversations land easy this week. Have the one you've been avoiding."
     ],
     late: [
-      "Peak window. Plan the dinner you keep saying you will.",
-      "She's confident - back her loudly in front of others.",
-      "Capture this energy. Photo, memory, moment. She'll appreciate it later."
+      "Brooooo, peak window. Plan the dinner you keep saying you will.",
+      "Bro, she's confident this week. Back her loudly in front of others.",
+      "Real talk bro — capture this energy. Photo, memory, moment. Future-you wants it."
     ]
   },
   luteal: {
     early: [
-      "Cozy mode starts. Less plans, more presence.",
-      "Order in tonight. Pick the comfort food. Surprise her.",
-      "Notice the small stuff. Compliment something specific."
+      "Psst bro — cozy mode starts. Less plans, more presence.",
+      "Bro, order in tonight. Pick the comfort food. Surprise her.",
+      "Brooooo, notice the small stuff. Compliment something specific."
     ],
     late: [
-      "Late luteal. She's reading everything you do. Be steady.",
-      "No big discussions. No big surprises. Just presence.",
-      "Get the supplies ready. Period is close. Don't make her ask.",
-      "Tonight: blanket, her show, no phone. Just be there."
+      "Bro listen — late luteal. She's reading everything you do. Be steady.",
+      "Real talk bro, no big discussions. No big surprises. Just presence.",
+      "Bro, get the supplies ready. Period is close. Don't make her ask.",
+      "Psst bro — tonight: blanket, her show, no phone. Just be there."
     ]
   }
 };
 
 const ALERTS = {
-  P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:'Stock up on supplies. Plan something cozy.', icon:'🚨' },
-  P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Get ibuprofen, heating pad, her favorites.', icon:'🚨' },
-  P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Be extra patient. No big discussions tonight.', icon:'🚨' },
-  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'She needs you. Go check on her.', icon:'🩸' },
-  OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"She's at her peak. Match that energy.", icon:'⭐' },
-  LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Cozy mode. Less plans, more presence.', icon:'🌙' }
+  P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:"Bro, stock up. Ibuprofen, snacks, heating pad. Don't make her ask.", icon:'🚨' },
+  P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Brooooo, get the supplies in the house today. Future-you will thank you.', icon:'🚨' },
+  P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Psst bro — patience mode tonight. No big talks. Just be present.', icon:'🚨' },
+  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'Bro. She needs you. Go check on her right now.', icon:'🩸' },
+  OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"Bro listen — peak window. Match her energy. Plan the thing.", icon:'⭐' },
+  LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Real talk bro — cozy mode begins. Less plans, more presence.', icon:'🌙' }
 };
 
 const RULES = [
-  'Never say "Are you on your period?" as an explanation for anything.',
-  'Her pain is real. Always. Full stop.',
-  'Acts of service speak louder than words during hard days.',
-  'Validation before solutions. Always.',
-  'Track the cycle. Know it before she has to tell you.',
-  'Food in the house = love language. Learn her favorites.',
-  'Never compare phases: "You were fine last week." Dead wrong.',
-  'Silence is sometimes the best answer. Learn when.',
-  'Plan ahead. Knowing her cycle is your secret weapon.',
-  "She doesn't need you to fix it. She needs you to show up."
+  'Bro, never say "are you on your period?" as an explanation for anything. Ever.',
+  'Brooooo, her pain is real. Always. Full stop.',
+  'Psst bro — acts of service speak louder than words on the hard days.',
+  'Bro listen — validation before solutions. Always.',
+  'Real talk bro, track the cycle. Know it before she has to tell you.',
+  'Bro, food in the house = love language. Learn her favorites.',
+  'Brooooo, never compare phases. "You were fine last week" is the killshot. Don\'t.',
+  'Psst bro — silence is sometimes the best answer. Learn when.',
+  'Bro listen — plan ahead. Knowing her cycle is your secret weapon.',
+  "Real talk bro, she doesn't need you to fix it. She needs you to show up."
 ];
 
 const PHRASE_BANK = [
@@ -437,6 +437,37 @@ const RED_LIST = [
   { phrase:"Just relax", why:"She's not choosing to feel this way." },
   { phrase:"Other women don't make this big a deal", why:"Never compare her to other women." },
   { phrase:"I can't say anything right", why:"This makes it about you." }
+];
+
+const BRO_TRUTHS = [
+  "Bro, every guy who's ever loved a woman has been here. You're not failing — you're paying attention.",
+  "Brooooo, her brain literally runs different software for two weeks a month. This is biology, not you.",
+  "Psst bro — she'll feel like a totally different person in 72 hours. Hold the line.",
+  "Bro, the fact that you're using this app puts you in the top 5%. Most guys never even Google this.",
+  "Real talk bro — you don't have to solve it. 'I'm here' is the whole answer.",
+  "Bro listen — you can't outsmart estrogen. Nobody has. Stop trying.",
+  "Brooooo, the worst possible move is silence + distance. Skip that one and you're already winning.",
+  "Psst bro — she remembers what you DID, not what you said. Move forward, not sideways.",
+  "Bro, you're allowed to be tired too. Refuel before you're running on empty.",
+  "Brooooo, ovulation week she's either gonna fall in love with you again or remember she could do better. Be there. Make it the first one.",
+  "Real talk bro — saying 'are you on your period' is gasoline on a candle. Just don't.",
+  "Bro, the period IS coming. It's a calendar. Don't act surprised every 28 days.",
+  "Psst bro — being a great partner doesn't mean disappearing. Take your guy time. Come back better.",
+  "Bro listen — late luteal isn't her being mean. It's her bullshit detector at max. Adjust.",
+  "Brooooo, you don't have to be perfect. You have to be there. That's 80% of the gig.",
+  "Bro, validation > solutions. Always. Even when your brain is screaming 'BUT I COULD FIX IT'. Sit on it.",
+  "Psst bro — if you're stressed reading her, take a breath. She's not your enemy. The clock isn't running.",
+  "Bro, the small stuff is the big stuff. Heating pad on the couch before she asks = elite move.",
+  "Real talk bro — she'll forgive a lot if you actually apologize. She'll forgive nothing if you don't.",
+  "Brooooo, you're not crazy. The dynamic IS different week to week. Now you have a map.",
+  "Bro, three things you control: what you bring home, how you listen, how you show up. That's the whole job.",
+  "Psst bro — your job isn't to never mess up. It's to repair faster than you mess up. Get good at the repair.",
+  "Bro listen — your nervous system is a tool. Slow your voice. Lower your shoulders. She'll mirror it.",
+  "Real talk bro, you're not going to learn this overnight. You learn it over years. You're early. Be patient with yourself.",
+  "Brooooo, the resentment you feel for taking care of her — pause. Did she ask? Or did you assume? Half the time it's the second one.",
+  "Bro, sex isn't a thermometer. Some weeks it's hot, some weeks it's a hand on her back. Both count.",
+  "Psst bro — checking in costs nothing. 'How are you, really?' once a day. Watch the difference.",
+  "Bro, the version of you that pays attention is the version she fell for. Be that guy more often."
 ];
 
 const CONVERSATIONS = {
@@ -468,33 +499,33 @@ const CONVERSATIONS = {
 
 const DATES = {
   menstrual: [
-    "Cancel everything. Build a fort. Her show, your job: snacks.",
-    "Order in from her favorite place. Run her a bath after.",
-    "Movie night, low lights, weighted blanket. No talking required."
+    "Bro, cancel everything. Build a fort. Her show, your job: snacks.",
+    "Brooooo, order in from her favorite place. Run her a bath after.",
+    "Psst bro — movie night, low lights, weighted blanket. No talking required."
   ],
   follicular: [
-    "Try the new place you've both been curious about.",
-    "Saturday hike + coffee shop after. Fresh-energy match.",
-    "Cook something neither of you has made before. Together."
+    "Bro listen — try the new place you've both been curious about.",
+    "Real talk bro, Saturday hike + coffee shop after. Fresh-energy match.",
+    "Bro, cook something neither of you has made before. Together."
   ],
   ovulation: [
-    "The dinner reservation you keep delaying. Tonight.",
-    "Dress up. Go out. Take a photo. She wants the memory.",
-    "Drinks somewhere with a view. Have the real conversation."
+    "Brooooo, the dinner reservation you keep delaying. Tonight.",
+    "Psst bro — dress up. Go out. Take a photo. She wants the memory.",
+    "Bro, drinks somewhere with a view. Have the real conversation."
   ],
   luteal: [
-    "Order in. Same couch. Her pick. Phone face-down.",
-    "Cozy dinner at home. Light a candle. Make it intentional.",
-    "Hot chocolate + a walk if the weather's right. Low stakes."
+    "Bro, order in. Same couch. Her pick. Phone face-down.",
+    "Brooooo, cozy dinner at home. Light a candle. Make it intentional.",
+    "Psst bro — hot chocolate + a walk if the weather's right. Low stakes."
   ]
 };
 
 const APOLOGY = {
   menstrual: {
     moves: [
-      "Acknowledge what you actually did - no \"I'm sorry you feel\".",
-      "Do not defend, do not explain. Just sit with it.",
-      "Then ask: what would help right now?"
+      "Bro, acknowledge what you actually did. No \"I'm sorry you feel\" garbage.",
+      "Psst bro — do not defend, do not explain. Just sit with it.",
+      "Then ask her: what would help right now? And mean it."
     ],
     lines: [
       "I was wrong. What I did wasn't okay.",
@@ -504,33 +535,33 @@ const APOLOGY = {
   },
   follicular: {
     moves: [
-      "Apologize cleanly, then redirect to action - she has energy for repair now.",
-      "Plan something concrete that shows you heard her.",
-      "Don't over-talk it. Repair, then move forward together."
+      "Brooooo, apologize cleanly, then redirect to action. She has energy for repair now.",
+      "Bro, plan something concrete that shows you heard her.",
+      "Psst bro — don't over-talk it. Repair, then move forward together."
     ],
     lines: [
       "You were right. I see it now. Here's what I'll do differently.",
-      "Let me make it up to you - this weekend, your call, my plan.",
+      "Let me make it up to you — this weekend, your call, my plan.",
       "I want to do better. Tell me what better looks like."
     ]
   },
   ovulation: {
     moves: [
-      "Bring it up directly - she's clearest and most generous here.",
-      "Be specific about what you got wrong.",
-      "Have the bigger conversation she's been wanting to have."
+      "Bro, bring it up directly. She's clearest and most generous this week.",
+      "Bro listen — be specific about what you got wrong. No vague apologies.",
+      "Real talk bro, have the bigger conversation she's been wanting to have."
     ],
     lines: [
       "I owe you a real apology. Not a quick one.",
       "I should have shown up. I didn't. That's on me.",
-      "Walk me through what hurt - I want to actually understand it."
+      "Walk me through what hurt — I want to actually understand it."
     ]
   },
   luteal: {
     moves: [
-      "Lead with humility - her bullshit detector is at peak.",
-      "Do not minimize. Do not bring up your side.",
-      "Then go quiet. Presence beats words this week."
+      "Bro, lead with humility. Her bullshit detector is at peak this week.",
+      "Psst bro — do not minimize. Do not bring up your side. Don't even try.",
+      "Then go quiet, bro. Presence beats words this week."
     ],
     lines: [
       "You weren't wrong. I was. I'm sorry.",
@@ -542,79 +573,80 @@ const APOLOGY = {
 
 const TIME_TIPS = {
   menstrual: {
-    morning:   ["Coffee in her hand before she asks. Ibuprofen on the nightstand.","Make her breakfast. Don't ask what she wants - just bring something soft.","Lay out the heating pad. Quietly. She'll find it."],
-    afternoon: ["Text 'I'm picking up groceries - what do you need?' Don't ask if. Just do.","Send her a 'thinking of you' text mid-day. No question attached.","Order her favorite snack to her work."],
-    evening:   ["Run her a bath. Have the towel warm. No talking required.","Dinner is handled. Tell her not to even look at the kitchen.","Light dim, blanket warm, her show queued up."],
-    night:     ["She's wired or tired - read her. Quiet presence wins.","Foot rub or back rub if she's awake. No agenda.","Tuck her in. Phone on silent. You're a guard dog tonight."]
+    morning:   ["Bro, coffee in her hand before she asks. Ibuprofen on the nightstand.","Brooooo, make her breakfast. Don't ask what she wants — just bring something soft.","Psst bro — lay out the heating pad. Quietly. She'll find it."],
+    afternoon: ["Bro, text 'I'm picking up groceries, what do you need?' Don't ask IF. Just do.","Bro listen — send her a 'thinking of you' text. No question attached.","Real talk bro, order her favorite snack to her work."],
+    evening:   ["Brooooo, run her a bath. Towel warm. No talking required.","Bro, dinner is handled. Tell her not to even look at the kitchen.","Psst bro — light dim, blanket warm, her show queued up."],
+    night:     ["Bro, she's wired or tired — read her. Quiet presence wins.","Brooooo, foot rub or back rub if she's awake. No agenda.","Psst bro — tuck her in. Phone on silent. You're a guard dog tonight."]
   },
   follicular: {
-    morning:   ["Match her rising energy. Make a plan for the day together over coffee.","She's open to new things this week - suggest one for today.","Hype her up about whatever she's working on this morning."],
-    afternoon: ["Pick a weekend plan and tell her - she likes initiative right now.","Send her something that made you think of her - song, photo, anything.","Suggest cooking together tonight."],
-    evening:   ["Plan tonight or tomorrow - she has the energy for both.","Try the new place. Tonight's the night to use the 'we should go someday' list.","Cook together. Music on. This is the easy week."],
-    night:     ["Don't crash the energy with a heavy talk - save it for ovulation.","Late-night walk if the night's good. Movement matches her phase.","Set tomorrow up together before bed - she likes structure right now."]
+    morning:   ["Brooooo, match her rising energy. Make a plan for the day over coffee.","Bro, she's open to new things this week — suggest one for today.","Psst bro — hype her up about whatever she's working on this morning."],
+    afternoon: ["Bro listen — pick a weekend plan and tell her. She likes initiative right now.","Real talk bro, send her something that made you think of her. Song, photo, anything.","Brooooo, suggest cooking together tonight."],
+    evening:   ["Bro, plan tonight or tomorrow — she has the energy for both.","Brooooo, try the new place. Tonight's the night to use the 'we should go someday' list.","Psst bro — cook together. Music on. This is the easy week, use it."],
+    night:     ["Bro, don't crash the energy with a heavy talk. Save it for ovulation.","Brooooo, late-night walk if the night's good. Movement matches her phase.","Psst bro — set tomorrow up together before bed. She likes structure right now."]
   },
   ovulation: {
-    morning:   ["She's at peak clarity - have the real conversation over breakfast.","Tell her she looks incredible. Specific. Mean it.","Match her ambition. What's the win today?"],
-    afternoon: ["Surprise her with something mid-day - peak energy = peak memory.","Send the photo of her you've been keeping. Tell her why you love it.","Plan the dinner you keep delaying. Reserve it now."],
-    evening:   ["Tonight is the night for the conversation you've been avoiding.","Dress up. Go out. She wants to be seen with you.","Initiate. She wants to be desired this week."],
-    night:     ["Capture the moment - photo, voice note, anything. Future-you will thank you.","Don't drift into your phone. Her, eyes, presence.","Late dinner, dim light, real talk. This window is rare."]
+    morning:   ["Bro, she's at peak clarity — have the real conversation over breakfast.","Brooooo, tell her she looks incredible. Be specific. Mean it.","Psst bro — match her ambition. What's the win today?"],
+    afternoon: ["Bro, surprise her with something mid-day. Peak energy = peak memory.","Bro listen — send the photo of her you've been keeping. Tell her why you love it.","Real talk bro, plan the dinner you keep delaying. Reserve it now."],
+    evening:   ["Brooooo, tonight is the night for the conversation you've been avoiding.","Bro, dress up. Go out. She wants to be seen with you.","Psst bro — initiate. She wants to be desired this week."],
+    night:     ["Bro listen — capture the moment. Photo, voice note, anything. Future-you will thank you.","Brooooo, don't drift into your phone. Her, eyes, presence.","Bro, late dinner, dim light, real talk. This window is rare."]
   },
   luteal: {
-    morning:   ["Bring her tea, not coffee, if she's wired. Watch which she reaches for.","Keep the morning soft. No big asks. Let her ease in.","Check the comfort drawer - heating pad, ibuprofen, her favorite tea."],
-    afternoon: ["Text her one specific thing you appreciate. Not generic.","Pick up dinner so she doesn't have to think about it.","Cancel the optional plan tonight - she won't ask, but she'll thank you."],
-    evening:   ["Cozy mode. Order in. Phone face down. Same couch.","Don't bring up anything heavy tonight. Save it for follicular.","Light a candle. Make tonight feel intentional, not just default."],
-    night:     ["She's reading everything you do tonight. Be calm, be steady, be present.","No phone. No drift. Just be next to her.","Tomorrow's gentler if tonight is. Tuck in early."]
+    morning:   ["Bro, bring her tea, not coffee, if she's wired. Watch which she reaches for.","Brooooo, keep the morning soft. No big asks. Let her ease in.","Psst bro — check the comfort drawer. Heating pad, ibuprofen, her favorite tea."],
+    afternoon: ["Bro, text her one specific thing you appreciate. Not generic.","Bro listen — pick up dinner so she doesn't have to think about it.","Real talk bro, cancel the optional plan tonight. She won't ask, but she'll thank you."],
+    evening:   ["Brooooo, cozy mode. Order in. Phone face down. Same couch.","Bro, don't bring up anything heavy tonight. Save it for follicular.","Psst bro — light a candle. Make tonight feel intentional, not just default."],
+    night:     ["Bro, she's reading everything you do tonight. Be calm. Be steady. Be present.","Brooooo, no phone. No drift. Just be next to her.","Psst bro — tomorrow's gentler if tonight is. Tuck in early."]
   }
 };
 
 const TRANSITION_TIPS = {
-  menstrual:  "Tomorrow she enters menstrual. Stock the comfort drawer tonight - heating pad, ibuprofen, her favorites. Cancel anything optional this week.",
-  follicular: "Tomorrow she enters follicular - energy is climbing back. Have one fun plan in your back pocket to suggest.",
-  ovulation:  "Tomorrow she enters ovulation - peak window. If there's a real conversation you've been holding, this is the week.",
-  luteal:     "Tomorrow she enters luteal - sensitivity rises. Lower the noise, raise the patience. Big talks can wait."
+  menstrual:  "Psst bro — menstrual hits tomorrow. Stock the comfort drawer tonight: heating pad, ibuprofen, her favorites. Cancel anything optional this week.",
+  follicular: "Bro, follicular kicks in tomorrow. Energy climbing back. Have one fun plan in your back pocket to suggest.",
+  ovulation:  "Bro listen — ovulation tomorrow. Peak window. If there's a real conversation you've been holding, this is the week.",
+  luteal:     "Real talk bro, luteal hits tomorrow. Sensitivity rises. Volume down, patience up. Big talks can wait."
 };
 
 const FOLLOWUP_TIPS = {
-  menstrual:  "You had a conflict recently. She's in recovery mode now - don't bring it up. Act it out: show up, do the things, don't make her ask.",
-  follicular: "You had a conflict recently. She has energy to repair this week. A clean apology + a concrete plan lands well now.",
-  ovulation:  "You had a conflict recently. This week she's clearest - have the real follow-up conversation. Lead with what you got wrong.",
-  luteal:     "You had a conflict recently. She remembers. A clean apology now beats waiting - silence reads as not caring.",
-  generic:    "You had a conflict recently. Don't let it sit. A specific 'I was wrong about X' is the move."
+  menstrual:  "Bro, you had a conflict recently. She's in recovery mode now — don't bring it up. Act it out: show up, do the things, don't make her ask.",
+  follicular: "Brooooo, you had a conflict recently. She has energy to repair this week. A clean apology + a concrete plan lands well now.",
+  ovulation:  "Psst bro — you had a conflict recently. This week she's clearest. Have the real follow-up conversation. Lead with what you got wrong.",
+  luteal:     "Real talk bro, you had a conflict recently. She remembers. A clean apology now beats waiting — silence reads as not caring.",
+  generic:    "Bro, you had a conflict recently. Don't let it sit. A specific 'I was wrong about X' is the move."
 };
 
 const NON_GIFT_TIPS = {
-  menstrual:  "You gave a gift recently - good. Now switch tracks: acts of service. Do the dishes, take the chore, no announcement.",
-  follicular: "You gave a gift recently. This week she wants you, not stuff - plan something to do together.",
-  ovulation:  "You gave a gift recently. This week she wants your attention - phone away, eyes up, real conversation.",
-  luteal:     "You gave a gift recently. This week she wants presence over presents - same couch, no agenda.",
-  generic:    "Recent gift logged - don't stack. Switch love languages: words, time, touch, or service today."
+  menstrual:  "Bro, you gave a gift recently — good move. Now switch tracks: acts of service. Do the dishes, take the chore, no announcement.",
+  follicular: "Psst bro — you gave a gift recently. This week she wants YOU, not stuff. Plan something to do together.",
+  ovulation:  "Brooooo, you gave a gift recently. This week she wants your attention. Phone away, eyes up, real conversation.",
+  luteal:     "Bro listen — you gave a gift recently. This week she wants presence over presents. Same couch, no agenda.",
+  generic:    "Real talk bro — recent gift logged. Don't stack. Switch love languages today: words, time, touch, or service."
 };
 
 const SITUATIONS = [
-  { id:'crying',  label:"She's crying",     emoji:'💧' },
-  { id:'angry',   label:"She's angry",      emoji:'⚡' },
-  { id:'quiet',   label:"She's quiet",      emoji:'🌫️' },
-  { id:'messup',  label:"I messed up",      emoji:'🆘' }
+  { id:'crying',    label:"She's crying",   emoji:'💧' },
+  { id:'angry',     label:"She's angry",    emoji:'⚡' },
+  { id:'quiet',     label:"She's quiet",    emoji:'🌫️' },
+  { id:'messup',    label:"I messed up",    emoji:'🆘' },
+  { id:'spiraling', label:"I'm spiraling",  emoji:'🫁' }
 ];
 
 const SITUATION_FIRST = {
   crying: {
-    menstrual:  "Sit down next to her. Don't talk. Hand on her back. That's the whole first move.",
-    follicular: "Ask once: 'do you want to be held or do you want space?' Then do exactly that.",
-    ovulation:  "Hold her. She's allowed to cry at peak too. Don't try to fix it.",
-    luteal:     "Get next to her. Quiet body language. Don't ask why - she'll tell you when she's ready."
+    menstrual:  "Bro, sit down next to her. Don't talk. Hand on her back. That's the whole first move.",
+    follicular: "Brooooo, ask once: 'do you want to be held or do you want space?' Then do exactly that.",
+    ovulation:  "Psst bro — hold her. She's allowed to cry at peak too. Don't try to fix it.",
+    luteal:     "Bro, get next to her. Quiet body language. Don't ask why — she'll tell you when she's ready."
   },
   angry: {
-    menstrual:  "Lower your voice. Don't match her temperature. Acknowledge, don't defend.",
-    follicular: "Listen all the way to the end before you say anything. Then repeat back what you heard.",
-    ovulation:  "She's clear-headed - the anger is information. Take it seriously, not personally.",
-    luteal:     "Don't argue. Don't fix. Validate: 'you're not wrong to be upset.' Then go quiet."
+    menstrual:  "Bro, lower your voice. Don't match her temperature. Acknowledge, don't defend.",
+    follicular: "Psst bro — listen all the way to the end before you say anything. Then repeat back what you heard.",
+    ovulation:  "Bro listen — she's clear-headed. The anger is information. Take it seriously, not personally.",
+    luteal:     "Real talk bro — don't argue. Don't fix. Validate: 'you're not wrong to be upset.' Then go quiet."
   },
   quiet: {
-    menstrual:  "Don't fill the silence. Bring her tea. Sit nearby. Available, not pressing.",
-    follicular: "Light check-in: 'you doing okay?' If she says yes, drop it. Believe her.",
-    ovulation:  "Direct: 'something on your mind?' She'll tell you straight this week.",
-    luteal:     "Don't ask why she's quiet. Just be steady. She's processing - presence is enough."
+    menstrual:  "Bro, don't fill the silence. Bring her tea. Sit nearby. Available, not pressing.",
+    follicular: "Brooooo, light check-in: 'you doing okay?' If she says yes, drop it. Believe her.",
+    ovulation:  "Bro, direct: 'something on your mind?' She'll tell you straight this week.",
+    luteal:     "Psst bro — don't ask why she's quiet. Just be steady. She's processing. Presence is enough."
   },
   messup: {
     menstrual:  APOLOGY.menstrual.moves[0],
@@ -632,13 +664,13 @@ const SITUATION_NEVER = {
 };
 
 const FAQ = [
-  { q:"Is PMS real?", a:"Yes - it's documented in medical literature, with 3-8% of women experiencing PMDD. Hormonal changes in the luteal phase have measurable effects on mood, energy, pain tolerance, and cognition." },
-  { q:"Should we have sex during her period?", a:"Up to you both. Some women experience increased desire during menstruation; others want zero touch. Communicate. Read her cues. Don't assume either way." },
-  { q:"What if she says the cycle doesn't affect her?", a:"Believe her. Cycles affect women differently. Some feel almost no change; some feel everything. Either way, knowing the cycle and being kind never hurts." },
-  { q:"What if she gets angry at me?", a:"Validate first, fix second. Don't blame the cycle - that's dismissive. Address what she actually said. Then, if needed, follow up about the dynamic later, calmly." },
-  { q:"Should I ever mention her cycle?", a:"Rarely, carefully - and never as a dismissal. Saying 'I know this week is harder, I've got you' is care. Saying 'Are you on your period?' is the opposite." },
-  { q:"What's the difference between PMS and PMDD?", a:"PMS = mild-to-moderate pre-period symptoms. PMDD = severe, life-disrupting symptoms (deep depression, rage, intense anxiety) that need medical support." },
-  { q:"How do I bring this up without being weird?", a:"\"I want to understand you better - and your cycle is part of that. I built/got this thing to help me show up better.\" Most partners receive that as care, not surveillance." }
+  { q:"Is PMS real?", a:"Bro, yes. It's in the medical literature. 3-8% of women have PMDD, the severe version. Hormones in the luteal phase have measurable effects on mood, pain, energy, and thinking. Not vibes. Science." },
+  { q:"Should we have sex during her period?", a:"Brooooo, up to both of you. Some women want more, some want zero touch. Communicate. Read her cues. Don't assume either way." },
+  { q:"What if she says the cycle doesn't affect her?", a:"Psst bro — believe her. Cycles affect women differently. Some feel almost nothing, some feel everything. Either way, knowing the cycle and being kind never hurts." },
+  { q:"What if she gets angry at me?", a:"Bro listen — validate first, fix second. Don't blame the cycle, that's dismissive and it'll make it worse. Address what she actually said. Then, if needed, follow up about the dynamic later. Calmly." },
+  { q:"Should I ever mention her cycle?", a:"Real talk bro — rarely, carefully, and never as a dismissal. \"I know this week is harder, I've got you\" = care. \"Are you on your period?\" = the opposite, every time." },
+  { q:"What's the difference between PMS and PMDD?", a:"Bro, PMS = mild-to-moderate pre-period symptoms. PMDD = severe, life-disrupting symptoms (deep depression, rage, intense anxiety). PMDD needs medical support, not a heating pad." },
+  { q:"How do I bring this up without being weird?", a:"Bro, just try: \"I want to understand you better, and your cycle is part of that. I built this thing to help me show up better.\" Most partners hear that as care, not surveillance." }
 ];
 
 const NEUROLOGY = [
@@ -652,64 +684,64 @@ const NEUROLOGY = [
 const GUIDE = {
   menstrual: {
     days:'Days 1-5',
-    bio:'Estrogen and progesterone are at their lowest. The uterine lining is shedding. Energy is down, pain is up, sleep is broken. Her body is doing real, measurable work.',
+    bio:"Bro, estrogen and progesterone are at rock bottom. The uterine lining is literally shedding. Energy down, pain up, sleep broken. Her body is doing real measurable work. Treat it that way.",
     say:["I'm taking care of dinner. Don't lift a finger.","What sounds good? Snack run, food, anything.","You don't owe anyone productivity this week."],
     never:["Aren't you done with that yet?","You were fine yesterday.","It can't be that bad."],
-    pro:'The first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week.'
+    pro:"Real talk bro — the first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week."
   },
   follicular: {
     days:'Days 6-13',
-    bio:'Estrogen is climbing. Energy returns. Mood lifts. Cognition sharpens. She wants new things, social connection, motion. This is her building phase.',
+    bio:"Brooooo, estrogen's climbing. Energy back. Mood up. Brain sharper. She wants new things, social connection, motion. This is her building phase. Match it.",
     say:["What's the plan this weekend? I'm in.","You're on fire lately. I see it.","Want to try something new tonight?"],
     never:["Why are you suddenly so busy?","Calm down with all the plans.","You're being too much."],
-    pro:'Plan adventures now. Book the trip. Start the project together. The momentum here is real and finite - use it.'
+    pro:"Bro listen — plan adventures now. Book the trip. Start the project together. The momentum here is real and finite. Use it."
   },
   ovulation: {
     days:'Days 14-17',
-    bio:'Estrogen peaks. Testosterone spikes. She is at maximum cognitive performance, social confidence, and libido. This is her sharpest, boldest, most magnetic window.',
+    bio:"Bro, estrogen peaks. Testosterone spikes. Maximum cognitive performance, social confidence, and libido. This is her sharpest, boldest, most magnetic window. Don't sleep on it.",
     say:["You look incredible.","Whatever you want to do - yes.","Tell me about the thing you're working on."],
     never:["You're full of yourself today.","Why are you so flirty?","Slow down a bit."],
-    pro:"Have the important conversation now - about money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it."
+    pro:"Psst bro — have the important conversation NOW. Money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it."
   },
   luteal: {
     days:'Days 18-28',
-    bio:'Progesterone rises then crashes. Sensitivity to noise, smell, social slights goes up. Patience for nonsense goes down. Her bullshit detector is at peak. Be honest, be steady, be present.',
+    bio:"Real talk bro — progesterone rises then crashes. Sensitivity to noise, smell, social slights goes up. Patience for nonsense goes down. Her bullshit detector is at peak. Be honest, be steady, be present.",
     say:["I noticed you handled that today. That was strong.","Tonight is whatever you want it to be.","I'm not going anywhere. We're good."],
     never:["Why are you so emotional?","It's just the cycle, right?","Can you let it go?"],
-    pro:"Late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here - she's reading the truth more clearly than usual."
+    pro:"Bro, late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here — she's reading the truth more clearly than usual."
   }
 };
 
 const PERSONALIZE = {
   menstrual: [
-    [p => has(p.neurology,'adhd'),    "Keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
-    [p => has(p.neurology,'anxiety'), "Extra physical closeness helps. Don't leave her alone if she seems distressed."],
-    [p => p.social==='introvert',     "Don't fill the silence. Presence without pressure."],
-    [p => p.social==='extrovert',     "She still wants company - just low-energy company."],
-    [p => has(p.love,'acts'),         "Do the dishes, laundry, dinner. No asking. Just do."],
-    [p => has(p.love,'words'),        "Tell her she's strong. Her body is doing something incredible."],
-    [p => has(p.love,'touch'),        "Hold her. Back rubs. Warm presence."],
-    [p => p.type==='a-type',          "She'll hate feeling unproductive. Normalize rest as productive."]
+    [p => has(p.neurology,'adhd'),    "Bro, keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
+    [p => has(p.neurology,'anxiety'), "Brooooo, extra physical closeness helps. Don't leave her alone if she seems distressed."],
+    [p => p.social==='introvert',     "Psst bro — don't fill the silence. Presence without pressure."],
+    [p => p.social==='extrovert',     "Bro, she still wants company — just low-energy company."],
+    [p => has(p.love,'acts'),         "Bro listen — do the dishes, the laundry, dinner. No asking. Just do."],
+    [p => has(p.love,'words'),        "Real talk bro, tell her she's strong. Her body is doing something incredible."],
+    [p => has(p.love,'touch'),        "Bro, hold her. Back rubs. Warm presence. That's the whole move."],
+    [p => p.type==='a-type',          "Psst bro — she hates feeling unproductive. Normalize rest as productive."]
   ],
   follicular: [
-    [p => p.social==='extrovert',     "She wants social. Be her hype man and plan something."],
-    [p => p.type==='a-type',          "She's in optimal mode. Support ambitious plans."],
-    [p => has(p.neurology,'adhd'),    "She may hyperfocus on a new project. Support it."],
-    [p => has(p.love,'time'),         "She wants adventures together. Plan it."]
+    [p => p.social==='extrovert',     "Brooooo, she wants social. Be her hype man and plan something."],
+    [p => p.type==='a-type',          "Bro, she's in optimal mode. Support ambitious plans, don't dim the lights."],
+    [p => has(p.neurology,'adhd'),    "Psst bro — she may hyperfocus on a new project. Support it, don't redirect."],
+    [p => has(p.love,'time'),         "Bro listen — she wants adventures together. Plan it. Tonight."]
   ],
   ovulation: [
-    [p => p.type==='a-type',          "This is her peak performance window. Don't slow her down."],
-    [p => has(p.love,'touch'),        "She's most interested in intimacy now. Match that energy."],
-    [p => has(p.love,'words'),        "Tell her she's incredible. She wants to hear it from you."],
-    [p => has(p.neurology,'adhd'),    "Great window for important conversations - she's most focused."]
+    [p => p.type==='a-type',          "Bro, this is her peak performance window. Don't slow her down."],
+    [p => has(p.love,'touch'),        "Brooooo, she's most interested in intimacy now. Match that energy."],
+    [p => has(p.love,'words'),        "Bro, tell her she's incredible. She wants to hear it from you. Specifically."],
+    [p => has(p.neurology,'adhd'),    "Psst bro — great window for important conversations. She's most focused this week."]
   ],
   luteal: [
-    [p => has(p.neurology,'anxiety'),    "Late luteal amplifies anxiety. Be extra steady."],
-    [p => has(p.neurology,'depression'), "Most vulnerable window. Watch for mood drops. Be present."],
-    [p => p.social==='introvert',        "Give her the quiet she needs without making her feel guilty."],
-    [p => p.type==='a-type',             "Her productivity dips naturally. Normalize this, don't comment on it."],
-    [p => has(p.love,'acts'),            "This is when acts of service matter most. Do everything."],
-    [p => has(p.neurology,'adhd'),       "Routine matters more now. Don't disrupt it."]
+    [p => has(p.neurology,'anxiety'),    "Bro listen — late luteal amplifies anxiety. Be extra steady."],
+    [p => has(p.neurology,'depression'), "Real talk bro, most vulnerable window. Watch for mood drops. Be present, don't lecture."],
+    [p => p.social==='introvert',        "Bro, give her the quiet she needs without making her feel guilty about it."],
+    [p => p.type==='a-type',             "Brooooo, her productivity dips naturally. Normalize this. Don't comment on it."],
+    [p => has(p.love,'acts'),            "Psst bro — this is when acts of service matter most. Do everything. No announcement."],
+    [p => has(p.neurology,'adhd'),       "Bro, routine matters more now. Don't disrupt it. Hold the line."]
   ]
 };
 
@@ -957,6 +989,7 @@ let state = {
   playsTab: 'ask',
   playsSeed: 0,
   situation: null,
+  truthSeed: 0,
   updateReady: false
 };
 
@@ -1001,7 +1034,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.3 · Know the code</footer>
+    <footer class="app">BRO CODE · v2.4 · Bro mode on</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1153,6 +1186,8 @@ function renderDashboard(day, phase, len) {
 
     ${renderPlaysCard(phase)}
 
+    ${renderBroTruth()}
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div class="label">// cycle progress</div>
@@ -1181,6 +1216,8 @@ function renderDashboard(day, phase, len) {
 }
 
 function renderSituationPanel(sit, phase) {
+  if (sit === 'spiraling') return renderSpiralPanel();
+
   const first = SITUATION_FIRST[sit]?.[phase] || 'Slow down. Breathe. She doesn\'t need you to fix it.';
   const never = SITUATION_NEVER[sit] || '';
   const label = SITUATIONS.find(s => s.id === sit)?.label || '';
@@ -1212,6 +1249,44 @@ function renderSituationPanel(sit, phase) {
         <div class="label" style="color:var(--red);margin-bottom:6px">// don't say</div>
         <div style="display:flex;align-items:baseline;gap:8px"><span class="red-strike" style="font-size:14px">${h(never)}</span></div>
       ` : ''}
+    </div>
+  `;
+}
+
+function renderSpiralPanel() {
+  const seed = state.truthSeed || 0;
+  const base = new Date().getDate() + seed;
+  const picks = [0, 1, 2].map(i => BRO_TRUTHS[(base + i * 7) % BRO_TRUTHS.length]);
+  return `
+    <div class="sit-panel" style="border-left-color:var(--green)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="display" style="font-size:18px;color:var(--green)">I'M SPIRALING</div>
+        <button class="x" onclick="closeSituation()" aria-label="Close">×</button>
+      </div>
+      <div class="label" style="margin-bottom:6px;color:var(--green)">// breathe</div>
+      <p style="margin:0 0 14px;color:var(--cream);line-height:1.45">Bro. In through the nose, 4 seconds. Hold 2. Out through the mouth, 6 seconds. Do it five times before reading on. No phone in between.</p>
+      <div class="label" style="margin-bottom:6px;color:var(--green)">// three truths</div>
+      <ul class="bullets" style="margin-bottom:6px">
+        ${picks.map(t => `<li><span style="color:var(--green)">▸</span><span>${h(t)}</span></li>`).join('')}
+      </ul>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollTruth()">⟳ NEW TRUTHS</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderBroTruth() {
+  const seed = state.truthSeed || 0;
+  const idx = (new Date().getDate() + seed) % BRO_TRUTHS.length;
+  const truth = BRO_TRUTHS[idx];
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
+        <div class="label">// bro truth</div>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollTruth()">⟳ ROTATE</button>
+      </div>
+      <p style="font-size:17px;line-height:1.4;margin:0;color:var(--cream);font-weight:300">${h(truth)}</p>
     </div>
   `;
 }
@@ -1671,6 +1746,7 @@ function openSituation(name) {
 function closeSituation() { setState({ situation: null }); }
 function setPlaysTab(t) { setState({ playsTab: t, playsSeed: 0 }); }
 function rerollPlays() { setState({ playsSeed: (state.playsSeed || 0) + 1 }); }
+function rerollTruth() { setState({ truthSeed: (state.truthSeed || 0) + 1 }); }
 
 let saveTimer = null;
 function flashSaved() {
