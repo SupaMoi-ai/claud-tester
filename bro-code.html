@@ -470,6 +470,78 @@ const BRO_TRUTHS = [
   "Bro, the version of you that pays attention is the version she fell for. Be that guy more often."
 ];
 
+const BRO_FACTS = [
+  "Bro fact: women experience pain at lower thresholds during ovulation. Yes, even period pain. Yes, that's biology.",
+  "Brooooo fact: estrogen affects how she perceives YOUR mood. If you're stressed, she feels it 2x. Calm down for her.",
+  "Psst bro — testosterone spikes in her during ovulation. Yes, women have testosterone. That's why she's bolder this week.",
+  "Bro real quick: the luteal phase is ALWAYS 14 days. Doesn't matter what cycle length. Ovulation = period day minus 14.",
+  "Brooooo, sleep gets worse in luteal due to progesterone changes. She's not lazy. She's chemically tired.",
+  "Bro fact: PMDD (severe PMS) affects 3-8% of women and is on the WHO disease list. Not 'vibes.'",
+  "Psst bro — her sense of smell is sharpest during ovulation. Your cologne lands different this week.",
+  "Bro listen — orgasms can reduce period cramps. Make of that what you will.",
+  "Brooooo fact: cortisol (stress) blocks progesterone. If she's overwhelmed AND in luteal, that's a chemical pile-up.",
+  "Real talk bro — her gut bacteria literally change across the cycle. Cravings aren't 'just cravings.'",
+  "Bro fact: cycle-syncing exercise — high intensity in follicular, restorative in luteal — is actual research.",
+  "Psst bro — birth control changes ALL of this. If she's on hormonal birth control, phases work differently.",
+  "Brooooo, the average woman bleeds 30-40ml total per period. About 2 tablespoons. It feels like more.",
+  "Bro fact: roughly 90% of women feel some premenstrual symptoms. The 10% who don't aren't lying. People vary.",
+  "Real talk bro — chocolate cravings in luteal are partly real. Magnesium drops. Dark chocolate is high in magnesium.",
+  "Bro listen — ovulation = peak fertility, but she can technically conceive 5 days before. Sperm live a while.",
+  "Brooooo, postpartum cycles can take 6-18 months to return. Don't expect normal right after baby.",
+  "Psst bro — endometriosis affects ~10% of women and is wildly underdiagnosed. If she says period pain is bad, believe her.",
+  "Bro fact: the cycle isn't synced to the moon. That's vibes, not biology. Sorry to ruin that one.",
+  "Real talk bro — perimenopause can start in her late 30s. Cycle gets unpredictable years before it stops.",
+  "Bro, on the day of ovulation, her face is measurably more symmetric. Yes, peer-reviewed. Yes, wild.",
+  "Brooooo, women average 3 more REM sleep cycles per night than men. She's not 'extra tired' — you're just less tired."
+];
+
+const DECODER = [
+  { phrase: "I'm fine",             meaning: "Bro, she's not fine. She wants you to notice without being asked.",                 move: "Sit next to her. Don't ask why. Hand on her back. 'I'm here, no rush.'" },
+  { phrase: "Whatever",             meaning: "Brooooo, she has a preference and you missed it.",                                   move: "Pick something specific. Wrong pick > no pick. Decisiveness beats correctness." },
+  { phrase: "Do whatever you want", meaning: "Psst bro — trap. She has an opinion. Don't take the bait.",                          move: "'I'd rather we decide together. What's on your mind?'" },
+  { phrase: "We need to talk",      meaning: "Bro listen — buckle up. Be early. Don't fix on impulse.",                            move: "'Yeah, I'm here. When and where?' Then LISTEN. Don't rehearse rebuttals." },
+  { phrase: "I'm not mad",          meaning: "Real talk bro, she is. Or she's hurt. Take it seriously.",                            move: "Don't argue the label. 'I hear you. Walk me through it.'" },
+  { phrase: "Go ahead",             meaning: "Bro, she's testing if you'll really do it. Spoiler: don't.",                          move: "'On second thought, let's skip it.' Watch her body language." },
+  { phrase: "Fine.",                meaning: "Brooooo, hard fine. Not fine at all.",                                                move: "Don't argue the period — 'You seem off. What's up?' Stay calm." },
+  { phrase: "K",                    meaning: "Psst bro — you did something. Or didn't do something. Look back 24h.",               move: "Don't double-text. Call her. 'I think I might've messed up — talk to me.'" },
+  { phrase: "Sure",                 meaning: "Bro, reluctant yes.",                                                                 move: "Verify: 'You sure-sure? Or sure-fine?' Make space to say no." },
+  { phrase: "Nothing's wrong",      meaning: "Real talk bro — something is. She doesn't want to launch into it yet.",               move: "Don't push. 'Okay. I'm here when you want to.' Then actually be there." },
+  { phrase: "I don't care",         meaning: "Brooooo, she cares. She's tired of carrying the decision.",                           move: "Take the decision off her plate. Be specific. 'I'm ordering Thai. Sound good?'" },
+  { phrase: "It's fine, really",    meaning: "Bro listen — doubled-fine = not fine. The 'really' is the tell.",                     move: "Slow down. 'Real talk — what's going on?'" },
+  { phrase: "Forget it",            meaning: "Psst bro — do not actually forget it.",                                               move: "'No, I want to hear it. Take your time.'" },
+  { phrase: "If you say so",        meaning: "Bro, she thinks you're wrong but doesn't want to fight.",                             move: "Step back. 'Wait — what am I missing?' Curiosity beats defending." },
+  { phrase: "I'm tired",            meaning: "Brooooo, could be sleep. Could be 'tired of carrying this.' Check the phase.",        move: "Ask warmly. Late luteal? Assume both. Take a chore off her plate." },
+  { phrase: "Nothing",              meaning: "Real talk bro — something. Always.",                                                  move: "Drop the question for now. Notice it later when she's softer." },
+  { phrase: "It doesn't matter",    meaning: "Bro, it matters.",                                                                    move: "Validate first: 'I think it does matter, and I want to understand.'" },
+  { phrase: "Have fun",             meaning: "Psst bro — sometimes literal. Sometimes 'I wish you'd stayed.' Read the energy.",     move: "If unsure: 'I'd rather skip if you're not into it. We good?'" }
+];
+
+const RED_PATTERNS = [
+  { rx: /\b(calm down|just relax|chill out|relax babe)\b/i,                                       flag: "calm-down",         alt: "Try: 'I see you're upset. Walk me through it.'" },
+  { rx: /\b(over\s*react(?:ing)?|too sensitive|too much|hysterical|crazy|irrational)\b/i,         flag: "minimize",          alt: "Try: 'Your reaction makes sense to me. What hurt most?'" },
+  { rx: /\b(is this PMS|are you on your period|that time of the month)\b/i,                       flag: "cycle-dismiss",     alt: "Try: 'Something's off and I want to understand without making assumptions.'" },
+  { rx: /\b(other (women|girls)|my ex|like (my )?mom)\b/i,                                        flag: "compare",           alt: "Try: 'I'm sorry. Let's stay on what you and I need.'" },
+  { rx: /\bI can'?t (say|do) anything right\b/i,                                                  flag: "make-it-about-you", alt: "Try: 'I hear that I keep missing it. Help me see what would land.'" },
+  { rx: /\b(whatever|nevermind|forget it|move on)\b/i,                                            flag: "shutdown",          alt: "Try: 'I want to keep talking. I'm not going anywhere.'" },
+  { rx: /\byou'?re always\b/i,                                                                    flag: "always-never",      alt: "Try: 'Lately I've noticed X.' Specific, not absolute." },
+  { rx: /\byou never\b/i,                                                                         flag: "always-never",      alt: "Try: 'I missed that you needed Y. I'll work on it.'" }
+];
+
+const MANSPLAIN_PATTERNS = [
+  { rx: /^\s*well,?\s*actually/i,                                                                 flag: "well-actually",      alt: "Did she ask? If no, just listen." },
+  { rx: /\b(what you (should|need to) do|all you have to do)\b/i,                                 flag: "advice-unasked",     alt: "Try: 'Want my take, or just to vent?'" },
+  { rx: /\b(it'?s actually (simple|easy)|just (think|listen|breathe|relax))\b/i,                  flag: "minimize-difficulty",alt: "Try: 'I can see why that's hard.'" },
+  { rx: /\b(have you tried|why don'?t you (just )?)\b/i,                                          flag: "have-you-tried",     alt: "Skip the solution. Listen, mirror, then ask 'want suggestions or no?'" }
+];
+
+const RECEIPT_VERDICTS = {
+  killing: "Bro, you're cooking. Don't slow down.",
+  great:   "Brooooo, you're showing up. She sees it.",
+  good:    "Psst bro — solid. One more deliberate move this week and you're crushing.",
+  meh:     "Real talk bro — light week. Pick one thing. Do it tonight.",
+  rough:   "Bro listen — work to do. Don't beat yourself up. Apologize if needed, then keep moving."
+};
+
 const CONVERSATIONS = {
   menstrual: [
     "What's the one thing that would actually help today?",
@@ -972,6 +1044,70 @@ function currentStreak() {
   return streak;
 }
 
+// ---------- LISTENED (Did-She-Tell-You) ----------
+const LISTENED_KEY = 'brocode_listened';
+function loadListened() { try { return JSON.parse(localStorage.getItem(LISTENED_KEY)) || []; } catch { return []; } }
+function saveListened(arr) { localStorage.setItem(LISTENED_KEY, JSON.stringify(arr)); }
+function addListened(note) {
+  const n = (note || '').trim();
+  if (!n) return;
+  const arr = loadListened();
+  arr.push({ id: 'L' + Date.now(), note: n, at: Date.now(), status: 'open' });
+  saveListened(arr);
+}
+function markListenedDone(id) {
+  const arr = loadListened().map(x => x.id === id ? { ...x, status: 'done', doneAt: Date.now() } : x);
+  saveListened(arr);
+}
+function snoozeListened(id) {
+  const arr = loadListened().map(x => x.id === id ? { ...x, at: Date.now() } : x);
+  saveListened(arr);
+}
+function getStaleListened() {
+  const cutoff = Date.now() - 5 * DAY;
+  return loadListened().filter(x => x.status === 'open' && x.at < cutoff);
+}
+
+// ---------- CYCLE STATS (The Receipt) ----------
+function cycleStats(profile, log) {
+  if (!profile?.lastPeriod) return null;
+  const len = profile.cycleLength || 28;
+  const start = midnight(profile.lastPeriod);
+  const now = midnight(new Date());
+  const diff = Math.floor((now - start) / DAY);
+  const cycleNum = Math.max(1, Math.floor(diff / len) + 1);
+  const cycleStartMs = start.getTime() + (cycleNum - 1) * len * DAY;
+  const cycleEndMs = cycleStartMs + len * DAY;
+  const inCycle = (log || []).filter(l => (l.at || 0) >= cycleStartMs && (l.at || 0) < cycleEndMs);
+  const count = (k) => inCycle.filter(l => l.kind === k).length;
+  const uniqueDays = new Set(inCycle.map(l => l.date)).size;
+  const days = Math.max(1, Math.min(len, Math.floor((Date.now() - cycleStartMs) / DAY) + 1));
+  const gifts     = count('gift');
+  const talks     = count('talk');
+  const conflicts = count('conflict');
+  const apologies = count('apology');
+  const wins  = gifts + talks + apologies;
+  const score = wins / (conflicts + 1);
+  let verdict = 'rough';
+  if (score >= 6) verdict = 'killing';
+  else if (score >= 4) verdict = 'great';
+  else if (score >= 2) verdict = 'good';
+  else if (score >= 1) verdict = 'meh';
+  return { cycleNum, len, days, uniqueDays, gifts, talks, conflicts, apologies, verdict, isLastDay: (days === len) };
+}
+
+// ---------- PRE-SEND CHECK ----------
+function checkDraft(text) {
+  const t = (text || '').trim();
+  if (!t) return null;
+  const flags = [];
+  for (const r of RED_PATTERNS)       if (r.rx.test(t)) flags.push(r);
+  for (const r of MANSPLAIN_PATTERNS) if (r.rx.test(t)) flags.push(r);
+  if (!flags.length) return { tone: 'ok',   verdict: "Bro, it's fine. Send it.", flags: [] };
+  if (flags.length === 1) return { tone: 'warn', verdict: "Hmm bro — one flag. Read below.", flags };
+  return { tone: 'bad', verdict: "BRO. NO. Rewrite this one.", flags };
+}
+
 // ---------- HELPERS ----------
 const h = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = (sel, root=document) => root.querySelector(sel);
@@ -990,6 +1126,10 @@ let state = {
   playsSeed: 0,
   situation: null,
   truthSeed: 0,
+  truthMode: 'truth',
+  decoderPick: '',
+  draftCheck: null,
+  listenedDraft: '',
   updateReady: false
 };
 
@@ -1034,7 +1174,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.4 · Bro mode on</footer>
+    <footer class="app">BRO CODE · v2.5 · Decoder + Insight</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1176,17 +1316,22 @@ function renderDashboard(day, phase, len) {
       </div>
       <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
         <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
           <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT</button>
           <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK</button>
           <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT</button>
+          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY</button>
         </div>
       </div>
     </div>
 
     ${renderPlaysCard(phase)}
 
+    ${renderListenedCard()}
+
     ${renderBroTruth()}
+
+    ${renderReceiptCard()}
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -1278,15 +1423,88 @@ function renderSpiralPanel() {
 
 function renderBroTruth() {
   const seed = state.truthSeed || 0;
-  const idx = (new Date().getDate() + seed) % BRO_TRUTHS.length;
-  const truth = BRO_TRUTHS[idx];
+  const mode = state.truthMode || 'truth';
+  const pool = mode === 'fact' ? BRO_FACTS : BRO_TRUTHS;
+  const idx = (new Date().getDate() + seed) % pool.length;
+  const line = pool[idx];
   return `
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
-        <div class="label">// bro truth</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px">
+          <button class="pill ${mode==='truth'?'active':''}" style="padding:4px 12px;font-size:11px;margin:0" onclick="setTruthMode('truth')">// TRUTH</button>
+          <button class="pill ${mode==='fact'?'active':''}"  style="padding:4px 12px;font-size:11px;margin:0" onclick="setTruthMode('fact')">// FACT</button>
+        </div>
         <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollTruth()">⟳ ROTATE</button>
       </div>
-      <p style="font-size:17px;line-height:1.4;margin:0;color:var(--cream);font-weight:300">${h(truth)}</p>
+      <p style="font-size:17px;line-height:1.4;margin:0;color:var(--cream);font-weight:300">${h(line)}</p>
+    </div>
+  `;
+}
+
+function renderListenedCard() {
+  const open = loadListened().filter(x => x.status === 'open').sort((a,b) => b.at - a.at);
+  const recent = open.slice(0, 3);
+  const stale = getStaleListened();
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="label">// she told you</div>
+        <div class="label" style="color:rgba(245,236,215,0.5)">${open.length} OPEN</div>
+      </div>
+      ${stale.length ? `
+        <div style="background:rgba(232,184,75,0.12);border-left:3px solid var(--alert);padding:8px 10px;border-radius:4px;margin-bottom:12px">
+          <div class="label" style="color:var(--alert);margin-bottom:4px">// heads up</div>
+          <div style="color:var(--cream);font-size:13px;line-height:1.4">Bro, she told you about "${h(stale[0].note)}" ${Math.floor((Date.now() - stale[0].at)/DAY)} days ago. Bring it up.</div>
+        </div>
+      ` : ''}
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="listened-input" placeholder="e.g., sister's wedding May 20" style="flex:1" oninput="state.listenedDraft = this.value" value="${h(state.listenedDraft || '')}" />
+        <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="addListenedFromInput()">+ ADD</button>
+      </div>
+      ${recent.length ? recent.map(item => {
+        const age = Math.floor((Date.now() - item.at) / DAY);
+        return `
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)">
+            <div style="flex:1;min-width:0">
+              <div style="color:var(--cream);font-size:14px;line-height:1.35">${h(item.note)}</div>
+              <div class="label" style="color:rgba(245,236,215,0.45);margin-top:2px">${age === 0 ? 'TODAY' : age + ' DAY' + (age===1?'':'S') + ' AGO'}</div>
+            </div>
+            <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px" onclick="snoozeListenedItem('${item.id}')">SNOOZE</button>
+            <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px;color:var(--green);border-color:var(--green)" onclick="markListened('${item.id}')">DONE</button>
+          </div>
+        `;
+      }).join('') : `<p style="color:rgba(245,236,215,0.5);margin:0;font-style:italic;font-size:13px">Bro, nothing logged yet. Next time she mentions something important, add it here so future-you doesn't forget.</p>`}
+    </div>
+  `;
+}
+
+function renderReceiptCard() {
+  const log = loadLog();
+  const stats = cycleStats(state.profile, log);
+  if (!stats) return '';
+  const verdictLine = RECEIPT_VERDICTS[stats.verdict] || RECEIPT_VERDICTS.meh;
+  const title = stats.isLastDay ? '// the receipt is in' : '// this cycle';
+  const verdictColor = stats.verdict === 'killing' || stats.verdict === 'great' ? 'var(--green)'
+                     : stats.verdict === 'good' ? 'var(--cream)'
+                     : stats.verdict === 'meh' ? 'var(--alert)'
+                     : 'var(--red)';
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="label">${title}</div>
+        <div class="label" style="color:rgba(245,236,215,0.55)">CYCLE ${stats.cycleNum} · DAY ${stats.days}/${stats.len}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.gifts}</div><div class="label" style="font-size:9px">🎁 GIFTS</div></div>
+        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.talks}</div><div class="label" style="font-size:9px">💬 TALKS</div></div>
+        <div style="text-align:center"><div class="display" style="font-size:24px;color:${stats.conflicts > 0 ? 'var(--red)' : 'var(--cream)'}">${stats.conflicts}</div><div class="label" style="font-size:9px">⚡ CONFLICTS</div></div>
+        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.apologies}</div><div class="label" style="font-size:9px">🙏 APOLOGIES</div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px">
+        <div class="label" style="margin-bottom:4px">// verdict</div>
+        <p style="margin:0;color:${verdictColor};font-size:15px;line-height:1.4">${h(verdictLine)}</p>
+        <p style="margin:6px 0 0;color:rgba(245,236,215,0.55);font-size:12px">Showed up <strong style="color:var(--cream)">${stats.uniqueDays}</strong> day${stats.uniqueDays===1?'':'s'} so far this cycle.</p>
+      </div>
     </div>
   `;
 }
@@ -1697,6 +1915,54 @@ function renderCode() {
       </div>`).join('')}
 
     <div style="margin:32px 0 14px">
+      <h3 class="display" style="font-size:24px;color:var(--orange);margin:0 0 10px">The Decoder</h3>
+      <p style="color:rgba(245,236,215,0.7);margin:0;font-size:14px">Bro, pick something she said. Get a translation + the move.</p>
+    </div>
+    <div class="card">
+      <select id="decoder-select" onchange="setState({ decoderPick: this.value })" style="margin-bottom:14px">
+        <option value="">— pick a phrase —</option>
+        ${DECODER.map((d,i) => `<option value="${i}" ${String(state.decoderPick)===String(i)?'selected':''}>${h(d.phrase)}</option>`).join('')}
+      </select>
+      ${state.decoderPick !== '' && DECODER[+state.decoderPick] ? `
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          <div class="label" style="color:var(--orange);margin-bottom:6px">// what she means</div>
+          <p style="margin:0 0 14px;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].meaning)}</p>
+          <div class="label" style="color:var(--green);margin-bottom:6px">// the move</div>
+          <p style="margin:0;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].move)}</p>
+        </div>
+      ` : '<p style="color:rgba(245,236,215,0.5);margin:0;font-style:italic;font-size:13px">Brooooo, the dictionary that should have come with her.</p>'}
+    </div>
+
+    <div style="margin:32px 0 14px">
+      <h3 class="display" style="font-size:24px;color:var(--alert);margin:0 0 10px">Pre-Send Check</h3>
+      <p style="color:rgba(245,236,215,0.7);margin:0;font-size:14px">Bro, paste the message you're about to send. Get a sanity check before you press go.</p>
+    </div>
+    <div class="card">
+      <textarea id="draft-input" rows="3" placeholder="e.g., 'calm down babe, you're overreacting'" style="margin-bottom:10px">${h((state.draftCheck && state.draftCheck.text) || '')}</textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="checkMessageFromInput()">✓ CHECK IT</button>
+        <button class="btn btn-ghost"   style="padding:8px 14px;font-size:13px" onclick="clearDraftCheck()">CLEAR</button>
+      </div>
+      ${state.draftCheck && state.draftCheck.result ? `
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="label" style="margin-bottom:6px;color:${state.draftCheck.result.tone==='ok'?'var(--green)':state.draftCheck.result.tone==='warn'?'var(--alert)':'var(--red)'}">// verdict</div>
+          <p style="margin:0 0 12px;color:var(--cream);font-size:16px;line-height:1.4">${h(state.draftCheck.result.verdict)}</p>
+          ${state.draftCheck.result.flags.length ? `
+            <div class="label" style="color:var(--red);margin-bottom:6px">// flags</div>
+            <ul class="bullets">
+              ${state.draftCheck.result.flags.map(f => `
+                <li style="display:block;padding:6px 0;border-top:1px solid var(--border)">
+                  <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--red);letter-spacing:0.1em;text-transform:uppercase">${h(f.flag)}</div>
+                  <div style="margin-top:2px;color:rgba(245,236,215,0.85);font-size:13px">${h(f.alt)}</div>
+                </li>
+              `).join('')}
+            </ul>
+          ` : ''}
+        </div>
+      ` : ''}
+    </div>
+
+    <div style="margin:32px 0 14px">
       <h3 class="display" style="font-size:24px;margin:0 0 10px">FAQ</h3>
     </div>
     ${FAQ.map(f => `
@@ -1747,6 +2013,26 @@ function closeSituation() { setState({ situation: null }); }
 function setPlaysTab(t) { setState({ playsTab: t, playsSeed: 0 }); }
 function rerollPlays() { setState({ playsSeed: (state.playsSeed || 0) + 1 }); }
 function rerollTruth() { setState({ truthSeed: (state.truthSeed || 0) + 1 }); }
+function setTruthMode(m) { setState({ truthMode: m, truthSeed: 0 }); }
+
+function addListenedFromInput() {
+  const el = document.getElementById('listened-input');
+  const note = el ? el.value : state.listenedDraft;
+  if (!note || !note.trim()) return;
+  addListened(note);
+  state.listenedDraft = '';
+  render();
+}
+function markListened(id) { markListenedDone(id); render(); }
+function snoozeListenedItem(id) { snoozeListened(id); render(); }
+
+function checkMessageFromInput() {
+  const el = document.getElementById('draft-input');
+  const text = el ? el.value : '';
+  const result = checkDraft(text);
+  setState({ draftCheck: { text, result } });
+}
+function clearDraftCheck() { setState({ draftCheck: null }); }
 
 let saveTimer = null;
 function flashSaved() {
