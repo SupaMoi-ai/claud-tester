@@ -329,14 +329,123 @@
   .offline-pill::before { content: '●'; color: var(--alert); margin-right: 6px; font-size: 10px; }
 
   /* Stagger entrance */
-  .stagger > * { opacity: 0; animation: rise 0.45s ease forwards; }
+  .stagger > * { opacity: 0; animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
   .stagger > *:nth-child(1) { animation-delay: 0.04s; }
   .stagger > *:nth-child(2) { animation-delay: 0.10s; }
   .stagger > *:nth-child(3) { animation-delay: 0.16s; }
   .stagger > *:nth-child(4) { animation-delay: 0.22s; }
   .stagger > *:nth-child(5) { animation-delay: 0.28s; }
   .stagger > *:nth-child(6) { animation-delay: 0.34s; }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* Hero ambient breathing — subtle alive feeling on the phase glow */
+  .hero { position: relative; isolation: isolate; }
+  .hero::after {
+    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+    background: radial-gradient(circle at 75% 25%, rgba(245,236,215,0.22), transparent 60%);
+    opacity: 0.3; animation: breathe 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes breathe { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.42; } }
+
+  /* Modal pacing */
+  .modal-bg { animation: fade-in 0.22s ease-out; }
+  .modal { animation: pop-in 0.26s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pop-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  /* Situation chip bounce when activated */
+  .sit-chip.active { animation: chip-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes chip-pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+  /* Truth/Fact toggle: smoother transitions */
+  .pill { transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.12s ease; }
+  .pill:active:not(.active) { transform: scale(0.96); }
+
+  /* Situation panel fade-in */
+  .sit-panel { animation: panel-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes panel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* Pre-Send Check verdict slide-in */
+  .draft-verdict { animation: verdict-in 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes verdict-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Quick-log button feedback */
+  .qlog { position: relative; overflow: visible; transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease; }
+  .qlog:active { transform: scale(0.97); }
+  .qlog.just-logged { background: rgba(61,170,106,0.18); border-color: var(--green); color: var(--green); }
+  .qlog .floater {
+    position: absolute; top: -4px; right: 8px; pointer-events: none;
+    color: var(--green); font-family: 'Anton', Impact, sans-serif; font-size: 14px;
+    opacity: 0;
+  }
+  .qlog.just-logged .floater { animation: float-up 0.9s ease-out forwards; }
+  @keyframes float-up {
+    0%   { opacity: 0; transform: translateY(0) scale(0.9); }
+    20%  { opacity: 1; transform: translateY(-4px) scale(1); }
+    100% { opacity: 0; transform: translateY(-26px) scale(1); }
+  }
+
+  /* Streak pill tick */
+  .streak-pill { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .streak-pill.tick { transform: scale(1.18); }
+
+  /* Activity strip */
+  .activity-strip {
+    position: sticky; top: 56px; z-index: 28;
+    background: rgba(13,17,23,0.96); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto; white-space: nowrap;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .activity-strip::-webkit-scrollbar { display: none; }
+  .activity-strip .row { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; min-width: max-content; }
+  .activity-strip .pill-act {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 0.14em; padding: 3px 9px;
+    border: 1px solid var(--border); border-radius: 999px;
+    color: rgba(245,236,215,0.75); text-transform: uppercase;
+    animation: slide-in-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .activity-strip .pill-act.streak { border-color: var(--orange); color: var(--orange); }
+  .activity-strip .pill-act.streak.milestone { animation: streak-pulse 1.4s ease-in-out infinite; border-color: var(--red); color: var(--red); }
+  @keyframes slide-in-left { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+  @keyframes streak-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(200,50,44,0.0); } 50% { box-shadow: 0 0 0 6px rgba(200,50,44,0.18); } }
+
+  /* One Move hero card */
+  .move-card {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--mid) 100%);
+    border: 1px solid var(--border); border-left: 5px solid var(--red);
+    border-radius: 12px; padding: 22px; position: relative; overflow: hidden;
+  }
+  .move-card.done { border-left-color: var(--green); }
+  .move-card .move-label { color: var(--red); }
+  .move-card.done .move-label { color: var(--green); }
+  .move-card h2 {
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    font-size: clamp(20px, 5vw, 24px); line-height: 1.32;
+    margin: 10px 0 18px; color: var(--cream);
+  }
+  .move-card .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .move-card .btn-big {
+    background: var(--red); color: var(--cream);
+    padding: 14px 24px; font-family: 'Anton', Impact, sans-serif;
+    text-transform: uppercase; letter-spacing: 0.08em; font-size: 16px;
+    border-radius: 6px; border: 0; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(200,50,44,0.28);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .move-card .btn-big:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(200,50,44,0.4); }
+  .move-card .btn-big:active { transform: scale(0.97); }
+  .move-card .skip { background: none; border: 0; color: rgba(245,236,215,0.55); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; padding: 6px 8px; cursor: pointer; }
+  .move-card .skip:hover { color: var(--cream); }
+
+  /* Reduced motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    .hero::after, .activity-strip .pill-act.streak.milestone, .qlog.just-logged .floater { animation: none; }
+    .stagger > * { animation-duration: 0.01ms; }
+  }
 </style>
 </head>
 <body>
@@ -1152,6 +1261,11 @@ let state = {
   showShare: false,
   showShareQR: false,
   copiedAt: 0,
+  todayMoveDone: localStorage.getItem('brocode_move_done') || null,
+  activityNow: Date.now(),
+  hapticsEnabled: localStorage.getItem('brocode_haptics') !== '0',
+  justLogged: null,
+  streakTick: 0,
   updateReady: false
 };
 
@@ -1199,7 +1313,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.6 · Pass the code</footer>
+    <footer class="app">BRO CODE · v2.7 · Make it feel alive</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1323,6 +1437,7 @@ function renderDashboard(day, phase, len) {
   }
 
   return `
+  ${renderActivityStrip()}
   <div class="stagger">
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
@@ -1351,10 +1466,12 @@ function renderDashboard(day, phase, len) {
         <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
       </div>` : ''}
 
+    ${renderOneMove(day, phase, len)}
+
     <div class="card corners">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
         <div class="label">// daily brief</div>
-        ${streak > 0 ? `<div class="label" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
+        ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
       </div>
 
       <div class="sit-row">
@@ -1375,10 +1492,10 @@ function renderDashboard(day, phase, len) {
       <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
         <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY</button>
+          <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+1</span></button>
+          <button class="btn btn-ghost qlog${state.justLogged==='talk'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK<span class="floater">+1</span></button>
+          <button class="btn btn-ghost qlog${state.justLogged==='conflict'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT<span class="floater">+1</span></button>
+          <button class="btn btn-ghost qlog${state.justLogged==='apology'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY<span class="floater">+1</span></button>
         </div>
       </div>
     </div>
@@ -1477,6 +1594,98 @@ function renderSpiralPanel() {
       </div>
     </div>
   `;
+}
+
+function renderOneMove(day, phase, len) {
+  const today = new Date().toISOString().slice(0,10);
+  const done  = state.todayMoveDone === today;
+  const dInPhase = dayInPhase(day, len);
+  const seed = (state.skipCount || 0) + (state.justLogged === 'skipped' ? 1 : 0);
+  // Use smart-tip selection plus a seed-shift when skipping so re-rolls feel fresh
+  const tip = pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.';
+  const moveText = done
+    ? "Bro, that's the move. See you tomorrow."
+    : tip;
+  return `
+    <div class="move-card${done ? ' done' : ''}">
+      <div class="label move-label">// your one move today</div>
+      <h2>${h(moveText)}</h2>
+      ${done ? `
+        <div class="row">
+          <button class="btn btn-ghost" style="padding:10px 18px;font-size:13px" onclick="undoMove()">↺ UNDO</button>
+        </div>
+      ` : `
+        <div class="row">
+          <button class="btn-big" onclick="markMoveDone()">✓ DONE</button>
+          <button class="skip" onclick="skipMove()">skip ✕</button>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderActivityStrip() {
+  const log = loadLog();
+  const listened = loadListened();
+  const streak = currentStreak();
+  const items = [];
+  // Latest 4 log entries
+  const recent = (log || []).slice(-4).reverse();
+  for (const r of recent) {
+    items.push({ kind: r.kind, label: kindLabel(r.kind), at: r.at });
+  }
+  // Latest 1-2 listened items
+  const openL = (listened || []).filter(x => x.status === 'open').slice(-2).reverse();
+  for (const l of openL) {
+    items.push({ kind: 'listened', label: 'heard "' + (l.note.length > 24 ? l.note.slice(0,22)+'…' : l.note) + '"', at: l.at });
+  }
+  // Sort by time desc, cap at 6
+  items.sort((a,b) => (b.at||0) - (a.at||0));
+  const top = items.slice(0, 6);
+  const milestone = [3,7,14,30,60,90,180,365].includes(streak);
+  return `
+    <div class="activity-strip">
+      <div class="row">
+        <span class="pill-act" style="border-color:rgba(245,236,215,0.15);color:rgba(245,236,215,0.55)">// activity</span>
+        ${streak > 0 ? `<span class="pill-act streak${milestone?' milestone':''}">🔥 ${streak}-day streak</span>` : ''}
+        ${top.length ? top.map(it => `
+          <span class="pill-act">${kindIcon(it.kind)} ${h(it.label)} · ${h(relativeAgo(it.at, state.activityNow))}</span>
+        `).join('') : `<span class="pill-act" style="color:rgba(245,236,215,0.45)">no activity yet — log your first move below</span>`}
+      </div>
+    </div>
+  `;
+}
+
+function kindLabel(k) {
+  switch (k) {
+    case 'gift': return 'gift logged';
+    case 'talk': return 'real talk';
+    case 'conflict': return 'conflict logged';
+    case 'apology': return 'apology logged';
+    case 'move': return 'today\'s move done';
+    default: return k;
+  }
+}
+function kindIcon(k) {
+  switch (k) {
+    case 'gift': return '🎁';
+    case 'talk': return '💬';
+    case 'conflict': return '⚡';
+    case 'apology': return '🙏';
+    case 'move': return '✓';
+    case 'listened': return '👂';
+    default: return '·';
+  }
+}
+function relativeAgo(at, now) {
+  const ms = (now || Date.now()) - (at || 0);
+  if (ms < 60_000) return 'just now';
+  const m = Math.floor(ms / 60_000);
+  if (m < 60) return m + 'm ago';
+  const hr = Math.floor(m / 60);
+  if (hr < 24) return hr + 'h ago';
+  const d = Math.floor(hr / 24);
+  return d + 'd ago';
 }
 
 function renderBroTruth() {
@@ -2002,7 +2211,7 @@ function renderCode() {
         <button class="btn btn-ghost"   style="padding:8px 14px;font-size:13px" onclick="clearDraftCheck()">CLEAR</button>
       </div>
       ${state.draftCheck && state.draftCheck.result ? `
-        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+        <div class="draft-verdict" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
           <div class="label" style="margin-bottom:6px;color:${state.draftCheck.result.tone==='ok'?'var(--green)':state.draftCheck.result.tone==='warn'?'var(--alert)':'var(--red)'}">// verdict</div>
           <p style="margin:0 0 12px;color:var(--cream);font-size:16px;line-height:1.4">${h(state.draftCheck.result.verdict)}</p>
           ${state.draftCheck.result.flags.length ? `
@@ -2060,9 +2269,54 @@ function navMonth(delta) {
 }
 function dismissAlertNow(id) { dismissAlert(id); render(); }
 function toggleGuide(p) { setState({ guideOpen: state.guideOpen === p ? null : p }); }
+
+// ---------- HAPTICS ----------
+function haptic(ms = 12) {
+  if (!state.hapticsEnabled) return;
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch {}
+}
+
+// ---------- ONE MOVE ----------
+function markMoveDone() {
+  const today = new Date().toISOString().slice(0,10);
+  const day = cycleDay(state.profile);
+  const phase = phaseFor(day, state.profile?.cycleLength || 28);
+  addLog('move', phase || 'menstrual');
+  localStorage.setItem('brocode_move_done', today);
+  haptic(18);
+  state.todayMoveDone = today;
+  state.streakTick = 1;
+  render();
+  setTimeout(() => { state.streakTick = 0; render(); }, 240);
+}
+function undoMove() {
+  // Remove today's 'move' entries and clear the done flag
+  const today = new Date().toISOString().slice(0,10);
+  const log = loadLog().filter(l => !(l.date === today && l.kind === 'move'));
+  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+  localStorage.removeItem('brocode_move_done');
+  haptic(8);
+  setState({ todayMoveDone: null });
+}
+function skipMove() {
+  haptic(8);
+  setState({ skipCount: (state.skipCount || 0) + 1 });
+}
+
+// ---------- ACTIVITY TICK ----------
+function tickActivity() { setState({ activityNow: Date.now() }); }
+
 function quickLog(kind, phase) {
   addLog(kind, phase);
+  haptic(12);
+  state.justLogged = kind;
+  state.streakTick = 1;
   render();
+  setTimeout(() => {
+    state.justLogged = null;
+    state.streakTick = 0;
+    render();
+  }, 950);
 }
 function openSituation(name) {
   setState({ situation: state.situation === name ? null : name });
@@ -2306,6 +2560,7 @@ detectInstallHint();
 render();
 applyOnlineStatus();
 if (state.notifEnabled) scheduleNotification();
+setInterval(tickActivity, 60000);
 </script>
 </body>
 </html>
