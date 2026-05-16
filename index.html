@@ -4,46 +4,28 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0D1117" />
-<meta name="description" content="BRO CODE - the playbook for showing up." />
-<title>BRO CODE</title>
+<meta name="description" content="BRO CODE — the cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<title>BRO CODE — the playbook for showing up</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
-<link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="BRO CODE" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="BRO CODE — the playbook for showing up" />
+<meta property="og:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta property="og:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
+<meta property="og:url" content="https://supamoi-ai.github.io/claud-tester/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="BRO CODE — the playbook for showing up" />
+<meta name="twitter:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta name="twitter:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <style>
-  @font-face {
-    font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap;
-    src: url('fonts/Anton-Regular.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-  }
-  @font-face {
-    font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap;
-    src: url('fonts/DMSans.woff2') format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap;
-    src: url('fonts/DMSans.woff2') format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap;
-    src: url('fonts/DMSans.woff2') format('woff2');
-  }
+  @font-face { font-family: 'Anton';   font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/Anton-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
   :root {
-    --red: #C8322C;
-    --orange: #E07A4A;
-    --cream: #F5ECD7;
-    --night: #0D1117;
-    --dark: #161B24;
-    --mid: #1F2837;
-    --border: #2A3547;
-    --green: #3DAA6A;
-    --alert: #E8B84B;
-    --m: #C8322C;
-    --f: #3DAA6A;
-    --o: #E8B84B;
-    --l: #7B68B8;
+    --red: #C8322C; --orange: #E07A4A; --cream: #F5ECD7; --night: #0D1117;
+    --dark: #161B24; --mid: #1F2837; --border: #2A3547; --green: #3DAA6A; --alert: #E8B84B;
+    --m: #C8322C; --f: #3DAA6A; --o: #E8B84B; --l: #7B68B8;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -55,2170 +37,215 @@
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   }
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.05;
-    mix-blend-mode: overlay;
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0.05; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
-  #app { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: 0 16px 80px; }
   .display { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 400; }
-  .label { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: #b8b0a0; }
-  .mono { font-family: 'Courier New', monospace; }
-
-  /* Header */
-  header.app {
+  .label   { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: #b8b0a0; }
+  .wrap    { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; padding: 0 18px; }
+  header {
     position: sticky; top: 0; z-index: 30;
     background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
-  .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .logo .badge { width: 32px; height: 32px; background: var(--red); display: grid; place-items: center; border-radius: 4px; }
-  .logo .badge span { font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: var(--cream); }
-  .logo .name { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 18px; }
-  .menu-btn { background: none; border: 1px solid var(--border); color: var(--cream); padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 18px; }
-
-  /* Tab strip - horizontal scroll on mobile */
-  nav.tabs {
-    position: sticky; top: 57px; z-index: 29;
-    background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  nav.tabs::-webkit-scrollbar { display: none; }
-  nav.tabs .row { display: flex; gap: 4px; padding: 8px 16px; min-width: max-content; }
-  nav.tabs button {
-    background: none; border: none; color: rgba(245,236,215,0.7); padding: 8px 10px;
-    font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em;
-    font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
-  }
-  nav.tabs button.active { color: var(--red); border-bottom-color: var(--red); }
-
-  main { padding: 20px 0; }
-
-  /* Card */
-  .card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-  .card + .card, .card + .alert, .alert + .card, .hero + * { margin-top: 16px; }
-  .corners { position: relative; }
-  .corners::before, .corners::after {
-    content: ''; position: absolute; width: 14px; height: 14px;
-    border-color: var(--red); border-style: solid;
-  }
-  .corners::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-  .corners::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+  header .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; max-width: 1100px; margin: 0 auto; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo .badge { width: 32px; height: 32px; background: var(--red); display: grid; place-items: center; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: var(--cream); }
+  .logo .name  { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 18px; }
+  header .top-cta { padding: 7px 14px; background: var(--red); color: var(--cream); border-radius: 4px; text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; }
 
   /* Hero */
-  .hero {
-    border-radius: 14px; padding: 28px 22px; min-height: 180px;
-    position: relative; overflow: hidden;
+  .hero { padding: 56px 0 48px; text-align: left; }
+  .hero .eyebrow { color: var(--red); margin-bottom: 12px; }
+  .hero h1 {
+    font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
+    font-size: clamp(48px, 14vw, 112px); line-height: 0.92; letter-spacing: 0.02em;
+    margin: 0 0 22px; color: var(--cream); max-width: 16ch;
   }
-  .hero[data-phase="menstrual"] { background: linear-gradient(135deg, #C8322C, #8B1F1B); }
-  .hero[data-phase="follicular"] { background: linear-gradient(135deg, #3DAA6A, #1F6B40); }
-  .hero[data-phase="ovulation"] { background: linear-gradient(135deg, #E8B84B, #B08A20); }
-  .hero[data-phase="luteal"] { background: linear-gradient(135deg, #7B68B8, #4A3D80); }
-  .hero .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  .hero h1 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
-    font-size: clamp(40px, 11vw, 72px); margin: 8px 0 0; line-height: 1; color: var(--cream); }
-  .hero .sub { color: rgba(245,236,215,0.95); margin-top: 14px; font-size: 16px; max-width: 28ch; }
-  .hero .day { text-align: right; }
-  .hero .day .emoji { font-size: 44px; }
-  .hero .day .num { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 18px; color: var(--cream); margin-top: 6px; }
-
-  /* Alert */
-  .alert {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--dark); border-left: 4px solid var(--alert);
-    padding: 14px 16px; border-radius: 4px;
-  }
-  .alert.red { border-left-color: var(--red); }
-  .alert .icon { font-size: 22px; }
-  .alert .text { flex: 1; }
-  .alert .title { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; color: var(--alert); }
-  .alert.red .title { color: var(--red); }
-  .alert .body { color: rgba(245,236,215,0.85); font-size: 14px; margin-top: 2px; }
-  .alert .x { background: none; border: none; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
-
-  /* Progress bar */
-  .progress {
-    position: relative; height: 12px; border-radius: 999px; overflow: hidden;
-    background: var(--night); display: flex;
-  }
-  .progress > span { display: block; height: 100%; }
-  .progress .dot {
-    position: absolute; top: 50%; transform: translate(-50%, -50%);
-    width: 12px; height: 12px; background: var(--cream);
-    border: 2px solid var(--night); border-radius: 999px;
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 50% { transform: translate(-50%,-50%) scale(1.6); opacity: 0.5; } }
-  .progress-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 9px; letter-spacing: 0.18em; color: rgba(245,236,215,0.6); font-family: 'Courier New', monospace; }
-
-  /* Next days */
-  .next { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  @media (min-width: 540px) { .next { grid-template-columns: repeat(4, 1fr); } }
-  .next .day {
-    background: var(--night); border: 1px solid var(--border); border-left-width: 4px;
-    border-radius: 6px; padding: 10px;
-  }
-  .next .day .lab { font-family: 'Courier New', monospace; font-size: 9px; color: rgba(245,236,215,0.6); letter-spacing: 0.18em; text-transform: uppercase; }
-  .next .day .d { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 16px; margin-top: 4px; }
-  .next .day .mood { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; margin-top: 4px; }
-
-  /* Form */
-  input, textarea, select {
-    width: 100%; background: var(--night); border: 1px solid var(--border); color: var(--cream);
-    padding: 11px 12px; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 16px;
-    -webkit-appearance: none;
-  }
-  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--red); }
-  label.field { display: block; margin-bottom: 14px; }
-  label.field > span { display: block; }
-
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 18px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
-    letter-spacing: 0.08em; font-size: 15px; border-radius: 4px;
-    cursor: pointer; border: 1px solid transparent; text-decoration: none;
-    transition: all 0.2s ease;
-  }
-  .btn-primary { background: var(--red); color: var(--cream); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .hero h1 .red { color: var(--red); }
+  .hero .sub { font-size: clamp(17px, 4.4vw, 22px); line-height: 1.45; color: rgba(245,236,215,0.85); max-width: 36ch; margin: 0 0 26px; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 17px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; text-decoration: none; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+  .btn-primary { background: var(--red); color: var(--cream); box-shadow: 0 8px 24px rgba(200,50,44,0.32); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(200,50,44,0.45); }
   .btn-ghost { background: transparent; color: var(--cream); border-color: var(--border); }
   .btn-ghost:hover { border-color: var(--red); color: var(--red); }
+  .trust { font-size: 12px; color: rgba(245,236,215,0.55); font-family: 'Courier New', monospace; letter-spacing: 0.18em; text-transform: uppercase; }
+  .hero-dots { display: flex; gap: 8px; margin-top: 20px; }
+  .hero-dots span { width: 10px; height: 10px; border-radius: 999px; }
+  .hero-dots .m { background: var(--m); } .hero-dots .f { background: var(--f); } .hero-dots .o { background: var(--o); } .hero-dots .l { background: var(--l); }
 
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px;
-    cursor: pointer; font-size: 14px; user-select: none; background: transparent;
-    color: var(--cream); margin: 0 6px 6px 0;
-    transition: all 0.15s ease;
+  /* Sections */
+  .section { padding: 48px 0; border-top: 1px solid var(--border); }
+  .section h2 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(28px, 6vw, 44px); letter-spacing: 0.03em; margin: 6px 0 8px; }
+  .section p.lead { color: rgba(245,236,215,0.75); margin: 0 0 28px; font-size: 16px; max-width: 48ch; }
+  .pillars { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .pillars { grid-template-columns: repeat(3, 1fr); } }
+  .pillar {
+    background: var(--dark); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px; position: relative; overflow: hidden;
   }
-  .pill.active { background: var(--red); border-color: var(--red); }
-  .pill:not(.active):active { background: var(--mid); }
+  .pillar::before, .pillar::after { content: ''; position: absolute; width: 12px; height: 12px; border-color: var(--red); border-style: solid; }
+  .pillar::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .pillar::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+  .pillar .emoji { font-size: 30px; }
+  .pillar h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 22px; margin: 10px 0 8px; color: var(--cream); }
+  .pillar p  { margin: 0; color: rgba(245,236,215,0.78); line-height: 1.5; font-size: 15px; }
+  .pillar:nth-child(2)::before, .pillar:nth-child(2)::after { border-color: var(--green); }
+  .pillar:nth-child(3)::before, .pillar:nth-child(3)::after { border-color: var(--orange); }
 
-  /* Collapsible */
-  .acc { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
-  .acc summary { list-style: none; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
-  .acc summary::-webkit-details-marker { display: none; }
-  .acc[open] { border-color: var(--red); }
-  .acc summary .title-row { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
-  .acc summary .num { font-family: 'Anton', Impact, sans-serif; color: var(--red); font-size: 18px; min-width: 26px; }
-  .acc summary .name { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 16px; flex: 1; }
-  .acc summary .opt { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.18em; color: rgba(245,236,215,0.4); text-transform: uppercase; }
-  .acc summary .plus { font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: rgba(245,236,215,0.6); transition: transform 0.2s ease; }
-  .acc[open] summary .plus { transform: rotate(45deg); }
-  .acc .body { border-top: 1px solid var(--border); padding: 16px; background: rgba(13,17,23,0.45); }
-
-  /* Calendar */
-  .cal-head { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 14px; gap: 8px; flex-wrap: wrap; }
-  .cal-head .month { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 28px; }
-  .cal-head .month .year { color: var(--red); }
-  .cal-grid { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--mid); }
-  .cal-week .wd { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.18em; text-align: center; padding: 8px 0; color: #b8b0a0; border-right: 1px solid var(--border); }
-  .cal-week .wd:last-child { border-right: none; }
-  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); }
-  .cal-day {
-    aspect-ratio: 1 / 1; padding: 4px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-    display: flex; flex-direction: column; justify-content: space-between; position: relative;
+  /* Screenshots */
+  .screens { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -18px; padding: 0 18px 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .screens::-webkit-scrollbar { display: none; }
+  .screens img {
+    flex: 0 0 auto; width: 240px; height: 480px; object-fit: cover; object-position: top center;
+    border-radius: 22px; border: 1px solid var(--border);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+    scroll-snap-align: start;
+    background: var(--dark);
   }
-  .cal-day.out { opacity: 0.25; }
-  .cal-day.today { box-shadow: inset 0 0 0 2px var(--cream); }
-  .cal-day .num { font-family: 'Anton', Impact, sans-serif; font-size: 14px; }
-  .cal-day .badge { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 999px; font-family: 'Anton', Impact, sans-serif; font-size: 9px; display: grid; place-items: center; color: var(--night); }
-  .cal-day .marker { position: absolute; bottom: 2px; right: 4px; font-size: 10px; }
-  .cal-day .lab { position: absolute; bottom: 2px; left: 4px; font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.1em; }
-  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 16px 0; font-size: 12px; }
-  .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
-
-  /* Lists */
-  ul.bullets { margin: 0; padding: 0; list-style: none; }
-  ul.bullets li { display: flex; gap: 10px; padding: 4px 0; color: rgba(245,236,215,0.92); }
-
-  .red-strike { text-decoration: line-through; color: var(--red); font-family: 'Anton', Impact, sans-serif; font-size: 18px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .pro-tip { background: var(--mid); padding: 14px 16px; border-radius: 6px; border-left: 4px solid var(--red); }
-
-  /* Welcome modal */
-  .modal-bg { position: fixed; inset: 0; background: rgba(13,17,23,0.85); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; z-index: 100; }
-  .modal { background: var(--dark); border: 1px solid var(--border); border-radius: 14px; padding: 22px; max-width: 380px; width: 100%; }
-
-  /* Saved flash */
-  .saved { color: var(--green); }
-
-  footer.app { text-align: center; margin: 32px 0 12px; opacity: 0.5; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
-
-  .hidden { display: none !important; }
-
-  /* Situation chips */
-  .sit-row {
-    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-    margin-bottom: 14px;
+  @media (min-width: 720px) {
+    .screens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; overflow: visible; margin: 0; padding: 0; }
+    .screens img { width: 100%; height: auto; aspect-ratio: 9/19; }
   }
-  .sit-chip {
-    background: transparent; color: rgba(245,236,215,0.85);
-    border: 1px solid var(--border); border-radius: 999px;
-    padding: 5px 11px; font-size: 12px;
-    font-family: 'DM Sans', sans-serif; cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s ease;
+
+  /* Numbered steps */
+  ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
+  ol.steps li {
+    counter-increment: step; padding: 14px 0 14px 56px; position: relative; border-top: 1px solid var(--border);
+    color: rgba(245,236,215,0.9); line-height: 1.45; font-size: 16px;
   }
-  .sit-chip:hover, .sit-chip:active { border-color: var(--red); color: var(--cream); }
-  .sit-chip.active { background: var(--red); border-color: var(--red); color: var(--cream); }
-
-  .sit-panel {
-    background: rgba(13,17,23,0.55); border: 1px solid var(--border);
-    border-left: 4px solid var(--red); border-radius: 8px;
-    padding: 14px; margin-bottom: 14px;
+  ol.steps li:first-child { border-top: 0; }
+  ol.steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute; left: 0; top: 14px;
+    font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: var(--red); letter-spacing: 0.04em;
   }
-  .sit-panel .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
 
-  /* Plays card */
-  .plays-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .plays-tabs .pill { margin: 0; font-size: 13px; padding: 6px 12px; }
-
-  /* Install hint */
-  .install-hint {
-    position: fixed; left: 12px; right: 12px;
-    bottom: calc(env(safe-area-inset-bottom) + 12px);
-    z-index: 50;
-    background: rgba(13,17,23,0.96); backdrop-filter: blur(10px);
-    border: 1px solid var(--border); border-left: 4px solid var(--red);
-    border-radius: 10px; padding: 12px 14px;
-    display: flex; align-items: center; gap: 10px;
-    max-width: 520px; margin: 0 auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  /* What it isn't */
+  .nots { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .nots { grid-template-columns: repeat(3, 1fr); } }
+  .not {
+    background: var(--dark); border: 1px solid var(--border); border-left: 4px solid var(--red);
+    border-radius: 8px; padding: 16px;
   }
-  .install-hint.update { border-left-color: var(--green); cursor: pointer; }
-  .install-hint .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
+  .not .display { font-size: 16px; margin-bottom: 4px; color: var(--cream); }
+  .not p { margin: 0; color: rgba(245,236,215,0.75); font-size: 14px; line-height: 1.45; }
 
-  /* Offline pill */
-  .offline-pill {
-    display: none; align-items: center;
-    font-family: 'Courier New', monospace; font-size: 10px;
-    letter-spacing: 0.18em; padding: 3px 9px;
-    border: 1px solid rgba(245,236,215,0.3); border-radius: 999px;
-    color: rgba(245,236,215,0.75); text-transform: uppercase;
-  }
-  .offline-pill.on { display: inline-flex; }
-  .offline-pill::before { content: '●'; color: var(--alert); margin-right: 6px; font-size: 10px; }
+  /* Final CTA */
+  .final { text-align: center; padding: 64px 0; border-top: 1px solid var(--border); }
+  .final h2 { margin: 0 0 18px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(30px, 7vw, 52px); }
 
-  /* Stagger entrance */
-  .stagger > * { opacity: 0; animation: rise 0.45s ease forwards; }
-  .stagger > *:nth-child(1) { animation-delay: 0.04s; }
-  .stagger > *:nth-child(2) { animation-delay: 0.10s; }
-  .stagger > *:nth-child(3) { animation-delay: 0.16s; }
-  .stagger > *:nth-child(4) { animation-delay: 0.22s; }
-  .stagger > *:nth-child(5) { animation-delay: 0.28s; }
-  .stagger > *:nth-child(6) { animation-delay: 0.34s; }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; }
+  footer .label { color: rgba(245,236,215,0.45); }
+  footer a { color: rgba(245,236,215,0.55); text-decoration: none; }
+  footer a:hover { color: var(--red); }
 </style>
 </head>
 <body>
-<div id="app"></div>
-
-<script>
-// ============================================================
-// BRO CODE - single-file mobile build
-// ============================================================
-
-// ---------- DATA ----------
-const PHASES = ['menstrual','follicular','ovulation','luteal'];
-const PHASE_LABEL = { menstrual:'Menstrual', follicular:'Follicular', ovulation:'Ovulation', luteal:'Luteal' };
-const PHASE_COLOR = { menstrual:'#C8322C', follicular:'#3DAA6A', ovulation:'#E8B84B', luteal:'#7B68B8' };
-const PHASE_INIT  = { menstrual:'M', follicular:'F', ovulation:'O', luteal:'L' };
-const PHASE_EMOJI = { menstrual:'🩸', follicular:'🌱', ovulation:'⭐', luteal:'🌙' };
-const PHASE_HERO  = {
-  menstrual: "Bro, she's in recovery mode. Be the one who shows up.",
-  follicular:"Brooooo, her energy's climbing. Match it, support it, ride the wave.",
-  ovulation: "Bro listen — peak window. Peak her. This is the superpower week.",
-  luteal:    "Psst bro — she's reading everything. Be someone worth reading.",
-};
-const PHASE_MOOD = { menstrual:'Tired', follicular:'Rising', ovulation:'Peak', luteal:'Introspective' };
-
-const TIPS = {
-  menstrual: {
-    early: [
-      "Bro, go get her favorite snacks right now. Don't ask, just do it.",
-      "Brooooo, run her a hot bath tonight. Towels ready. Phone on silent.",
-      "Psst bro — take over dinner. Completely. Don't ask what she wants.",
-      "Bro listen — top up the heating pad. Make sure ibuprofen is within reach.",
-      "Real talk bro, cancel anything optional this week. Make space for rest."
-    ],
-    late: [
-      "Bro, she's coming out of the heavy days. Plan something small to look forward to.",
-      "Psst bro — check in tonight. 'How are you feeling?' and actually listen.",
-      "Brooooo, energy's coming back. Suggest a low-key walk together.",
-      "Bro, make her the meal she always asks for. Don't announce it. Just do."
-    ]
-  },
-  follicular: {
-    early: [
-      "Brooooo, energy's climbing. Suggest something fun for the weekend.",
-      "Bro, plan a date. Pick the place, pick the time, just tell her.",
-      "Psst bro — she's open to new things this week. Suggest one. Anything."
-    ],
-    late: [
-      "Bro listen — match her momentum. If she's planning, plan with her.",
-      "Real talk bro, hype her up about the project she keeps mentioning.",
-      "Brooooo, cook together tonight. It's the energy match she wants."
-    ]
-  },
-  ovulation: {
-    early: [
-      "Bro, tell her she looks incredible today. Mean it. Be specific.",
-      "Psst bro — initiate. She wants to be desired right now.",
-      "Bro listen — big conversations land easy this week. Have the one you've been avoiding."
-    ],
-    late: [
-      "Brooooo, peak window. Plan the dinner you keep saying you will.",
-      "Bro, she's confident this week. Back her loudly in front of others.",
-      "Real talk bro — capture this energy. Photo, memory, moment. Future-you wants it."
-    ]
-  },
-  luteal: {
-    early: [
-      "Psst bro — cozy mode starts. Less plans, more presence.",
-      "Bro, order in tonight. Pick the comfort food. Surprise her.",
-      "Brooooo, notice the small stuff. Compliment something specific."
-    ],
-    late: [
-      "Bro listen — late luteal. She's reading everything you do. Be steady.",
-      "Real talk bro, no big discussions. No big surprises. Just presence.",
-      "Bro, get the supplies ready. Period is close. Don't make her ask.",
-      "Psst bro — tonight: blanket, her show, no phone. Just be there."
-    ]
-  }
-};
-
-const ALERTS = {
-  P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:"Bro, stock up. Ibuprofen, snacks, heating pad. Don't make her ask.", icon:'🚨' },
-  P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Brooooo, get the supplies in the house today. Future-you will thank you.', icon:'🚨' },
-  P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Psst bro — patience mode tonight. No big talks. Just be present.', icon:'🚨' },
-  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'Bro. She needs you. Go check on her right now.', icon:'🩸' },
-  OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"Bro listen — peak window. Match her energy. Plan the thing.", icon:'⭐' },
-  LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Real talk bro — cozy mode begins. Less plans, more presence.', icon:'🌙' }
-};
-
-const RULES = [
-  'Bro, never say "are you on your period?" as an explanation for anything. Ever.',
-  'Brooooo, her pain is real. Always. Full stop.',
-  'Psst bro — acts of service speak louder than words on the hard days.',
-  'Bro listen — validation before solutions. Always.',
-  'Real talk bro, track the cycle. Know it before she has to tell you.',
-  'Bro, food in the house = love language. Learn her favorites.',
-  'Brooooo, never compare phases. "You were fine last week" is the killshot. Don\'t.',
-  'Psst bro — silence is sometimes the best answer. Learn when.',
-  'Bro listen — plan ahead. Knowing her cycle is your secret weapon.',
-  "Real talk bro, she doesn't need you to fix it. She needs you to show up."
-];
-
-const PHRASE_BANK = [
-  { s:"She's in pain", lines:["I'm so sorry. What can I do right now?","Let me get the heating pad. Stay there.","I'm not going anywhere. Tell me what helps."] },
-  { s:"She's crying", lines:["Come here. I've got you.","You don't have to explain anything.","I'm not going anywhere."] },
-  { s:"She's irritable", lines:["I hear you. That sounds frustrating.","What do you need from me right now?","Take your time. I'll be here."] },
-  { s:"She wants space", lines:["I'm here when you're ready.","Take whatever time you need.","I'll handle dinner. Don't worry about anything."] },
-  { s:"She wants to talk", lines:["I'm listening. Tell me everything.","That makes sense. What else?","I get why you'd feel that way."] },
-  { s:"She's doubting herself", lines:["I've watched you do harder things than this.","You're not wrong about this. I see it too.","You've got this. And I've got you."] },
-  { s:"She needs validation", lines:["You're not crazy. That was unfair.","Your feelings make complete sense.","I would have felt the same way."] },
-  { s:"She's at peak energy", lines:["You're glowing today. I noticed.","Tell me what you're working on. I want to hear it.","Whatever you want to do tonight - I'm in."] }
-];
-
-const RED_LIST = [
-  { phrase:"Calm down", why:"It signals you don't think her feelings are valid." },
-  { phrase:"You're overreacting", why:"Her feelings are real, even if intense." },
-  { phrase:"Is this PMS?", why:"Reduces her emotions to biology, dismisses the real issue." },
-  { phrase:"Just relax", why:"She's not choosing to feel this way." },
-  { phrase:"Other women don't make this big a deal", why:"Never compare her to other women." },
-  { phrase:"I can't say anything right", why:"This makes it about you." }
-];
-
-const BRO_TRUTHS = [
-  "Bro, every guy who's ever loved a woman has been here. You're not failing — you're paying attention.",
-  "Brooooo, her brain literally runs different software for two weeks a month. This is biology, not you.",
-  "Psst bro — she'll feel like a totally different person in 72 hours. Hold the line.",
-  "Bro, the fact that you're using this app puts you in the top 5%. Most guys never even Google this.",
-  "Real talk bro — you don't have to solve it. 'I'm here' is the whole answer.",
-  "Bro listen — you can't outsmart estrogen. Nobody has. Stop trying.",
-  "Brooooo, the worst possible move is silence + distance. Skip that one and you're already winning.",
-  "Psst bro — she remembers what you DID, not what you said. Move forward, not sideways.",
-  "Bro, you're allowed to be tired too. Refuel before you're running on empty.",
-  "Brooooo, ovulation week she's either gonna fall in love with you again or remember she could do better. Be there. Make it the first one.",
-  "Real talk bro — saying 'are you on your period' is gasoline on a candle. Just don't.",
-  "Bro, the period IS coming. It's a calendar. Don't act surprised every 28 days.",
-  "Psst bro — being a great partner doesn't mean disappearing. Take your guy time. Come back better.",
-  "Bro listen — late luteal isn't her being mean. It's her bullshit detector at max. Adjust.",
-  "Brooooo, you don't have to be perfect. You have to be there. That's 80% of the gig.",
-  "Bro, validation > solutions. Always. Even when your brain is screaming 'BUT I COULD FIX IT'. Sit on it.",
-  "Psst bro — if you're stressed reading her, take a breath. She's not your enemy. The clock isn't running.",
-  "Bro, the small stuff is the big stuff. Heating pad on the couch before she asks = elite move.",
-  "Real talk bro — she'll forgive a lot if you actually apologize. She'll forgive nothing if you don't.",
-  "Brooooo, you're not crazy. The dynamic IS different week to week. Now you have a map.",
-  "Bro, three things you control: what you bring home, how you listen, how you show up. That's the whole job.",
-  "Psst bro — your job isn't to never mess up. It's to repair faster than you mess up. Get good at the repair.",
-  "Bro listen — your nervous system is a tool. Slow your voice. Lower your shoulders. She'll mirror it.",
-  "Real talk bro, you're not going to learn this overnight. You learn it over years. You're early. Be patient with yourself.",
-  "Brooooo, the resentment you feel for taking care of her — pause. Did she ask? Or did you assume? Half the time it's the second one.",
-  "Bro, sex isn't a thermometer. Some weeks it's hot, some weeks it's a hand on her back. Both count.",
-  "Psst bro — checking in costs nothing. 'How are you, really?' once a day. Watch the difference.",
-  "Bro, the version of you that pays attention is the version she fell for. Be that guy more often."
-];
-
-const BRO_FACTS = [
-  "Bro fact: women experience pain at lower thresholds during ovulation. Yes, even period pain. Yes, that's biology.",
-  "Brooooo fact: estrogen affects how she perceives YOUR mood. If you're stressed, she feels it 2x. Calm down for her.",
-  "Psst bro — testosterone spikes in her during ovulation. Yes, women have testosterone. That's why she's bolder this week.",
-  "Bro real quick: the luteal phase is ALWAYS 14 days. Doesn't matter what cycle length. Ovulation = period day minus 14.",
-  "Brooooo, sleep gets worse in luteal due to progesterone changes. She's not lazy. She's chemically tired.",
-  "Bro fact: PMDD (severe PMS) affects 3-8% of women and is on the WHO disease list. Not 'vibes.'",
-  "Psst bro — her sense of smell is sharpest during ovulation. Your cologne lands different this week.",
-  "Bro listen — orgasms can reduce period cramps. Make of that what you will.",
-  "Brooooo fact: cortisol (stress) blocks progesterone. If she's overwhelmed AND in luteal, that's a chemical pile-up.",
-  "Real talk bro — her gut bacteria literally change across the cycle. Cravings aren't 'just cravings.'",
-  "Bro fact: cycle-syncing exercise — high intensity in follicular, restorative in luteal — is actual research.",
-  "Psst bro — birth control changes ALL of this. If she's on hormonal birth control, phases work differently.",
-  "Brooooo, the average woman bleeds 30-40ml total per period. About 2 tablespoons. It feels like more.",
-  "Bro fact: roughly 90% of women feel some premenstrual symptoms. The 10% who don't aren't lying. People vary.",
-  "Real talk bro — chocolate cravings in luteal are partly real. Magnesium drops. Dark chocolate is high in magnesium.",
-  "Bro listen — ovulation = peak fertility, but she can technically conceive 5 days before. Sperm live a while.",
-  "Brooooo, postpartum cycles can take 6-18 months to return. Don't expect normal right after baby.",
-  "Psst bro — endometriosis affects ~10% of women and is wildly underdiagnosed. If she says period pain is bad, believe her.",
-  "Bro fact: the cycle isn't synced to the moon. That's vibes, not biology. Sorry to ruin that one.",
-  "Real talk bro — perimenopause can start in her late 30s. Cycle gets unpredictable years before it stops.",
-  "Bro, on the day of ovulation, her face is measurably more symmetric. Yes, peer-reviewed. Yes, wild.",
-  "Brooooo, women average 3 more REM sleep cycles per night than men. She's not 'extra tired' — you're just less tired."
-];
-
-const DECODER = [
-  { phrase: "I'm fine",             meaning: "Bro, she's not fine. She wants you to notice without being asked.",                 move: "Sit next to her. Don't ask why. Hand on her back. 'I'm here, no rush.'" },
-  { phrase: "Whatever",             meaning: "Brooooo, she has a preference and you missed it.",                                   move: "Pick something specific. Wrong pick > no pick. Decisiveness beats correctness." },
-  { phrase: "Do whatever you want", meaning: "Psst bro — trap. She has an opinion. Don't take the bait.",                          move: "'I'd rather we decide together. What's on your mind?'" },
-  { phrase: "We need to talk",      meaning: "Bro listen — buckle up. Be early. Don't fix on impulse.",                            move: "'Yeah, I'm here. When and where?' Then LISTEN. Don't rehearse rebuttals." },
-  { phrase: "I'm not mad",          meaning: "Real talk bro, she is. Or she's hurt. Take it seriously.",                            move: "Don't argue the label. 'I hear you. Walk me through it.'" },
-  { phrase: "Go ahead",             meaning: "Bro, she's testing if you'll really do it. Spoiler: don't.",                          move: "'On second thought, let's skip it.' Watch her body language." },
-  { phrase: "Fine.",                meaning: "Brooooo, hard fine. Not fine at all.",                                                move: "Don't argue the period — 'You seem off. What's up?' Stay calm." },
-  { phrase: "K",                    meaning: "Psst bro — you did something. Or didn't do something. Look back 24h.",               move: "Don't double-text. Call her. 'I think I might've messed up — talk to me.'" },
-  { phrase: "Sure",                 meaning: "Bro, reluctant yes.",                                                                 move: "Verify: 'You sure-sure? Or sure-fine?' Make space to say no." },
-  { phrase: "Nothing's wrong",      meaning: "Real talk bro — something is. She doesn't want to launch into it yet.",               move: "Don't push. 'Okay. I'm here when you want to.' Then actually be there." },
-  { phrase: "I don't care",         meaning: "Brooooo, she cares. She's tired of carrying the decision.",                           move: "Take the decision off her plate. Be specific. 'I'm ordering Thai. Sound good?'" },
-  { phrase: "It's fine, really",    meaning: "Bro listen — doubled-fine = not fine. The 'really' is the tell.",                     move: "Slow down. 'Real talk — what's going on?'" },
-  { phrase: "Forget it",            meaning: "Psst bro — do not actually forget it.",                                               move: "'No, I want to hear it. Take your time.'" },
-  { phrase: "If you say so",        meaning: "Bro, she thinks you're wrong but doesn't want to fight.",                             move: "Step back. 'Wait — what am I missing?' Curiosity beats defending." },
-  { phrase: "I'm tired",            meaning: "Brooooo, could be sleep. Could be 'tired of carrying this.' Check the phase.",        move: "Ask warmly. Late luteal? Assume both. Take a chore off her plate." },
-  { phrase: "Nothing",              meaning: "Real talk bro — something. Always.",                                                  move: "Drop the question for now. Notice it later when she's softer." },
-  { phrase: "It doesn't matter",    meaning: "Bro, it matters.",                                                                    move: "Validate first: 'I think it does matter, and I want to understand.'" },
-  { phrase: "Have fun",             meaning: "Psst bro — sometimes literal. Sometimes 'I wish you'd stayed.' Read the energy.",     move: "If unsure: 'I'd rather skip if you're not into it. We good?'" }
-];
-
-const RED_PATTERNS = [
-  { rx: /\b(calm down|just relax|chill out|relax babe)\b/i,                                       flag: "calm-down",         alt: "Try: 'I see you're upset. Walk me through it.'" },
-  { rx: /\b(over\s*react(?:ing)?|too sensitive|too much|hysterical|crazy|irrational)\b/i,         flag: "minimize",          alt: "Try: 'Your reaction makes sense to me. What hurt most?'" },
-  { rx: /\b(is this PMS|are you on your period|that time of the month)\b/i,                       flag: "cycle-dismiss",     alt: "Try: 'Something's off and I want to understand without making assumptions.'" },
-  { rx: /\b(other (women|girls)|my ex|like (my )?mom)\b/i,                                        flag: "compare",           alt: "Try: 'I'm sorry. Let's stay on what you and I need.'" },
-  { rx: /\bI can'?t (say|do) anything right\b/i,                                                  flag: "make-it-about-you", alt: "Try: 'I hear that I keep missing it. Help me see what would land.'" },
-  { rx: /\b(whatever|nevermind|forget it|move on)\b/i,                                            flag: "shutdown",          alt: "Try: 'I want to keep talking. I'm not going anywhere.'" },
-  { rx: /\byou'?re always\b/i,                                                                    flag: "always-never",      alt: "Try: 'Lately I've noticed X.' Specific, not absolute." },
-  { rx: /\byou never\b/i,                                                                         flag: "always-never",      alt: "Try: 'I missed that you needed Y. I'll work on it.'" }
-];
-
-const MANSPLAIN_PATTERNS = [
-  { rx: /^\s*well,?\s*actually/i,                                                                 flag: "well-actually",      alt: "Did she ask? If no, just listen." },
-  { rx: /\b(what you (should|need to) do|all you have to do)\b/i,                                 flag: "advice-unasked",     alt: "Try: 'Want my take, or just to vent?'" },
-  { rx: /\b(it'?s actually (simple|easy)|just (think|listen|breathe|relax))\b/i,                  flag: "minimize-difficulty",alt: "Try: 'I can see why that's hard.'" },
-  { rx: /\b(have you tried|why don'?t you (just )?)\b/i,                                          flag: "have-you-tried",     alt: "Skip the solution. Listen, mirror, then ask 'want suggestions or no?'" }
-];
-
-const RECEIPT_VERDICTS = {
-  killing: "Bro, you're cooking. Don't slow down.",
-  great:   "Brooooo, you're showing up. She sees it.",
-  good:    "Psst bro — solid. One more deliberate move this week and you're crushing.",
-  meh:     "Real talk bro — light week. Pick one thing. Do it tonight.",
-  rough:   "Bro listen — work to do. Don't beat yourself up. Apologize if needed, then keep moving."
-};
-
-const CONVERSATIONS = {
-  menstrual: [
-    "What's the one thing that would actually help today?",
-    "Want me to handle the next decision so you don't have to think?",
-    "Is there anyone you want me to text on your behalf?",
-    "What show do you want to disappear into tonight?"
-  ],
-  follicular: [
-    "What's the thing you've been wanting to try?",
-    "If we could plan anything for next weekend - what?",
-    "What's a project you're excited about right now?",
-    "What's something new you want us to do together?"
-  ],
-  ovulation: [
-    "What's the conversation we've been avoiding? Let's have it.",
-    "Tell me about the thing you're proudest of this month.",
-    "What do you want more of in our life right now?",
-    "Where do you want to travel - one trip, any budget?"
-  ],
-  luteal: [
-    "Is there anything I haven't been seeing this week?",
-    "What's been weighing on you that we haven't talked about?",
-    "What can I take off your plate tonight?",
-    "Have I been showing up the way you need me to?"
-  ]
-};
-
-const DATES = {
-  menstrual: [
-    "Bro, cancel everything. Build a fort. Her show, your job: snacks.",
-    "Brooooo, order in from her favorite place. Run her a bath after.",
-    "Psst bro — movie night, low lights, weighted blanket. No talking required."
-  ],
-  follicular: [
-    "Bro listen — try the new place you've both been curious about.",
-    "Real talk bro, Saturday hike + coffee shop after. Fresh-energy match.",
-    "Bro, cook something neither of you has made before. Together."
-  ],
-  ovulation: [
-    "Brooooo, the dinner reservation you keep delaying. Tonight.",
-    "Psst bro — dress up. Go out. Take a photo. She wants the memory.",
-    "Bro, drinks somewhere with a view. Have the real conversation."
-  ],
-  luteal: [
-    "Bro, order in. Same couch. Her pick. Phone face-down.",
-    "Brooooo, cozy dinner at home. Light a candle. Make it intentional.",
-    "Psst bro — hot chocolate + a walk if the weather's right. Low stakes."
-  ]
-};
-
-const APOLOGY = {
-  menstrual: {
-    moves: [
-      "Bro, acknowledge what you actually did. No \"I'm sorry you feel\" garbage.",
-      "Psst bro — do not defend, do not explain. Just sit with it.",
-      "Then ask her: what would help right now? And mean it."
-    ],
-    lines: [
-      "I was wrong. What I did wasn't okay.",
-      "You don't have to forgive me right now. I'll be here when you're ready.",
-      "I'm taking everything off your plate tonight. Don't lift a finger."
-    ]
-  },
-  follicular: {
-    moves: [
-      "Brooooo, apologize cleanly, then redirect to action. She has energy for repair now.",
-      "Bro, plan something concrete that shows you heard her.",
-      "Psst bro — don't over-talk it. Repair, then move forward together."
-    ],
-    lines: [
-      "You were right. I see it now. Here's what I'll do differently.",
-      "Let me make it up to you — this weekend, your call, my plan.",
-      "I want to do better. Tell me what better looks like."
-    ]
-  },
-  ovulation: {
-    moves: [
-      "Bro, bring it up directly. She's clearest and most generous this week.",
-      "Bro listen — be specific about what you got wrong. No vague apologies.",
-      "Real talk bro, have the bigger conversation she's been wanting to have."
-    ],
-    lines: [
-      "I owe you a real apology. Not a quick one.",
-      "I should have shown up. I didn't. That's on me.",
-      "Walk me through what hurt — I want to actually understand it."
-    ]
-  },
-  luteal: {
-    moves: [
-      "Bro, lead with humility. Her bullshit detector is at peak this week.",
-      "Psst bro — do not minimize. Do not bring up your side. Don't even try.",
-      "Then go quiet, bro. Presence beats words this week."
-    ],
-    lines: [
-      "You weren't wrong. I was. I'm sorry.",
-      "You don't have to explain why it hurt. I get it.",
-      "I'm not going anywhere. Take whatever space you need."
-    ]
-  }
-};
-
-const TIME_TIPS = {
-  menstrual: {
-    morning:   ["Bro, coffee in her hand before she asks. Ibuprofen on the nightstand.","Brooooo, make her breakfast. Don't ask what she wants — just bring something soft.","Psst bro — lay out the heating pad. Quietly. She'll find it."],
-    afternoon: ["Bro, text 'I'm picking up groceries, what do you need?' Don't ask IF. Just do.","Bro listen — send her a 'thinking of you' text. No question attached.","Real talk bro, order her favorite snack to her work."],
-    evening:   ["Brooooo, run her a bath. Towel warm. No talking required.","Bro, dinner is handled. Tell her not to even look at the kitchen.","Psst bro — light dim, blanket warm, her show queued up."],
-    night:     ["Bro, she's wired or tired — read her. Quiet presence wins.","Brooooo, foot rub or back rub if she's awake. No agenda.","Psst bro — tuck her in. Phone on silent. You're a guard dog tonight."]
-  },
-  follicular: {
-    morning:   ["Brooooo, match her rising energy. Make a plan for the day over coffee.","Bro, she's open to new things this week — suggest one for today.","Psst bro — hype her up about whatever she's working on this morning."],
-    afternoon: ["Bro listen — pick a weekend plan and tell her. She likes initiative right now.","Real talk bro, send her something that made you think of her. Song, photo, anything.","Brooooo, suggest cooking together tonight."],
-    evening:   ["Bro, plan tonight or tomorrow — she has the energy for both.","Brooooo, try the new place. Tonight's the night to use the 'we should go someday' list.","Psst bro — cook together. Music on. This is the easy week, use it."],
-    night:     ["Bro, don't crash the energy with a heavy talk. Save it for ovulation.","Brooooo, late-night walk if the night's good. Movement matches her phase.","Psst bro — set tomorrow up together before bed. She likes structure right now."]
-  },
-  ovulation: {
-    morning:   ["Bro, she's at peak clarity — have the real conversation over breakfast.","Brooooo, tell her she looks incredible. Be specific. Mean it.","Psst bro — match her ambition. What's the win today?"],
-    afternoon: ["Bro, surprise her with something mid-day. Peak energy = peak memory.","Bro listen — send the photo of her you've been keeping. Tell her why you love it.","Real talk bro, plan the dinner you keep delaying. Reserve it now."],
-    evening:   ["Brooooo, tonight is the night for the conversation you've been avoiding.","Bro, dress up. Go out. She wants to be seen with you.","Psst bro — initiate. She wants to be desired this week."],
-    night:     ["Bro listen — capture the moment. Photo, voice note, anything. Future-you will thank you.","Brooooo, don't drift into your phone. Her, eyes, presence.","Bro, late dinner, dim light, real talk. This window is rare."]
-  },
-  luteal: {
-    morning:   ["Bro, bring her tea, not coffee, if she's wired. Watch which she reaches for.","Brooooo, keep the morning soft. No big asks. Let her ease in.","Psst bro — check the comfort drawer. Heating pad, ibuprofen, her favorite tea."],
-    afternoon: ["Bro, text her one specific thing you appreciate. Not generic.","Bro listen — pick up dinner so she doesn't have to think about it.","Real talk bro, cancel the optional plan tonight. She won't ask, but she'll thank you."],
-    evening:   ["Brooooo, cozy mode. Order in. Phone face down. Same couch.","Bro, don't bring up anything heavy tonight. Save it for follicular.","Psst bro — light a candle. Make tonight feel intentional, not just default."],
-    night:     ["Bro, she's reading everything you do tonight. Be calm. Be steady. Be present.","Brooooo, no phone. No drift. Just be next to her.","Psst bro — tomorrow's gentler if tonight is. Tuck in early."]
-  }
-};
-
-const TRANSITION_TIPS = {
-  menstrual:  "Psst bro — menstrual hits tomorrow. Stock the comfort drawer tonight: heating pad, ibuprofen, her favorites. Cancel anything optional this week.",
-  follicular: "Bro, follicular kicks in tomorrow. Energy climbing back. Have one fun plan in your back pocket to suggest.",
-  ovulation:  "Bro listen — ovulation tomorrow. Peak window. If there's a real conversation you've been holding, this is the week.",
-  luteal:     "Real talk bro, luteal hits tomorrow. Sensitivity rises. Volume down, patience up. Big talks can wait."
-};
-
-const FOLLOWUP_TIPS = {
-  menstrual:  "Bro, you had a conflict recently. She's in recovery mode now — don't bring it up. Act it out: show up, do the things, don't make her ask.",
-  follicular: "Brooooo, you had a conflict recently. She has energy to repair this week. A clean apology + a concrete plan lands well now.",
-  ovulation:  "Psst bro — you had a conflict recently. This week she's clearest. Have the real follow-up conversation. Lead with what you got wrong.",
-  luteal:     "Real talk bro, you had a conflict recently. She remembers. A clean apology now beats waiting — silence reads as not caring.",
-  generic:    "Bro, you had a conflict recently. Don't let it sit. A specific 'I was wrong about X' is the move."
-};
-
-const NON_GIFT_TIPS = {
-  menstrual:  "Bro, you gave a gift recently — good move. Now switch tracks: acts of service. Do the dishes, take the chore, no announcement.",
-  follicular: "Psst bro — you gave a gift recently. This week she wants YOU, not stuff. Plan something to do together.",
-  ovulation:  "Brooooo, you gave a gift recently. This week she wants your attention. Phone away, eyes up, real conversation.",
-  luteal:     "Bro listen — you gave a gift recently. This week she wants presence over presents. Same couch, no agenda.",
-  generic:    "Real talk bro — recent gift logged. Don't stack. Switch love languages today: words, time, touch, or service."
-};
-
-const SITUATIONS = [
-  { id:'crying',    label:"She's crying",   emoji:'💧' },
-  { id:'angry',     label:"She's angry",    emoji:'⚡' },
-  { id:'quiet',     label:"She's quiet",    emoji:'🌫️' },
-  { id:'messup',    label:"I messed up",    emoji:'🆘' },
-  { id:'spiraling', label:"I'm spiraling",  emoji:'🫁' }
-];
-
-const SITUATION_FIRST = {
-  crying: {
-    menstrual:  "Bro, sit down next to her. Don't talk. Hand on her back. That's the whole first move.",
-    follicular: "Brooooo, ask once: 'do you want to be held or do you want space?' Then do exactly that.",
-    ovulation:  "Psst bro — hold her. She's allowed to cry at peak too. Don't try to fix it.",
-    luteal:     "Bro, get next to her. Quiet body language. Don't ask why — she'll tell you when she's ready."
-  },
-  angry: {
-    menstrual:  "Bro, lower your voice. Don't match her temperature. Acknowledge, don't defend.",
-    follicular: "Psst bro — listen all the way to the end before you say anything. Then repeat back what you heard.",
-    ovulation:  "Bro listen — she's clear-headed. The anger is information. Take it seriously, not personally.",
-    luteal:     "Real talk bro — don't argue. Don't fix. Validate: 'you're not wrong to be upset.' Then go quiet."
-  },
-  quiet: {
-    menstrual:  "Bro, don't fill the silence. Bring her tea. Sit nearby. Available, not pressing.",
-    follicular: "Brooooo, light check-in: 'you doing okay?' If she says yes, drop it. Believe her.",
-    ovulation:  "Bro, direct: 'something on your mind?' She'll tell you straight this week.",
-    luteal:     "Psst bro — don't ask why she's quiet. Just be steady. She's processing. Presence is enough."
-  },
-  messup: {
-    menstrual:  APOLOGY.menstrual.moves[0],
-    follicular: APOLOGY.follicular.moves[0],
-    ovulation:  APOLOGY.ovulation.moves[0],
-    luteal:     APOLOGY.luteal.moves[0]
-  }
-};
-
-const SITUATION_NEVER = {
-  crying:  "Why are you crying?",
-  angry:   "You're being irrational.",
-  quiet:   "What's wrong with you tonight?",
-  messup:  "I'm sorry you feel that way."
-};
-
-const FAQ = [
-  { q:"Is PMS real?", a:"Bro, yes. It's in the medical literature. 3-8% of women have PMDD, the severe version. Hormones in the luteal phase have measurable effects on mood, pain, energy, and thinking. Not vibes. Science." },
-  { q:"Should we have sex during her period?", a:"Brooooo, up to both of you. Some women want more, some want zero touch. Communicate. Read her cues. Don't assume either way." },
-  { q:"What if she says the cycle doesn't affect her?", a:"Psst bro — believe her. Cycles affect women differently. Some feel almost nothing, some feel everything. Either way, knowing the cycle and being kind never hurts." },
-  { q:"What if she gets angry at me?", a:"Bro listen — validate first, fix second. Don't blame the cycle, that's dismissive and it'll make it worse. Address what she actually said. Then, if needed, follow up about the dynamic later. Calmly." },
-  { q:"Should I ever mention her cycle?", a:"Real talk bro — rarely, carefully, and never as a dismissal. \"I know this week is harder, I've got you\" = care. \"Are you on your period?\" = the opposite, every time." },
-  { q:"What's the difference between PMS and PMDD?", a:"Bro, PMS = mild-to-moderate pre-period symptoms. PMDD = severe, life-disrupting symptoms (deep depression, rage, intense anxiety). PMDD needs medical support, not a heating pad." },
-  { q:"How do I bring this up without being weird?", a:"Bro, just try: \"I want to understand you better, and your cycle is part of that. I built this thing to help me show up better.\" Most partners hear that as care, not surveillance." }
-];
-
-const NEUROLOGY = [
-  { id:'adhd', label:'ADHD', info:'Cycle phases amplify ADHD symptoms. Structure and low-stim helps.' },
-  { id:'anxiety', label:'Anxiety', info:'Luteal phase can spike anxiety. Extra calm, extra reassurance.' },
-  { id:'depression', label:'Depression / Mood', info:'Hormone dips in late luteal can deepen depressive episodes.' },
-  { id:'autism', label:'Autism / Neurodivergent', info:'Sensory and routine changes hit harder. Predictability is caring.' },
-  { id:'sensory', label:'Sensory Sensitivity', info:'Noise, light, smell all matter more during menstruation.' }
-];
-
-const GUIDE = {
-  menstrual: {
-    days:'Days 1-5',
-    bio:"Bro, estrogen and progesterone are at rock bottom. The uterine lining is literally shedding. Energy down, pain up, sleep broken. Her body is doing real measurable work. Treat it that way.",
-    say:["I'm taking care of dinner. Don't lift a finger.","What sounds good? Snack run, food, anything.","You don't owe anyone productivity this week."],
-    never:["Aren't you done with that yet?","You were fine yesterday.","It can't be that bad."],
-    pro:"Real talk bro — the first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week."
-  },
-  follicular: {
-    days:'Days 6-13',
-    bio:"Brooooo, estrogen's climbing. Energy back. Mood up. Brain sharper. She wants new things, social connection, motion. This is her building phase. Match it.",
-    say:["What's the plan this weekend? I'm in.","You're on fire lately. I see it.","Want to try something new tonight?"],
-    never:["Why are you suddenly so busy?","Calm down with all the plans.","You're being too much."],
-    pro:"Bro listen — plan adventures now. Book the trip. Start the project together. The momentum here is real and finite. Use it."
-  },
-  ovulation: {
-    days:'Days 14-17',
-    bio:"Bro, estrogen peaks. Testosterone spikes. Maximum cognitive performance, social confidence, and libido. This is her sharpest, boldest, most magnetic window. Don't sleep on it.",
-    say:["You look incredible.","Whatever you want to do - yes.","Tell me about the thing you're working on."],
-    never:["You're full of yourself today.","Why are you so flirty?","Slow down a bit."],
-    pro:"Psst bro — have the important conversation NOW. Money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it."
-  },
-  luteal: {
-    days:'Days 18-28',
-    bio:"Real talk bro — progesterone rises then crashes. Sensitivity to noise, smell, social slights goes up. Patience for nonsense goes down. Her bullshit detector is at peak. Be honest, be steady, be present.",
-    say:["I noticed you handled that today. That was strong.","Tonight is whatever you want it to be.","I'm not going anywhere. We're good."],
-    never:["Why are you so emotional?","It's just the cycle, right?","Can you let it go?"],
-    pro:"Bro, late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here — she's reading the truth more clearly than usual."
-  }
-};
-
-const PERSONALIZE = {
-  menstrual: [
-    [p => has(p.neurology,'adhd'),    "Bro, keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
-    [p => has(p.neurology,'anxiety'), "Brooooo, extra physical closeness helps. Don't leave her alone if she seems distressed."],
-    [p => p.social==='introvert',     "Psst bro — don't fill the silence. Presence without pressure."],
-    [p => p.social==='extrovert',     "Bro, she still wants company — just low-energy company."],
-    [p => has(p.love,'acts'),         "Bro listen — do the dishes, the laundry, dinner. No asking. Just do."],
-    [p => has(p.love,'words'),        "Real talk bro, tell her she's strong. Her body is doing something incredible."],
-    [p => has(p.love,'touch'),        "Bro, hold her. Back rubs. Warm presence. That's the whole move."],
-    [p => p.type==='a-type',          "Psst bro — she hates feeling unproductive. Normalize rest as productive."]
-  ],
-  follicular: [
-    [p => p.social==='extrovert',     "Brooooo, she wants social. Be her hype man and plan something."],
-    [p => p.type==='a-type',          "Bro, she's in optimal mode. Support ambitious plans, don't dim the lights."],
-    [p => has(p.neurology,'adhd'),    "Psst bro — she may hyperfocus on a new project. Support it, don't redirect."],
-    [p => has(p.love,'time'),         "Bro listen — she wants adventures together. Plan it. Tonight."]
-  ],
-  ovulation: [
-    [p => p.type==='a-type',          "Bro, this is her peak performance window. Don't slow her down."],
-    [p => has(p.love,'touch'),        "Brooooo, she's most interested in intimacy now. Match that energy."],
-    [p => has(p.love,'words'),        "Bro, tell her she's incredible. She wants to hear it from you. Specifically."],
-    [p => has(p.neurology,'adhd'),    "Psst bro — great window for important conversations. She's most focused this week."]
-  ],
-  luteal: [
-    [p => has(p.neurology,'anxiety'),    "Bro listen — late luteal amplifies anxiety. Be extra steady."],
-    [p => has(p.neurology,'depression'), "Real talk bro, most vulnerable window. Watch for mood drops. Be present, don't lecture."],
-    [p => p.social==='introvert',        "Bro, give her the quiet she needs without making her feel guilty about it."],
-    [p => p.type==='a-type',             "Brooooo, her productivity dips naturally. Normalize this. Don't comment on it."],
-    [p => has(p.love,'acts'),            "Psst bro — this is when acts of service matter most. Do everything. No announcement."],
-    [p => has(p.neurology,'adhd'),       "Bro, routine matters more now. Don't disrupt it. Hold the line."]
-  ]
-};
-
-function has(arr, val) { return Array.isArray(arr) && arr.includes(val); }
-
-// ---------- CYCLE MATH ----------
-const DAY = 86400000;
-function midnight(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
-function cycleDay(p, today=new Date()) {
-  if (!p?.lastPeriod) return null;
-  const len = p.cycleLength || 28;
-  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
-  if (diff < 0) return null;
-  return ((diff % len) + len) % len + 1;
-}
-function phaseFor(day, len=28) {
-  if (!day) return null;
-  const fEnd = Math.floor(len*0.46), oEnd = Math.floor(len*0.61);
-  if (day <= 5) return 'menstrual';
-  if (day <= fEnd) return 'follicular';
-  if (day <= oEnd) return 'ovulation';
-  return 'luteal';
-}
-function phaseRanges(len=28) {
-  const fEnd = Math.floor(len*0.46), oEnd = Math.floor(len*0.61);
-  return { menstrual:[1,5], follicular:[6,fEnd], ovulation:[fEnd+1,oEnd], luteal:[oEnd+1,len] };
-}
-function dayInPhase(day, len=28) {
-  const r = phaseRanges(len)[phaseFor(day,len)];
-  return day - r[0] + 1;
-}
-function daysToNextPeriod(p, today=new Date()) {
-  if (!p?.lastPeriod) return null;
-  const len = p.cycleLength || 28;
-  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
-  const cycles = diff < 0 ? 0 : Math.floor(diff/len) + 1;
-  const next = new Date(midnight(p.lastPeriod).getTime() + cycles*len*DAY);
-  return Math.max(0, Math.ceil((next - midnight(today)) / DAY));
-}
-function fertilityFor(day, len=28) {
-  if (!day) return { state:'unknown', label:'—' };
-  const ovuDay = Math.max(1, Math.round(len - 14));
-  const distance = day - ovuDay;
-  if (distance === 0) return { state:'peak', label:'Peak fertility', ovuDay, distance };
-  if (distance >= -5 && distance <= 1) return { state:'fertile', label:'Fertile window', ovuDay, distance };
-  return { state:'low', label:'Low chance', ovuDay, distance };
-}
-function latePeriodState(p, today=new Date()) {
-  if (!p?.lastPeriod) return null;
-  const len = p.cycleLength || 28;
-  const diff = Math.floor((midnight(today) - midnight(p.lastPeriod)) / DAY);
-  if (diff < 0) return null;
-  const lateBy = diff - len + 1;
-  if (lateBy < 1) return null;
-  if (lateBy >= 7) return { lateBy, severity:'high' };
-  if (lateBy >= 3) return { lateBy, severity:'medium' };
-  return { lateBy, severity:'low' };
-}
-function infoFor(p, date) {
-  if (!p?.lastPeriod) return { phase:null, day:null };
-  const len = p.cycleLength || 28;
-  const diff = Math.floor((midnight(date) - midnight(p.lastPeriod)) / DAY);
-  if (diff < 0) return { phase:null, day:null };
-  const day = (diff % len) + 1;
-  return { day, phase: phaseFor(day, len) };
-}
-function pickTip(profile, phase, dInPhase) {
-  const personal = (PERSONALIZE[phase]||[])
-    .filter(([m])=>{ try { return m(profile); } catch { return false; } })
-    .map(([,line])=>line);
-  const seed = (new Date(profile.lastPeriod).getDate() || 0) + (dInPhase||1);
-  if (personal.length && seed % 3 !== 0) return personal[seed % personal.length];
-  const t = TIPS[phase];
-  if (!t) return null;
-  const list = (dInPhase||1) <= 3 ? t.early : t.late;
-  return list[seed % list.length];
-}
-function timeOfDay(d = new Date()) {
-  const h = d.getHours();
-  if (h < 5)  return 'night';
-  if (h < 12) return 'morning';
-  if (h < 17) return 'afternoon';
-  if (h < 22) return 'evening';
-  return 'night';
-}
-function nextPhase(p) {
-  const i = PHASES.indexOf(p);
-  return PHASES[(i + 1) % PHASES.length];
-}
-function nextPhaseTransition(day, len) {
-  const r = phaseRanges(len);
-  for (const p of PHASES) if (r[p] && day === r[p][1]) return { from: p, next: nextPhase(p), daysAway: 1 };
-  return null;
-}
-function daysAgo(ts) {
-  return Math.floor((Date.now() - ts) / DAY);
-}
-function lastLog(kind, withinDays = 7) {
-  const log = loadLog();
-  const cutoff = Date.now() - withinDays * DAY;
-  for (let i = log.length - 1; i >= 0; i--) {
-    if ((!kind || log[i].kind === kind) && (log[i].at || 0) >= cutoff) return log[i];
-  }
-  return null;
-}
-function pickSmartTip(profile, phase, dInPhase) {
-  if (!profile?.lastPeriod) return null;
-  const len = profile.cycleLength || 28;
-  const day = cycleDay(profile);
-
-  // 1) phase transition next-day heads-up
-  const tx = nextPhaseTransition(day, len);
-  if (tx && TRANSITION_TIPS[tx.next]) return TRANSITION_TIPS[tx.next];
-
-  // 2) recent conflict — push a follow-up move
-  const conf = lastLog('conflict', 3);
-  if (conf && daysAgo(conf.at) >= 1) return FOLLOWUP_TIPS[phase] || FOLLOWUP_TIPS.generic;
-
-  // 3) recent gift — switch love language
-  const gift = lastLog('gift', 4);
-  if (gift && daysAgo(gift.at) <= 2) return NON_GIFT_TIPS[phase] || NON_GIFT_TIPS.generic;
-
-  // 4) time-of-day awareness
-  const tod = timeOfDay();
-  const arr = TIME_TIPS[phase]?.[tod];
-  if (arr && arr.length) {
-    const seed = new Date().getDate() + (dInPhase || 1);
-    return arr[seed % arr.length];
-  }
-
-  // 5) fallback to existing tip engine
-  return pickTip(profile, phase, dInPhase);
-}
-function pickGifts(profile) {
-  const out = [];
-  const cravings = profile?.cravings || [];
-  const love = profile?.love || [];
-  const comfort = profile?.comfort || [];
-  const fav = (profile?.favorites || '').trim();
-
-  if (has(cravings,'sweet'))   out.push(fav ? `Her favorite — ${fav.split(',')[0].trim()}.` : 'Dark chocolate + a handwritten note tucked in.');
-  if (has(cravings,'salty'))   out.push('Her go-to salty snack stash refilled. No announcement.');
-  if (has(cravings,'carbs'))   out.push('Pick up the comfort-carb she always craves. Pre-warmed.');
-  if (has(cravings,'spicy'))   out.push('Surprise takeout from her favorite spicy place.');
-  if (has(comfort,'heat'))     out.push('Her hoodie pre-warmed in the dryer. Heating pad ready.');
-  if (has(comfort,'cuddles'))  out.push('Cancel tonight. Couch, blanket, no agenda. You\'re the gift.');
-  if (has(comfort,'massage'))  out.push('30-min back-rub coupon. Cash it in tonight.');
-  if (has(comfort,'blanket'))  out.push('The weighted blanket she keeps eyeing. Buy it.');
-  if (has(love,'touch'))       out.push('Slow morning. Coffee in bed. Hand on her back.');
-  if (has(love,'words'))       out.push('Write the specific thing you appreciate. Not a text — a note.');
-  if (has(love,'acts'))        out.push('Take a chore she hates and do it without telling her first.');
-  if (has(love,'time'))        out.push('Block the night. Phones away. Two hours, fully present.');
-  if (has(love,'gifts'))       out.push('Something tiny but specific — flowers in her favorite, not generic roses.');
-
-  // Fallbacks if profile has nothing matched
-  if (!out.length) {
-    out.push('Her favorite takeout, ordered without asking.');
-    out.push('A note. Three sentences. What you actually appreciate.');
-    out.push('Take a chore off her plate. Don\'t mention it.');
-  }
-  return out.slice(0, 4);
-}
-function buildAlert(profile, day) {
-  if (!profile) return null;
-  const days = daysToNextPeriod(profile);
-  if (day === 1) return ALERTS.P0;
-  if (days === 1) return ALERTS.P1;
-  if (days === 2) return ALERTS.P2;
-  if (days === 3) return ALERTS.P3;
-  if (day === 14) return ALERTS.OVU;
-  if (day === 18) return ALERTS.LUT;
-  return null;
-}
-
-// ---------- STORAGE ----------
-const KEY = 'brocode_profile';
-const SEEN = 'brocode_seen';
-const DISMISS = 'brocode_dismiss';
-const LOG_KEY = 'brocode_log';
-const NOTIF_KEY = 'brocode_notif';
-const NOTIF_LAST = 'brocode_notif_last';
-const INSTALL_DISMISS = 'brocode_install_dismissed';
-function loadProfile() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
-function saveProfile(p) {
-  const stamped = { ...p, updatedAt: new Date().toISOString() };
-  if (!stamped.createdAt) stamped.createdAt = stamped.updatedAt;
-  localStorage.setItem(KEY, JSON.stringify(stamped));
-  return stamped;
-}
-function clearProfile() { localStorage.removeItem(KEY); }
-function dismissedToday(id) {
-  const today = new Date().toISOString().slice(0,10);
-  try {
-    const m = JSON.parse(localStorage.getItem(DISMISS)) || {};
-    return (m[today]||[]).includes(id);
-  } catch { return false; }
-}
-function dismissAlert(id) {
-  const today = new Date().toISOString().slice(0,10);
-  let m = {}; try { m = JSON.parse(localStorage.getItem(DISMISS)) || {}; } catch {}
-  m[today] = m[today] || [];
-  if (!m[today].includes(id)) m[today].push(id);
-  localStorage.setItem(DISMISS, JSON.stringify(m));
-}
-function loadLog() { try { return JSON.parse(localStorage.getItem(LOG_KEY)) || []; } catch { return []; } }
-function addLog(kind, phase) {
-  const log = loadLog();
-  log.push({ date: new Date().toISOString().slice(0,10), kind, phase, at: Date.now() });
-  if (log.length > 365) log.splice(0, log.length - 365);
-  localStorage.setItem(LOG_KEY, JSON.stringify(log));
-}
-function loggedToday() {
-  const today = new Date().toISOString().slice(0,10);
-  return loadLog().some(l => l.date === today);
-}
-function currentStreak() {
-  const log = loadLog();
-  if (!log.length) return 0;
-  const days = new Set(log.map(l => l.date));
-  let streak = 0;
-  let d = new Date();
-  for (let i = 0; i < 365; i++) {
-    const key = d.toISOString().slice(0,10);
-    if (days.has(key)) streak++;
-    else if (i > 0) break;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-
-// ---------- LISTENED (Did-She-Tell-You) ----------
-const LISTENED_KEY = 'brocode_listened';
-function loadListened() { try { return JSON.parse(localStorage.getItem(LISTENED_KEY)) || []; } catch { return []; } }
-function saveListened(arr) { localStorage.setItem(LISTENED_KEY, JSON.stringify(arr)); }
-function addListened(note) {
-  const n = (note || '').trim();
-  if (!n) return;
-  const arr = loadListened();
-  arr.push({ id: 'L' + Date.now(), note: n, at: Date.now(), status: 'open' });
-  saveListened(arr);
-}
-function markListenedDone(id) {
-  const arr = loadListened().map(x => x.id === id ? { ...x, status: 'done', doneAt: Date.now() } : x);
-  saveListened(arr);
-}
-function snoozeListened(id) {
-  const arr = loadListened().map(x => x.id === id ? { ...x, at: Date.now() } : x);
-  saveListened(arr);
-}
-function getStaleListened() {
-  const cutoff = Date.now() - 5 * DAY;
-  return loadListened().filter(x => x.status === 'open' && x.at < cutoff);
-}
-
-// ---------- CYCLE STATS (The Receipt) ----------
-function cycleStats(profile, log) {
-  if (!profile?.lastPeriod) return null;
-  const len = profile.cycleLength || 28;
-  const start = midnight(profile.lastPeriod);
-  const now = midnight(new Date());
-  const diff = Math.floor((now - start) / DAY);
-  const cycleNum = Math.max(1, Math.floor(diff / len) + 1);
-  const cycleStartMs = start.getTime() + (cycleNum - 1) * len * DAY;
-  const cycleEndMs = cycleStartMs + len * DAY;
-  const inCycle = (log || []).filter(l => (l.at || 0) >= cycleStartMs && (l.at || 0) < cycleEndMs);
-  const count = (k) => inCycle.filter(l => l.kind === k).length;
-  const uniqueDays = new Set(inCycle.map(l => l.date)).size;
-  const days = Math.max(1, Math.min(len, Math.floor((Date.now() - cycleStartMs) / DAY) + 1));
-  const gifts     = count('gift');
-  const talks     = count('talk');
-  const conflicts = count('conflict');
-  const apologies = count('apology');
-  const wins  = gifts + talks + apologies;
-  const score = wins / (conflicts + 1);
-  let verdict = 'rough';
-  if (score >= 6) verdict = 'killing';
-  else if (score >= 4) verdict = 'great';
-  else if (score >= 2) verdict = 'good';
-  else if (score >= 1) verdict = 'meh';
-  return { cycleNum, len, days, uniqueDays, gifts, talks, conflicts, apologies, verdict, isLastDay: (days === len) };
-}
-
-// ---------- PRE-SEND CHECK ----------
-function checkDraft(text) {
-  const t = (text || '').trim();
-  if (!t) return null;
-  const flags = [];
-  for (const r of RED_PATTERNS)       if (r.rx.test(t)) flags.push(r);
-  for (const r of MANSPLAIN_PATTERNS) if (r.rx.test(t)) flags.push(r);
-  if (!flags.length) return { tone: 'ok',   verdict: "Bro, it's fine. Send it.", flags: [] };
-  if (flags.length === 1) return { tone: 'warn', verdict: "Hmm bro — one flag. Read below.", flags };
-  return { tone: 'bad', verdict: "BRO. NO. Rewrite this one.", flags };
-}
-
-// ---------- HELPERS ----------
-const h = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
-
-// ---------- STATE ----------
-let state = {
-  tab: 'dashboard',
-  profile: loadProfile(),
-  view: new Date(),
-  showWelcome: localStorage.getItem(SEEN) !== '1',
-  guideOpen: null,
-  notifEnabled: localStorage.getItem(NOTIF_KEY) === '1' && (typeof Notification !== 'undefined') && Notification.permission === 'granted',
-  showInstallHint: false,
-  playsTab: 'ask',
-  playsSeed: 0,
-  situation: null,
-  truthSeed: 0,
-  truthMode: 'truth',
-  decoderPick: '',
-  draftCheck: null,
-  listenedDraft: '',
-  updateReady: false
-};
-
-function setState(patch) {
-  state = { ...state, ...patch };
-  render();
-}
-
-// ---------- RENDER ----------
-const TABS = [
-  { id:'dashboard', label:'Dashboard' },
-  { id:'calendar',  label:'Calendar' },
-  { id:'profile',   label:'Her Profile' },
-  { id:'guide',     label:'The Guide' },
-  { id:'code',      label:'The Code' }
-];
-
-function render() {
-  const root = $('#app');
-  const day = cycleDay(state.profile);
-  const len = state.profile?.cycleLength || 28;
-  const phase = phaseFor(day, len);
-
-  let body = '';
-  if (state.tab === 'dashboard') body = renderDashboard(day, phase, len);
-  else if (state.tab === 'calendar') body = renderCalendar();
-  else if (state.tab === 'profile') body = renderProfile();
-  else if (state.tab === 'guide') body = renderGuide(phase);
-  else if (state.tab === 'code') body = renderCode();
-
-  root.innerHTML = `
-    <header class="app">
-      <div class="logo" onclick="go('dashboard')">
-        <div class="badge"><span>BC</span></div>
+  <header>
+    <div class="row">
+      <div class="logo">
+        <div class="badge">BC</div>
         <div class="name">Bro Code</div>
       </div>
-      <span class="offline-pill" id="offline-pill">OFFLINE · cache</span>
-    </header>
-    <nav class="tabs">
-      <div class="row">
-        ${TABS.map(t => `<button class="${state.tab===t.id?'active':''}" onclick="go('${t.id}')">${t.label}</button>`).join('')}
-      </div>
-    </nav>
-    <main>${body}</main>
-    <footer class="app">BRO CODE · v2.5 · Decoder + Insight</footer>
-    ${state.updateReady ? `
-      <div class="install-hint update" onclick="applyUpdate()">
-        <div style="flex:1;line-height:1.35">
-          <div class="display" style="color:var(--cream);font-size:14px;letter-spacing:0.08em">NEW VERSION READY</div>
-          <div style="font-size:12px;color:rgba(245,236,215,0.75);margin-top:2px">Tap anywhere on this banner to refresh.</div>
-        </div>
-        <button class="x" onclick="event.stopPropagation(); dismissUpdate()" aria-label="Dismiss">×</button>
-      </div>` : ''}
-    ${state.showInstallHint ? `
-      <div class="install-hint">
-        <div style="flex:1;line-height:1.35">
-          <div class="display" style="color:var(--cream);font-size:14px;letter-spacing:0.08em">ADD TO HOME SCREEN</div>
-          <div style="font-size:12px;color:rgba(245,236,215,0.75);margin-top:2px">Tap <strong>Share</strong> → <strong>Add to Home Screen</strong> for offline + daily reminders.</div>
-        </div>
-        <button class="x" onclick="dismissInstallHint()" aria-label="Dismiss">×</button>
-      </div>` : ''}
-    ${state.showWelcome ? renderWelcome() : ''}
-  `;
-  applyOnlineStatus();
-}
-
-function renderWelcome() {
-  return `
-    <div class="modal-bg" onclick="dismissWelcome()">
-      <div class="modal corners" onclick="event.stopPropagation()">
-        <div class="label" style="margin-bottom:14px">// system :: welcome</div>
-        <h2 class="display" style="font-size:34px;line-height:1;margin:0 0 16px">BRO CODE.</h2>
-        <p style="margin:0 0 12px;color:rgba(245,236,215,0.85)">The guys who show up don't do it by accident. They learn. They track. They adjust.</p>
-        <p class="display" style="color:var(--red);font-size:16px;margin:0 0 18px">This is your playbook.</p>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissWelcome()">ENTER →</button>
-      </div>
+      <a class="top-cta" href="app.html">OPEN APP →</a>
     </div>
-  `;
-}
+  </header>
 
-function renderDashboard(day, phase, len) {
-  if (!state.profile?.lastPeriod) return renderQuickStart();
+  <div class="wrap">
+    <section class="hero">
+      <div class="label eyebrow">// section :: bro code</div>
+      <h1>The playbook<br/>for <span class="red">showing up.</span></h1>
+      <p class="sub">The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
+        <a class="btn btn-ghost" href="#how">SEE HOW IT WORKS</a>
+      </div>
+      <div class="trust">No login · No tracking · Everything stays on your phone</div>
+      <div class="hero-dots"><span class="m"></span><span class="f"></span><span class="o"></span><span class="l"></span></div>
+    </section>
 
-  const late = latePeriodState(state.profile);
-  if (late) { day = len; phase = 'luteal'; }
-  const days = late ? 0 : daysToNextPeriod(state.profile);
-  const tip = pickSmartTip(state.profile, phase, dayInPhase(day, len));
-  const alert = late ? null : buildAlert(state.profile, day);
-  const showAlert = alert && !dismissedToday(alert.id);
-  const ranges = phaseRanges(len);
-  const pct = ((day-1)/len)*100;
-  const fert = fertilityFor(day, len);
-  const mode = state.profile.fertilityMode || 'off';
-  const streak = currentStreak();
-  const didToday = loggedToday();
-  const todayIdx = Math.floor((midnight(new Date()) - midnight(new Date('2024-01-01'))) / DAY);
-  const avoid = RED_LIST[todayIdx % RED_LIST.length];
-
-  const today = new Date();
-  const next = [1,2,3,4].map(i => {
-    const d = new Date(today); d.setDate(d.getDate()+i);
-    const info = infoFor(state.profile, d);
-    return { d, ...info, label: i===1?'Tomorrow':'+ '+i };
-  });
-
-  const segments = PHASES.map(p => {
-    const [s,e] = ranges[p];
-    return `<span style="background:${PHASE_COLOR[p]};width:${((e-s+1)/len)*100}%"></span>`;
-  }).join('');
-
-  const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
-
-  let fertPill = '';
-  if (fert.state !== 'low' && fert.state !== 'unknown') {
-    const peak = fert.state === 'peak';
-    let bg = 'rgba(245,236,215,0.18)', fg = 'var(--cream)', txt = peak ? 'PEAK FERTILITY' : 'FERTILE WINDOW';
-    if (mode === 'ttc')   { bg = 'rgba(61,170,106,0.22)'; fg = '#7DE0A5'; txt = peak ? 'PEAK • TRY TONIGHT' : 'FERTILE • TRY TONIGHT'; }
-    if (mode === 'avoid') { bg = 'rgba(200,50,44,0.25)';  fg = '#FF9B96'; txt = peak ? 'PEAK • HIGH RISK'  : 'FERTILE • PROTECT'; }
-    fertPill = `<div style="display:inline-flex;align-items:center;gap:6px;background:${bg};color:${fg};font-family:'Anton',Impact,sans-serif;letter-spacing:0.1em;font-size:11px;padding:4px 10px;border-radius:999px;margin-top:8px">${peak?'🔴':'🟡'} ${txt}</div>`;
-  }
-
-  let lateBanner = '';
-  if (late) {
-    const high = late.severity === 'high';
-    lateBanner = `
-      <div class="alert ${high?'red':''}">
-        <div class="icon">${high?'⚠️':'⏳'}</div>
-        <div class="text">
-          <div class="title">${high?'PERIOD LATE BY '+late.lateBy+' DAYS':'PERIOD RUNNING LATE'}</div>
-          <div class="body">${high?'Consider a pregnancy test. Could also be stress, travel, or illness. Be calm. Be present.':'Late by '+late.lateBy+' day'+(late.lateBy===1?'':'s')+'. Not unusual — but worth noting. Watch for symptoms.'}</div>
+    <section class="section">
+      <div class="label">// what it does</div>
+      <h2>Three things, every day.</h2>
+      <p class="lead">Each phase of her cycle has a different code. The app reads where she is, then tells you what to do.</p>
+      <div class="pillars">
+        <div class="pillar">
+          <div class="emoji">🔥</div>
+          <h3>Know the cycle</h3>
+          <p>Phase-aware daily moves, fertility window, late-period detection, and a 4-phase calendar so you're never surprised.</p>
         </div>
-      </div>`;
-  }
-
-  return `
-  <div class="stagger">
-    <div class="hero corners" data-phase="${phase}">
-      <div class="top">
-        <div>
-          <div class="label" style="color:rgba(245,236,215,0.8)">// ${h(heroName)} :: phase</div>
-          <h1>${PHASE_LABEL[phase]}</h1>
-          <div class="sub">${PHASE_HERO[phase]}</div>
-          ${fertPill}
+        <div class="pillar">
+          <div class="emoji">💬</div>
+          <h3>Say the right thing</h3>
+          <p>Situation chips, a Decoder for what she actually means, and a Pre-Send Check that flags red-flag phrases before you hit send.</p>
         </div>
-        <div class="day">
-          <div class="emoji">${PHASE_EMOJI[phase]}</div>
-          <div class="num">DAY ${day} / ${len}</div>
+        <div class="pillar">
+          <div class="emoji">🫁</div>
+          <h3>Show up consistently</h3>
+          <p>One-tap log for gifts, talks, conflicts, apologies. Streak counter. End-of-cycle Receipt of how you actually showed up.</p>
         </div>
       </div>
-    </div>
+    </section>
 
-    ${lateBanner}
+    <section class="section">
+      <div class="label">// what it looks like</div>
+      <h2>Built for the phone in your hand.</h2>
+      <p class="lead">Swipe through. Same app, different surfaces.</p>
+      <div class="screens">
+        <img src="screens/s1-dashboard.png" alt="Dashboard with phase hero, daily brief, and situation chips" />
+        <img src="screens/s2-situation.png" alt="Situation panel with phase-aware first move and exact phrases" />
+        <img src="screens/s3-decoder.png"   alt="The Decoder translating 'we need to talk' into the move" />
+        <img src="screens/s4-calendar.png"  alt="Calendar view with the 4-phase cycle laid out by day" />
+      </div>
+    </section>
 
-    ${showAlert ? `
-      <div class="alert ${alert.tone==='red'?'red':''}">
-        <div class="icon">${alert.icon}</div>
-        <div class="text">
-          <div class="title">${alert.title}</div>
-          <div class="body">${alert.body}</div>
+    <section class="section" id="how">
+      <div class="label">// how it works</div>
+      <h2>30 seconds to set up.</h2>
+      <p class="lead">No bloated onboarding. No friend invites. Just the math.</p>
+      <ol class="steps">
+        <li>Add the first day of her last period. That's it.</li>
+        <li>The app figures out where she is in the cycle.</li>
+        <li>Every day, you get one specific move tuned to her phase + her profile.</li>
+        <li>When something's happening right now, tap a situation chip. Phase-aware moves + exact phrases.</li>
+        <li>End of the cycle: a one-page Receipt of how you actually showed up.</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <div class="label">// what it isn't</div>
+      <h2>Some honesty up front.</h2>
+      <div class="nots">
+        <div class="not">
+          <div class="display">Not a doctor.</div>
+          <p>This isn't medical advice. PMDD, endometriosis, anything severe — that's a real conversation with a real provider.</p>
         </div>
-        <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
-      </div>` : ''}
-
-    <div class="card corners">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
-        <div class="label">// daily brief</div>
-        ${streak > 0 ? `<div class="label" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
-      </div>
-
-      <div class="sit-row">
-        <div class="label" style="margin-right:4px">// right now</div>
-        ${SITUATIONS.map(s => `
-          <button class="sit-chip ${state.situation===s.id?'active':''}" onclick="openSituation('${s.id}')">${s.emoji} ${h(s.label)}</button>
-        `).join('')}
-      </div>
-
-      ${state.situation ? renderSituationPanel(state.situation, phase) : `
-        <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(tip||'')}</p>
-      `}
-
-      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:6px">
-        <div class="label" style="color:var(--red);margin-bottom:6px">// avoid today</div>
-        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="red-strike" style="font-size:15px">${h(avoid.phrase)}</span><span style="color:rgba(245,236,215,0.6);font-size:13px">${h(avoid.why)}</span></div>
-      </div>
-      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
-        <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT</button>
-          <button class="btn btn-ghost" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY</button>
+        <div class="not">
+          <div class="display">Not a tracker for her.</div>
+          <p>This is for you. She has Clue, Flo, whatever she likes. This is the coach in your pocket.</p>
         </div>
-      </div>
-    </div>
-
-    ${renderPlaysCard(phase)}
-
-    ${renderListenedCard()}
-
-    ${renderBroTruth()}
-
-    ${renderReceiptCard()}
-
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="label">// cycle progress</div>
-        <div class="label">${days===0?'PERIOD TODAY':`${days} ${days===1?'DAY':'DAYS'} TO PERIOD`}</div>
-      </div>
-      <div class="progress">
-        ${segments}
-        <span class="dot" style="left:${pct}%"></span>
-      </div>
-      <div class="progress-row"><span>MENSTRUAL</span><span>FOLLICULAR</span><span>OVULATION</span><span>LUTEAL</span></div>
-    </div>
-
-    <div class="card">
-      <div class="label" style="margin-bottom:14px">// what's coming</div>
-      <div class="next">
-        ${next.map(n => `
-          <div class="day" style="border-left-color:${PHASE_COLOR[n.phase]}">
-            <div class="lab">${n.label}</div>
-            <div class="d">${n.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase()}</div>
-            <div class="mood" style="color:${PHASE_COLOR[n.phase]}">${PHASE_MOOD[n.phase]}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  </div>`;
-}
-
-function renderSituationPanel(sit, phase) {
-  if (sit === 'spiraling') return renderSpiralPanel();
-
-  const first = SITUATION_FIRST[sit]?.[phase] || 'Slow down. Breathe. She doesn\'t need you to fix it.';
-  const never = SITUATION_NEVER[sit] || '';
-  const label = SITUATIONS.find(s => s.id === sit)?.label || '';
-
-  let phrases = [];
-  if (sit === 'messup') {
-    phrases = APOLOGY[phase]?.lines || [];
-  } else {
-    const map = { crying:"She's crying", angry:"She's irritable", quiet:"She wants space" };
-    const bank = PHRASE_BANK.find(g => g.s === map[sit]);
-    phrases = bank ? bank.lines.slice(0, 3) : [];
-  }
-
-  return `
-    <div class="sit-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="display" style="font-size:18px;color:var(--red)">${h(label)}</div>
-        <button class="x" onclick="closeSituation()" aria-label="Close">×</button>
-      </div>
-      <div class="label" style="margin-bottom:6px">// first move</div>
-      <p style="margin:0 0 14px;color:var(--cream);line-height:1.4">${h(first)}</p>
-      ${phrases.length ? `
-        <div class="label" style="color:var(--green);margin-bottom:6px">// say this</div>
-        <ul class="bullets" style="margin-bottom:14px">
-          ${phrases.map(p => `<li><span style="color:var(--green)">✓</span><span>"${h(p)}"</span></li>`).join('')}
-        </ul>
-      ` : ''}
-      ${never ? `
-        <div class="label" style="color:var(--red);margin-bottom:6px">// don't say</div>
-        <div style="display:flex;align-items:baseline;gap:8px"><span class="red-strike" style="font-size:14px">${h(never)}</span></div>
-      ` : ''}
-    </div>
-  `;
-}
-
-function renderSpiralPanel() {
-  const seed = state.truthSeed || 0;
-  const base = new Date().getDate() + seed;
-  const picks = [0, 1, 2].map(i => BRO_TRUTHS[(base + i * 7) % BRO_TRUTHS.length]);
-  return `
-    <div class="sit-panel" style="border-left-color:var(--green)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="display" style="font-size:18px;color:var(--green)">I'M SPIRALING</div>
-        <button class="x" onclick="closeSituation()" aria-label="Close">×</button>
-      </div>
-      <div class="label" style="margin-bottom:6px;color:var(--green)">// breathe</div>
-      <p style="margin:0 0 14px;color:var(--cream);line-height:1.45">Bro. In through the nose, 4 seconds. Hold 2. Out through the mouth, 6 seconds. Do it five times before reading on. No phone in between.</p>
-      <div class="label" style="margin-bottom:6px;color:var(--green)">// three truths</div>
-      <ul class="bullets" style="margin-bottom:6px">
-        ${picks.map(t => `<li><span style="color:var(--green)">▸</span><span>${h(t)}</span></li>`).join('')}
-      </ul>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px">
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollTruth()">⟳ NEW TRUTHS</button>
-      </div>
-    </div>
-  `;
-}
-
-function renderBroTruth() {
-  const seed = state.truthSeed || 0;
-  const mode = state.truthMode || 'truth';
-  const pool = mode === 'fact' ? BRO_FACTS : BRO_TRUTHS;
-  const idx = (new Date().getDate() + seed) % pool.length;
-  const line = pool[idx];
-  return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-        <div style="display:flex;gap:8px">
-          <button class="pill ${mode==='truth'?'active':''}" style="padding:4px 12px;font-size:11px;margin:0" onclick="setTruthMode('truth')">// TRUTH</button>
-          <button class="pill ${mode==='fact'?'active':''}"  style="padding:4px 12px;font-size:11px;margin:0" onclick="setTruthMode('fact')">// FACT</button>
-        </div>
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollTruth()">⟳ ROTATE</button>
-      </div>
-      <p style="font-size:17px;line-height:1.4;margin:0;color:var(--cream);font-weight:300">${h(line)}</p>
-    </div>
-  `;
-}
-
-function renderListenedCard() {
-  const open = loadListened().filter(x => x.status === 'open').sort((a,b) => b.at - a.at);
-  const recent = open.slice(0, 3);
-  const stale = getStaleListened();
-  return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="label">// she told you</div>
-        <div class="label" style="color:rgba(245,236,215,0.5)">${open.length} OPEN</div>
-      </div>
-      ${stale.length ? `
-        <div style="background:rgba(232,184,75,0.12);border-left:3px solid var(--alert);padding:8px 10px;border-radius:4px;margin-bottom:12px">
-          <div class="label" style="color:var(--alert);margin-bottom:4px">// heads up</div>
-          <div style="color:var(--cream);font-size:13px;line-height:1.4">Bro, she told you about "${h(stale[0].note)}" ${Math.floor((Date.now() - stale[0].at)/DAY)} days ago. Bring it up.</div>
-        </div>
-      ` : ''}
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input id="listened-input" placeholder="e.g., sister's wedding May 20" style="flex:1" oninput="state.listenedDraft = this.value" value="${h(state.listenedDraft || '')}" />
-        <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="addListenedFromInput()">+ ADD</button>
-      </div>
-      ${recent.length ? recent.map(item => {
-        const age = Math.floor((Date.now() - item.at) / DAY);
-        return `
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)">
-            <div style="flex:1;min-width:0">
-              <div style="color:var(--cream);font-size:14px;line-height:1.35">${h(item.note)}</div>
-              <div class="label" style="color:rgba(245,236,215,0.45);margin-top:2px">${age === 0 ? 'TODAY' : age + ' DAY' + (age===1?'':'S') + ' AGO'}</div>
-            </div>
-            <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px" onclick="snoozeListenedItem('${item.id}')">SNOOZE</button>
-            <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px;color:var(--green);border-color:var(--green)" onclick="markListened('${item.id}')">DONE</button>
-          </div>
-        `;
-      }).join('') : `<p style="color:rgba(245,236,215,0.5);margin:0;font-style:italic;font-size:13px">Bro, nothing logged yet. Next time she mentions something important, add it here so future-you doesn't forget.</p>`}
-    </div>
-  `;
-}
-
-function renderReceiptCard() {
-  const log = loadLog();
-  const stats = cycleStats(state.profile, log);
-  if (!stats) return '';
-  const verdictLine = RECEIPT_VERDICTS[stats.verdict] || RECEIPT_VERDICTS.meh;
-  const title = stats.isLastDay ? '// the receipt is in' : '// this cycle';
-  const verdictColor = stats.verdict === 'killing' || stats.verdict === 'great' ? 'var(--green)'
-                     : stats.verdict === 'good' ? 'var(--cream)'
-                     : stats.verdict === 'meh' ? 'var(--alert)'
-                     : 'var(--red)';
-  return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="label">${title}</div>
-        <div class="label" style="color:rgba(245,236,215,0.55)">CYCLE ${stats.cycleNum} · DAY ${stats.days}/${stats.len}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
-        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.gifts}</div><div class="label" style="font-size:9px">🎁 GIFTS</div></div>
-        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.talks}</div><div class="label" style="font-size:9px">💬 TALKS</div></div>
-        <div style="text-align:center"><div class="display" style="font-size:24px;color:${stats.conflicts > 0 ? 'var(--red)' : 'var(--cream)'}">${stats.conflicts}</div><div class="label" style="font-size:9px">⚡ CONFLICTS</div></div>
-        <div style="text-align:center"><div class="display" style="font-size:24px;color:var(--cream)">${stats.apologies}</div><div class="label" style="font-size:9px">🙏 APOLOGIES</div></div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:10px">
-        <div class="label" style="margin-bottom:4px">// verdict</div>
-        <p style="margin:0;color:${verdictColor};font-size:15px;line-height:1.4">${h(verdictLine)}</p>
-        <p style="margin:6px 0 0;color:rgba(245,236,215,0.55);font-size:12px">Showed up <strong style="color:var(--cream)">${stats.uniqueDays}</strong> day${stats.uniqueDays===1?'':'s'} so far this cycle.</p>
-      </div>
-    </div>
-  `;
-}
-
-function renderPlaysCard(phase) {
-  const tab = state.playsTab || 'ask';
-  const seed = state.playsSeed || 0;
-  let title = '', items = [];
-  if (tab === 'ask') {
-    title = 'ASK HER TONIGHT';
-    items = CONVERSATIONS[phase] || [];
-  } else if (tab === 'date') {
-    title = 'DATE IDEA';
-    items = DATES[phase] || [];
-  } else if (tab === 'gift') {
-    title = 'GIFT MOVE';
-    items = pickGifts(state.profile);
-  }
-  const rotated = items.length ? items.slice(seed % items.length).concat(items.slice(0, seed % items.length)) : [];
-  const shown = rotated.slice(0, tab === 'ask' ? 3 : (tab === 'gift' ? 3 : 2));
-
-  return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
-        <div class="label">// tonight's plays</div>
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="rerollPlays()">⟳ ROTATE</button>
-      </div>
-      <div class="plays-tabs">
-        <button class="pill ${tab==='ask'?'active':''}" onclick="setPlaysTab('ask')">💬 ASK</button>
-        <button class="pill ${tab==='date'?'active':''}" onclick="setPlaysTab('date')">🍽️ DATE</button>
-        <button class="pill ${tab==='gift'?'active':''}" onclick="setPlaysTab('gift')">🎁 GIFT</button>
-      </div>
-      <div class="label" style="margin:14px 0 8px;color:var(--cream)">${title}</div>
-      ${shown.length ? `
-        <ul class="bullets">
-          ${shown.map(line => `<li><span style="color:var(--orange)">▸</span><span>${h(line)}</span></li>`).join('')}
-        </ul>
-      ` : `<p style="color:rgba(245,236,215,0.6);margin:0;font-style:italic">Fill in her profile to unlock gift moves.</p>`}
-    </div>
-  `;
-}
-
-function renderQuickStart() {
-  const today = new Date().toISOString().slice(0,10);
-  return `
-  <div class="stagger">
-    <div class="hero corners" data-phase="menstrual">
-      <div class="label" style="color:rgba(245,236,215,0.8)">// new playbook</div>
-      <h1 style="font-size:clamp(34px,9vw,56px)">START THE CODE.</h1>
-      <div class="sub">Two fields. One minute. The whole app lights up.</div>
-    </div>
-    <div class="card">
-      <div class="label" style="margin-bottom:14px">// quick start</div>
-      <form onsubmit="quickStart(event)">
-        <label class="field">
-          <span class="label" style="margin-bottom:8px">Her name (optional)</span>
-          <input id="qs-name" placeholder="e.g., Maya" />
-        </label>
-        <label class="field">
-          <span class="label" style="margin-bottom:8px">First day of her last period</span>
-          <input id="qs-date" type="date" max="${today}" required />
-        </label>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">
-          <button class="btn btn-primary" type="submit">ENTER THE CODE →</button>
-          <button class="btn btn-ghost" type="button" onclick="go('profile')">Or build full profile</button>
-        </div>
-      </form>
-    </div>
-  </div>`;
-}
-
-function renderCalendar() {
-  if (!state.profile?.lastPeriod) {
-    return `
-    <div class="card corners stagger" style="text-align:center;padding:32px 18px">
-      <div class="label" style="margin-bottom:10px">// status :: no profile</div>
-      <h2 class="display" style="font-size:24px;margin:0 0 12px">BUILD HER PROFILE FIRST.</h2>
-      <p style="color:rgba(245,236,215,0.75);margin-bottom:20px">The calendar needs her last period date.</p>
-      <button class="btn btn-primary" onclick="go('dashboard')">QUICK START →</button>
-    </div>`;
-  }
-
-  const v = state.view;
-  const year = v.getFullYear(), month = v.getMonth();
-  const monthName = v.toLocaleDateString('en-US',{month:'long'}).toUpperCase();
-  const first = new Date(year, month, 1);
-  const startWd = first.getDay();
-  const daysIn = new Date(year, month+1, 0).getDate();
-  const today = midnight(new Date());
-
-  const cells = [];
-  for (let i = 0; i < startWd; i++) {
-    const d = new Date(year, month, 1 - (startWd - i));
-    cells.push({ date:d, inMonth:false });
-  }
-  for (let d = 1; d <= daysIn; d++) cells.push({ date:new Date(year, month, d), inMonth:true });
-  while (cells.length < 42) {
-    const last = cells[cells.length-1].date;
-    const next = new Date(last); next.setDate(next.getDate()+1);
-    cells.push({ date:next, inMonth: next.getMonth()===month });
-  }
-
-  const wd = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-
-  // Upcoming
-  const events = [];
-  for (let m = 0; m < 3; m++) {
-    const len = state.profile.cycleLength || 28;
-    const future = new Date(today); future.setDate(future.getDate() + m*len);
-    const days = daysToNextPeriod(state.profile, future);
-    const date = new Date(midnight(today).getTime() + (days + m*len)*DAY);
-    if (days >= 0) events.push({ days: days + m*len, label:'Period starts', icon:'🩸', date });
-  }
-  for (let m = 0; m < 2; m++) {
-    const start = new Date(state.profile.lastPeriod);
-    start.setDate(start.getDate() + m*(state.profile.cycleLength || 28));
-    const ovu = new Date(start); ovu.setDate(ovu.getDate()+13);
-    const d = Math.ceil((ovu - today) / DAY);
-    if (d >= 0 && d < 70) events.push({ days:d, label:'Ovulation window opens', icon:'⭐', date:ovu });
-  }
-  events.sort((a,b)=>a.days-b.days);
-
-  return `
-  <div class="stagger">
-    <div class="cal-head">
-      <div class="month">${monthName} <span class="year">${year}</span></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost" onclick="navMonth(-1)">←</button>
-        <button class="btn btn-ghost" onclick="navMonth(0)">Today</button>
-        <button class="btn btn-ghost" onclick="navMonth(1)">→</button>
-      </div>
-    </div>
-
-    <div class="cal-grid">
-      <div class="cal-week">${wd.map(w => `<div class="wd">${w}</div>`).join('')}</div>
-      <div class="cal-days">
-        ${cells.map(c => {
-          const info = infoFor(state.profile, c.date);
-          const isToday = midnight(c.date).getTime() === today.getTime();
-          const tint = info.phase ? PHASE_COLOR[info.phase] + '1A' : 'transparent';
-          const left = info.phase ? `border-left:3px solid ${PHASE_COLOR[info.phase]}` : '';
-          return `
-            <div class="cal-day ${c.inMonth?'':'out'} ${isToday?'today':''}" style="background:${tint};${left}">
-              <div class="num">${c.date.getDate()}</div>
-              ${info.phase?`<div class="badge" style="background:${PHASE_COLOR[info.phase]}">${PHASE_INIT[info.phase]}</div>`:''}
-              ${isToday?`<div class="lab">TODAY</div>`:''}
-              ${info.phase==='menstrual'&&info.day===1?`<div class="marker">🩸</div>`:''}
-              ${info.phase==='ovulation'&&info.day===14?`<div class="marker">⭐</div>`:''}
-            </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <div class="legend">
-      ${PHASES.map(p => `<div><span class="swatch" style="background:${PHASE_COLOR[p]}"></span><span class="label">${PHASE_LABEL[p]}</span></div>`).join('')}
-    </div>
-
-    <div class="card">
-      <div class="label" style="margin-bottom:14px">// upcoming</div>
-      ${events.length===0 ? '<p style="color:rgba(245,236,215,0.6);margin:0">No upcoming events.</p>' : `
-        <ul class="bullets">
-          ${events.slice(0,6).map(e => `
-            <li style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:16px">${e.icon}</span>
-              <span class="display" style="min-width:78px">In ${e.days} ${e.days===1?'day':'days'}</span>
-              <span style="flex:1;color:rgba(245,236,215,0.85)">${e.label}</span>
-              <span style="color:rgba(245,236,215,0.5);font-size:12px">${e.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
-            </li>
-          `).join('')}
-        </ul>`}
-    </div>
-  </div>`;
-}
-
-function renderProfile() {
-  const p = state.profile || {};
-  const today = new Date().toISOString().slice(0,10);
-  const lp = p.lastPeriod || '';
-
-  const pillGroup = (key, opts, multi=true, val) => {
-    const current = val !== undefined ? val : (p[key] || (multi ? [] : ''));
-    return opts.map(o => {
-      const active = multi ? (Array.isArray(current) && current.includes(o.id)) : current === o.id;
-      return `<button type="button" class="pill ${active?'active':''}" onclick="togglePill('${key}','${o.id}',${multi})">${h(o.label)}</button>`;
-    }).join('');
-  };
-
-  return `
-  <div class="stagger">
-    <div>
-      <div class="label">// section :: profile builder</div>
-      <h2 class="display" style="font-size:36px;margin:6px 0 8px">HER PROFILE</h2>
-      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Only Basics is required. Everything else levels up the code. Auto-saves as you go.</p>
-    </div>
-
-    <details class="acc" open>
-      <summary>
-        <div class="title-row"><span class="num">01</span><span class="name">The Basics</span></div>
-        <span class="plus">+</span>
-      </summary>
-      <div class="body">
-        <label class="field">
-          <span class="label" style="margin-bottom:6px">Her name</span>
-          <input data-field="name" value="${h(p.name||'')}" placeholder="e.g., Maya" oninput="updateField(event)" />
-        </label>
-        <label class="field">
-          <span class="label" style="margin-bottom:6px">Cycle length (days)</span>
-          <input type="number" min="21" max="35" data-field="cycleLength" value="${p.cycleLength||28}" oninput="updateField(event)" />
-        </label>
-        <label class="field">
-          <span class="label" style="margin-bottom:6px">First day of her last period *</span>
-          <input type="date" max="${today}" data-field="lastPeriod" value="${h(lp)}" onchange="updateField(event)" />
-        </label>
-        <div class="label" style="margin-bottom:8px">Relationship</div>
-        ${pillGroup('relationship', [
-          {id:'girlfriend',label:'Girlfriend'},{id:'wife',label:'Wife'},
-          {id:'partner',label:'Partner'},{id:'other',label:'Other'}], false, p.relationship||'girlfriend')}
-        <div class="label" style="margin:18px 0 8px">Fertility mode</div>
-        ${pillGroup('fertilityMode', [
-          {id:'off',label:'Not tracking'},{id:'ttc',label:'Trying to conceive'},{id:'avoid',label:'Avoiding pregnancy'}], false, p.fertilityMode||'off')}
-        <div class="label" style="margin:18px 0 8px">Daily reminder</div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <button type="button" class="pill ${state.notifEnabled?'active':''}" onclick="toggleNotif()" id="notif-pill">
-            ${state.notifEnabled ? '🔔 ON · DAILY 8 AM' : '🔕 OFF · TAP TO ENABLE'}
-          </button>
-          <span class="label" style="color:rgba(245,236,215,0.55)">Phase-aware tip, once a day.</span>
+        <div class="not">
+          <div class="display">Not data collection.</div>
+          <p>No account, no server, no tracking. Everything lives in your phone's local storage. Export or wipe whenever.</p>
         </div>
       </div>
-    </details>
+    </section>
 
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">02</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        <div class="label" style="margin-bottom:8px">Type</div>
-        ${pillGroup('type', [{id:'a-type',label:'A-Type'},{id:'b-type',label:'B-Type'}], false)}
-        <div class="label" style="margin:14px 0 8px">Social</div>
-        ${pillGroup('social', [{id:'introvert',label:'Introvert'},{id:'extrovert',label:'Extrovert'},{id:'ambivert',label:'Ambivert'}], false)}
-      </div>
-    </details>
+    <section class="final">
+      <h2>Stop guessing. Start showing up.</h2>
+      <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
+      <div class="trust" style="margin-top:14px">Free. No ads. Works offline.</div>
+    </section>
+  </div>
 
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">03</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Tap to toggle. Be honest - it shapes the code.</p>
-        ${pillGroup('neurology', NEUROLOGY.map(n => ({id:n.id,label:n.label})))}
-        <div class="label" style="margin-top:14px;line-height:1.6">
-          ${NEUROLOGY.map(n => `<div style="margin-bottom:6px"><strong style="color:var(--cream)">${n.label}</strong>: ${n.info}</div>`).join('')}
-        </div>
-      </div>
-    </details>
-
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">04</span><span class="name">What Comforts Her</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        ${pillGroup('comfort', [
-          {id:'cuddles',label:'Touch / Cuddles'},{id:'massage',label:'Massage'},{id:'heat',label:'Heat (bath, pad)'},
-          {id:'space',label:'Space'},{id:'blanket',label:'Weighted blanket'},{id:'held',label:'Being held'},
-          {id:'acts',label:'Acts of service'},{id:'verbal',label:'Verbal reassurance'}])}
-      </div>
-    </details>
-
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">05</span><span class="name">Food &amp; Drinks</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        <div class="label" style="margin-bottom:8px">Cravings</div>
-        ${pillGroup('cravings', [{id:'sweet',label:'Sweet'},{id:'salty',label:'Salty'},{id:'carbs',label:'Comfort carbs'},{id:'spicy',label:'Spicy'},{id:'healthy',label:'Healthy'}])}
-        <label class="field" style="margin-top:14px">
-          <span class="label" style="margin-bottom:6px">Her favorites</span>
-          <input data-field="favorites" value="${h(p.favorites||'')}" placeholder="e.g., dark chocolate, ramen" oninput="updateField(event)" />
-        </label>
-        <label class="field">
-          <span class="label" style="margin-bottom:6px">Dietary restrictions</span>
-          <input data-field="dietary" value="${h(p.dietary||'')}" placeholder="e.g., vegetarian" oninput="updateField(event)" />
-        </label>
-      </div>
-    </details>
-
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">06</span><span class="name">Love Languages</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        ${pillGroup('love', [
-          {id:'words',label:'Words of Affirmation'},{id:'acts',label:'Acts of Service'},
-          {id:'gifts',label:'Receiving Gifts'},{id:'time',label:'Quality Time'},{id:'touch',label:'Physical Touch'}])}
-      </div>
-    </details>
-
-    <details class="acc">
-      <summary><div class="title-row"><span class="num">07</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
-      <div class="body">
-        <textarea data-field="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
-      </div>
-    </details>
-
-    <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
-      <span id="save-status" class="label">// auto-save on</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-ghost" onclick="exportProfile()">Export</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">Import</button>
-        <input id="imp" type="file" accept="application/json" style="display:none" onchange="importProfile(event)" />
-        <button class="btn btn-ghost" onclick="confirmClear()">Clear</button>
-      </div>
+  <footer>
+    <div class="wrap">
+      <div class="label">BRO CODE · v2.6 · Made by a bro for the bros</div>
+      <div style="margin-top:8px"><a href="https://github.com/SupaMoi-ai/claud-tester" rel="noopener">github</a> · <a href="app.html">app</a></div>
     </div>
-  </div>`;
-}
-
-function renderGuide(currentPhase) {
-  if (!state.profile?.lastPeriod) {
-    return `
-    <div class="card corners stagger" style="text-align:center;padding:32px 18px">
-      <div class="label" style="margin-bottom:10px">// status :: no profile</div>
-      <h2 class="display" style="font-size:24px;margin:0 0 12px">BUILD HER PROFILE FIRST.</h2>
-      <button class="btn btn-primary" onclick="go('dashboard')" style="margin-top:8px">QUICK START →</button>
-    </div>`;
-  }
-  const open = state.guideOpen || currentPhase || 'menstrual';
-
-  const cards = PHASES.map(p => {
-    const g = GUIDE[p];
-    const isOpen = p === open;
-    const color = PHASE_COLOR[p];
-    const personal = (PERSONALIZE[p]||[])
-      .filter(([m])=>{ try { return m(state.profile); } catch { return false; } })
-      .map(([,line])=>line);
-    return `
-      <div class="card" style="padding:0;overflow:hidden;${isOpen?`border-color:${color}`:''}">
-        <button onclick="toggleGuide('${p}')" style="width:100%;text-align:left;background:none;border:0;color:inherit;padding:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;cursor:pointer">
-          <div>
-            <div class="label" style="display:flex;gap:10px;align-items:center">
-              <span style="color:${color}">// phase</span>
-              ${p===currentPhase?`<span class="display" style="background:${color};color:#0D1117;padding:1px 8px;border-radius:999px;font-size:10px;letter-spacing:0.18em">CURRENT</span>`:''}
-            </div>
-            <h3 class="display" style="font-size:30px;color:${color};margin:6px 0 2px">${PHASE_LABEL[p]}</h3>
-            <div class="label" style="color:rgba(245,236,215,0.5)">${g.days}</div>
-          </div>
-          <div style="font-size:28px">${PHASE_EMOJI[p]}</div>
-        </button>
-        ${isOpen ? `
-          <div style="padding:0 18px 18px;border-top:1px solid var(--border)">
-            <div style="margin-top:14px"><div class="label" style="margin-bottom:8px">// what's happening in her body</div><p style="margin:0;color:rgba(245,236,215,0.85);line-height:1.5">${g.bio}</p></div>
-            <div style="margin-top:18px">
-              <div class="label" style="margin-bottom:8px;color:${color}">// for her</div>
-              ${personal.length ? `<ul class="bullets">${personal.map(x=>`<li><span style="color:${color}">▸</span><span>${h(x)}</span></li>`).join('')}</ul>` :
-                `<p style="margin:0;color:rgba(245,236,215,0.7);font-style:italic">Fill in more of her profile to unlock personalized cues.</p>`}
-            </div>
-            <div style="margin-top:18px"><div class="label" style="margin-bottom:8px;color:var(--green)">// the code says</div>
-              <ul class="bullets">${g.say.map(x=>`<li><span style="color:var(--green)">✓</span><span>"${h(x)}"</span></li>`).join('')}</ul>
-            </div>
-            <div style="margin-top:18px"><div class="label" style="margin-bottom:8px;color:var(--red)">// never say</div>
-              <ul class="bullets">${g.never.map(x=>`<li><span style="color:var(--red)">✕</span><span style="text-decoration:line-through;opacity:0.85">"${h(x)}"</span></li>`).join('')}</ul>
-            </div>
-            <div class="pro-tip" style="margin-top:18px;border-left-color:${color}">
-              <div class="label" style="margin-bottom:6px;color:${color}">// pro tip</div>
-              <p style="margin:0;color:var(--cream);line-height:1.5">${g.pro}</p>
-            </div>
-          </div>` : ''}
-      </div>
-      <div style="height:14px"></div>
-    `;
-  }).join('');
-
-  return `
-  <div class="stagger">
-    <div>
-      <div class="label">// section :: the guide</div>
-      <h2 class="display" style="font-size:36px;margin:6px 0 8px">THE GUIDE</h2>
-      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Phase-by-phase. Personalized to her profile.</p>
-    </div>
-    ${cards}
-  </div>`;
-}
-
-function renderCode() {
-  return `
-  <div class="stagger">
-    <div>
-      <div class="label">// section :: the playbook</div>
-      <h2 class="display" style="font-size:36px;margin:6px 0 8px">THE CODE</h2>
-      <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">The non-negotiables. The phrases that work. The phrases that don't.</p>
-    </div>
-
-    <div style="margin:24px 0 14px">
-      <h3 class="display" style="font-size:24px;color:var(--red);margin:0 0 10px">The Golden Rules</h3>
-    </div>
-    <ol style="list-style:none;padding:0;margin:0">
-      ${RULES.map((r,i)=>`
-        <li class="card corners" style="display:flex;gap:14px;align-items:flex-start;margin-bottom:10px">
-          <span class="display" style="color:var(--red);font-size:22px;min-width:32px">${String(i+1).padStart(2,'0')}</span>
-          <span style="line-height:1.5">${h(r)}</span>
-        </li>`).join('')}
-    </ol>
-
-    <div style="margin:32px 0 14px">
-      <h3 class="display" style="font-size:24px;color:var(--green);margin:0 0 10px">What To Say</h3>
-    </div>
-    ${PHRASE_BANK.map(g => `
-      <div class="card" style="margin-bottom:10px">
-        <div class="display" style="font-size:15px;margin-bottom:8px">${h(g.s)}</div>
-        ${g.lines.map(x=>`<div style="color:rgba(245,236,215,0.85);margin-bottom:4px">"${h(x)}"</div>`).join('')}
-      </div>`).join('')}
-
-    <div style="margin:32px 0 14px">
-      <h3 class="display" style="font-size:24px;color:var(--red);margin:0 0 10px">What Not To Say</h3>
-    </div>
-    ${RED_LIST.map(item => `
-      <div class="card" style="border-left:4px solid var(--red);margin-bottom:10px">
-        <div class="red-strike">${h(item.phrase)}</div>
-        <p style="margin:6px 0 0;color:rgba(245,236,215,0.75);font-size:13px;font-style:italic">${h(item.why)}</p>
-      </div>`).join('')}
-
-    <div style="margin:32px 0 14px">
-      <h3 class="display" style="font-size:24px;color:var(--orange);margin:0 0 10px">The Decoder</h3>
-      <p style="color:rgba(245,236,215,0.7);margin:0;font-size:14px">Bro, pick something she said. Get a translation + the move.</p>
-    </div>
-    <div class="card">
-      <select id="decoder-select" onchange="setState({ decoderPick: this.value })" style="margin-bottom:14px">
-        <option value="">— pick a phrase —</option>
-        ${DECODER.map((d,i) => `<option value="${i}" ${String(state.decoderPick)===String(i)?'selected':''}>${h(d.phrase)}</option>`).join('')}
-      </select>
-      ${state.decoderPick !== '' && DECODER[+state.decoderPick] ? `
-        <div style="border-top:1px solid var(--border);padding-top:12px">
-          <div class="label" style="color:var(--orange);margin-bottom:6px">// what she means</div>
-          <p style="margin:0 0 14px;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].meaning)}</p>
-          <div class="label" style="color:var(--green);margin-bottom:6px">// the move</div>
-          <p style="margin:0;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].move)}</p>
-        </div>
-      ` : '<p style="color:rgba(245,236,215,0.5);margin:0;font-style:italic;font-size:13px">Brooooo, the dictionary that should have come with her.</p>'}
-    </div>
-
-    <div style="margin:32px 0 14px">
-      <h3 class="display" style="font-size:24px;color:var(--alert);margin:0 0 10px">Pre-Send Check</h3>
-      <p style="color:rgba(245,236,215,0.7);margin:0;font-size:14px">Bro, paste the message you're about to send. Get a sanity check before you press go.</p>
-    </div>
-    <div class="card">
-      <textarea id="draft-input" rows="3" placeholder="e.g., 'calm down babe, you're overreacting'" style="margin-bottom:10px">${h((state.draftCheck && state.draftCheck.text) || '')}</textarea>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-        <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="checkMessageFromInput()">✓ CHECK IT</button>
-        <button class="btn btn-ghost"   style="padding:8px 14px;font-size:13px" onclick="clearDraftCheck()">CLEAR</button>
-      </div>
-      ${state.draftCheck && state.draftCheck.result ? `
-        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-          <div class="label" style="margin-bottom:6px;color:${state.draftCheck.result.tone==='ok'?'var(--green)':state.draftCheck.result.tone==='warn'?'var(--alert)':'var(--red)'}">// verdict</div>
-          <p style="margin:0 0 12px;color:var(--cream);font-size:16px;line-height:1.4">${h(state.draftCheck.result.verdict)}</p>
-          ${state.draftCheck.result.flags.length ? `
-            <div class="label" style="color:var(--red);margin-bottom:6px">// flags</div>
-            <ul class="bullets">
-              ${state.draftCheck.result.flags.map(f => `
-                <li style="display:block;padding:6px 0;border-top:1px solid var(--border)">
-                  <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--red);letter-spacing:0.1em;text-transform:uppercase">${h(f.flag)}</div>
-                  <div style="margin-top:2px;color:rgba(245,236,215,0.85);font-size:13px">${h(f.alt)}</div>
-                </li>
-              `).join('')}
-            </ul>
-          ` : ''}
-        </div>
-      ` : ''}
-    </div>
-
-    <div style="margin:32px 0 14px">
-      <h3 class="display" style="font-size:24px;margin:0 0 10px">FAQ</h3>
-    </div>
-    ${FAQ.map(f => `
-      <details class="acc">
-        <summary>
-          <div class="title-row"><span class="name">${h(f.q)}</span></div>
-          <span class="plus">+</span>
-        </summary>
-        <div class="body" style="color:rgba(245,236,215,0.85);line-height:1.55">${h(f.a)}</div>
-      </details>`).join('')}
-  </div>`;
-}
-
-// ---------- ACTIONS ----------
-function go(tab) {
-  state.guideOpen = null;
-  state.situation = null;
-  setState({ tab });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function dismissWelcome() { localStorage.setItem(SEEN, '1'); setState({ showWelcome: false }); }
-function quickStart(e) {
-  e.preventDefault();
-  const name = $('#qs-name').value.trim();
-  const lastPeriod = $('#qs-date').value;
-  if (!lastPeriod) return;
-  const profile = saveProfile({
-    name, lastPeriod, cycleLength: 28, relationship: 'girlfriend',
-    neurology: [], comfort: [], cravings: [], love: [], notes: ''
-  });
-  setState({ profile });
-}
-function navMonth(delta) {
-  if (delta === 0) { setState({ view: new Date() }); return; }
-  const v = state.view;
-  setState({ view: new Date(v.getFullYear(), v.getMonth()+delta, 1) });
-}
-function dismissAlertNow(id) { dismissAlert(id); render(); }
-function toggleGuide(p) { setState({ guideOpen: state.guideOpen === p ? null : p }); }
-function quickLog(kind, phase) {
-  addLog(kind, phase);
-  render();
-}
-function openSituation(name) {
-  setState({ situation: state.situation === name ? null : name });
-}
-function closeSituation() { setState({ situation: null }); }
-function setPlaysTab(t) { setState({ playsTab: t, playsSeed: 0 }); }
-function rerollPlays() { setState({ playsSeed: (state.playsSeed || 0) + 1 }); }
-function rerollTruth() { setState({ truthSeed: (state.truthSeed || 0) + 1 }); }
-function setTruthMode(m) { setState({ truthMode: m, truthSeed: 0 }); }
-
-function addListenedFromInput() {
-  const el = document.getElementById('listened-input');
-  const note = el ? el.value : state.listenedDraft;
-  if (!note || !note.trim()) return;
-  addListened(note);
-  state.listenedDraft = '';
-  render();
-}
-function markListened(id) { markListenedDone(id); render(); }
-function snoozeListenedItem(id) { snoozeListened(id); render(); }
-
-function checkMessageFromInput() {
-  const el = document.getElementById('draft-input');
-  const text = el ? el.value : '';
-  const result = checkDraft(text);
-  setState({ draftCheck: { text, result } });
-}
-function clearDraftCheck() { setState({ draftCheck: null }); }
-
-let saveTimer = null;
-function flashSaved() {
-  const el = $('#save-status');
-  if (!el) return;
-  el.textContent = '✓ SAVED';
-  el.classList.add('saved');
-  clearTimeout(flashSaved._t);
-  flashSaved._t = setTimeout(() => {
-    if (el) { el.textContent = '// auto-save on'; el.classList.remove('saved'); }
-  }, 1400);
-}
-function debouncedSave(p) {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    if (!p.lastPeriod) return;
-    state.profile = saveProfile(p);
-    flashSaved();
-  }, 500);
-}
-function updateField(e) {
-  const field = e.target.dataset.field;
-  let value = e.target.value;
-  if (field === 'cycleLength') value = Math.max(21, Math.min(35, parseInt(value) || 28));
-  const next = { ...(state.profile || {}), [field]: value };
-  state.profile = next;
-  debouncedSave(next);
-}
-function togglePill(key, id, multi) {
-  const p = state.profile || {};
-  let next;
-  if (multi) {
-    const arr = Array.isArray(p[key]) ? p[key].slice() : [];
-    const i = arr.indexOf(id);
-    if (i >= 0) arr.splice(i, 1); else arr.push(id);
-    next = { ...p, [key]: arr };
-  } else {
-    next = { ...p, [key]: p[key] === id ? '' : id };
-  }
-  state.profile = next;
-  debouncedSave(next);
-  render();
-}
-function exportProfile() {
-  if (!state.profile) return;
-  const blob = new Blob([JSON.stringify(state.profile, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `brocode-profile-${new Date().toISOString().slice(0,10)}.json`; a.click();
-  URL.revokeObjectURL(url);
-}
-function importProfile(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result);
-      if (!data.lastPeriod) throw new Error('No lastPeriod field.');
-      state.profile = saveProfile(data);
-      render();
-      alert('Profile imported.');
-    } catch (err) { alert('Import failed: ' + err.message); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-}
-function confirmClear() {
-  if (confirm('Clear her profile? This cannot be undone.')) {
-    clearProfile();
-    state.profile = null;
-    render();
-  }
-}
-
-// ---------- NOTIFICATIONS ----------
-async function toggleNotif() {
-  if (typeof Notification === 'undefined') {
-    alert('This browser does not support notifications.\n\nTip: install the app to your Home Screen (Share → Add to Home Screen) and reopen for full support.');
-    return;
-  }
-  if (state.notifEnabled) {
-    localStorage.setItem(NOTIF_KEY, '0');
-    setState({ notifEnabled: false });
-    return;
-  }
-  let perm = Notification.permission;
-  if (perm === 'default') perm = await Notification.requestPermission();
-  if (perm !== 'granted') {
-    alert('Notification permission was not granted. Enable it in your browser settings to receive daily reminders.');
-    return;
-  }
-  localStorage.setItem(NOTIF_KEY, '1');
-  setState({ notifEnabled: true });
-  scheduleNotification();
-}
-function notifBody() {
-  const p = state.profile;
-  if (!p?.lastPeriod) return { title: 'BRO CODE', body: 'Open the app and set her last period to unlock today\'s move.' };
-  const day = cycleDay(p);
-  const len = p.cycleLength || 28;
-  const phase = phaseFor(day, len);
-  const tip = pickTip(p, phase, dayInPhase(day, len)) || 'Show up today.';
-  const days = daysToNextPeriod(p);
-  const subtitle = days === 0 ? 'Day 1' : (days === 1 ? 'Period tomorrow' : (PHASE_LABEL[phase] + ' · Day ' + day + '/' + len));
-  return { title: 'BRO CODE · ' + subtitle, body: tip };
-}
-function scheduleNotification() {
-  if (!state.notifEnabled) return;
-  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-  const today = new Date().toISOString().slice(0,10);
-  const last = localStorage.getItem(NOTIF_LAST);
-  const now = new Date();
-  const target = new Date(now); target.setHours(8, 0, 0, 0);
-  if (last !== today && now.getHours() >= 8) {
-    try { fireNotification(); } catch {}
-  } else if (last !== today) {
-    const delay = Math.max(1000, target - now);
-    setTimeout(() => { try { fireNotification(); } catch {} }, delay);
-  }
-  const next = new Date(now); next.setDate(next.getDate()+1); next.setHours(8,0,0,0);
-  setTimeout(scheduleNotification, Math.max(60000, next - now));
-}
-function fireNotification() {
-  const today = new Date().toISOString().slice(0,10);
-  if (localStorage.getItem(NOTIF_LAST) === today) return;
-  const { title, body } = notifBody();
-  if (navigator.serviceWorker?.controller) {
-    navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'brocode-daily-'+today }));
-  } else {
-    new Notification(title, { body, icon: 'icon-192.png', tag: 'brocode-daily-'+today });
-  }
-  localStorage.setItem(NOTIF_LAST, today);
-}
-
-// ---------- INSTALL HINT ----------
-function detectInstallHint() {
-  const ua = navigator.userAgent || '';
-  const isIOS = /iPhone|iPad|iPod/.test(ua);
-  const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isIOS && isSafari && !standalone && localStorage.getItem(INSTALL_DISMISS) !== '1') {
-    state.showInstallHint = true;
-  }
-}
-function dismissInstallHint() {
-  localStorage.setItem(INSTALL_DISMISS, '1');
-  setState({ showInstallHint: false });
-}
-
-// ---------- ONLINE / OFFLINE ----------
-function applyOnlineStatus() {
-  const pill = document.getElementById('offline-pill');
-  if (!pill) return;
-  pill.classList.toggle('on', !navigator.onLine);
-}
-window.addEventListener('online',  applyOnlineStatus);
-window.addEventListener('offline', applyOnlineStatus);
-
-// ---------- UPDATE PROMPT ----------
-function applyUpdate() { window.location.reload(); }
-function dismissUpdate() { setState({ updateReady: false }); }
-
-// ---------- PWA ----------
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      if (!reg) return;
-      reg.addEventListener('updatefound', () => {
-        const nw = reg.installing;
-        if (!nw) return;
-        nw.addEventListener('statechange', () => {
-          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            setState({ updateReady: true });
-          }
-        });
-      });
-    }).catch(()=>{});
-  });
-}
-
-// ---------- BOOT ----------
-detectInstallHint();
-render();
-applyOnlineStatus();
-if (state.notifEnabled) scheduleNotification();
-</script>
+  </footer>
 </body>
 </html>

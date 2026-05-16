@@ -6,6 +6,15 @@
 <meta name="theme-color" content="#0D1117" />
 <meta name="description" content="BRO CODE - the playbook for showing up." />
 <title>BRO CODE</title>
+<meta property="og:type" content="website" />
+<meta property="og:title" content="BRO CODE — the playbook for showing up" />
+<meta property="og:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta property="og:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
+<meta property="og:url" content="https://supamoi-ai.github.io/claud-tester/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="BRO CODE — the playbook for showing up" />
+<meta name="twitter:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta name="twitter:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
@@ -297,6 +306,16 @@
   }
   .install-hint.update { border-left-color: var(--green); cursor: pointer; }
   .install-hint .x { background: none; border: 0; color: rgba(245,236,215,0.5); font-size: 22px; cursor: pointer; padding: 0 6px; }
+
+  /* Share button */
+  .share-btn {
+    background: transparent; color: var(--cream); border: 1px solid var(--border);
+    width: 34px; height: 34px; border-radius: 6px; cursor: pointer;
+    font-size: 18px; padding: 0; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .share-btn:hover, .share-btn:active { border-color: var(--red); color: var(--red); }
 
   /* Offline pill */
   .offline-pill {
@@ -1130,6 +1149,9 @@ let state = {
   decoderPick: '',
   draftCheck: null,
   listenedDraft: '',
+  showShare: false,
+  showShareQR: false,
+  copiedAt: 0,
   updateReady: false
 };
 
@@ -1166,7 +1188,10 @@ function render() {
         <div class="badge"><span>BC</span></div>
         <div class="name">Bro Code</div>
       </div>
-      <span class="offline-pill" id="offline-pill">OFFLINE · cache</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="offline-pill" id="offline-pill">OFFLINE · cache</span>
+        <button class="share-btn" onclick="openShare()" aria-label="Share BRO CODE">↗</button>
+      </div>
     </header>
     <nav class="tabs">
       <div class="row">
@@ -1174,7 +1199,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.5 · Decoder + Insight</footer>
+    <footer class="app">BRO CODE · v2.6 · Pass the code</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1192,8 +1217,41 @@ function render() {
         <button class="x" onclick="dismissInstallHint()" aria-label="Dismiss">×</button>
       </div>` : ''}
     ${state.showWelcome ? renderWelcome() : ''}
+    ${state.showShare ? renderShareModal() : ''}
   `;
   applyOnlineStatus();
+}
+
+function renderShareModal() {
+  const url = location.origin + location.pathname.replace(/[^/]*$/, '');
+  const justCopied = (Date.now() - (state.copiedAt || 0)) < 2000;
+  const hasShare = typeof navigator !== 'undefined' && !!navigator.share;
+  return `
+    <div class="modal-bg" onclick="closeShare()">
+      <div class="modal corners" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:10px">
+          <div>
+            <div class="label" style="margin-bottom:6px">// share with a bro</div>
+            <h2 class="display" style="font-size:28px;line-height:1;margin:0;color:var(--cream)">PASS THE CODE.</h2>
+          </div>
+          <button class="x" onclick="closeShare()" aria-label="Close" style="background:none;border:0;color:rgba(245,236,215,0.6);font-size:24px;cursor:pointer">×</button>
+        </div>
+        <p style="margin:0 0 16px;color:rgba(245,236,215,0.78);line-height:1.45">Know a bro who needs this? Send him the playbook.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${hasShare ? `<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="nativeShare()">📲 SHARE</button>` : ''}
+          <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="copyShareLink()">${justCopied ? '✓ COPIED' : '📋 COPY LINK'}</button>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="toggleShareQR()">${state.showShareQR ? '↑ HIDE QR' : '🔲 SHOW QR'}</button>
+        </div>
+        ${state.showShareQR ? `
+          <div style="margin-top:16px;background:var(--cream);border-radius:8px;padding:12px;display:grid;place-items:center">
+            <img src="share-qr.png" alt="QR code for BRO CODE" style="display:block;width:100%;max-width:240px;height:auto;image-rendering:pixelated" />
+          </div>
+          <div class="label" style="text-align:center;margin-top:10px;color:rgba(245,236,215,0.55)">scan with the camera</div>
+        ` : ''}
+        <div class="label" style="margin-top:18px;text-align:center;color:rgba(245,236,215,0.4)">— no login · no tracking · all local —</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderWelcome() {
@@ -2033,6 +2091,35 @@ function checkMessageFromInput() {
   setState({ draftCheck: { text, result } });
 }
 function clearDraftCheck() { setState({ draftCheck: null }); }
+
+// ---------- SHARE ----------
+function shareUrl() { return location.origin + location.pathname.replace(/[^/]*$/, ''); }
+function openShare()  { setState({ showShare: true,  showShareQR: false, copiedAt: 0 }); }
+function closeShare() { setState({ showShare: false, showShareQR: false }); }
+function toggleShareQR() { setState({ showShareQR: !state.showShareQR }); }
+async function nativeShare() {
+  if (!navigator.share) return;
+  try {
+    await navigator.share({
+      title: 'BRO CODE',
+      text: 'The playbook for showing up. Cycle-aware moves for guys who want to be a better partner.',
+      url: shareUrl()
+    });
+  } catch (e) { /* user cancelled */ }
+}
+async function copyShareLink() {
+  const url = shareUrl();
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch {}
+    document.body.removeChild(ta);
+  }
+  setState({ copiedAt: Date.now() });
+  setTimeout(() => { if (state.showShare) render(); }, 2100);
+}
 
 let saveTimer = null;
 function flashSaved() {

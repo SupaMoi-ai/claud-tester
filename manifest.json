@@ -2,7 +2,7 @@
   "name": "BRO CODE",
   "short_name": "BroCode",
   "description": "The playbook for showing up.",
-  "start_url": "./",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
