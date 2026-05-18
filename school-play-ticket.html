@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ticket" />
+<meta name="theme-color" content="#ffffff" />
 <title>Single ticket</title>
-<!-- Self-contained: no external CSS/JS/fonts/network calls. Works fully offline once saved. -->
+<!-- Self-contained: no external CSS/JS/fonts/network calls. Works fully offline once saved.
+     On iPhone: Share → Add to Home Screen, then launch from the icon for full-screen (no URL bar). -->
 
 <style>
   :root {
@@ -45,13 +51,21 @@
   .status-bar {
     background: var(--header-bg);
     color: #fff;
-    height: 50px;
+    min-height: 50px;
+    padding-top: env(safe-area-inset-top, 0px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 22px;
+    padding-left: 22px;
+    padding-right: 22px;
     font-size: 16px;
     font-weight: 600;
+  }
+  /* When launched from Home Screen (standalone), let the real iOS status bar
+     show through, and hide the in-page fake clock/wifi/battery widgets. */
+  @media (display-mode: standalone), (display-mode: fullscreen) {
+    .status-bar #status-time,
+    .status-bar .status-right { visibility: hidden; }
   }
   .status-left { display: flex; align-items: center; gap: 6px; }
   .status-left .arrow {
@@ -480,7 +494,7 @@
 <script>
   // ----- Config: school play ticket -----
   // Ticket is valid for this many minutes from page load.
-  const VALID_FOR_MINUTES = 6;
+  const VALID_FOR_MINUTES = 56;
 
   const purchasedAt = new Date();
   const expiresAt = new Date(purchasedAt.getTime() + VALID_FOR_MINUTES * 60 * 1000);
