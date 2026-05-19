@@ -28,14 +28,26 @@
 
   * { box-sizing: border-box; }
 
+  /* Native-feel polish: kill webby behaviors on touch */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    background: #000;
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
   }
+  /* Top overscroll bleeds into the header color; bottom bleeds into the page bg. */
+  html { background: var(--header-bg); }
+  body { background: var(--bg); }
 
   .phone {
     max-width: 420px;
@@ -78,41 +90,8 @@
   }
   .vipps-back { font-size: 14px; opacity: .85; margin-left: 4px; font-weight: 500; }
   .status-right { display: flex; align-items: center; gap: 6px; font-size: 14px; }
-  .signal-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
-  .signal-bars i { width: 3px; background: #fff; border-radius: 1px; display: inline-block; }
-  .signal-bars i:nth-child(1) { height: 4px; }
-  .signal-bars i:nth-child(2) { height: 6px; }
-  .signal-bars i:nth-child(3) { height: 9px; }
-  .signal-bars i:nth-child(4) { height: 12px; }
-  .wifi { width: 16px; height: 12px; position: relative; }
-  .wifi::before, .wifi::after, .wifi span {
-    content: ""; position: absolute; left: 50%; bottom: 0;
-    border: 2px solid #fff; border-radius: 50%;
-    border-bottom-color: transparent; border-left-color: transparent; border-right-color: transparent;
-    transform: translateX(-50%);
-  }
-  .wifi::before { width: 14px; height: 14px; }
-  .wifi::after { width: 8px; height: 8px; }
-  .wifi span { width: 3px; height: 3px; background: #fff; border-radius: 50%; border: none; bottom: 0; }
-  .battery {
-    width: 26px; height: 12px;
-    border: 1.5px solid #fff;
-    border-radius: 3px;
-    position: relative;
-    padding: 1px;
-    display: flex;
-    align-items: center;
-  }
-  .battery::after {
-    content: ""; position: absolute; right: -3px; top: 3px;
-    width: 2px; height: 4px; background: #fff; border-radius: 0 1px 1px 0;
-  }
-  .battery .lvl { background: #fff; height: 100%; border-radius: 1px; width: 44%; }
-  .battery .num {
-    position: absolute; left: 0; right: 4px; top: 0; bottom: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; color: var(--header-bg); font-weight: 700;
-  }
+  .status-right svg { display: block; }
+  .battery-pct { font-size: 14px; font-weight: 500; }
 
   /* Page header */
   .page-header {
@@ -339,6 +318,10 @@
     top: -2px;
   }
 
+  /* Tap feedback so interactive elements feel responsive */
+  .tab:active, .back-btn:active, .inspection-btn:active,
+  .hide-details:active, .ticket-link:active { opacity: 0.6; }
+
   /* Bottom tab bar */
   .tabbar {
     position: fixed;
@@ -349,8 +332,8 @@
     background: #fff;
     border-top: 1px solid #e3e3e3;
     display: flex;
-    height: 72px;
-    padding-bottom: 16px;
+    min-height: 72px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .tab {
     flex: 1;
@@ -406,9 +389,24 @@
         <span class="vipps-back">◀ Vipps</span>
       </div>
       <div class="status-right">
-        <span class="signal-bars"><i></i><i></i><i></i><i></i></span>
-        <span class="wifi"><span></span></span>
-        <span class="battery"><span class="lvl"></span><span class="num">44</span></span>
+        <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
+          <rect x="0"  y="8" width="3" height="3" rx="0.6" fill="#fff"/>
+          <rect x="4"  y="6" width="3" height="5" rx="0.6" fill="#fff"/>
+          <rect x="8"  y="3" width="3" height="8" rx="0.6" fill="#fff"/>
+          <rect x="12" y="0" width="3" height="11" rx="0.6" fill="#fff"/>
+        </svg>
+        <svg width="15" height="11" viewBox="0 0 15 11" aria-hidden="true" fill="none" stroke="#fff" stroke-linecap="round">
+          <path d="M1 4.2 A 9 9 0 0 1 14 4.2" stroke-width="1.4"/>
+          <path d="M3.2 6.4 A 6 6 0 0 1 11.8 6.4" stroke-width="1.4"/>
+          <path d="M5.4 8.6 A 3 3 0 0 1 9.6 8.6" stroke-width="1.4"/>
+          <circle cx="7.5" cy="10" r="0.9" fill="#fff" stroke="none"/>
+        </svg>
+        <span class="battery-pct">44</span>
+        <svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="22" height="11" rx="2.5" ry="2.5" fill="none" stroke="#fff" stroke-width="1"/>
+          <rect x="24" y="3.5" width="1.8" height="5" rx="0.9" fill="#fff"/>
+          <rect x="2" y="2" width="8.8" height="8" rx="1.2" fill="#fff"/>
+        </svg>
       </div>
     </div>
 
