@@ -366,6 +366,20 @@
   .sit-panel { animation: panel-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
   @keyframes panel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
+  /* Coming up (important dates) */
+  .coming-up { border-left: 3px solid var(--orange); }
+  .coming-up.medium { border-left-color: var(--orange); }
+  .coming-up.urgent { border-left-color: var(--red); }
+  .coming-up.urgent-now { border-left-color: var(--red); }
+  .stagger > .coming-up.urgent-now { animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards, pulse-glow 2.4s ease-in-out 0.6s infinite; }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,50,44,0); }
+    50%      { box-shadow: 0 0 0 8px rgba(200,50,44,0.18); }
+  }
+  .coming-up .count { font-family: 'Anton',Impact,sans-serif; font-size: 26px; letter-spacing: 0.04em; color: var(--cream); line-height: 1.1; }
+  .coming-up.urgent .count, .coming-up.urgent-now .count { color: var(--red); }
+  .coming-up .meta { font-family: 'Courier New',monospace; font-size: 11px; letter-spacing: 0.16em; color: rgba(245,236,215,0.6); text-transform: uppercase; }
+
   /* Adaptive flow */
   .sit-flow-step { animation: panel-in 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
   .ans-pill {
@@ -979,6 +993,57 @@ const SIT_MODIFIERS = {
   'messup.react.passive':{ label: 'INVITE DIRECTNESS',         body: "Don't play the passive game back. ‘I can tell something's off and I'd rather hear it straight than dance around it.’" }
 };
 
+const FIXED_EVENTS = [
+  { id: 'valentine', label: "VALENTINE'S DAY", monthDay: '02-14', emoji: '❤️' }
+];
+
+const OCCASION_PLAYS = {
+  anniversary: {
+    universal: [
+      "Hand-written letter. Not a card. One specific thing from this year that mattered.",
+      "Recreate your first date — same place, same drinks, no phones.",
+      "Playlist of every song that mattered this year. Short note on each."
+    ],
+    menstrual:  ["Postpone the big gesture. Anniversary cuddle-night instead. Save the dinner for next week."],
+    follicular: ["Plan something new — class, day trip, gallery. Her energy is up."],
+    ovulation:  ["Dress up. Take her somewhere she gets to be seen."],
+    luteal:     ["Skip the loud restaurant. Quiet at-home dinner she doesn't have to dress for."]
+  },
+  birthday: {
+    universal: [
+      "Three small surprises across the day beats one big gesture. Morning note → afternoon drop-in → evening plan.",
+      "Loop in two friends she actually likes. Coordinate, don't centralize.",
+      "Photo book of the year. Free template, 30 min in Canva. Lethal."
+    ],
+    menstrual:  ["Lower the noise. Her favorite meal in, her favorite show, no crowd."],
+    follicular: ["She'll want people. Throw the thing. Be the host, not the spotlight."],
+    ovulation:  ["Dancing, dressing up, photographs. Lean into the high."],
+    luteal:     ["Pre-prep everything so she does nothing. Wrapping, food, even her outfit picked. Removes friction."]
+  },
+  valentine: {
+    universal: [
+      "Don't buy red roses at the gas station on the 14th. Do literally anything else.",
+      "Reservation made Feb 1 ≠ reservation made Feb 13. Book now.",
+      "Hand-write the card. Specific. Not 'love you forever.'"
+    ],
+    menstrual:  ["Skip the dinner-out trap. At-home Valentine's — her takeout, candles, foot rub."],
+    follicular: ["Plan something active. Activity > restaurant for her phase."],
+    ovulation:  ["Lean in. She's open. Make it memorable."],
+    luteal:     ["Quiet > loud. Food she actually wants. No surprise crowds."]
+  },
+  firstMet: {
+    universal: [
+      "Text her the photo from that day with one sentence: ‘still my best decision.’",
+      "Order the drink you both had. Send a picture. Be a little dorky.",
+      "Plan the same walk/meal/spot this week. Anchor the memory."
+    ],
+    menstrual:  ["Keep it as a sweet text, nothing physical."],
+    follicular: ["Let it be the seed of a re-do date this week."],
+    ovulation:  ["Re-do the date this week."],
+    luteal:     ["Small + quiet. A photo and a sentence is enough."]
+  }
+};
+
 const FAQ = [
   { q:"Is PMS real?", a:"Bro, yes. It's in the medical literature. 3-8% of women have PMDD, the severe version. Hormones in the luteal phase have measurable effects on mood, pain, energy, and thinking. Not vibes. Science." },
   { q:"Should we have sex during her period?", a:"Brooooo, up to both of you. Some women want more, some want zero touch. Communicate. Read her cues. Don't assume either way." },
@@ -1240,6 +1305,45 @@ function composePlay(sit, phase, ctx) {
   return { baseMove, modifiers, phrases: phrases.slice(0, 3), dontSay, trail };
 }
 
+// ---------- IMPORTANT DATES ----------
+function daysUntilMD(monthDay) {
+  const today = midnight(new Date());
+  const [mm, dd] = monthDay.split('-').map(Number);
+  let next = new Date(today.getFullYear(), mm - 1, dd);
+  next.setHours(0, 0, 0, 0);
+  if (next < today) next.setFullYear(today.getFullYear() + 1);
+  return Math.round((next - today) / DAY);
+}
+function yearsSinceNext(yyyymmdd) {
+  if (!yyyymmdd) return null;
+  const then = new Date(yyyymmdd);
+  const now = new Date();
+  let yrs = now.getFullYear() - then.getFullYear();
+  const before = now.getMonth() < then.getMonth()
+    || (now.getMonth() === then.getMonth() && now.getDate() < then.getDate());
+  return Math.max(0, yrs - (before ? 1 : 0)) + 1;
+}
+function upcomingEvents(profile, withinDays) {
+  const max = typeof withinDays === 'number' ? withinDays : 30;
+  const d = (profile && profile.dates) || {};
+  const events = [];
+  if (d.anniversary) events.push({ id:'anniversary', label:'ANNIVERSARY',  emoji:'💍', monthDay: d.anniversary.slice(5), since: d.anniversary });
+  if (d.birthday)    events.push({ id:'birthday',    label:'HER BIRTHDAY', emoji:'🎂', monthDay: d.birthday.slice(5),    since: d.birthday });
+  if (d.firstMet)    events.push({ id:'firstMet',    label:'FIRST MET',    emoji:'📍', monthDay: d.firstMet.slice(5),    since: d.firstMet });
+  FIXED_EVENTS.forEach(e => events.push({ id:e.id, label:e.label, emoji:e.emoji, monthDay: e.monthDay, since: null }));
+  return events
+    .map(e => ({ ...e, daysUntil: daysUntilMD(e.monthDay), years: e.since ? yearsSinceNext(e.since) : null }))
+    .filter(e => e.daysUntil <= max)
+    .sort((a, b) => a.daysUntil - b.daysUntil);
+}
+function urgencyForDays(d) {
+  if (d === 0)        return { cls: 'urgent-now', sub: "TODAY. Don't blow it." };
+  if (d === 1)        return { cls: 'urgent-now', sub: "Tomorrow. Last call." };
+  if (d <= 7)         return { cls: 'urgent',     sub: "This week — get on it." };
+  if (d <= 14)        return { cls: 'medium',     sub: "Bro — mark this. Don't get caught." };
+  return                     { cls: '',           sub: "Two weeks out. Plan now, thank yourself later." };
+}
+
 function buildAlert(profile, day) {
   if (!profile) return null;
   const days = daysToNextPeriod(profile);
@@ -1452,7 +1556,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.8 · The adaptive coach</footer>
+    <footer class="app">BRO CODE · v2.9 · Don't forget</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1638,6 +1742,8 @@ function renderDashboard(day, phase, len) {
         </div>
       </div>
     </div>
+
+    ${renderUpcomingCard()}
 
     ${renderPlaysCard(phase)}
 
@@ -1874,6 +1980,33 @@ function relativeAgo(at, now) {
   return d + 'd ago';
 }
 
+function renderUpcomingCard() {
+  const upcoming = upcomingEvents(state.profile, 30);
+  if (!upcoming.length) return '';
+  const e = upcoming[0];
+  const u = urgencyForDays(e.daysUntil);
+  // Pretty date string e.g. "SUN, JUN 8"
+  const today = midnight(new Date());
+  const target = new Date(today); target.setDate(today.getDate() + e.daysUntil);
+  const fmt = target.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' }).toUpperCase();
+  const yearLine = e.years != null ? ` · YEAR ${e.years}` : '';
+  const countLine = e.daysUntil === 0
+    ? `${e.label} · TODAY`
+    : `${e.label} · ${e.daysUntil} DAY${e.daysUntil === 1 ? '' : 'S'}`;
+  return `
+    <div class="card coming-up ${u.cls}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="label">// coming up</div>
+        <div style="font-size:22px;line-height:1">${e.emoji}</div>
+      </div>
+      <div class="count">${h(countLine)}</div>
+      <div class="meta" style="margin-top:4px">${h(fmt)}${yearLine}</div>
+      <p style="margin:10px 0 12px;color:var(--cream);line-height:1.45;font-size:14px">${h(u.sub)}</p>
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="jumpToOccasionPlays()">→ SEE THE PLAYS</button>
+    </div>
+  `;
+}
+
 function renderBroTruth() {
   const seed = state.truthSeed || 0;
   const mode = state.truthMode || 'truth';
@@ -1963,9 +2096,13 @@ function renderReceiptCard() {
 }
 
 function renderPlaysCard(phase) {
-  const tab = state.playsTab || 'ask';
+  const occ = upcomingEvents(state.profile, 14)[0] || null;
+  let tab = state.playsTab || 'ask';
+  // If the user requested 'occasion' but there's no current event, fall back
+  if (tab === 'occasion' && !occ) tab = 'ask';
   const seed = state.playsSeed || 0;
   let title = '', items = [];
+  let empty = `<p style="color:rgba(245,236,215,0.6);margin:0;font-style:italic">Fill in her profile to unlock gift moves.</p>`;
   if (tab === 'ask') {
     title = 'ASK HER TONIGHT';
     items = CONVERSATIONS[phase] || [];
@@ -1975,9 +2112,18 @@ function renderPlaysCard(phase) {
   } else if (tab === 'gift') {
     title = 'GIFT MOVE';
     items = pickGifts(state.profile);
+  } else if (tab === 'occasion' && occ) {
+    const lib = OCCASION_PLAYS[occ.id] || {};
+    const phaseLines = lib[phase] || [];
+    items = [...phaseLines, ...(lib.universal || [])];
+    const dLabel = occ.daysUntil === 0 ? 'TODAY' : `${occ.daysUntil}D`;
+    title = `${occ.emoji} ${occ.label} — ${dLabel}`;
   }
   const rotated = items.length ? items.slice(seed % items.length).concat(items.slice(0, seed % items.length)) : [];
-  const shown = rotated.slice(0, tab === 'ask' ? 3 : (tab === 'gift' ? 3 : 2));
+  const shown = rotated.slice(0, tab === 'ask' ? 3 : (tab === 'occasion' ? 4 : (tab === 'gift' ? 3 : 2)));
+  const occPill = occ
+    ? `<button class="pill ${tab==='occasion'?'active':''}" onclick="setPlaysTab('occasion')">${occ.emoji} ${h(occ.label.split(' ')[0])}</button>`
+    : '';
 
   return `
     <div class="card">
@@ -1989,15 +2135,25 @@ function renderPlaysCard(phase) {
         <button class="pill ${tab==='ask'?'active':''}" onclick="setPlaysTab('ask')">💬 ASK</button>
         <button class="pill ${tab==='date'?'active':''}" onclick="setPlaysTab('date')">🍽️ DATE</button>
         <button class="pill ${tab==='gift'?'active':''}" onclick="setPlaysTab('gift')">🎁 GIFT</button>
+        ${occPill}
       </div>
-      <div class="label" style="margin:14px 0 8px;color:var(--cream)">${title}</div>
+      <div class="label" style="margin:14px 0 8px;color:var(--cream)">${h(title)}</div>
       ${shown.length ? `
         <ul class="bullets">
           ${shown.map(line => `<li><span style="color:var(--orange)">▸</span><span>${h(line)}</span></li>`).join('')}
         </ul>
-      ` : `<p style="color:rgba(245,236,215,0.6);margin:0;font-style:italic">Fill in her profile to unlock gift moves.</p>`}
+      ` : empty}
     </div>
   `;
+}
+
+function jumpToOccasionPlays() {
+  haptic(8);
+  setState({ playsTab: 'occasion' });
+  setTimeout(() => {
+    const card = document.querySelector('.plays-tabs');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
 }
 
 function renderQuickStart() {
@@ -2245,7 +2401,27 @@ function renderProfile() {
     </details>
 
     <details class="acc">
-      <summary><div class="title-row"><span class="num">07</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">07</span><span class="name">Important Dates</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Any blanks are fine — fill in what you've got. Surfaces a countdown + occasion plays as each date approaches.</p>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">💍 Anniversary</span>
+          <input type="date" max="${today}" value="${h((p.dates&&p.dates.anniversary)||'')}" onchange="updateDate('anniversary', event)" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">🎂 Her birthday</span>
+          <input type="date" max="${today}" value="${h((p.dates&&p.dates.birthday)||'')}" onchange="updateDate('birthday', event)" />
+        </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:6px">📍 First met / first date</span>
+          <input type="date" max="${today}" value="${h((p.dates&&p.dates.firstMet)||'')}" onchange="updateDate('firstMet', event)" />
+        </label>
+        <p style="font-size:12px;color:rgba(245,236,215,0.55);margin:6px 0 0">Valentine's Day (Feb 14) is auto-tracked — no input needed.</p>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary><div class="title-row"><span class="num">08</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <textarea data-field="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
       </div>
@@ -2633,6 +2809,16 @@ function updateField(e) {
   state.profile = next;
   debouncedSave(next);
 }
+function updateDate(which, e) {
+  const value = e.target.value || '';
+  const prev = state.profile || {};
+  const dates = { ...(prev.dates || {}), [which]: value };
+  const next = { ...prev, dates };
+  state.profile = next;
+  debouncedSave(next);
+  // Re-render so the dashboard COMING UP card reflects the change immediately
+  render();
+}
 function togglePill(key, id, multi) {
   const p = state.profile || {};
   let next;
@@ -2704,6 +2890,20 @@ async function toggleNotif() {
 function notifBody() {
   const p = state.profile;
   if (!p?.lastPeriod) return { title: 'BRO CODE', body: 'Open the app and set her last period to unlock today\'s move.' };
+
+  // Date-aware override: if there's an event today or tomorrow, push that instead of the phase tip
+  const soon = upcomingEvents(p, 1);
+  if (soon.length) {
+    const e = soon[0];
+    const labelTitle = e.label.toLowerCase().replace(/\bher\b/, 'her').replace(/^./, c => c.toUpperCase());
+    if (e.daysUntil === 0) {
+      return { title: 'BRO CODE · ' + e.emoji + ' TODAY', body: `Bro. ${labelTitle} today. Open the app — one move for you.` };
+    }
+    if (e.daysUntil === 1) {
+      return { title: 'BRO CODE · ' + e.emoji + ' TOMORROW', body: `${labelTitle} tomorrow. Last call. One play inside.` };
+    }
+  }
+
   const day = cycleDay(p);
   const len = p.cycleLength || 28;
   const phase = phaseFor(day, len);
