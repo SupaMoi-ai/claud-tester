@@ -380,6 +380,28 @@
   .coming-up.urgent .count, .coming-up.urgent-now .count { color: var(--red); }
   .coming-up .meta { font-family: 'Courier New',monospace; font-size: 11px; letter-spacing: 0.16em; color: rgba(245,236,215,0.6); text-transform: uppercase; }
 
+  /* Pulse cards */
+  .pulse { border-left: 3px solid var(--alert); }
+  .pulse-repair { border-left-color: var(--orange); }
+  .pulse-ghost { border-left-color: var(--alert); }
+  .pulse-ghost.pulse-heavy { border-left-color: var(--red); }
+  .pulse-channel { border-left-color: var(--cream); }
+
+  /* Phase progress arc (inside daily brief) */
+  .phase-arc { display:flex; flex-direction: column; gap:6px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .phase-arc .line { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; font-family:'Courier New',monospace; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(245,236,215,0.7); }
+  .phase-arc .ph { font-family:'Anton',Impact,sans-serif; font-size:14px; letter-spacing:0.1em; }
+  .phase-arc .bar { height: 4px; background: rgba(245,236,215,0.10); border-radius:999px; overflow:hidden; }
+  .phase-arc .bar > span { display:block; height:100%; border-radius:999px; transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+  .phase-arc .meta { color: rgba(245,236,215,0.55); font-size:10px; }
+
+  /* 7-day strip */
+  .day-strip { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; padding:8px 0; }
+  .day-strip .cell { aspect-ratio: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:1px solid var(--border); border-radius:8px; font-size:16px; line-height:1; }
+  .day-strip .cell .dlabel { font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.1em; color: rgba(245,236,215,0.45); }
+  .day-strip .cell.today { border-color: var(--red); }
+  .day-strip .cell.empty { color: rgba(245,236,215,0.25); }
+
   /* Adaptive flow */
   .sit-flow-step { animation: panel-in 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
   .ans-pill {
@@ -575,7 +597,9 @@ const ALERTS = {
   P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Brooooo, get the supplies in the house today. Future-you will thank you.', icon:'🚨' },
   P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Psst bro — patience mode tonight. No big talks. Just be present.', icon:'🚨' },
   P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'Bro. She needs you. Go check on her right now.', icon:'🩸' },
+  OVU2:{ id:'ovu-2',tone:'alert', title:'OVULATION IN 2 DAYS',  body:"Heads up — peak window starts Thursday. Plan one thing worth doing.", icon:'⭐' },
   OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"Bro listen — peak window. Match her energy. Plan the thing.", icon:'⭐' },
+  LUT2:{ id:'lut-2',tone:'alert', title:'LUTEAL IN 2 DAYS',     body:'Heads up — sensitivity rises in 2 days. Volume down, patience up. Plan softer this week.', icon:'🌙' },
   LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Real talk bro — cozy mode begins. Less plans, more presence.', icon:'🌙' }
 };
 
@@ -603,18 +627,6 @@ const PHRASE_BANK = [
   { s:"She's at peak energy", lines:["You're glowing today. I noticed.","Tell me what you're working on. I want to hear it.","Whatever you want to do tonight - I'm in."] }
 ];
 
-const PHRASE_BANK_NO = [
-  { s:"She's in pain", lines:["Så leit. Hva kan jeg gjøre nå?","Jeg henter varmeputa. Bare bli liggende.","Jeg går ingen steder. Si hva som hjelper."] },
-  { s:"She's crying", lines:["Kom hit. Jeg har deg.","Du trenger ikke forklare noe.","Jeg går ingen steder."] },
-  { s:"She's irritable", lines:["Jeg hører deg. Det høres slitsomt ut.","Hva trenger du fra meg akkurat nå?","Ta den tiden du trenger. Jeg er her."] },
-  { s:"She wants space", lines:["Jeg er her når du er klar.","Ta den tiden du trenger.","Jeg fikser middag. Ikke tenk på noe."] },
-  { s:"She wants to talk", lines:["Jeg lytter. Fortell alt.","Det gir mening. Hva mer?","Jeg skjønner hvorfor du føler det sånn."] },
-  { s:"She's doubting herself", lines:["Jeg har sett deg gjøre hardere ting enn dette.","Du har ikke feil her. Jeg ser det også.","Du klarer dette. Og jeg har deg."] },
-  { s:"She needs validation", lines:["Du er ikke gal. Det var urettferdig.","Følelsene dine gir helt mening.","Jeg hadde følt det samme."] },
-  { s:"She's at peak energy", lines:["Du stråler i dag. Jeg la merke til det.","Fortell hva du holder på med. Jeg vil høre.","Hva enn du vil i kveld — jeg er med."] }
-];
-function phraseBank() { return lang() === 'no' ? PHRASE_BANK_NO : PHRASE_BANK; }
-
 const RED_LIST = [
   { phrase:"Calm down", why:"It signals you don't think her feelings are valid." },
   { phrase:"You're overreacting", why:"Her feelings are real, even if intense." },
@@ -623,15 +635,6 @@ const RED_LIST = [
   { phrase:"Other women don't make this big a deal", why:"Never compare her to other women." },
   { phrase:"I can't say anything right", why:"This makes it about you." }
 ];
-const RED_LIST_NO = [
-  { phrase:"Ro deg ned", why:"Signaliserer at du ikke mener følelsene hennes er gyldige." },
-  { phrase:"Du overreagerer", why:"Følelsene hennes er ekte, selv når de er intense." },
-  { phrase:"Er du i PMS?", why:"Reduserer henne til biologi. Avfeier det virkelige." },
-  { phrase:"Bare slapp av", why:"Hun velger ikke å føle det sånn." },
-  { phrase:"Andre lager ikke en sånn greie", why:"Aldri sammenlign henne med andre." },
-  { phrase:"Jeg får ikke gjort noe riktig", why:"Da gjør du det om til deg selv." }
-];
-function redList() { return lang() === 'no' ? RED_LIST_NO : RED_LIST; }
 
 const BRO_TRUTHS = [
   "Bro, every guy who's ever loved a woman has been here. You're not failing — you're paying attention.",
@@ -664,41 +667,6 @@ const BRO_TRUTHS = [
   "Bro, the version of you that pays attention is the version she fell for. Be that guy more often."
 ];
 
-const BRO_TRUTHS_NO = [
-  "Hver kar som har elsket en kvinne har vært her. Du svikter ikke — du følger med.",
-  "Hjernen hennes kjører bokstavelig talt andre programmer to uker i måneden. Det er biologi, ikke deg.",
-  "Hun kommer til å føles som en helt annen person om 72 timer. Hold linja.",
-  "At du bruker denne appen plasserer deg blant de øverste 5%. De fleste googler aldri engang dette.",
-  "Du trenger ikke løse det. ‘Jeg er her’ er hele svaret.",
-  "Du kan ikke smartere deg ut av østrogen. Ingen har klart det. Slutt å prøve.",
-  "Verste trekk er stillhet + avstand. Bare unngå det, så vinner du allerede.",
-  "Hun husker hva du GJORDE, ikke hva du sa. Beveg deg framover, ikke sidelengs.",
-  "Du har lov til å være sliten du også. Fyll opp før du går tom.",
-  "I ovulasjonsuka kommer hun enten til å forelske seg i deg igjen, eller huske at hun kunne fått bedre. Vær til stede. Sørg for det første.",
-  "‘Er du på mensen?’ er bensin på et stearinlys. Ikke gjør det.",
-  "Mensen KOMMER. Det er en kalender. Ikke se overrasket ut hver 28. dag.",
-  "Å være en god partner betyr ikke å forsvinne i seg selv. Ta din egen tid. Kom tilbake bedre.",
-  "Sen luteal er ikke hun som er slem. Det er hun med radaren på max. Tilpass deg.",
-  "Du trenger ikke være perfekt. Du må være til stede. Det er 80% av jobben.",
-  "Validering > løsninger. Alltid. Selv om hjernen din skriker ‘MEN JEG KAN FIKSE DET’. Sitt på den.",
-  "Hvis du blir stressa av å lese henne, pust. Hun er ikke fienden. Klokka tikker ikke.",
-  "Småtingene er det store. Varmepute på sofaen før hun spør = elite-trekk.",
-  "Hun tilgir mye hvis du faktisk beklager. Hun tilgir ingenting hvis du ikke gjør det.",
-  "Du er ikke gal. Dynamikken ER forskjellig uke til uke. Nå har du kartet.",
-  "Tre ting du styrer: hva du tar med deg hjem, hvordan du lytter, hvordan du møter opp. Det er hele jobben.",
-  "Jobben din er ikke å aldri rote. Jobben er å reparere raskere enn du roter. Bli god på reparasjon.",
-  "Nervesystemet ditt er et verktøy. Senk stemmen. Slipp skuldrene. Hun matcher det.",
-  "Du lærer ikke dette over natta. Du lærer det over år. Du er tidlig ute. Vær tålmodig med deg selv.",
-  "Den irritasjonen du føler over å ta vare på henne — stopp. Spurte hun? Eller antok du? Halvparten av tiden er det det andre.",
-  "Sex er ikke et termometer. Noen uker er det heitt, andre uker er det en hånd på ryggen. Begge teller.",
-  "Å sjekke inn koster ingenting. ‘Hvordan har du det, egentlig?’ én gang om dagen. Se hva som skjer.",
-  "Versjonen av deg som følger med, er den hun forelska seg i. Vær den karen oftere.",
-  "Reminder: omsorg > ego.",
-  "Du trenger ikke vinne denne samtalen.",
-  "Noen ganger er ‘jeg skjønner’ bedre enn en forklaring.",
-  "Det er ikke din jobb å fikse. Det er din jobb å være til stede."
-];
-function broTruths() { return lang() === 'no' ? BRO_TRUTHS_NO : BRO_TRUTHS; }
 
 const BRO_FACTS = [
   "Bro fact: women experience pain at lower thresholds during ovulation. Yes, even period pain. Yes, that's biology.",
@@ -745,27 +713,6 @@ const DECODER = [
   { phrase: "It doesn't matter",    meaning: "Bro, it matters.",                                                                    move: "Validate first: 'I think it does matter, and I want to understand.'" },
   { phrase: "Have fun",             meaning: "Psst bro — sometimes literal. Sometimes 'I wish you'd stayed.' Read the energy.",     move: "If unsure: 'I'd rather skip if you're not into it. We good?'" }
 ];
-const DECODER_NO = [
-  { phrase: "Det går fint",         meaning: "Det går ikke fint. Hun vil at du skal merke det uten å bli spurt.",                  move: "Sett deg ved siden av. Ikke spør hvorfor. Hånd på ryggen. ‘Jeg er her, ingen hast.’" },
-  { phrase: "Samma",                meaning: "Hun har en mening og du gikk glipp av den.",                                          move: "Velg noe konkret. Feil valg > intet valg. Bestemthet slår å ha rett." },
-  { phrase: "Gjør som du vil",      meaning: "Felle. Hun har en mening. Ikke gå på den.",                                           move: "‘Jeg vil heller bestemme sammen. Hva tenker du?’" },
-  { phrase: "Vi må snakke",         meaning: "Spenn på deg. Vær tidlig. Ikke fiks på impuls.",                                       move: "‘Ja, jeg er her. Når og hvor?’ Så LYTT. Ikke øv på motsvar." },
-  { phrase: "Jeg er ikke sint",     meaning: "Det er hun. Eller hun er såra. Ta det seriøst.",                                       move: "Ikke krangel om merkelappen. ‘Jeg hører deg. Forklar meg det.’" },
-  { phrase: "Bare gå",              meaning: "Hun tester om du faktisk gjør det. Spoiler: ikke gjør det.",                          move: "‘Tenker meg om — la oss droppe det.’ Følg med på kroppsspråket." },
-  { phrase: "Fint.",                meaning: "Hard fint. Ikke fint i det hele tatt.",                                                move: "Ikke krangel om punktumet — ‘Du virker av. Hva skjer?’ Hold deg rolig." },
-  { phrase: "K",                    meaning: "Du gjorde noe. Eller lot være å gjøre noe. Spol 24t tilbake.",                        move: "Ikke dobbel-skriv. Ring henne. ‘Tror jeg kan ha rota — snakk med meg.’" },
-  { phrase: "Greit",                meaning: "Motvillig ja.",                                                                       move: "Verifiser: ‘Helt greit? Eller greit-fint?’ Gi rom til å si nei." },
-  { phrase: "Det er ingenting",     meaning: "Det er noe. Hun orker bare ikke ta det enda.",                                        move: "Ikke press. ‘Ok. Jeg er her når du vil.’ Så faktisk vær der." },
-  { phrase: "Jeg bryr meg ikke",    meaning: "Hun bryr seg. Hun er lei av å bære avgjørelsen.",                                     move: "Ta avgjørelsen av henne. Vær konkret. ‘Jeg bestiller thai. Greit?’" },
-  { phrase: "Det går helt fint",    meaning: "Doblet ‘fint’ = ikke fint. ‘Helt’ er fortellingen.",                                    move: "Senk tempoet. ‘Ærlig — hva skjer?’" },
-  { phrase: "Glem det",             meaning: "Ikke faktisk glem det.",                                                              move: "‘Nei, jeg vil høre. Ta den tiden du trenger.’" },
-  { phrase: "Hvis du sier det",     meaning: "Hun mener du tar feil, men vil ikke krangle.",                                        move: "Trekk pusten. ‘Vent — hva går jeg glipp av?’ Nysgjerrighet slår forsvar." },
-  { phrase: "Jeg er bare sliten",   meaning: "Kan være søvn. Kan være ‘sliten av å bære dette.’ Sjekk fasen.",                       move: "Spør varmt. Sen luteal? Anta begge. Ta en gjøremål av henne." },
-  { phrase: "Ingenting",            meaning: "Det er noe. Alltid.",                                                                  move: "Drop spørsmålet for nå. Merk det senere når hun er mykere." },
-  { phrase: "Det spiller ingen rolle", meaning: "Det spiller en rolle.",                                                            move: "Valider først: ‘Jeg tror det spiller en rolle, og jeg vil forstå.’" },
-  { phrase: "Ha det gøy",           meaning: "Noen ganger bokstavelig. Noen ganger ‘skulle ønske du ble.’ Les energien.",            move: "Hvis usikker: ‘Jeg dropper hvis du ikke er gira. Er vi gode?’" }
-];
-function decoder() { return lang() === 'no' ? DECODER_NO : DECODER; }
 
 const RED_PATTERNS = [
   { rx: /\b(calm down|just relax|chill out|relax babe)\b/i,                                       flag: "calm-down",         alt: "Try: 'I see you're upset. Walk me through it.'" },
@@ -784,24 +731,6 @@ const MANSPLAIN_PATTERNS = [
   { rx: /\b(it'?s actually (simple|easy)|just (think|listen|breathe|relax))\b/i,                  flag: "minimize-difficulty",alt: "Try: 'I can see why that's hard.'" },
   { rx: /\b(have you tried|why don'?t you (just )?)\b/i,                                          flag: "have-you-tried",     alt: "Skip the solution. Listen, mirror, then ask 'want suggestions or no?'" }
 ];
-const RED_PATTERNS_NO = [
-  { rx: /\b(ro deg ned|slapp av|chill|ta det med ro)\b/i,                                         flag: "ro-deg-ned",       alt: "Prøv: ‘Jeg ser at du er opprørt. Forklar meg det.’" },
-  { rx: /\b(overreager(er)?|for sensitiv|for mye|hysterisk|gal|irrasjonell)\b/i,                  flag: "bagatelliser",     alt: "Prøv: ‘Reaksjonen din gir mening. Hva gjorde mest vondt?’" },
-  { rx: /\b(er du i pms|er du på mensen|den tida i måneden)\b/i,                                  flag: "avfei-syklus",     alt: "Prøv: ‘Noe er av og jeg vil forstå uten å anta.’" },
-  { rx: /\b(andre (jenter|kvinner)|ekskjær(esten)?|som (min )?mor)\b/i,                           flag: "sammenlign",       alt: "Prøv: ‘Beklager. La oss holde oss til deg og meg.’" },
-  { rx: /\bjeg får ikke gjort noe riktig\b/i,                                                     flag: "om-deg-selv",      alt: "Prøv: ‘Jeg hører at jeg bommer. Hjelp meg se hva som ville landa.’" },
-  { rx: /\b(samma|glem det|drit i det|gå videre)\b/i,                                             flag: "stenger",          alt: "Prøv: ‘Jeg vil fortsette å snakke. Jeg går ingen steder.’" },
-  { rx: /\bdu er alltid\b/i,                                                                      flag: "alltid-aldri",     alt: "Prøv: ‘I det siste har jeg merka X.’ Spesifikt, ikke absolutt." },
-  { rx: /\bdu aldri\b/i,                                                                          flag: "alltid-aldri",     alt: "Prøv: ‘Jeg gikk glipp av at du trengte Y. Jeg jobber med det.’" }
-];
-const MANSPLAIN_PATTERNS_NO = [
-  { rx: /^\s*(faktisk|egentlig),?\s*/i,                                                           flag: "faktisk",          alt: "Spurte hun? Hvis ikke, bare lytt." },
-  { rx: /\b(det du (må|burde) gjøre|alt du trenger å gjøre)\b/i,                                  flag: "uønska-råd",       alt: "Prøv: ‘Vil du ha mitt syn, eller bare ventilere?’" },
-  { rx: /\b(det er jo (enkelt|lett)|bare (tenk|lytt|pust|slapp av))\b/i,                          flag: "bagatelliser-vansker", alt: "Prøv: ‘Jeg skjønner hvorfor det er vanskelig.’" },
-  { rx: /\b(har du prøvd|hvorfor ikke bare)\b/i,                                                  flag: "har-du-prøvd",     alt: "Drop løsningen. Lytt, speil, og spør ‘vil du ha forslag eller nei?’" }
-];
-function redPatterns() { return lang() === 'no' ? RED_PATTERNS_NO : RED_PATTERNS; }
-function mansplainPatterns() { return lang() === 'no' ? MANSPLAIN_PATTERNS_NO : MANSPLAIN_PATTERNS; }
 
 const RECEIPT_VERDICTS = {
   killing: "Bro, you're cooking. Don't slow down.",
@@ -810,14 +739,6 @@ const RECEIPT_VERDICTS = {
   meh:     "Real talk bro — light week. Pick one thing. Do it tonight.",
   rough:   "Bro listen — work to do. Don't beat yourself up. Apologize if needed, then keep moving."
 };
-const RECEIPT_VERDICTS_NO = {
-  killing: "Du leverer denne syklusen. Ikke senk farten.",
-  great:   "Du møter opp. Hun merker det.",
-  good:    "Solid. Ett bevisst trekk til denne uka og du knuser det.",
-  meh:     "Lett uke. Velg én ting. Gjør det i kveld.",
-  rough:   "Tøff syklus. Det er greit. Si unnskyld om det trengs, og bare møt opp i morgen."
-};
-function receiptVerdicts() { return lang() === 'no' ? RECEIPT_VERDICTS_NO : RECEIPT_VERDICTS; }
 
 const CONVERSATIONS = {
   menstrual: [
@@ -845,33 +766,6 @@ const CONVERSATIONS = {
     "Have I been showing up the way you need me to?"
   ]
 };
-const CONVERSATIONS_NO = {
-  menstrual: [
-    "Hva er den ene tingen som faktisk ville hjulpet i dag?",
-    "Skal jeg ta neste avgjørelse for deg, så du slipper å tenke?",
-    "Er det noen du vil jeg melder for deg?",
-    "Hvilken serie vil du forsvinne inn i i kveld?"
-  ],
-  follicular: [
-    "Hva er den greia du har lyst til å prøve?",
-    "Hvis vi kunne planlagt hva som helst neste helg — hva?",
-    "Hva er et prosjekt du er gira på akkurat nå?",
-    "Hva er noe nytt du har lyst til å gjøre sammen med meg?"
-  ],
-  ovulation: [
-    "Hva er samtalen vi har unngått? La oss ta den.",
-    "Fortell meg om det du er mest stolt av denne måneden.",
-    "Hva vil du ha mer av i livet vårt nå?",
-    "Hvor vil du reise — én tur, hvilket som helst budsjett?"
-  ],
-  luteal: [
-    "Er det noe jeg ikke har sett denne uka?",
-    "Hva er det som tynger deg som vi ikke har snakka om?",
-    "Hva kan jeg ta av deg i kveld?",
-    "Har jeg møtt opp sånn du trenger meg?"
-  ]
-};
-function conversations() { return lang() === 'no' ? CONVERSATIONS_NO : CONVERSATIONS; }
 
 const DATES = {
   menstrual: [
@@ -895,29 +789,6 @@ const DATES = {
     "Psst bro — hot chocolate + a walk if the weather's right. Low stakes."
   ]
 };
-const DATES_NO = {
-  menstrual: [
-    "Avlys alt. Bygg en hule. Hennes serie, din jobb: snacks.",
-    "Bestill hjemlevering fra favorittstedet. Tapp et bad etterpå.",
-    "Filmkveld, dempa lys, tungt teppe. Ingen prat nødvendig."
-  ],
-  follicular: [
-    "Prøv det nye stedet dere har vært nysgjerrige på.",
-    "Tur lørdag + kaffi etterpå. Match energien hennes.",
-    "Lag noe ingen av dere har laga før. Sammen."
-  ],
-  ovulation: [
-    "Den middagsreservasjonen du stadig utsetter. I kveld.",
-    "Kle opp. Gå ut. Ta et bilde. Hun vil ha minnet.",
-    "Drinks et sted med utsikt. Ta den ekte samtalen."
-  ],
-  luteal: [
-    "Bestill hjem. Samme sofa. Hennes valg. Telefon ned.",
-    "Koselig middag hjemme. Tenn et lys. Gjør det intensjonelt.",
-    "Varm kakao + en tur hvis været er på lag. Lav terskel."
-  ]
-};
-function dates() { return lang() === 'no' ? DATES_NO : DATES; }
 
 const APOLOGY = {
   menstrual: {
@@ -969,57 +840,6 @@ const APOLOGY = {
     ]
   }
 };
-const APOLOGY_NO = {
-  menstrual: {
-    moves: [
-      "Ta ansvar for det du faktisk gjorde. Ikke ‘jeg er lei meg for at du føler …’.",
-      "Ikke forsvar deg, ikke forklar. Bare sitt med det.",
-      "Spør henne: hva ville hjulpet nå? Og mene det."
-    ],
-    lines: [
-      "Jeg tok feil. Det jeg gjorde var ikke greit.",
-      "Du trenger ikke tilgi meg nå. Jeg er her når du er klar.",
-      "Jeg tar alt av deg i kveld. Du løfter ikke en finger."
-    ]
-  },
-  follicular: {
-    moves: [
-      "Beklag rent, så pek mot handling. Hun har energi til å reparere nå.",
-      "Planlegg noe konkret som viser at du hørte.",
-      "Ikke snakk det ihjel. Reparér, gå framover sammen."
-    ],
-    lines: [
-      "Du hadde rett. Jeg ser det nå. Her er hva jeg gjør annerledes.",
-      "La meg gjøre det godt igjen — denne helga, du velger, jeg planlegger.",
-      "Jeg vil bli bedre. Si meg hva ‘bedre’ ser ut som."
-    ]
-  },
-  ovulation: {
-    moves: [
-      "Ta det opp direkte. Hun er klarest og mest raus denne uka.",
-      "Vær spesifikk om hva du tok feil i. Ingen vage unnskyldninger.",
-      "Ta den større samtalen hun har ventet på."
-    ],
-    lines: [
-      "Jeg skylder deg en ekte unnskyldning. Ikke en kjapp en.",
-      "Jeg burde møtt opp. Jeg gjorde det ikke. Det er på meg.",
-      "Forklar meg hva som gjorde vondt — jeg vil faktisk forstå."
-    ]
-  },
-  luteal: {
-    moves: [
-      "Vær ydmyk først. Radaren hennes er på max denne uka.",
-      "Ikke bagatelliser. Ikke bring inn din side. Ikke en gang prøv.",
-      "Så vær stille. Tilstedeværelse slår ord denne uka."
-    ],
-    lines: [
-      "Du hadde ikke feil. Jeg hadde det. Jeg er lei for det.",
-      "Du trenger ikke forklare hvorfor det gjorde vondt. Jeg skjønner.",
-      "Jeg går ingen steder. Ta så mye rom du trenger."
-    ]
-  }
-};
-function apology() { return lang() === 'no' ? APOLOGY_NO : APOLOGY; }
 
 const TIME_TIPS = {
   menstrual: {
@@ -1112,42 +932,6 @@ const SITUATION_NEVER = {
   quiet:   "What's wrong with you tonight?",
   messup:  "I'm sorry you feel that way."
 };
-const SITUATION_FIRST_NO = {
-  crying: {
-    menstrual:  "Sett deg ved siden av henne. Ikke snakk. Hånd på ryggen. Det er hele første trekk.",
-    follicular: "Spør én gang: ‘vil du bli holdt eller vil du ha rom?’ Så gjør akkurat det.",
-    ovulation:  "Hold henne. Hun har lov til å gråte på toppen òg. Ikke prøv å fikse.",
-    luteal:     "Kom ved siden av. Stille kropp. Ikke spør hvorfor — hun sier det når hun er klar."
-  },
-  angry: {
-    menstrual:  "Senk stemmen. Ikke match temperaturen hennes. Bekreft, ikke forsvar.",
-    follicular: "Lytt hele veien til slutten før du sier noe. Så gjenta det du hørte.",
-    ovulation:  "Hun er klartenkt. Sinnet er informasjon. Ta det seriøst, ikke personlig.",
-    luteal:     "Ikke krangle. Ikke fiks. Valider: ‘du har ikke feil i å være opprørt.’ Så bli stille."
-  },
-  quiet: {
-    menstrual:  "Ikke fyll stillheten. Lag te til henne. Sitt i nærheten. Tilgjengelig, ikke presserende.",
-    follicular: "Mild sjekk-inn: ‘går det bra?’ Sier hun ja, drop det. Tro henne.",
-    ovulation:  "Direkte: ‘noe på hjertet?’ Hun sier det rett ut denne uka.",
-    luteal:     "Ikke spør hvorfor hun er stille. Bare vær stødig. Hun prosesserer. Tilstedeværelse er nok."
-  },
-  messup: {
-    menstrual:  APOLOGY_NO.menstrual.moves[0],
-    follicular: APOLOGY_NO.follicular.moves[0],
-    ovulation:  APOLOGY_NO.ovulation.moves[0],
-    luteal:     APOLOGY_NO.luteal.moves[0]
-  }
-};
-function situationFirst() { return lang() === 'no' ? SITUATION_FIRST_NO : SITUATION_FIRST; }
-
-const SITUATION_NEVER_NO = {
-  crying:  "Hvorfor gråter du egentlig?",
-  angry:   "Du er irrasjonell.",
-  quiet:   "Hva er det med deg i kveld?",
-  messup:  "Beklager at du føler det sånn."
-};
-function situationNever() { return lang() === 'no' ? SITUATION_NEVER_NO : SITUATION_NEVER; }
-
 const SIT_QUESTIONS = {
   crying: [
     { id: 'where', q: "Bro, where are you right now?",
@@ -1233,96 +1017,6 @@ const SIT_MODIFIERS = {
   'messup.react.passive':{ label: 'INVITE DIRECTNESS',         body: "Don't play the passive game back. ‘I can tell something's off and I'd rather hear it straight than dance around it.’" }
 };
 
-const SIT_QUESTIONS_NO = {
-  crying: [
-    { id: 'where', q: "Bro, hvor er du nå?",
-      opts: [
-        { id: 'with',  label: 'Hos henne',         icon: '🛋️' },
-        { id: 'phone', label: 'På telefonen',      icon: '📱' },
-        { id: 'away',  label: 'Ikke hos henne',    icon: '🚗' }
-      ] },
-    { id: 'why', q: "Har hun sagt hvorfor?",
-      opts: [
-        { id: 'told',   label: 'Sa det til meg',   icon: '🗣️' },
-        { id: 'wont',   label: "Vil ikke si",      icon: '🤐' },
-        { id: 'unsure', label: 'Vet ikke',         icon: '🤷' }
-      ] }
-  ],
-  angry: [
-    { id: 'who', q: "Bro, hvem er hun sint på?",
-      opts: [
-        { id: 'you',    label: 'Deg',              icon: '👉' },
-        { id: 'other',  label: 'Noen andre',       icon: '👥' },
-        { id: 'thing',  label: 'Noe annet',        icon: '🌍' }
-      ] },
-    { id: 'heat', q: "Trygt å snakke nå?",
-      opts: [
-        { id: 'cool',   label: 'Kjølt ned',        icon: '❄️' },
-        { id: 'hot',    label: 'Fortsatt heitt',   icon: '🔥' }
-      ] }
-  ],
-  quiet: [
-    { id: 'long', q: "Hvor lenge har hun vært stille?",
-      opts: [
-        { id: 'today',  label: 'Bare i dag',          icon: '☀️' },
-        { id: 'days',   label: 'Et par dager',        icon: '📅' }
-      ] },
-    { id: 'event', q: "Har det skjedd noe nylig?",
-      opts: [
-        { id: 'yes',    label: 'Ja',                  icon: '✓' },
-        { id: 'no',     label: 'Ikke noe jeg kommer på', icon: '✕' }
-      ] }
-  ],
-  messup: [
-    { id: 'kind', q: "Bro, hva slags rot?",
-      opts: [
-        { id: 'forgot', label: 'Glemte noe',          icon: '🧠' },
-        { id: 'words',  label: 'Sa noe feil',         icon: '🗯️' },
-        { id: 'noshow', label: "Møtte ikke opp",      icon: '🪑' },
-        { id: 'trust',  label: 'Tillit-greie',        icon: '💔' }
-      ] },
-    { id: 'react', q: "Hvordan reagerer hun?",
-      opts: [
-        { id: 'direct',  label: 'Sa det rett ut',     icon: '🗣️' },
-        { id: 'silent',  label: 'Stille behandling',  icon: '🌫️' },
-        { id: 'passive', label: 'Passiv-aggressiv',   icon: '😤' }
-      ] }
-  ]
-};
-function sitQuestions() { return lang() === 'no' ? SIT_QUESTIONS_NO : SIT_QUESTIONS; }
-
-const SIT_MODIFIERS_NO = {
-  'crying.where.with':   { label: 'TID PÅ STEDET',         body: "Plan 30–45 min minst. Telefon vekk. Ikke prøv å fikse." },
-  'crying.where.phone':  { label: 'IKKE TEKST-FIKS',       body: "Stemme slår tekst 10:1 nå. Ring om du kan. Hvis ikke: én kort ‘jeg er her, vil du jeg kommer over?’ — så SLUTT å skrive." },
-  'crying.where.away':   { label: 'TETT AVSTANDEN',        body: "Kom deg til henne hvis det er mulig. ‘På vei’ slår enhver tekst." },
-  'crying.why.told':     { label: 'SPEIL FØRST',           body: "Gjenta det hun sa. ‘Du er såra fordi X.’ Ikke argumenter med X. Bare bekreft at du hørte." },
-  'crying.why.wont':     { label: 'OM HUN ER STILLE',      body: "Det er normalt. Bli nær. Hun snakker når hun er klar. Ikke grav." },
-  'crying.why.unsure':   { label: 'ÅPNE DØRA',             body: "Mildt: ‘Er det noe jeg burde vite om i dag?’ Hvis hun trekker på skuldrene — drop det. Ikke avhør." },
-
-  'angry.who.you':       { label: 'EI DIN DEL',            body: "Ikke avled. Selv om du tror du har 70% rett, led med de 30% som er på deg." },
-  'angry.who.other':     { label: 'TEAM-MODUS',            body: "Hun trenger ikke en fiks. Hun trenger en alliert. ‘Det er kjipt. Hva trenger du fra meg nå?’" },
-  'angry.who.thing':     { label: 'RO HENNE NED',          body: "Match energien ned. Sakte stemme. Hånd på armen om det er greit. Vær termostat, ikke termometer." },
-  'angry.heat.cool':     { label: "DETTE ER VINDUET",      body: "Hun er åpen. Ta den ekte samtalen. Lytt dobbelt så mye som du snakker." },
-  'angry.heat.hot':      { label: 'IKKE ENDA',             body: "Ikke prosesser mens hun er varm. ‘Jeg vil høre alt sammen. La oss komme tilbake når begge kan.’ Så faktisk kom tilbake." },
-
-  'quiet.long.today':    { label: 'LETT BERØRING',         body: "Ikke gjør det til en greie. Lag te, sett deg i nærheten, vær tilgjengelig. Hun trenger kanskje bare å være i kroppen sin." },
-  'quiet.long.days':     { label: 'BRYT MØNSTERET',        body: "Tre stille dager = spør direkte. ‘Du har føltes fjern denne uka. Hva skjer?’ Ingen anklage i stemmen." },
-  'quiet.event.yes':     { label: 'SI DET HØYT',           body: "Ta opp tingen uten å vente på at hun gjør det. ‘Jeg har tenkt på X. Hvordan har du det med det?’" },
-  'quiet.event.no':      { label: 'SJEKK DEG SELV',        body: "Noen ganger betyr ‘ingenting’ at du gikk glipp av noe lite. Spol gjennom siste 48 timer ærlig." },
-
-  'messup.kind.forgot':  { label: 'EI + KOMPENSER',        body: "Ikke unnskyld med hvor travel du var. ‘Jeg droppa det. Det er på meg. Her er hva jeg gjør for å sikre at det ikke skjer igjen — [konkret].’" },
-  'messup.kind.words':   { label: 'NAVNGI ORDENE',         body: "‘Jeg sa X. Det var ikke greit fordi Y.’ Spesifikt er den eneste typen unnskyldning som lander." },
-  'messup.kind.noshow':  { label: 'INGEN GRUNNER, BARE REPARASJON', body: "Hun vil ikke ha grunnen enda. ‘Du trengte meg, jeg var ikke der. Jeg er lei for det. Her er hvordan jeg gjør det godt igjen.’" },
-  'messup.kind.trust':   { label: 'TID, IKKE ORD',         body: "Tillit gjenoppbygges ikke i én unnskyldning. Beklag rent, så møt opp konsekvent i uker. Les henne, ikke press." },
-  'messup.react.direct': { label: 'GAVE, IKKE FORNÆRMELSE',body: "At hun sier det = hun bryr seg fortsatt. Lytt helt til slutten før du forsvarer noe." },
-  'messup.react.silent': { label: 'GI ROM + BLI VÆRENDE',  body: "Ikke jag. Én melding: ‘Jeg vet jeg rota. Jeg går ingen steder. Si fra når du er klar.’ Så vent." },
-  'messup.react.passive':{ label: 'INVITER DIREKTHET',     body: "Ikke spill det passive spillet tilbake. ‘Jeg merker at noe er av, og jeg vil heller høre det direkte enn å danse rundt det.’" }
-};
-function sitModifier(key) {
-  const tbl = lang() === 'no' ? SIT_MODIFIERS_NO : SIT_MODIFIERS;
-  return tbl[key];
-}
-
 const FIXED_EVENTS = [
   { id: 'valentine', label: "VALENTINE'S DAY", monthDay: '02-14', emoji: '❤️' }
 ];
@@ -1373,53 +1067,6 @@ const OCCASION_PLAYS = {
     luteal:     ["Small + quiet. A photo and a sentence is enough."]
   }
 };
-const OCCASION_PLAYS_NO = {
-  anniversary: {
-    universal: [
-      "Håndskrevet brev. Ikke et kort. Én spesifikk ting fra dette året som betydde noe.",
-      "Gjenskap første date — samme sted, samme drikker, ingen telefoner.",
-      "Spilleliste med hver låt som betydde noe i år. Kort notat på hver."
-    ],
-    menstrual:  ["Drop den store gesten. Bryllupsdag-kosekveld i stedet. Spar middagen til neste uke."],
-    follicular: ["Planlegg noe nytt — kurs, dagstur, galleri. Energien hennes er oppe."],
-    ovulation:  ["Kle opp. Ta henne et sted hun får være sett."],
-    luteal:     ["Hopp over det høylytte stedet. Stille middag hjemme — hun trenger ikke gjøre seg klar."]
-  },
-  birthday: {
-    universal: [
-      "Tre små overraskelser gjennom dagen slår én stor. Morgennotat → drop-in på ettermiddagen → kveldsplan.",
-      "Få inn to venner hun faktisk liker. Koordiner, ikke sentraliser.",
-      "Fotobok over året. Gratis mal, 30 min i Canva. Dødelig."
-    ],
-    menstrual:  ["Skru ned støyen. Favorittmat hjem, favorittserie, ingen folk."],
-    follicular: ["Hun vil ha folk. Lag greia. Vær vert, ikke sentrum."],
-    ovulation:  ["Dans, antrekk, bilder. Len deg inn i toppen."],
-    luteal:     ["For-prep alt så hun ikke gjør noe. Innpakning, mat, til og med antrekket plukket ut. Fjerner friksjon."]
-  },
-  valentine: {
-    universal: [
-      "Ikke kjøp røde roser på bensinstasjonen den 14. Gjør bokstavelig talt hva som helst annet.",
-      "Reservasjon gjort 1. feb ≠ reservasjon gjort 13. feb. Book nå.",
-      "Skriv kortet for hånd. Spesifikt. Ikke ‘elsker deg for alltid.’"
-    ],
-    menstrual:  ["Skip ute-middag-fellen. Valentine's hjemme — hennes takeaway, levende lys, fotmassasje."],
-    follicular: ["Planlegg noe aktivt. Aktivitet > restaurant for fasen hennes."],
-    ovulation:  ["Len deg inn. Hun er åpen. Gjør det minneverdig."],
-    luteal:     ["Stille > høylytt. Mat hun faktisk vil ha. Ingen overraskelses-folkemengder."]
-  },
-  firstMet: {
-    universal: [
-      "Send henne bildet fra den dagen med én setning: ‘fortsatt min beste avgjørelse.’",
-      "Bestill drinken dere begge hadde. Send et bilde. Vær litt dorky.",
-      "Planlegg den samme turen/middagen/stedet denne uka. Forankre minnet."
-    ],
-    menstrual:  ["Hold det som en søt tekst, ingenting fysisk."],
-    follicular: ["La det bli kimen til en re-take date denne uka."],
-    ovulation:  ["Ta date'en på nytt denne uka."],
-    luteal:     ["Lite + stille. Et bilde og en setning er nok."]
-  }
-};
-function occasionPlays() { return lang() === 'no' ? OCCASION_PLAYS_NO : OCCASION_PLAYS; }
 
 const FAQ = [
   { q:"Is PMS real?", a:"Bro, yes. It's in the medical literature. 3-8% of women have PMDD, the severe version. Hormones in the luteal phase have measurable effects on mood, pain, energy, and thinking. Not vibes. Science." },
@@ -1430,16 +1077,6 @@ const FAQ = [
   { q:"What's the difference between PMS and PMDD?", a:"Bro, PMS = mild-to-moderate pre-period symptoms. PMDD = severe, life-disrupting symptoms (deep depression, rage, intense anxiety). PMDD needs medical support, not a heating pad." },
   { q:"How do I bring this up without being weird?", a:"Bro, just try: \"I want to understand you better, and your cycle is part of that. I built this thing to help me show up better.\" Most partners hear that as care, not surveillance." }
 ];
-const FAQ_NO = [
-  { q:"Er PMS ekte?", a:"Ja, helt klart. Det står i medisinsk litteratur. 3–8% av kvinner har PMDD, den alvorlige varianten. Hormoner i luteal-fasen har målbar effekt på humør, smerte, energi og tenkning. Ikke vibes. Vitenskap." },
-  { q:"Skal vi ha sex i mensen?", a:"Det er opp til dere begge. Noen vil ha mer, andre vil ikke bli rørt. Snakk om det. Les henne. Ikke anta noen vei." },
-  { q:"Hva om hun sier syklusen ikke påvirker henne?", a:"Tro henne. Syklusen påvirker kvinner ulikt. Noen kjenner nesten ingenting, andre kjenner alt. Uansett — å kjenne syklusen og være snill skader aldri." },
-  { q:"Hva om hun blir sint på meg?", a:"Valider først, fiks etterpå. Ikke skyld på syklusen — det er avfeiende og gjør det verre. Ta tak i det hun faktisk sa. Følg opp dynamikken senere om nødvendig. Rolig." },
-  { q:"Burde jeg noensinne nevne syklusen hennes?", a:"Sjelden, forsiktig, og aldri som avfeiing. ‘Jeg vet denne uka er hardere, jeg har deg’ = omsorg. ‘Er du på mensen?’ = motsatt, hver gang." },
-  { q:"Hva er forskjellen på PMS og PMDD?", a:"PMS = milde til moderate symptomer før mensen. PMDD = alvorlige, livsforstyrrende symptomer (dyp depresjon, raseri, intens angst). PMDD trenger medisinsk støtte, ikke en varmepute." },
-  { q:"Hvordan tar jeg dette opp uten å bli rar?", a:"Prøv: ‘Jeg vil forstå deg bedre, og syklusen din er en del av det. Jeg har laga en sak som hjelper meg å møte opp bedre.’ De fleste hører det som omsorg, ikke overvåking." }
-];
-function faq() { return lang() === 'no' ? FAQ_NO : FAQ; }
 
 const NEUROLOGY = [
   { id:'adhd', label:'ADHD', info:'Cycle phases amplify ADHD symptoms. Structure and low-stim helps.' },
@@ -1448,14 +1085,6 @@ const NEUROLOGY = [
   { id:'autism', label:'Autism / Neurodivergent', info:'Sensory and routine changes hit harder. Predictability is caring.' },
   { id:'sensory', label:'Sensory Sensitivity', info:'Noise, light, smell all matter more during menstruation.' }
 ];
-const NEUROLOGY_NO = [
-  { id:'adhd', label:'ADHD', info:'Syklusen forsterker ADHD-symptomer. Struktur og lite støy hjelper.' },
-  { id:'anxiety', label:'Angst', info:'Luteal-fasen kan trigge angst. Ekstra ro, ekstra trygghet.' },
-  { id:'depression', label:'Depresjon / Humør', info:'Hormonfall i sen luteal kan forsterke depressive perioder.' },
-  { id:'autism', label:'Autisme / Nevrodivergent', info:'Sensoriske og rutinemessige endringer treffer hardere. Forutsigbarhet er omsorg.' },
-  { id:'sensory', label:'Sensorisk sensitivitet', info:'Lyd, lys og lukt spiller mer rolle under menstruasjon.' }
-];
-function neurology() { return lang() === 'no' ? NEUROLOGY_NO : NEUROLOGY; }
 
 const GUIDE = {
   menstrual: {
@@ -1487,37 +1116,6 @@ const GUIDE = {
     pro:"Bro, late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here — she's reading the truth more clearly than usual."
   }
 };
-const GUIDE_NO = {
-  menstrual: {
-    days:'Days 1-5',
-    bio:"Østrogen og progesteron er på bunn. Livmorslimhinnen løses bokstavelig talt opp. Energi ned, smerte opp, søvn brutt. Kroppen hennes gjør ekte, målbart arbeid. Behandle det sånn.",
-    say:["Jeg tar middagen. Du løfter ikke en finger.","Hva høres godt ut? Snacksrunde, mat, hva som helst.","Du skylder ingen produktivitet denne uka."],
-    never:["Er du ikke ferdig med det enda?","Du var jo helt fin i går.","Det kan ikke være så ille."],
-    pro:"De første 48 timene er hardest. Avlys det valgfrie, dempa lysene, ta alt av planken hennes. Dette er møt-opp-uka."
-  },
-  follicular: {
-    days:'Days 6-13',
-    bio:"Østrogen klatrer. Energi tilbake. Humør opp. Hjerne skarpere. Hun vil ha nye ting, sosial kontakt, bevegelse. Dette er byggefasen. Match det.",
-    say:["Hva er planen denne helga? Jeg er med.","Du er på topp om dagen. Jeg ser det.","Vil du prøve noe nytt i kveld?"],
-    never:["Hvorfor er du plutselig så travel?","Ta det med ro med alle planene.","Du er litt for mye."],
-    pro:"Planlegg eventyr nå. Bestill turen. Start prosjektet sammen. Momentumet her er ekte og begrenset. Bruk det."
-  },
-  ovulation: {
-    days:'Days 14-17',
-    bio:"Østrogen topper. Testosteron stiger. Maks kognitiv ytelse, sosial selvtillit og libido. Dette er hennes skarpeste, frekkeste, mest magnetiske vindu. Ikke sov på det.",
-    say:["Du ser helt utrolig ut.","Det du vil — ja.","Fortell meg om det du jobber med."],
-    never:["Du er litt full av deg selv i dag.","Hvorfor er du så flørtete?","Roe deg litt."],
-    pro:"Ta den viktige samtalen NÅ. Penger, fremtiden, det vanskelige. Hun er mest klar og selvsikker her. Ikke kast det bort."
-  },
-  luteal: {
-    days:'Days 18-28',
-    bio:"Progesteron stiger så krasjer. Sensitivitet for lyd, lukt og sosiale stikk går opp. Tålmodighet for tull går ned. Hennes radar er på max. Vær ærlig, vær stødig, vær til stede.",
-    say:["Jeg så hvordan du håndterte det i dag. Det var sterkt.","Kvelden er det du vil den skal være.","Jeg går ingen steder. Vi er gode."],
-    never:["Hvorfor er du så emosjonell?","Det er bare syklusen, ikke sant?","Kan du la det ligge?"],
-    pro:"Sen luteal = ingen store diskusjoner. Utsett enhver konflikt som kan vente. Hun er ikke mindre fornuftig her — hun leser sannheten klarere enn vanlig."
-  }
-};
-function guide() { return lang() === 'no' ? GUIDE_NO : GUIDE; }
 
 const PERSONALIZE = {
   menstrual: [
@@ -1551,39 +1149,6 @@ const PERSONALIZE = {
     [p => has(p.neurology,'adhd'),       "Bro, routine matters more now. Don't disrupt it. Hold the line."]
   ]
 };
-const PERSONALIZE_NO = {
-  menstrual: [
-    [p => has(p.neurology,'adhd'),    "Hold antall valg minimalt. Ikke be henne ta avgjørelser. Reduser visuelt rot."],
-    [p => has(p.neurology,'anxiety'), "Ekstra fysisk nærhet hjelper. Ikke la henne være alene hvis hun ser stressa ut."],
-    [p => p.social==='introvert',     "Ikke fyll stillheten. Tilstedeværelse uten press."],
-    [p => p.social==='extrovert',     "Hun vil fortsatt ha selskap — bare lav-energi-selskap."],
-    [p => has(p.love,'acts'),         "Ta oppvasken, klesvasken, middagen. Ikke spør. Bare gjør."],
-    [p => has(p.love,'words'),        "Si til henne at hun er sterk. Kroppen hennes gjør noe utrolig."],
-    [p => has(p.love,'touch'),        "Hold henne. Ryggmassasje. Varm tilstedeværelse. Det er hele trekket."],
-    [p => p.type==='a-type',          "Hun hater å føle seg uproduktiv. Normaliser hvile som produktivt."]
-  ],
-  follicular: [
-    [p => p.social==='extrovert',     "Hun vil ha sosialt. Vær hype-mannen hennes og planlegg noe."],
-    [p => p.type==='a-type',          "Hun er i optimal modus. Støtt ambisiøse planer, ikke demp lysene."],
-    [p => has(p.neurology,'adhd'),    "Hun kan hyperfokusere på et nytt prosjekt. Støtt det, ikke avled."],
-    [p => has(p.love,'time'),         "Hun vil ha eventyr sammen. Planlegg det. I kveld."]
-  ],
-  ovulation: [
-    [p => p.type==='a-type',          "Dette er hennes topp-ytelsesvindu. Ikke senk farten hennes."],
-    [p => has(p.love,'touch'),        "Hun er mest interessert i intimitet nå. Match den energien."],
-    [p => has(p.love,'words'),        "Si at hun er utrolig. Hun vil høre det fra deg. Spesifikt."],
-    [p => has(p.neurology,'adhd'),    "Bra vindu for viktige samtaler. Hun er mest fokusert denne uka."]
-  ],
-  luteal: [
-    [p => has(p.neurology,'anxiety'),    "Sen luteal forsterker angst. Vær ekstra stødig."],
-    [p => has(p.neurology,'depression'), "Mest sårbart vindu. Følg med på humørfall. Vær til stede, ikke forklar."],
-    [p => p.social==='introvert',        "Gi henne stillheten hun trenger uten å la henne føle skyld."],
-    [p => p.type==='a-type',             "Produktiviteten hennes synker naturlig. Normaliser det. Ikke kommenter."],
-    [p => has(p.love,'acts'),            "Dette er når acts of service betyr mest. Gjør alt. Ingen annonsering."],
-    [p => has(p.neurology,'adhd'),       "Rutine betyr mer nå. Ikke forstyrr den. Hold linja."]
-  ]
-};
-function personalize() { return lang() === 'no' ? PERSONALIZE_NO : PERSONALIZE; }
 
 function has(arr, val) { return Array.isArray(arr) && arr.includes(val); }
 
@@ -1649,140 +1214,9 @@ function infoFor(p, date) {
   return { day, phase: phaseFor(day, len) };
 }
 
-// ---------- LANGUAGE & VOICE ----------
-const VOICE_NO = {
-  bro:    { intro: 'Bro, ' },
-  soft:   { intro: '' },
-  direct: { intro: '' },
-  coach:  { intro: '' }
-};
-
-// Per-tone body variants for the three highest-impact surfaces.
-// Other coaching lines use canonical Norwegian wrapped by voice().
-const TONED_NO = {
-  // Daily Brief base tip per phase (used when no profile-specific override fires)
-  brief_menstrual_base: {
-    bro:    "Bro, hun har det fysisk tøft i dag. Bring varme, ikke vitser. Vær lavmælt og til stede.",
-    soft:   "Hun har det vondt i dag. Vær mild og til stede — ikke prøv å fikse, bare vær der.",
-    direct: "Menstruasjon dag 1–5. Lavt tempo. Tilby varme, ikke løsninger.",
-    coach:  "Plan: lavt tempo, ekstra varme, ingen forhandlinger. Tilby konkret — varmepute, te, dyne."
-  },
-  brief_follicular_base: {
-    bro:    "Bro, energien hennes er på vei opp. Foreslå noe nytt — tur, kafé, plan. Hun er med.",
-    soft:   "Energien hennes er stigende. Det er en fin uke for noe lite og nytt sammen.",
-    direct: "Follikulær. Energi opp. Foreslå plan.",
-    coach:  "Plan: kapitaliser på energien — ny aktivitet, lett dato, kreativt prosjekt."
-  },
-  brief_ovulation_base: {
-    bro:    "Bro, dette er toppen. Hun er åpen, klar, sosial. Vis opp — middag, tur, en god prat.",
-    soft:   "Hun er på sitt mest åpne nå. En god uke for nærhet og samtale som teller.",
-    direct: "Ovulasjon. Peak. Møt det med tilstedeværelse.",
-    coach:  "Plan: prioriter kvalitetstid. Den ekte samtalen, en god dato, ekte øyekontakt."
-  },
-  brief_luteal_base: {
-    bro:    "Bro, ho er litt giret. Tørre vitser i dag? Ikke 💀. Småting du gjør betyr ekstra.",
-    soft:   "Hun er mer sårbar nå. Det du gjør i det små teller mer enn det føles.",
-    direct: "Luteal. Hold deg mild. Småting > storgester.",
-    coach:  "Ukens plan: lavere tempo, mer tålmodighet, færre vitser. Reager rolig først."
-  },
-
-  // One Move primary tip — per-tone for the One Move card. Phase-aware variants.
-  move_menstrual: {
-    bro:    "Bro, sett henne i førersetet i dag. Hennes meny, hennes serie, hennes tempo.",
-    soft:   "La henne velge alt i dag — middag, kveld, tempo. Bare vær der.",
-    direct: "Hun velger. Du følger.",
-    coach:  "Plan: gi henne kontroll over alle små valg i dag. Du leverer logistikk."
-  },
-  move_follicular: {
-    bro:    "Bro, foreslå én ny ting denne uka. Ikke spør 'hva har du lyst på' — kom med en plan.",
-    soft:   "Foreslå én liten, ny ting denne uka. Hun setter pris på at du tenkte først.",
-    direct: "Lag en plan denne uka. Ikke spør, foreslå.",
-    coach:  "Plan: en konkret ny aktivitet innen 7 dager. Du tar initiativ."
-  },
-  move_ovulation: {
-    bro:    "Bro, ekte øyekontakt-samtale i kveld. Telefonen vekk. Spør hvordan hun har det — og hør faktisk etter.",
-    soft:   "En ekte samtale i kveld. Bare dere to, ingen skjerm. Spør og lytt.",
-    direct: "Ekte samtale i kveld. Telefon vekk.",
-    coach:  "Plan: 20 min uten skjerm i kveld. Du spør, hun snakker, du lytter."
-  },
-  move_luteal: {
-    bro:    "Bro, sett deg ved siden av henne. Telefonen vekk. Tjue minutter. Ikke noe annet.",
-    soft:   "Bare sett deg ved siden av henne. Tjue minutter, stille til stede.",
-    direct: "Sett deg. Telefon vekk. 20 minutter.",
-    coach:  "Plan: 20 min ren tilstedeværelse. Ingen prat, ingen skjerm."
-  },
-
-  // Coming Up urgency subtitle (v2.9 dates card)
-  coming_quiet: {
-    bro:    "To uker ute. Planlegg nå, takk deg selv senere.",
-    soft:   "To uker igjen. Bra tid å begynne smått.",
-    direct: "Planlegg. Tidlig.",
-    coach:  "Plan: 14 dager. Sett av tid i kalenderen nå."
-  },
-  coming_medium: {
-    bro:    "Bro — sett av tid. Ikke bli tatt på senga.",
-    soft:   "Det nærmer seg. Sett av tid før kalenderen fylles.",
-    direct: "Sett av tid nå.",
-    coach:  "Plan: blokker tid i kalenderen denne uka."
-  },
-  coming_urgent: {
-    bro:    "Denne uka — kom i gang.",
-    soft:   "Det er denne uka. Begynn med det lille.",
-    direct: "Denne uka. Start nå.",
-    coach:  "Plan: aktiver tiltak innen 48 timer."
-  },
-  coming_tomorrow: {
-    bro:    "I morgen. Siste sjanse.",
-    soft:   "I morgen. Du rekker det, om du starter nå.",
-    direct: "I morgen. Avslutt forberedelsene.",
-    coach:  "Plan: alt klart innen kveld. Sjekk listen din."
-  },
-  coming_today: {
-    bro:    "I DAG. Ikke svik.",
-    soft:   "I dag. Bare vær til stede.",
-    direct: "I dag. Levér.",
-    coach:  "I dag. Plan: én ting, gjort godt."
-  }
-};
-
-function lang() { return state.lang === 'no' ? 'no' : 'en'; }
-function tone() { return ['bro','soft','direct','coach'].includes(state.tone) ? state.tone : 'bro'; }
-
-function voice(body, opts) {
-  opts = opts || {};
-  if (!body) return '';
-  if (lang() === 'en') return body;
-  const v = VOICE_NO[tone()] || VOICE_NO.bro;
-  if (opts.skipPrefix) return body;
-  // Don't double-prefix if body already starts with "Bro," (Norwegian content shouldn't, but guardrail)
-  if (v.intro && body.toLowerCase().startsWith('bro')) return body;
-  return v.intro + body;
-}
-
-function tonedTipNO(key) {
-  const slot = TONED_NO[key];
-  if (!slot) return '';
-  return slot[tone()] || slot.bro || '';
-}
-
-function say(out) {
-  if (!out) return '';
-  if (typeof out === 'string') return out;  // legacy: raw string treated as English-default
-  if (lang() === 'no') {
-    if (out.key) {
-      const toned = tonedTipNO(out.key);
-      if (toned) return toned;
-    }
-    if (out.bodyNO) return voice(out.bodyNO, out.opts);
-    // Fallback: wrap the English body so something renders
-    return voice(out.bodyEN || out.body || '', out.opts);
-  }
-  return out.bodyEN || out.body || '';
-}
-
 
 function pickTip(profile, phase, dInPhase) {
-  const personal = (personalize()[phase]||[])
+  const personal = (PERSONALIZE[phase]||[])
     .filter(([m])=>{ try { return m(profile); } catch { return false; } })
     .map(([,line])=>line);
   const seed = (new Date(profile.lastPeriod).getDate() || 0) + (dInPhase||1);
@@ -1880,19 +1314,18 @@ function pickGifts(profile) {
 
 // ---------- ADAPTIVE SITUATION COMPOSER ----------
 function composePlay(sit, phase, ctx) {
-  const baseMoveRaw = situationFirst()[sit]?.[phase] || '';
-  const baseMove = sit === 'messup' ? baseMoveRaw : voice(baseMoveRaw);
-  const dontSay  = situationNever()[sit] || '';
+  const baseMove = SITUATION_FIRST[sit]?.[phase] || '';
+  const dontSay  = SITUATION_NEVER[sit] || '';
   let phrases = [];
   if (sit === 'messup') {
-    phrases = apology()[phase]?.lines || [];
+    phrases = APOLOGY[phase]?.lines || [];
   } else {
     const map = { crying: "She's crying", angry: "She's irritable", quiet: "She wants space" };
-    const bank = phraseBank().find(g => g.s === map[sit]);
+    const bank = PHRASE_BANK.find(g => g.s === map[sit]);
     phrases = bank ? bank.lines.slice(0, 3) : [];
   }
   const modifiers = Object.keys(ctx)
-    .map(qid => sitModifier(`${sit}.${qid}.${ctx[qid]}`))
+    .map(qid => SIT_MODIFIERS[`${sit}.${qid}.${ctx[qid]}`])
     .filter(Boolean);
   const trail = [phase + ' phase', ...Object.keys(ctx).map(qid => ctx[qid])].join(' · ');
   return { baseMove, modifiers, phrases: phrases.slice(0, 3), dontSay, trail };
@@ -1930,14 +1363,11 @@ function upcomingEvents(profile, withinDays) {
     .sort((a, b) => a.daysUntil - b.daysUntil);
 }
 function urgencyForDays(d) {
-  let cls, key, subEN;
-  if (d === 0)        { cls = 'urgent-now'; key = 'coming_today';    subEN = "TODAY. Don't blow it."; }
-  else if (d === 1)   { cls = 'urgent-now'; key = 'coming_tomorrow'; subEN = "Tomorrow. Last call."; }
-  else if (d <= 7)    { cls = 'urgent';     key = 'coming_urgent';   subEN = "This week — get on it."; }
-  else if (d <= 14)   { cls = 'medium';     key = 'coming_medium';   subEN = "Bro — mark this. Don't get caught."; }
-  else                { cls = '';           key = 'coming_quiet';    subEN = "Two weeks out. Plan now, thank yourself later."; }
-  const sub = lang() === 'no' ? (tonedTipNO(key) || subEN) : subEN;
-  return { cls, sub };
+  if (d === 0)        return { cls: 'urgent-now', sub: "TODAY. Don't blow it." };
+  if (d === 1)        return { cls: 'urgent-now', sub: "Tomorrow. Last call." };
+  if (d <= 7)         return { cls: 'urgent',     sub: "This week — get on it." };
+  if (d <= 14)        return { cls: 'medium',     sub: "Bro — mark this. Don't get caught." };
+  return                     { cls: '',           sub: "Two weeks out. Plan now, thank yourself later." };
 }
 
 function buildAlert(profile, day) {
@@ -1947,14 +1377,103 @@ function buildAlert(profile, day) {
   if (days === 1) return ALERTS.P1;
   if (days === 2) return ALERTS.P2;
   if (days === 3) return ALERTS.P3;
+  if (day === 12) return ALERTS.OVU2;
   if (day === 14) return ALERTS.OVU;
+  if (day === 16) return ALERTS.LUT2;
   if (day === 18) return ALERTS.LUT;
   return null;
 }
 
+// ---------- PULSE (follow-up loops) ----------
+function computePulse() {
+  const profile = state.profile;
+  if (!profile?.lastPeriod) return null;
+  const dismissals = state.pulseDismissals || {};
+  const now = Date.now();
+  const log = loadLog() || [];
+
+  // Most recent conflict within 24-96h, with no apology since the conflict
+  const conflicts = log.filter(l => l.kind === 'conflict').sort((a, b) => (b.at || 0) - (a.at || 0));
+  const conflict = conflicts[0];
+  if (conflict) {
+    const hoursSince = (now - (conflict.at || 0)) / 36e5;
+    if (hoursSince >= 24 && hoursSince <= 96) {
+      const lastApology = log.find(l => l.kind === 'apology' && (l.at || 0) > (conflict.at || 0));
+      if (!lastApology && (!dismissals.repair || now - dismissals.repair > 24 * 36e5)) {
+        const daysAgo = Math.max(1, Math.round(hoursSince / 24));
+        return { kind: 'repair', daysAgo };
+      }
+    }
+  }
+
+  // Ghost — no log of any kind in 4+ days
+  const sorted = [...log].sort((a, b) => (b.at || 0) - (a.at || 0));
+  const lastAny = sorted[0]?.at || 0;
+  const daysSinceAny = lastAny ? Math.floor((now - lastAny) / 864e5) : Infinity;
+  if (daysSinceAny >= 4 && (!dismissals.ghost || now - dismissals.ghost > 48 * 36e5)) {
+    return { kind: 'ghost', daysSince: daysSinceAny === Infinity ? null : daysSinceAny };
+  }
+
+  // Switch the Channel — 3+ gifts this cycle AND 0 talks
+  const stats = cycleStats(profile, log);
+  if (stats && stats.gifts >= 3 && stats.talks === 0
+      && (!dismissals.channel || now - dismissals.channel > 48 * 36e5)) {
+    return { kind: 'channel', gifts: stats.gifts };
+  }
+
+  return null;
+}
+
+function dismissPulse(kind) {
+  haptic(8);
+  const d = { ...(state.pulseDismissals || {}), [kind]: Date.now() };
+  try { localStorage.setItem(PULSE_DISMISS, JSON.stringify(d)); } catch {}
+  setState({ pulseDismissals: d });
+}
+
+function pulseHandled() {
+  const p = state.profile;
+  if (!p) return;
+  haptic(12);
+  const day = cycleDay(p);
+  const len = p.cycleLength || 28;
+  const phase = phaseFor(day, len);
+  quickLog('apology', phase);
+}
+
+function pulseToMessup() {
+  haptic(8);
+  openSituation('messup');
+  setTimeout(() => {
+    const panel = document.querySelector('.sit-panel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 80);
+}
+
+function pulseToOneMove() {
+  haptic(8);
+  setTimeout(() => {
+    const card = document.querySelector('.move-card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 30);
+}
+
+function pulseToTalkPlays() {
+  haptic(8);
+  setState({ playsTab: 'ask' });
+  setTimeout(() => {
+    const card = document.querySelector('.plays-tabs');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
 // ---------- STORAGE ----------
+// One-time cleanup of legacy v2.10 keys
+try { localStorage.removeItem('brocode_lang'); localStorage.removeItem('brocode_tone'); } catch {}
+
 const KEY = 'brocode_profile';
 const SEEN = 'brocode_seen';
+const PULSE_DISMISS = 'brocode_pulse_dismissals';
 const DISMISS = 'brocode_dismiss';
 const LOG_KEY = 'brocode_log';
 const NOTIF_KEY = 'brocode_notif';
@@ -2065,13 +1584,8 @@ function checkDraft(text) {
   const t = (text || '').trim();
   if (!t) return null;
   const flags = [];
-  for (const r of redPatterns())       if (r.rx.test(t)) flags.push(r);
-  for (const r of mansplainPatterns()) if (r.rx.test(t)) flags.push(r);
-  if (lang() === 'no') {
-    if (!flags.length) return { tone: 'ok',   verdict: voice("det er greit. Send.").replace(/^Bro, b/, 'B').replace(/^Bro, /, 'Bro — '), flags: [] };
-    if (flags.length === 1) return { tone: 'warn', verdict: "Hmm — ett flagg. Les under.", flags };
-    return { tone: 'bad', verdict: "NEI. Skriv om denne.", flags };
-  }
+  for (const r of RED_PATTERNS)       if (r.rx.test(t)) flags.push(r);
+  for (const r of MANSPLAIN_PATTERNS) if (r.rx.test(t)) flags.push(r);
   if (!flags.length) return { tone: 'ok',   verdict: "Bro, it's fine. Send it.", flags: [] };
   if (flags.length === 1) return { tone: 'warn', verdict: "Hmm bro — one flag. Read below.", flags };
   return { tone: 'bad', verdict: "BRO. NO. Rewrite this one.", flags };
@@ -2108,8 +1622,7 @@ let state = {
   todayMoveDone: localStorage.getItem('brocode_move_done') || null,
   activityNow: Date.now(),
   hapticsEnabled: localStorage.getItem('brocode_haptics') !== '0',
-  lang: localStorage.getItem('brocode_lang') === 'no' ? 'no' : 'en',
-  tone: ['bro','soft','direct','coach'].includes(localStorage.getItem('brocode_tone')) ? localStorage.getItem('brocode_tone') : 'bro',
+  pulseDismissals: (() => { try { return JSON.parse(localStorage.getItem(PULSE_DISMISS)) || {}; } catch { return {}; } })(),
   justLogged: null,
   streakTick: 0,
   updateReady: false
@@ -2118,6 +1631,25 @@ let state = {
 function setState(patch) {
   state = { ...state, ...patch };
   render();
+}
+
+function updateTitle() {
+  const parts = [];
+  const p = state.profile;
+  if (p?.lastPeriod) {
+    const day = cycleDay(p);
+    const len = p.cycleLength || 28;
+    const phase = phaseFor(day, len);
+    parts.push(`${PHASE_LABEL[phase].toUpperCase()} D${day}`);
+  }
+  let prefix = '';
+  const pulse = computePulse();
+  if (pulse?.kind === 'repair')  prefix = '⚠ ';
+  else if (pulse?.kind === 'ghost') prefix = '⚪ ';
+  const up = upcomingEvents(p, 14)[0];
+  if (up) prefix = `${up.emoji}${up.daysUntil}d · ${prefix}`;
+  const tail = parts.length ? ' · ' + parts.join(' ') : '';
+  document.title = (prefix + 'BRO CODE' + tail).trim();
 }
 
 // ---------- RENDER ----------
@@ -2159,7 +1691,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.10 · Language & Tone</footer>
+    <footer class="app">BRO CODE · v2.11 · The pulse</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2180,6 +1712,7 @@ function render() {
     ${state.showShare ? renderShareModal() : ''}
   `;
   applyOnlineStatus();
+  updateTitle();
 }
 
 function renderShareModal() {
@@ -2234,8 +1767,7 @@ function renderDashboard(day, phase, len) {
   const late = latePeriodState(state.profile);
   if (late) { day = len; phase = 'luteal'; }
   const days = late ? 0 : daysToNextPeriod(state.profile);
-  const tipEN = pickSmartTip(state.profile, phase, dayInPhase(day, len));
-  const tip = lang() === 'no' ? (tonedTipNO('brief_' + phase + '_base') || voice(tipEN)) : tipEN;
+  const tip = pickSmartTip(state.profile, phase, dayInPhase(day, len));
   const alert = late ? null : buildAlert(state.profile, day);
   const showAlert = alert && !dismissedToday(alert.id);
   const ranges = phaseRanges(len);
@@ -2245,7 +1777,7 @@ function renderDashboard(day, phase, len) {
   const streak = currentStreak();
   const didToday = loggedToday();
   const todayIdx = Math.floor((midnight(new Date()) - midnight(new Date('2024-01-01'))) / DAY);
-  const avoid = redList()[todayIdx % redList().length];
+  const avoid = RED_LIST[todayIdx % RED_LIST.length];
 
   const today = new Date();
   const next = [1,2,3,4].map(i => {
@@ -2285,6 +1817,7 @@ function renderDashboard(day, phase, len) {
 
   return `
   ${renderActivityStrip()}
+  <div style="padding:0 16px 4px">${renderDayStrip()}</div>
   <div class="stagger">
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
@@ -2321,6 +1854,8 @@ function renderDashboard(day, phase, len) {
         ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
       </div>
 
+      ${renderPhaseArc(day, phase, len)}
+
       <div class="sit-row">
         <div class="label" style="margin-right:4px">// right now</div>
         ${SITUATIONS.map(s => `
@@ -2346,6 +1881,8 @@ function renderDashboard(day, phase, len) {
         </div>
       </div>
     </div>
+
+    ${renderPulseCard()}
 
     ${renderUpcomingCard()}
 
@@ -2389,7 +1926,7 @@ function renderSituationPanel(sit, phase) {
 
   const step = state.sitStep || 'asking';
   const label = SITUATIONS.find(s => s.id === sit)?.label || '';
-  const questions = sitQuestions()[sit] || [];
+  const questions = SIT_QUESTIONS[sit] || [];
   const ctx = state.sitContext || {};
   const answered = questions.filter(q => ctx[q.id]).length;
 
@@ -2472,8 +2009,7 @@ function renderPlayingStep(sit, phase, ctx) {
 function renderSpiralPanel() {
   const seed = state.truthSeed || 0;
   const base = new Date().getDate() + seed;
-  const truths = broTruths();
-  const picks = [0, 1, 2].map(i => truths[(base + i * 7) % truths.length]);
+  const picks = [0, 1, 2].map(i => BRO_TRUTHS[(base + i * 7) % BRO_TRUTHS.length]);
   return `
     <div class="sit-panel" style="border-left-color:var(--green)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -2499,12 +2035,10 @@ function renderOneMove(day, phase, len) {
   const dInPhase = dayInPhase(day, len);
   const seed = (state.skipCount || 0) + (state.justLogged === 'skipped' ? 1 : 0);
   // Use smart-tip selection plus a seed-shift when skipping so re-rolls feel fresh
-  const tipEN = pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.';
-  const tip = lang() === 'no' ? (tonedTipNO('move_' + phase) || voice(tipEN)) : tipEN;
-  const doneLine = lang() === 'no'
-    ? voice("det er trekket. Vi sees i morgen.")
-    : "Bro, that's the move. See you tomorrow.";
-  const moveText = done ? doneLine : tip;
+  const tip = pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.';
+  const moveText = done
+    ? "Bro, that's the move. See you tomorrow."
+    : tip;
   return `
     <div class="move-card${done ? ' done' : ''}">
       <div class="label move-label">// your one move today</div>
@@ -2521,6 +2055,34 @@ function renderOneMove(day, phase, len) {
       `}
     </div>
   `;
+}
+
+function renderDayStrip() {
+  const log = loadLog();
+  const today = midnight(new Date());
+  const moveDone = state.todayMoveDone;
+  const PRIO = { apology: 3, conflict: 2, talk: 1, gift: 0 };
+  const ICON = { apology: '🙏', conflict: '⚡', talk: '💬', gift: '🎁', done: '✓' };
+  const cells = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const dStart = midnight(d).getTime();
+    const dEnd = dStart + DAY;
+    const dayLogs = (log || []).filter(l => (l.at || 0) >= dStart && (l.at || 0) < dEnd);
+    let best = null;
+    for (const l of dayLogs) {
+      if (best == null || (PRIO[l.kind] ?? -1) > (PRIO[best] ?? -1)) best = l.kind;
+    }
+    const dStr = d.toISOString().slice(0, 10);
+    const wasDone = moveDone === dStr;
+    let emoji = '·', cls = 'empty';
+    if (best) { emoji = ICON[best] || '·'; cls = best; }
+    else if (wasDone) { emoji = ICON.done; cls = 'done'; }
+    const isToday = i === 0;
+    const label = isToday ? 'NOW' : d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 1).toUpperCase();
+    cells.push(`<div class="cell ${cls} ${isToday ? 'today' : ''}" title="${dStr}"><span>${emoji}</span><span class="dlabel">${h(label)}</span></div>`);
+  }
+  return `<div class="day-strip">${cells.join('')}</div>`;
 }
 
 function renderActivityStrip() {
@@ -2587,6 +2149,93 @@ function relativeAgo(at, now) {
   return d + 'd ago';
 }
 
+function renderPulseCard() {
+  const p = computePulse();
+  if (!p) return '';
+  if (p.kind === 'repair') {
+    return `
+      <div class="card pulse pulse-repair">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="label">// pulse :: repair check</div>
+          <div style="font-size:18px;line-height:1">🩹</div>
+        </div>
+        <p style="margin:0 0 12px;color:var(--cream);line-height:1.45;font-size:14px">
+          You logged a conflict ${p.daysAgo} day${p.daysAgo === 1 ? '' : 's'} ago.
+          Has it been addressed?
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;border-color:var(--green);color:var(--green)" onclick="pulseHandled()">✓ HANDLED</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="pulseToMessup()">→ THE MOVE</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:rgba(245,236,215,0.55)" onclick="dismissPulse('repair')">× LATER</button>
+        </div>
+      </div>
+    `;
+  }
+  if (p.kind === 'ghost') {
+    const heavy = (p.daysSince || 0) >= 7;
+    const cls = heavy ? 'pulse-heavy' : '';
+    const body = heavy
+      ? `A week silent. Don't drift — pick one small thing tonight.`
+      : `${p.daysSince} quiet days. Quiet's not bad — but pick one small thing tonight.`;
+    return `
+      <div class="card pulse pulse-ghost ${cls}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="label">// pulse :: ghost check</div>
+          <div style="font-size:18px;line-height:1">${heavy ? '⚠️' : '⚪'}</div>
+        </div>
+        <p style="margin:0 0 12px;color:var(--cream);line-height:1.45;font-size:14px">${h(body)}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="pulseToOneMove()">→ ONE MOVE</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:rgba(245,236,215,0.55)" onclick="dismissPulse('ghost')">× NOT GHOST</button>
+        </div>
+      </div>
+    `;
+  }
+  if (p.kind === 'channel') {
+    return `
+      <div class="card pulse pulse-channel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="label">// pulse :: switch the channel</div>
+          <div style="font-size:18px;line-height:1">🔀</div>
+        </div>
+        <p style="margin:0 0 12px;color:var(--cream);line-height:1.45;font-size:14px">
+          ${p.gifts} gifts logged this cycle. She wants attention now, not stuff.
+          Tonight: phone away, eyes up.
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="pulseToTalkPlays()">→ TALK PLAYS</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:rgba(245,236,215,0.55)" onclick="dismissPulse('channel')">× LATER</button>
+        </div>
+      </div>
+    `;
+  }
+  return '';
+}
+
+function renderPhaseArc(day, phase, len) {
+  const ranges = phaseRanges(len);
+  const [pStart, pEnd] = ranges[phase] || [1, len];
+  const pLen = Math.max(1, pEnd - pStart + 1);
+  const pProg = Math.max(0, Math.min(pLen, day - pStart + 1));
+  const pct = Math.round((pProg / pLen) * 100);
+  const daysToPeriod = daysToNextPeriod(state.profile);
+  const trans = nextPhaseTransition(day, len);
+  const nextLabel = trans ? `${PHASE_LABEL[trans.next].toLowerCase()} tomorrow` :
+    `${PHASE_LABEL[phase === 'luteal' ? 'menstrual' : (phase === 'menstrual' ? 'follicular' : (phase === 'follicular' ? 'ovulation' : 'luteal'))].toLowerCase()} in ${(ranges[phase][1] - day + 1)}d`;
+  const color = PHASE_COLOR[phase] || 'var(--cream)';
+  return `
+    <div class="phase-arc">
+      <div class="line">
+        <span class="ph" style="color:${color}">${PHASE_LABEL[phase].toUpperCase()}</span>
+        <span>D ${day}/${len}</span>
+        <span class="meta">· ${daysToPeriod === 0 ? 'period today' : `${daysToPeriod}d to period`}</span>
+      </div>
+      <div class="bar"><span style="width:${pct}%;background:${color}"></span></div>
+      <div class="line"><span class="meta">→ ${h(nextLabel)}</span></div>
+    </div>
+  `;
+}
+
 function renderUpcomingCard() {
   const upcoming = upcomingEvents(state.profile, 30);
   if (!upcoming.length) return '';
@@ -2617,7 +2266,7 @@ function renderUpcomingCard() {
 function renderBroTruth() {
   const seed = state.truthSeed || 0;
   const mode = state.truthMode || 'truth';
-  const pool = mode === 'fact' ? BRO_FACTS : broTruths();
+  const pool = mode === 'fact' ? BRO_FACTS : BRO_TRUTHS;
   const idx = (new Date().getDate() + seed) % pool.length;
   const line = pool[idx];
   return `
@@ -2675,8 +2324,7 @@ function renderReceiptCard() {
   const log = loadLog();
   const stats = cycleStats(state.profile, log);
   if (!stats) return '';
-  const verdictTbl = receiptVerdicts();
-  const verdictLine = verdictTbl[stats.verdict] || verdictTbl.meh;
+  const verdictLine = RECEIPT_VERDICTS[stats.verdict] || RECEIPT_VERDICTS.meh;
   const title = stats.isLastDay ? '// the receipt is in' : '// this cycle';
   const verdictColor = stats.verdict === 'killing' || stats.verdict === 'great' ? 'var(--green)'
                      : stats.verdict === 'good' ? 'var(--cream)'
@@ -2713,15 +2361,15 @@ function renderPlaysCard(phase) {
   let empty = `<p style="color:rgba(245,236,215,0.6);margin:0;font-style:italic">Fill in her profile to unlock gift moves.</p>`;
   if (tab === 'ask') {
     title = 'ASK HER TONIGHT';
-    items = conversations()[phase] || [];
+    items = CONVERSATIONS[phase] || [];
   } else if (tab === 'date') {
     title = 'DATE IDEA';
-    items = dates()[phase] || [];
+    items = DATES[phase] || [];
   } else if (tab === 'gift') {
     title = 'GIFT MOVE';
     items = pickGifts(state.profile);
   } else if (tab === 'occasion' && occ) {
-    const lib = occasionPlays()[occ.id] || {};
+    const lib = OCCASION_PLAYS[occ.id] || {};
     const phaseLines = lib[phase] || [];
     items = [...phaseLines, ...(lib.universal || [])];
     const dLabel = occ.daysUntil === 0 ? 'TODAY' : `${occ.daysUntil}D`;
@@ -2949,24 +2597,6 @@ function renderProfile() {
           </button>
           <span class="label" style="color:rgba(245,236,215,0.55)">Phase-aware tip, once a day.</span>
         </div>
-
-        <div class="label" style="margin:18px 0 8px">Language</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <button type="button" class="pill ${lang()==='en'?'active':''}" onclick="setLang('en')">🇬🇧 English</button>
-          <button type="button" class="pill ${lang()==='no'?'active':''}" onclick="setLang('no')">🇳🇴 Norsk</button>
-        </div>
-        <span class="label" style="color:rgba(245,236,215,0.55);display:block;margin-top:6px">UI stays English. Norsk switches coaching copy to Norwegian.</span>
-
-        ${lang()==='no' ? `
-          <div class="label" style="margin:18px 0 8px">Voice</div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <button type="button" class="pill ${tone()==='bro'   ?'active':''}" onclick="setTone('bro')">🔥 Bro</button>
-            <button type="button" class="pill ${tone()==='soft'  ?'active':''}" onclick="setTone('soft')">🤍 Mild</button>
-            <button type="button" class="pill ${tone()==='direct'?'active':''}" onclick="setTone('direct')">→ Rett på</button>
-            <button type="button" class="pill ${tone()==='coach' ?'active':''}" onclick="setTone('coach')">📋 Coach</button>
-          </div>
-          <span class="label" style="color:rgba(245,236,215,0.55);display:block;margin-top:6px">Endrer hvordan coachen snakker. Bytt når du vil.</span>
-        ` : ''}
       </div>
     </details>
 
@@ -2984,9 +2614,9 @@ function renderProfile() {
       <summary><div class="title-row"><span class="num">03</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Tap to toggle. Be honest - it shapes the code.</p>
-        ${pillGroup('neurology', neurology().map(n => ({id:n.id,label:n.label})))}
+        ${pillGroup('neurology', NEUROLOGY.map(n => ({id:n.id,label:n.label})))}
         <div class="label" style="margin-top:14px;line-height:1.6">
-          ${neurology().map(n => `<div style="margin-bottom:6px"><strong style="color:var(--cream)">${n.label}</strong>: ${n.info}</div>`).join('')}
+          ${NEUROLOGY.map(n => `<div style="margin-bottom:6px"><strong style="color:var(--cream)">${n.label}</strong>: ${n.info}</div>`).join('')}
         </div>
       </div>
     </details>
@@ -3077,10 +2707,10 @@ function renderGuide(currentPhase) {
   const open = state.guideOpen || currentPhase || 'menstrual';
 
   const cards = PHASES.map(p => {
-    const g = guide()[p];
+    const g = GUIDE[p];
     const isOpen = p === open;
     const color = PHASE_COLOR[p];
-    const personal = (personalize()[p]||[])
+    const personal = (PERSONALIZE[p]||[])
       .filter(([m])=>{ try { return m(state.profile); } catch { return false; } })
       .map(([,line])=>line);
     return `
@@ -3154,7 +2784,7 @@ function renderCode() {
     <div style="margin:32px 0 14px">
       <h3 class="display" style="font-size:24px;color:var(--green);margin:0 0 10px">What To Say</h3>
     </div>
-    ${phraseBank().map(g => `
+    ${PHRASE_BANK.map(g => `
       <div class="card" style="margin-bottom:10px">
         <div class="display" style="font-size:15px;margin-bottom:8px">${h(g.s)}</div>
         ${g.lines.map(x=>`<div style="color:rgba(245,236,215,0.85);margin-bottom:4px">"${h(x)}"</div>`).join('')}
@@ -3163,7 +2793,7 @@ function renderCode() {
     <div style="margin:32px 0 14px">
       <h3 class="display" style="font-size:24px;color:var(--red);margin:0 0 10px">What Not To Say</h3>
     </div>
-    ${redList().map(item => `
+    ${RED_LIST.map(item => `
       <div class="card" style="border-left:4px solid var(--red);margin-bottom:10px">
         <div class="red-strike">${h(item.phrase)}</div>
         <p style="margin:6px 0 0;color:rgba(245,236,215,0.75);font-size:13px;font-style:italic">${h(item.why)}</p>
@@ -3176,14 +2806,14 @@ function renderCode() {
     <div class="card">
       <select id="decoder-select" onchange="setState({ decoderPick: this.value })" style="margin-bottom:14px">
         <option value="">— pick a phrase —</option>
-        ${decoder().map((d,i) => `<option value="${i}" ${String(state.decoderPick)===String(i)?'selected':''}>${h(d.phrase)}</option>`).join('')}
+        ${DECODER.map((d,i) => `<option value="${i}" ${String(state.decoderPick)===String(i)?'selected':''}>${h(d.phrase)}</option>`).join('')}
       </select>
-      ${state.decoderPick !== '' && decoder()[+state.decoderPick] ? `
+      ${state.decoderPick !== '' && DECODER[+state.decoderPick] ? `
         <div style="border-top:1px solid var(--border);padding-top:12px">
           <div class="label" style="color:var(--orange);margin-bottom:6px">// what she means</div>
-          <p style="margin:0 0 14px;color:var(--cream);line-height:1.45;font-size:15px">${h(decoder()[+state.decoderPick].meaning)}</p>
+          <p style="margin:0 0 14px;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].meaning)}</p>
           <div class="label" style="color:var(--green);margin-bottom:6px">// the move</div>
-          <p style="margin:0;color:var(--cream);line-height:1.45;font-size:15px">${h(decoder()[+state.decoderPick].move)}</p>
+          <p style="margin:0;color:var(--cream);line-height:1.45;font-size:15px">${h(DECODER[+state.decoderPick].move)}</p>
         </div>
       ` : '<p style="color:rgba(245,236,215,0.5);margin:0;font-style:italic;font-size:13px">Brooooo, the dictionary that should have come with her.</p>'}
     </div>
@@ -3220,7 +2850,7 @@ function renderCode() {
     <div style="margin:32px 0 14px">
       <h3 class="display" style="font-size:24px;margin:0 0 10px">FAQ</h3>
     </div>
-    ${faq().map(f => `
+    ${FAQ.map(f => `
       <details class="acc">
         <summary>
           <div class="title-row"><span class="name">${h(f.q)}</span></div>
@@ -3319,7 +2949,7 @@ function answerSituation(qid, aid) {
   haptic(10);
   const sit = state.situation;
   if (!sit) return;
-  const questions = sitQuestions()[sit] || [];
+  const questions = SIT_QUESTIONS[sit] || [];
   const nextCtx = { ...(state.sitContext || {}), [qid]: aid };
   const remaining = questions.filter(q => !nextCtx[q.id]);
   state.sitContext = nextCtx;
@@ -3337,7 +2967,7 @@ function backStep() {
   haptic(6);
   const sit = state.situation;
   if (!sit) return;
-  const questions = sitQuestions()[sit] || [];
+  const questions = SIT_QUESTIONS[sit] || [];
   const ctx = { ...(state.sitContext || {}) };
   if (state.sitStep === 'playing' || state.sitStep === 'thinking') {
     // Drop the last answer to go back into asking mode
@@ -3493,21 +3123,6 @@ function confirmClear() {
 }
 
 // ---------- NOTIFICATIONS ----------
-function setLang(l) {
-  if (l !== 'en' && l !== 'no') return;
-  if (state.lang === l) return;
-  haptic(8);
-  localStorage.setItem('brocode_lang', l);
-  setState({ lang: l });
-}
-function setTone(t) {
-  if (!['bro','soft','direct','coach'].includes(t)) return;
-  if (state.tone === t) return;
-  haptic(8);
-  localStorage.setItem('brocode_tone', t);
-  setState({ tone: t });
-}
-
 async function toggleNotif() {
   if (typeof Notification === 'undefined') {
     alert('This browser does not support notifications.\n\nTip: install the app to your Home Screen (Share → Add to Home Screen) and reopen for full support.');
