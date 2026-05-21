@@ -1695,6 +1695,22 @@ let state = {
   showWelcome: localStorage.getItem(SEEN) !== '1',
   guideOpen: null,
   notifEnabled: localStorage.getItem(NOTIF_KEY) === '1' && (typeof Notification !== 'undefined') && Notification.permission === 'granted',
+  notifSlots: (() => {
+    // Legacy migration: if old single toggle was on, treat it as morning enabled
+    const legacy = localStorage.getItem(NOTIF_KEY) === '1';
+    if (legacy && localStorage.getItem('brocode_notif_morning') === null) {
+      try { localStorage.setItem('brocode_notif_morning', '1'); } catch {}
+    }
+    return {
+      morning: localStorage.getItem('brocode_notif_morning') === '1',
+      midday:  localStorage.getItem('brocode_notif_midday')  === '1',
+      evening: localStorage.getItem('brocode_notif_evening') === '1'
+    };
+  })(),
+  profileOpen: (() => {
+    try { return JSON.parse(localStorage.getItem('brocode_profile_open')) || { basics: true }; }
+    catch { return { basics: true }; }
+  })(),
   showInstallHint: false,
   playsTab: 'ask',
   playsSeed: 0,
@@ -1774,7 +1790,37 @@ const TABS = [
   { id:'code',      label:'The Code' }
 ];
 
+function captureFocus() {
+  const el = document.activeElement;
+  if (!el || el === document.body) return null;
+  const keep = el.getAttribute && el.getAttribute('data-keep');
+  if (!keep) return null;
+  let pos = null;
+  try { pos = { start: el.selectionStart, end: el.selectionEnd }; } catch {}
+  return { keep, pos, scrollY: window.scrollY };
+}
+function restoreFocus(snap) {
+  if (!snap) return;
+  requestAnimationFrame(() => {
+    const next = document.querySelector('[data-keep="' + snap.keep + '"]');
+    if (!next) return;
+    try { next.focus({ preventScroll: true }); } catch { next.focus(); }
+    if (snap.pos && next.setSelectionRange) {
+      try { next.setSelectionRange(snap.pos.start, snap.pos.end); } catch {}
+    }
+    if (typeof snap.scrollY === 'number') window.scrollTo(0, snap.scrollY);
+  });
+}
+
+function setProfileOpen(key, isOpen) {
+  const next = { ...(state.profileOpen || {}), [key]: !!isOpen };
+  state.profileOpen = next;
+  try { localStorage.setItem('brocode_profile_open', JSON.stringify(next)); } catch {}
+  // NO render() — <details> already toggled visually; this just persists.
+}
+
 function render() {
+  const snap = captureFocus();
   const root = $('#app');
   const day = cycleDay(state.profile);
   const len = state.profile?.cycleLength || 28;
@@ -1804,7 +1850,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.12 · Reach him</footer>
+    <footer class="app">BRO CODE · v2.13 · Stay out of the way</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1827,6 +1873,7 @@ function render() {
   applyOnlineStatus();
   updateTitle();
   updateBadge();
+  restoreFocus(snap);
 }
 
 function renderShareModal() {
@@ -2681,7 +2728,7 @@ function renderProfile() {
       <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Only Basics is required. Everything else levels up the code. Auto-saves as you go.</p>
     </div>
 
-    <details class="acc" open>
+    <details class="acc" id="acc-basics" ${state.profileOpen?.basics ? 'open' : ''} ontoggle="setProfileOpen('basics', this.open)">
       <summary>
         <div class="title-row"><span class="num">01</span><span class="name">The Basics</span></div>
         <span class="plus">+</span>
@@ -2689,15 +2736,15 @@ function renderProfile() {
       <div class="body">
         <label class="field">
           <span class="label" style="margin-bottom:6px">Her name</span>
-          <input data-field="name" value="${h(p.name||'')}" placeholder="e.g., Maya" oninput="updateField(event)" />
+          <input data-field="name" data-keep="name" value="${h(p.name||'')}" placeholder="e.g., Maya" oninput="updateField(event)" />
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:6px">Cycle length (days)</span>
-          <input type="number" min="21" max="35" data-field="cycleLength" value="${p.cycleLength||28}" oninput="updateField(event)" />
+          <input type="number" min="21" max="35" data-field="cycleLength" data-keep="cycleLength" value="${p.cycleLength||28}" oninput="updateField(event)" />
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:6px">First day of her last period *</span>
-          <input type="date" max="${today}" data-field="lastPeriod" value="${h(lp)}" onchange="updateField(event)" />
+          <input type="date" max="${today}" data-field="lastPeriod" data-keep="lastPeriod" value="${h(lp)}" onchange="updateField(event)" />
         </label>
         <div class="label" style="margin-bottom:8px">Relationship</div>
         ${pillGroup('relationship', [
@@ -2706,17 +2753,17 @@ function renderProfile() {
         <div class="label" style="margin:18px 0 8px">Fertility mode</div>
         ${pillGroup('fertilityMode', [
           {id:'off',label:'Not tracking'},{id:'ttc',label:'Trying to conceive'},{id:'avoid',label:'Avoiding pregnancy'}], false, p.fertilityMode||'off')}
-        <div class="label" style="margin:18px 0 8px">Daily reminder</div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <button type="button" class="pill ${state.notifEnabled?'active':''}" onclick="toggleNotif()" id="notif-pill">
-            ${state.notifEnabled ? '🔔 ON · DAILY 8 AM' : '🔕 OFF · TAP TO ENABLE'}
-          </button>
-          <span class="label" style="color:rgba(245,236,215,0.55)">Phase-aware tip, once a day.</span>
+
+        <div class="label" style="margin:18px 0 8px">Reminders <span style="color:rgba(245,236,215,0.45);font-weight:normal;text-transform:none;letter-spacing:0">— optional, max 3 / day · only when there's something worth saying</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button type="button" class="pill ${state.notifSlots?.morning?'active':''}" style="justify-content:flex-start" onclick="toggleNotifSlot('morning')">${state.notifSlots?.morning ? '🌅' : '·'} morning · 8am ${state.notifSlots?.morning ? '— on' : '— off'}</button>
+          <button type="button" class="pill ${state.notifSlots?.midday?'active':''}" style="justify-content:flex-start" onclick="toggleNotifSlot('midday')">${state.notifSlots?.midday ? '☀️' : '·'} midday · 1pm ${state.notifSlots?.midday ? '— on' : '— off'}</button>
+          <button type="button" class="pill ${state.notifSlots?.evening?'active':''}" style="justify-content:flex-start" onclick="toggleNotifSlot('evening')">${state.notifSlots?.evening ? '🌙' : '·'} evening · 6pm ${state.notifSlots?.evening ? '— on' : '— off'}</button>
         </div>
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-personality" ${state.profileOpen?.personality ? 'open' : ''} ontoggle="setProfileOpen('personality', this.open)">
       <summary><div class="title-row"><span class="num">02</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <div class="label" style="margin-bottom:8px">Type</div>
@@ -2726,7 +2773,7 @@ function renderProfile() {
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-neurology" ${state.profileOpen?.neurology ? 'open' : ''} ontoggle="setProfileOpen('neurology', this.open)">
       <summary><div class="title-row"><span class="num">03</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Tap to toggle. Be honest - it shapes the code.</p>
@@ -2737,7 +2784,7 @@ function renderProfile() {
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-comfort" ${state.profileOpen?.comfort ? 'open' : ''} ontoggle="setProfileOpen('comfort', this.open)">
       <summary><div class="title-row"><span class="num">04</span><span class="name">What Comforts Her</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         ${pillGroup('comfort', [
@@ -2747,23 +2794,23 @@ function renderProfile() {
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-food" ${state.profileOpen?.food ? 'open' : ''} ontoggle="setProfileOpen('food', this.open)">
       <summary><div class="title-row"><span class="num">05</span><span class="name">Food &amp; Drinks</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <div class="label" style="margin-bottom:8px">Cravings</div>
         ${pillGroup('cravings', [{id:'sweet',label:'Sweet'},{id:'salty',label:'Salty'},{id:'carbs',label:'Comfort carbs'},{id:'spicy',label:'Spicy'},{id:'healthy',label:'Healthy'}])}
         <label class="field" style="margin-top:14px">
           <span class="label" style="margin-bottom:6px">Her favorites</span>
-          <input data-field="favorites" value="${h(p.favorites||'')}" placeholder="e.g., dark chocolate, ramen" oninput="updateField(event)" />
+          <input data-field="favorites" data-keep="favorites" value="${h(p.favorites||'')}" placeholder="e.g., dark chocolate, ramen" oninput="updateField(event)" />
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:6px">Dietary restrictions</span>
-          <input data-field="dietary" value="${h(p.dietary||'')}" placeholder="e.g., vegetarian" oninput="updateField(event)" />
+          <input data-field="dietary" data-keep="dietary" value="${h(p.dietary||'')}" placeholder="e.g., vegetarian" oninput="updateField(event)" />
         </label>
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-love" ${state.profileOpen?.love ? 'open' : ''} ontoggle="setProfileOpen('love', this.open)">
       <summary><div class="title-row"><span class="num">06</span><span class="name">Love Languages</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         ${pillGroup('love', [
@@ -2772,7 +2819,7 @@ function renderProfile() {
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-dates" ${state.profileOpen?.dates ? 'open' : ''} ontoggle="setProfileOpen('dates', this.open)">
       <summary><div class="title-row"><span class="num">07</span><span class="name">Important Dates</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Any blanks are fine — fill in what you've got. Surfaces a countdown + occasion plays as each date approaches.</p>
@@ -2806,10 +2853,10 @@ function renderProfile() {
       </div>
     </details>
 
-    <details class="acc">
+    <details class="acc" id="acc-notes" ${state.profileOpen?.notes ? 'open' : ''} ontoggle="setProfileOpen('notes', this.open)">
       <summary><div class="title-row"><span class="num">08</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
-        <textarea data-field="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
+        <textarea data-field="notes" data-keep="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
       </div>
     </details>
 
@@ -3253,90 +3300,193 @@ function confirmClear() {
 }
 
 // ---------- NOTIFICATIONS ----------
-async function toggleNotif() {
+// ---------- NOTIFICATIONS (gentle, 3 slots, max 3 / day, 7am–9pm) ----------
+const SLOT_HOURS = { morning: 8, midday: 13, evening: 18 };
+const SLOT_LABEL = { morning: 'morning', midday: 'midday', evening: 'tonight' };
+const NOTIF_DAY_CAP = 3;
+
+function anyNotifOn() {
+  return !!(state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening));
+}
+
+async function toggleNotifSlot(slot) {
+  if (!['morning','midday','evening'].includes(slot)) return;
   if (typeof Notification === 'undefined') {
-    alert('This browser does not support notifications.\n\nTip: install the app to your Home Screen (Share → Add to Home Screen) and reopen for full support.');
+    alert('this browser does not support notifications.\n\ntip: install the app to your home screen (share → add to home screen) and reopen.');
     return;
   }
-  if (state.notifEnabled) {
-    localStorage.setItem(NOTIF_KEY, '0');
-    setState({ notifEnabled: false });
+  const slots = { ...(state.notifSlots || {}) };
+  if (slots[slot]) {
+    slots[slot] = false;
+    try { localStorage.setItem('brocode_notif_' + slot, '0'); } catch {}
+    setState({ notifSlots: slots });
     return;
   }
   let perm = Notification.permission;
   if (perm === 'default') perm = await Notification.requestPermission();
   if (perm !== 'granted') {
-    alert('Notification permission was not granted. Enable it in your browser settings to receive daily reminders.');
+    alert('notifications were not granted. enable them in your browser settings to receive reminders.');
     return;
   }
-  localStorage.setItem(NOTIF_KEY, '1');
-  setState({ notifEnabled: true });
-  scheduleNotification();
+  slots[slot] = true;
+  try {
+    localStorage.setItem('brocode_notif_' + slot, '1');
+    // Keep legacy NOTIF_KEY in sync so other paths don't get confused
+    localStorage.setItem(NOTIF_KEY, '1');
+  } catch {}
+  setState({ notifSlots: slots, notifEnabled: true });
+  scheduleAllSlots();
 }
-function notifBody() {
+
+function notifCountKey() {
+  return 'brocode_notif_count_' + new Date().toISOString().slice(0, 10);
+}
+function getDayCount() {
+  try { return parseInt(localStorage.getItem(notifCountKey()) || '0', 10); } catch { return 0; }
+}
+function bumpDayCount() {
+  try { localStorage.setItem(notifCountKey(), String(getDayCount() + 1)); } catch {}
+}
+function lastFiredKey(slot) {
+  return 'brocode_slot_last_' + slot;
+}
+function inQuietHours() {
+  const h = new Date().getHours();
+  return h < 7 || h >= 21;
+}
+
+function notifBodyForSlot(slot) {
   const p = state.profile;
-  if (!p?.lastPeriod) return { title: 'BRO CODE', body: 'Open the app and set her last period to unlock today\'s move.' };
-
-  // Priority 1: event today or tomorrow
-  const soon = upcomingEvents(p, 1);
-  if (soon.length) {
-    const e = soon[0];
-    const labelTitle = e.label.toLowerCase().replace(/\bher\b/, 'her').replace(/^./, c => c.toUpperCase());
-    if (e.daysUntil === 0) {
-      return { title: 'BRO CODE · ' + e.emoji + ' TODAY', body: `Bro. ${labelTitle} today. Open the app — one move for you.` };
-    }
-    if (e.daysUntil === 1) {
-      return { title: 'BRO CODE · ' + e.emoji + ' TOMORROW', body: `${labelTitle} tomorrow. Last call. One play inside.` };
-    }
-  }
-
-  // Priority 2: pulse state (repair / ghost)
-  const pulse = computePulse();
-  if (pulse?.kind === 'repair') {
-    return { title: 'BRO CODE · REPAIR', body: `You logged a conflict ${pulse.daysAgo} day${pulse.daysAgo === 1 ? '' : 's'} ago. Open the app — one move.` };
-  }
-  if (pulse?.kind === 'ghost') {
-    const d = pulse.daysSince || 5;
-    if (d >= 7) return { title: 'BRO CODE · QUIET WEEK', body: `${d} silent days. Don't drift — open and pick one small thing.` };
-    return { title: 'BRO CODE · QUIET DAYS', body: `${d} quiet days. One small move tonight.` };
-  }
-
-  // Priority 3: default phase tip
+  if (!p?.lastPeriod) return null;
   const day = cycleDay(p);
   const len = p.cycleLength || 28;
   const phase = phaseFor(day, len);
-  const tip = pickTip(p, phase, dayInPhase(day, len)) || 'Show up today.';
-  const days = daysToNextPeriod(p);
-  const subtitle = days === 0 ? 'Day 1' : (days === 1 ? 'Period tomorrow' : (PHASE_LABEL[phase] + ' · Day ' + day + '/' + len));
-  return { title: 'BRO CODE · ' + subtitle, body: tip };
+  const phaseLower = (PHASE_LABEL[phase] || '').toLowerCase();
+
+  // Cross-cutting: event today/tomorrow always wins in any slot
+  const soon = upcomingEvents(p, 1);
+  if (soon.length) {
+    const e = soon[0];
+    const label = e.label.toLowerCase();
+    if (e.daysUntil === 0) {
+      return { title: 'BRO CODE · ' + e.emoji + ' today', body: `${label} today. open the app — one play inside if you want.` };
+    }
+    if (e.daysUntil === 1) {
+      return { title: 'BRO CODE · ' + e.emoji + ' tomorrow', body: `${label} tomorrow. one play inside if you want.` };
+    }
+  }
+
+  if (slot === 'morning') {
+    // Always fires when enabled. Phase-aware brief, gentle.
+    const tip = lowerSoftly(pickTip(p, phase, dayInPhase(day, len)) || 'show up today, no agenda.');
+    return { title: 'BRO CODE · ' + phaseLower + ' d' + day, body: tip };
+  }
+
+  if (slot === 'midday') {
+    // Only fires when there's actual signal.
+    const pulse = computePulse();
+    if (pulse?.kind === 'repair') {
+      return { title: 'BRO CODE · quick check', body: `you logged a conflict ${pulse.daysAgo} day${pulse.daysAgo === 1 ? '' : 's'} ago. one move when you're back.` };
+    }
+    if (pulse?.kind === 'ghost') {
+      const d = pulse.daysSince || 5;
+      return { title: 'BRO CODE · quiet days', body: `${d} quiet days. small thing tonight goes a long way.` };
+    }
+    if (pulse?.kind === 'channel') {
+      return { title: 'BRO CODE · switch the channel', body: `lots of gifts lately. tonight maybe attention beats stuff.` };
+    }
+    const upWk = upcomingEvents(p, 7).find(e => e.daysUntil >= 2);
+    if (upWk) {
+      return { title: 'BRO CODE · ' + upWk.emoji + ' ' + upWk.daysUntil + ' days', body: `${upWk.label.toLowerCase()} in ${upWk.daysUntil} days. plays inside if you want one.` };
+    }
+    const trans = nextPhaseTransition(day, len);
+    if (trans && trans.daysAway === 1) {
+      return { title: 'BRO CODE · heads up', body: `${PHASE_LABEL[trans.next].toLowerCase()} tomorrow. nothing to do — just a soft note.` };
+    }
+    return null; // silent today
+  }
+
+  if (slot === 'evening') {
+    // Only fires when nothing logged today.
+    if (loggedToday && loggedToday()) return null;
+    const moves = {
+      menstrual:  'one small thing tonight — heating pad, no agenda.',
+      follicular: 'one small thing tonight — a tiny plan suggestion.',
+      ovulation:  'one small thing tonight — 20 minutes, eyes up.',
+      luteal:     'one small thing tonight — 20 quiet minutes, no phone.'
+    };
+    return { title: 'BRO CODE · tonight', body: moves[phase] || 'one small thing tonight.' };
+  }
+
+  return null;
 }
-function scheduleNotification() {
-  if (!state.notifEnabled) return;
+
+function lowerSoftly(s) {
+  if (!s) return '';
+  // Tame BRO/CAPS/exclamation, keep proper names like "Maya" intact.
+  return String(s)
+    .replace(/!+/g, '.')
+    .replace(/^[Bb]rooo+,?\s*/g, '')
+    .replace(/^[Bb]ro listen[\s—\-]*/i, '')
+    .replace(/^[Bb]ro,?\s*/g, '')
+    .replace(/^[Pp]sst bro[\s—\-]*/g, '')
+    .replace(/^[Rr]eal talk bro,?\s*/g, '')
+    .replace(/^./, c => c.toLowerCase());
+}
+
+function fireSlot(slot) {
+  if (!state.notifSlots?.[slot]) return;
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  if (getDayCount() >= NOTIF_DAY_CAP) return;
+  if (inQuietHours()) return;
   const today = new Date().toISOString().slice(0,10);
-  const last = localStorage.getItem(NOTIF_LAST);
+  const lastFired = localStorage.getItem(lastFiredKey(slot));
+  if (lastFired === today) return;  // already fired this slot today
+  const out = notifBodyForSlot(slot);
+  if (!out) return;  // nothing worth saying
+  try {
+    if (navigator.serviceWorker?.controller) {
+      navigator.serviceWorker.ready.then(reg => reg.showNotification(out.title, {
+        body: out.body, icon: 'icon-192.png', badge: 'icon-192.png',
+        tag: 'brocode-' + slot + '-' + today, silent: false
+      }));
+    } else {
+      new Notification(out.title, { body: out.body, icon: 'icon-192.png', tag: 'brocode-' + slot + '-' + today });
+    }
+    try { localStorage.setItem(lastFiredKey(slot), today); } catch {}
+    bumpDayCount();
+    // Keep legacy NOTIF_LAST in sync for any code that still checks it
+    try { localStorage.setItem(NOTIF_LAST, today); } catch {}
+  } catch {}
+}
+
+function scheduleAllSlots() {
+  if (!anyNotifOn()) return;
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   const now = new Date();
-  const target = new Date(now); target.setHours(8, 0, 0, 0);
-  if (last !== today && now.getHours() >= 8) {
-    try { fireNotification(); } catch {}
-  } else if (last !== today) {
-    const delay = Math.max(1000, target - now);
-    setTimeout(() => { try { fireNotification(); } catch {} }, delay);
+  for (const slot of ['morning','midday','evening']) {
+    if (!state.notifSlots[slot]) continue;
+    const hour = SLOT_HOURS[slot];
+    const target = new Date(now); target.setHours(hour, 0, 0, 0);
+    const today = now.toISOString().slice(0,10);
+    const alreadyFired = localStorage.getItem(lastFiredKey(slot)) === today;
+    if (!alreadyFired && now >= target && !inQuietHours()) {
+      try { fireSlot(slot); } catch {}
+    } else if (!alreadyFired) {
+      const delay = Math.max(1000, target - now);
+      setTimeout(() => { try { fireSlot(slot); } catch {} }, delay);
+    }
   }
-  const next = new Date(now); next.setDate(next.getDate()+1); next.setHours(8,0,0,0);
-  setTimeout(scheduleNotification, Math.max(60000, next - now));
+  // Re-arm tomorrow at 7am
+  const next = new Date(now); next.setDate(next.getDate() + 1); next.setHours(7, 0, 0, 0);
+  setTimeout(scheduleAllSlots, Math.max(60 * 1000, next - now));
 }
-function fireNotification() {
-  const today = new Date().toISOString().slice(0,10);
-  if (localStorage.getItem(NOTIF_LAST) === today) return;
-  const { title, body } = notifBody();
-  if (navigator.serviceWorker?.controller) {
-    navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'brocode-daily-'+today }));
-  } else {
-    new Notification(title, { body, icon: 'icon-192.png', tag: 'brocode-daily-'+today });
-  }
-  localStorage.setItem(NOTIF_LAST, today);
-}
+
+// Back-compat shim — anything still calling these gets the new behavior.
+function scheduleNotification() { scheduleAllSlots(); }
+function fireNotification() { ['morning','midday','evening'].forEach(s => { if (state.notifSlots?.[s]) fireSlot(s); }); }
+function notifBody() { return notifBodyForSlot('morning') || { title: 'BRO CODE', body: '' }; }
+async function toggleNotif() { return toggleNotifSlot('morning'); }
 
 // ---------- INSTALL HINT ----------
 function detectInstallHint() {
@@ -3455,7 +3605,7 @@ function renderInstallBanner() {
 detectInstallHint();
 render();
 applyOnlineStatus();
-if (state.notifEnabled) scheduleNotification();
+if (anyNotifOn()) scheduleAllSlots();
 setInterval(tickActivity, 60000);
 </script>
 </body>
