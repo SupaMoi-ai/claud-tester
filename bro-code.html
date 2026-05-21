@@ -1086,6 +1086,114 @@ const NEUROLOGY = [
   { id:'sensory', label:'Sensory Sensitivity', info:'Noise, light, smell all matter more during menstruation.' }
 ];
 
+const CONTRACEPTION = [
+  { id: 'combined-pill', label: 'Combined pill', emoji: '💊', cycleEffect: 'full',
+    blurb: "Estrogen + progestin daily. Ovulation suppressed. The bleed in placebo week is a withdrawal bleed, not a true period.",
+    sideEffects: [
+      { se: 'Lower libido for some users',              tip: "Don't take it personally. Initiate gently, accept either answer without sulking." },
+      { se: 'Mood shifts (especially first 3 months)',  tip: "Her body is adjusting. Patience. Don't pin every feeling on the pill — but know it's in the mix." },
+      { se: 'Breast tenderness, especially early',      tip: "Lighter touch. Ask before squeezing or playful jabs." },
+      { se: 'Nausea early on',                          tip: "Bland food, water, no strong smells. Don't push food choices on bad days." },
+      { se: 'Spotting in the first few months',         tip: "Stock liners quietly. No comments. Don't make a thing of it." },
+      { se: 'Headaches in some users',                  tip: "Quiet room, water, lights down. Skip the strong cologne." }
+    ]
+  },
+  { id: 'mini-pill', label: 'Mini-pill (progestin-only)', emoji: '💊', cycleEffect: 'partial',
+    blurb: "Progestin only, taken at the same time daily. Ovulation suppression is inconsistent — sometimes yes, sometimes no.",
+    sideEffects: [
+      { se: 'Irregular spotting / unpredictable bleeding',     tip: "Stock liners. No ‘are you spotting’ commentary. It's normal." },
+      { se: 'Timing-sensitive: a few hours late = lower effectiveness', tip: "Offer to back her up on reminders. Don't be smug about it." },
+      { se: 'Mood / libido changes for some',                  tip: "Same script: patience, don't diagnose her mood." },
+      { se: 'Less likely to suppress full PMS pattern',        tip: "Cycle stuff in the app probably still applies — read her, not just the calendar." }
+    ]
+  },
+  { id: 'hormonal-iud', label: 'Hormonal IUD (Mirena / Kyleena)', emoji: '🪙', cycleEffect: 'partial',
+    blurb: "Local progestin in the uterus. Often makes periods lighter or absent over time. Ovulation may or may not be suppressed depending on the dose.",
+    sideEffects: [
+      { se: 'Cramping + spotting for weeks after insertion',   tip: "Insertion day: she runs the schedule. Cancel optional plans. Heating pad, ibuprofen, no questions." },
+      { se: 'Irregular bleeding for the first 3–6 months',     tip: "It evens out. Don't escalate. Stock supplies, drop comments." },
+      { se: 'Periods become lighter or stop',                  tip: "Period predictions in this app may be wrong. Trust her body, not the calendar." },
+      { se: 'Some users feel mood changes',                    tip: "Believe her if she says it's the IUD. Don't argue with her experience." }
+    ]
+  },
+  { id: 'copper-iud', label: 'Copper IUD (Paragard)', emoji: '🪙', cycleEffect: 'none',
+    blurb: "Non-hormonal. Natural cycle preserved. Often makes periods heavier and crampier, especially in the first year.",
+    sideEffects: [
+      { se: 'Heavier periods, more cramping',                  tip: "Comfort drawer = more important here. Heating pad always within reach." },
+      { se: 'Insertion + first few cycles can be rough',       tip: "First period after insertion: clear the calendar. She may need real rest." },
+      { se: 'No hormonal mood effects',                        tip: "Cycle moods you see ARE the natural cycle. The phase coaching in this app applies fully." },
+      { se: 'Sometimes shifts cycle length',                   tip: "Re-check her cycle length in the app after 2–3 months." }
+    ]
+  },
+  { id: 'implant', label: 'Implant (Nexplanon)', emoji: '🦾', cycleEffect: 'full',
+    blurb: "Small rod in the upper arm, releases progestin for ~3 years. Highly effective. Bleeding patterns become unpredictable.",
+    sideEffects: [
+      { se: 'Bleeding can be anything — none, spotting, or longer periods', tip: "Period predictions here will be unreliable. Stock supplies regardless." },
+      { se: 'Mood / libido changes for some',                  tip: "Trust her on this. Same script: patience, no diagnosing." },
+      { se: 'Headaches or acne for a minority',                tip: "Don't comment on her skin. Make her favorite things easy to access." },
+      { se: 'Perceived weight changes',                        tip: "Never the move to comment. Compliment specifics that aren't her body." }
+    ]
+  },
+  { id: 'shot', label: 'Shot (Depo-Provera)', emoji: '💉', cycleEffect: 'full',
+    blurb: "Progestin injection every 3 months. Periods often stop entirely after a few shots. Return to fertility can take 6–12 months.",
+    sideEffects: [
+      { se: 'Periods often stop entirely',                     tip: "Don't ask ‘are you sure you're not pregnant.’ She knows. The shot did this." },
+      { se: 'Possible weight gain for some',                   tip: "Make her favorite foods easy. Don't comment on the scale or portions. Ever." },
+      { se: 'Mood shifts in a subset of users',                tip: "If she says it changed her, believe her. Talk options with her, don't override her doctor." },
+      { se: 'Bone density concern with long-term use',         tip: "Encourage calcium / vitamin D / weight-bearing exercise without making it a project." }
+    ]
+  },
+  { id: 'patch', label: 'Patch (Xulane / Twirla)', emoji: '🩹', cycleEffect: 'full',
+    blurb: "Weekly patch delivering estrogen + progestin. Similar profile to the combined pill.",
+    sideEffects: [
+      { se: 'Skin irritation at the patch site',               tip: "Don't grab where the patch is. Lotion-free if she rotates spots." },
+      { se: 'Same hormone profile as combined pill',           tip: "See combined-pill tips: libido, mood, breast tenderness all possible." },
+      { se: 'Heat / water can affect adhesion',                tip: "If she's stressed about it falling off after a swim, hand her a spare patch and shut up." }
+    ]
+  },
+  { id: 'ring', label: 'Vaginal ring (NuvaRing / Annovera)', emoji: '⭕', cycleEffect: 'full',
+    blurb: "Hormonal ring inserted monthly. Same hormone profile as the combined pill.",
+    sideEffects: [
+      { se: 'Same hormone profile as combined pill',           tip: "See combined-pill tips for the broad strokes." },
+      { se: 'Occasional discomfort during sex',                tip: "Believe her if she says she feels it. Adjust." },
+      { se: 'Storage temperature matters',                     tip: "If she's traveling, help her keep it cool. Don't leave it in a hot car." }
+    ]
+  },
+  { id: 'condoms', label: 'Condoms only', emoji: '🛡️', cycleEffect: 'none',
+    blurb: "Non-hormonal barrier. Natural cycle preserved. All the phase coaching in this app applies fully.",
+    sideEffects: [
+      { se: 'No hormonal effects to manage',                   tip: "Your job: read the natural cycle and adjust. The phase content here is tuned for this." },
+      { se: 'Some sensitivity to latex',                       tip: "If irritation happens, switch to non-latex. Don't make her ask twice." },
+      { se: "You're 100% on supply duty",                       tip: "Always in stock. Always. Never out." }
+    ]
+  },
+  { id: 'fam', label: 'Fertility awareness / cycle tracking', emoji: '🌡️', cycleEffect: 'none',
+    blurb: "Tracking ovulation to time intercourse. Natural cycle preserved + actively monitored.",
+    sideEffects: [
+      { se: 'Requires discipline both sides',                  tip: "Know her fertile window. Don't push when she says no. Trust her tracking." },
+      { se: 'Stress can shift ovulation timing',               tip: "If her cycle's off, don't blame her. Stress is real and tracking adjusts." },
+      { se: 'No hormonal effects',                             tip: "Cycle phase coaching here is fully relevant." }
+    ]
+  },
+  { id: 'none', label: 'None / TTC / N/A', emoji: '🫥', cycleEffect: 'none',
+    blurb: "No contraception (trying to conceive, or other reason). Natural cycle in full effect.",
+    sideEffects: [
+      { se: 'Natural cycle, all phases active',                tip: "Phase coaching here is fully accurate. Read the brief daily." },
+      { se: 'TTC adds emotional weight to each cycle',         tip: "Don't joke about it. Don't push positivity. Just be there." }
+    ]
+  },
+  { id: 'prefer-not', label: 'Prefer not to say', emoji: '🤐', cycleEffect: 'none',
+    blurb: "No problem. The app behaves as if the cycle is natural.",
+    sideEffects: []
+  }
+];
+function contraceptionFor(profile) {
+  return CONTRACEPTION.find(c => c.id === profile?.contraception) || null;
+}
+function cycleSuppression(profile) {
+  return contraceptionFor(profile)?.cycleEffect || 'none';
+}
+
 const GUIDE = {
   menstrual: {
     days:'Days 1-5',
@@ -1850,7 +1958,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.13 · Stay out of the way</footer>
+    <footer class="app">BRO CODE · v2.14 · Her method</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1981,6 +2089,7 @@ function renderDashboard(day, phase, len) {
   <div style="padding:0 16px 4px">${renderDayStrip()}</div>
   <div class="stagger">
     ${renderInstallBanner()}
+    ${renderMethodHint()}
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
         <div>
@@ -2017,6 +2126,13 @@ function renderDashboard(day, phase, len) {
       </div>
 
       ${renderPhaseArc(day, phase, len)}
+
+      ${(() => {
+        const sup = cycleSuppression(state.profile);
+        if (sup === 'full')    return `<div class="label" style="margin:-6px 0 12px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal contraception — phases may be muted. coaching still applies; calendar is approximate.</div>`;
+        if (sup === 'partial') return `<div class="label" style="margin:-6px 0 12px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal IUD / mini-pill — phases sometimes present. read her, not just the calendar.</div>`;
+        return '';
+      })()}
 
       <div class="sit-row">
         <div class="label" style="margin-right:4px">// right now</div>
@@ -2689,6 +2805,7 @@ function renderCalendar() {
     <div class="legend">
       ${PHASES.map(p => `<div><span class="swatch" style="background:${PHASE_COLOR[p]}"></span><span class="label">${PHASE_LABEL[p]}</span></div>`).join('')}
     </div>
+    ${cycleSuppression(state.profile) === 'full' ? `<p style="font-size:12px;color:rgba(245,236,215,0.5);margin:-4px 0 14px;font-style:italic">period markers are approximate withdrawal-bleed predictions on hormonal contraception.</p>` : ''}
 
     <div class="card">
       <div class="label" style="margin-bottom:14px">// upcoming</div>
@@ -2763,8 +2880,37 @@ function renderProfile() {
       </div>
     </details>
 
+    <details class="acc" id="acc-method" ${state.profileOpen?.method ? 'open' : ''} ontoggle="setProfileOpen('method', this.open)">
+      <summary><div class="title-row"><span class="num">02</span><span class="name">Her Method</span><span class="opt">// contraception</span></div><span class="plus">+</span></summary>
+      <div class="body">
+        <p style="font-size:13px;color:rgba(245,236,215,0.7);margin:0 0 12px;line-height:1.5">What she's using changes how the cycle reads. Pick one — the rest of the app tunes itself.</p>
+        ${pillGroup('contraception', CONTRACEPTION.map(c => ({ id: c.id, label: c.emoji + ' ' + c.label })), false, p.contraception || '')}
+        ${(() => {
+          const c = contraceptionFor(p);
+          if (!c) return `<p style="font-size:12px;color:rgba(245,236,215,0.55);margin:12px 0 0">Not set yet. The app behaves like a natural cycle until you pick one.</p>`;
+          return `
+            <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
+              <div class="label" style="margin-bottom:8px">// what it does</div>
+              <p style="font-size:13px;color:rgba(245,236,215,0.85);margin:0 0 14px;line-height:1.55">${h(c.blurb)}</p>
+              ${c.sideEffects.length ? `
+                <div class="label" style="margin-bottom:8px;color:var(--orange)">// side effects + plays</div>
+                <ul class="bullets">
+                  ${c.sideEffects.map(s => `
+                    <li style="flex-direction:column;align-items:flex-start;gap:2px">
+                      <span style="color:var(--cream);font-size:13px"><span style="color:var(--orange)">▸</span> ${h(s.se)}</span>
+                      <span style="color:rgba(245,236,215,0.75);font-size:13px;padding-left:16px;line-height:1.45">→ ${h(s.tip)}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              ` : ''}
+            </div>
+          `;
+        })()}
+      </div>
+    </details>
+
     <details class="acc" id="acc-personality" ${state.profileOpen?.personality ? 'open' : ''} ontoggle="setProfileOpen('personality', this.open)">
-      <summary><div class="title-row"><span class="num">02</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">03</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <div class="label" style="margin-bottom:8px">Type</div>
         ${pillGroup('type', [{id:'a-type',label:'A-Type'},{id:'b-type',label:'B-Type'}], false)}
@@ -2774,7 +2920,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-neurology" ${state.profileOpen?.neurology ? 'open' : ''} ontoggle="setProfileOpen('neurology', this.open)">
-      <summary><div class="title-row"><span class="num">03</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">04</span><span class="name">Neurology &amp; Mental Health</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Tap to toggle. Be honest - it shapes the code.</p>
         ${pillGroup('neurology', NEUROLOGY.map(n => ({id:n.id,label:n.label})))}
@@ -2785,7 +2931,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-comfort" ${state.profileOpen?.comfort ? 'open' : ''} ontoggle="setProfileOpen('comfort', this.open)">
-      <summary><div class="title-row"><span class="num">04</span><span class="name">What Comforts Her</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">05</span><span class="name">What Comforts Her</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         ${pillGroup('comfort', [
           {id:'cuddles',label:'Touch / Cuddles'},{id:'massage',label:'Massage'},{id:'heat',label:'Heat (bath, pad)'},
@@ -2795,7 +2941,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-food" ${state.profileOpen?.food ? 'open' : ''} ontoggle="setProfileOpen('food', this.open)">
-      <summary><div class="title-row"><span class="num">05</span><span class="name">Food &amp; Drinks</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">06</span><span class="name">Food &amp; Drinks</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <div class="label" style="margin-bottom:8px">Cravings</div>
         ${pillGroup('cravings', [{id:'sweet',label:'Sweet'},{id:'salty',label:'Salty'},{id:'carbs',label:'Comfort carbs'},{id:'spicy',label:'Spicy'},{id:'healthy',label:'Healthy'}])}
@@ -2811,7 +2957,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-love" ${state.profileOpen?.love ? 'open' : ''} ontoggle="setProfileOpen('love', this.open)">
-      <summary><div class="title-row"><span class="num">06</span><span class="name">Love Languages</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">07</span><span class="name">Love Languages</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         ${pillGroup('love', [
           {id:'words',label:'Words of Affirmation'},{id:'acts',label:'Acts of Service'},
@@ -2820,7 +2966,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-dates" ${state.profileOpen?.dates ? 'open' : ''} ontoggle="setProfileOpen('dates', this.open)">
-      <summary><div class="title-row"><span class="num">07</span><span class="name">Important Dates</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">08</span><span class="name">Important Dates</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Any blanks are fine — fill in what you've got. Surfaces a countdown + occasion plays as each date approaches.</p>
         <label class="field">
@@ -2854,7 +3000,7 @@ function renderProfile() {
     </details>
 
     <details class="acc" id="acc-notes" ${state.profileOpen?.notes ? 'open' : ''} ontoggle="setProfileOpen('notes', this.open)">
-      <summary><div class="title-row"><span class="num">08</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
+      <summary><div class="title-row"><span class="num">09</span><span class="name">Notes - The Unwritten Rules</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
         <textarea data-field="notes" data-keep="notes" rows="6" placeholder="Pet peeves, secret wins, what makes her feel instantly better..." oninput="updateField(event)">${h(p.notes||'')}</textarea>
       </div>
@@ -2927,6 +3073,29 @@ function renderGuide(currentPhase) {
     `;
   }).join('');
 
+  const method = contraceptionFor(state.profile);
+  const methodCard = method ? `
+    <div class="card" style="border-left:3px solid var(--orange)">
+      <div class="label" style="margin-bottom:6px">// her method</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:22px;line-height:1">${method.emoji}</span>
+        <h3 class="display" style="font-size:18px;margin:0;color:var(--cream)">${h(method.label.toUpperCase())}</h3>
+      </div>
+      <p style="margin:0 0 14px;color:rgba(245,236,215,0.85);line-height:1.5;font-size:14px">${h(method.blurb)}</p>
+      ${method.sideEffects.length ? `
+        <div class="label" style="margin-bottom:8px;color:var(--orange)">// side effects + plays</div>
+        <ul class="bullets" style="margin:0">
+          ${method.sideEffects.map(s => `
+            <li style="flex-direction:column;align-items:flex-start;gap:2px;margin-bottom:8px">
+              <span style="color:var(--cream);font-size:13px"><span style="color:var(--orange)">▸</span> ${h(s.se)}</span>
+              <span style="color:rgba(245,236,215,0.75);font-size:13px;padding-left:16px;line-height:1.45">→ ${h(s.tip)}</span>
+            </li>
+          `).join('')}
+        </ul>
+      ` : ''}
+    </div>
+  ` : '';
+
   return `
   <div class="stagger">
     <div>
@@ -2934,6 +3103,7 @@ function renderGuide(currentPhase) {
       <h2 class="display" style="font-size:36px;margin:6px 0 8px">THE GUIDE</h2>
       <p style="color:rgba(245,236,215,0.7);margin:0 0 18px">Phase-by-phase. Personalized to her profile.</p>
     </div>
+    ${methodCard}
     ${cards}
   </div>`;
 }
@@ -3581,6 +3751,34 @@ function shouldShowInstallBanner() {
   if (isIOSSafari()) return state.visits >= 3;
   return false;
 }
+function dismissMethodHint() {
+  haptic(6);
+  try { localStorage.setItem('brocode_method_hinted', '1'); } catch {}
+  setState({});
+}
+function shouldShowMethodHint() {
+  if (localStorage.getItem('brocode_method_hinted') === '1') return false;
+  const p = state.profile;
+  if (!p?.lastPeriod) return false;
+  if (p.contraception) return false;  // already set
+  return true;
+}
+function renderMethodHint() {
+  if (!shouldShowMethodHint()) return '';
+  return `
+    <div class="card" style="border-left:3px solid var(--orange)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0;flex:1">
+          <div class="label">// her method</div>
+          <p style="margin:6px 0 0;color:var(--cream);line-height:1.45;font-size:14px">Set what she's using in profile → it changes how the cycle reads. Takes ten seconds.</p>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;margin-top:8px" onclick="go('profile')">→ HER PROFILE</button>
+        </div>
+        <button class="x" onclick="dismissMethodHint()" aria-label="Later" style="background:none;border:0;color:rgba(245,236,215,0.55);font-size:20px;cursor:pointer;padding:0 4px;flex:0 0 auto">×</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderInstallBanner() {
   if (!shouldShowInstallBanner()) return '';
   const ios = !state.installPrompt && isIOSSafari();
