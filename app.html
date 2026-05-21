@@ -1370,6 +1370,97 @@ function urgencyForDays(d) {
   return                     { cls: '',           sub: "Two weeks out. Plan now, thank yourself later." };
 }
 
+// ---------- CALENDAR EXPORT (.ics) ----------
+function escapeICS(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function ymdCompact(yyyymmdd) { return yyyymmdd.replace(/-/g, ''); }
+function nextDayCompact(yyyymmdd) {
+  const d = new Date(yyyymmdd); d.setDate(d.getDate() + 1);
+  return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
+}
+function nowStampUTC() {
+  const d = new Date();
+  return d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate())
+       + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + pad2(d.getUTCSeconds()) + 'Z';
+}
+function uidFor(slug) {
+  const rand = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+  return 'brocode-' + slug + '-' + rand + '@brocode.app';
+}
+function ics(events) {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BRO CODE//Cycle//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+  const stamp = nowStampUTC();
+  for (const e of events) {
+    if (!e.date) continue;
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + (e.uid || uidFor(e.slug || 'event')));
+    lines.push('DTSTAMP:' + stamp);
+    lines.push('DTSTART;VALUE=DATE:' + ymdCompact(e.date));
+    lines.push('DTEND;VALUE=DATE:' + nextDayCompact(e.date));
+    lines.push('SUMMARY:' + escapeICS(e.title));
+    if (e.desc) lines.push('DESCRIPTION:' + escapeICS(e.desc));
+    if (e.rrule) lines.push('RRULE:' + e.rrule);
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function downloadIcs(filename, body) {
+  try {
+    const blob = new Blob([body], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { try { document.body.removeChild(a); URL.revokeObjectURL(url); } catch {} }, 200);
+  } catch (e) {}
+}
+
+function exportEventIcs(name) {
+  haptic(8);
+  const p = state.profile || {};
+  const d = p.dates || {};
+  const map = {
+    anniversary: { title: 'Anniversary · BRO CODE',     date: d.anniversary, desc: 'Anniversary. Plan something.' },
+    birthday:    { title: 'Her birthday · BRO CODE',    date: d.birthday,    desc: 'Her birthday. Lock plans early.' },
+    firstMet:    { title: 'First met · BRO CODE',       date: d.firstMet,    desc: 'The day you met. Send the photo.' }
+  };
+  const e = map[name];
+  if (!e || !e.date) return;
+  const body = ics([{ ...e, slug: name, rrule: 'FREQ=YEARLY' }]);
+  downloadIcs('bro-code-' + name + '.ics', body);
+}
+
+function exportCycleIcs() {
+  haptic(8);
+  const p = state.profile;
+  if (!p?.lastPeriod) return;
+  const len = p.cycleLength || 28;
+  const ranges = phaseRanges(len);
+  const lastPeriod = midnight(new Date(p.lastPeriod));
+  const today = midnight(new Date());
+  // Find the next period start at-or-after today
+  let cursor = new Date(lastPeriod);
+  while (cursor < today) cursor.setDate(cursor.getDate() + len);
+  const events = [];
+  for (let i = 0; i < 3; i++) {
+    const start = new Date(cursor); start.setDate(cursor.getDate() + i * len);
+    const startStr = start.getFullYear() + '-' + pad2(start.getMonth() + 1) + '-' + pad2(start.getDate());
+    events.push({ slug: 'period-' + i, date: startStr, title: 'Day 1 likely · BRO CODE', desc: 'Predicted period start. Stock comfort drawer.' });
+    // Ovulation: day 14 of THAT cycle (start + 13 days, day count is 1-based)
+    const ov = new Date(start); ov.setDate(start.getDate() + (ranges.ovulation[0] - 1));
+    const ovStr = ov.getFullYear() + '-' + pad2(ov.getMonth() + 1) + '-' + pad2(ov.getDate());
+    events.push({ slug: 'ovu-' + i, date: ovStr, title: 'Peak window · BRO CODE', desc: 'Ovulation. Lean in.' });
+    // Luteal: day 18
+    const lu = new Date(start); lu.setDate(start.getDate() + (ranges.luteal[0] - 1));
+    const luStr = lu.getFullYear() + '-' + pad2(lu.getMonth() + 1) + '-' + pad2(lu.getDate());
+    events.push({ slug: 'lut-' + i, date: luStr, title: 'Sensitivity rising · BRO CODE', desc: 'Luteal begins. Volume down, patience up.' });
+  }
+  downloadIcs('bro-code-cycle.ics', ics(events));
+}
+
 function buildAlert(profile, day) {
   if (!profile) return null;
   const days = daysToNextPeriod(profile);
@@ -1623,6 +1714,16 @@ let state = {
   activityNow: Date.now(),
   hapticsEnabled: localStorage.getItem('brocode_haptics') !== '0',
   pulseDismissals: (() => { try { return JSON.parse(localStorage.getItem(PULSE_DISMISS)) || {}; } catch { return {}; } })(),
+  installPrompt: null,
+  installDismissed: (() => {
+    const ts = parseInt(localStorage.getItem('brocode_install_dismissed') || '0', 10);
+    return ts && (Date.now() - ts) < 14 * 864e5;
+  })(),
+  visits: (() => {
+    const n = parseInt(localStorage.getItem('brocode_visits') || '0', 10) + 1;
+    try { localStorage.setItem('brocode_visits', String(n)); } catch {}
+    return n;
+  })(),
   justLogged: null,
   streakTick: 0,
   updateReady: false
@@ -1650,6 +1751,18 @@ function updateTitle() {
   if (up) prefix = `${up.emoji}${up.daysUntil}d · ${prefix}`;
   const tail = parts.length ? ' · ' + parts.join(' ') : '';
   document.title = (prefix + 'BRO CODE' + tail).trim();
+}
+
+function updateBadge() {
+  if (typeof navigator === 'undefined' || !('setAppBadge' in navigator)) return;
+  let count = 0;
+  try {
+    if (computePulse()) count++;
+    const ev = upcomingEvents(state.profile, 7)[0];
+    if (ev) count++;
+    if (count > 0) navigator.setAppBadge(count);
+    else if ('clearAppBadge' in navigator) navigator.clearAppBadge();
+  } catch {}
 }
 
 // ---------- RENDER ----------
@@ -1691,7 +1804,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.11 · The pulse</footer>
+    <footer class="app">BRO CODE · v2.12 · Reach him</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -1713,6 +1826,7 @@ function render() {
   `;
   applyOnlineStatus();
   updateTitle();
+  updateBadge();
 }
 
 function renderShareModal() {
@@ -1819,6 +1933,7 @@ function renderDashboard(day, phase, len) {
   ${renderActivityStrip()}
   <div style="padding:0 16px 4px">${renderDayStrip()}</div>
   <div class="stagger">
+    ${renderInstallBanner()}
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
         <div>
@@ -2496,10 +2611,11 @@ function renderCalendar() {
   <div class="stagger">
     <div class="cal-head">
       <div class="month">${monthName} <span class="year">${year}</span></div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-ghost" onclick="navMonth(-1)">←</button>
         <button class="btn btn-ghost" onclick="navMonth(0)">Today</button>
         <button class="btn btn-ghost" onclick="navMonth(1)">→</button>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="exportCycleIcs()" title="Export next 3 cycles as a .ics file">📅 EXPORT</button>
       </div>
     </div>
 
@@ -2662,17 +2778,31 @@ function renderProfile() {
         <p style="font-size:13px;color:rgba(245,236,215,0.65);margin:0 0 12px">Any blanks are fine — fill in what you've got. Surfaces a countdown + occasion plays as each date approaches.</p>
         <label class="field">
           <span class="label" style="margin-bottom:6px">💍 Anniversary</span>
-          <input type="date" max="${today}" value="${h((p.dates&&p.dates.anniversary)||'')}" onchange="updateDate('anniversary', event)" />
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="date" max="${today}" value="${h((p.dates&&p.dates.anniversary)||'')}" onchange="updateDate('anniversary', event)" style="flex:1" />
+            ${(p.dates&&p.dates.anniversary) ? `<button type="button" class="btn btn-ghost" style="padding:8px 10px;font-size:11px;white-space:nowrap" onclick="exportEventIcs('anniversary')">📅 ADD TO CAL</button>` : ''}
+          </div>
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:6px">🎂 Her birthday</span>
-          <input type="date" max="${today}" value="${h((p.dates&&p.dates.birthday)||'')}" onchange="updateDate('birthday', event)" />
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="date" max="${today}" value="${h((p.dates&&p.dates.birthday)||'')}" onchange="updateDate('birthday', event)" style="flex:1" />
+            ${(p.dates&&p.dates.birthday) ? `<button type="button" class="btn btn-ghost" style="padding:8px 10px;font-size:11px;white-space:nowrap" onclick="exportEventIcs('birthday')">📅 ADD TO CAL</button>` : ''}
+          </div>
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:6px">📍 First met / first date</span>
-          <input type="date" max="${today}" value="${h((p.dates&&p.dates.firstMet)||'')}" onchange="updateDate('firstMet', event)" />
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="date" max="${today}" value="${h((p.dates&&p.dates.firstMet)||'')}" onchange="updateDate('firstMet', event)" style="flex:1" />
+            ${(p.dates&&p.dates.firstMet) ? `<button type="button" class="btn btn-ghost" style="padding:8px 10px;font-size:11px;white-space:nowrap" onclick="exportEventIcs('firstMet')">📅 ADD TO CAL</button>` : ''}
+          </div>
         </label>
         <p style="font-size:12px;color:rgba(245,236,215,0.55);margin:6px 0 0">Valentine's Day (Feb 14) is auto-tracked — no input needed.</p>
+        <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
+          <div class="label" style="margin-bottom:8px">// cycle predictions</div>
+          <p style="font-size:13px;color:rgba(245,236,215,0.7);margin:0 0 8px;line-height:1.4">Export the next 3 predicted period / ovulation / luteal dates to your system calendar.</p>
+          <button type="button" class="btn btn-ghost" style="padding:8px 12px;font-size:12px" onclick="exportCycleIcs()">📅 EXPORT NEXT 3 CYCLES</button>
+        </div>
       </div>
     </details>
 
@@ -3147,7 +3277,7 @@ function notifBody() {
   const p = state.profile;
   if (!p?.lastPeriod) return { title: 'BRO CODE', body: 'Open the app and set her last period to unlock today\'s move.' };
 
-  // Date-aware override: if there's an event today or tomorrow, push that instead of the phase tip
+  // Priority 1: event today or tomorrow
   const soon = upcomingEvents(p, 1);
   if (soon.length) {
     const e = soon[0];
@@ -3160,6 +3290,18 @@ function notifBody() {
     }
   }
 
+  // Priority 2: pulse state (repair / ghost)
+  const pulse = computePulse();
+  if (pulse?.kind === 'repair') {
+    return { title: 'BRO CODE · REPAIR', body: `You logged a conflict ${pulse.daysAgo} day${pulse.daysAgo === 1 ? '' : 's'} ago. Open the app — one move.` };
+  }
+  if (pulse?.kind === 'ghost') {
+    const d = pulse.daysSince || 5;
+    if (d >= 7) return { title: 'BRO CODE · QUIET WEEK', body: `${d} silent days. Don't drift — open and pick one small thing.` };
+    return { title: 'BRO CODE · QUIET DAYS', body: `${d} quiet days. One small move tonight.` };
+  }
+
+  // Priority 3: default phase tip
   const day = cycleDay(p);
   const len = p.cycleLength || 28;
   const phase = phaseFor(day, len);
@@ -3240,6 +3382,73 @@ if ('serviceWorker' in navigator) {
       });
     }).catch(()=>{});
   });
+}
+
+// ---------- INSTALL PROMPT ----------
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  state.installPrompt = e;
+  render();
+});
+window.addEventListener('appinstalled', () => {
+  state.installPrompt = null;
+  state.installDismissed = true;
+  render();
+});
+
+function triggerInstall() {
+  haptic(10);
+  const p = state.installPrompt;
+  if (p && typeof p.prompt === 'function') {
+    p.prompt();
+    p.userChoice?.then(() => { state.installPrompt = null; render(); });
+  } else {
+    // iOS / unsupported: show the manual hint
+    alert('Add to home screen for badge + reminders:\n\nTap the Share icon, then "Add to Home Screen".');
+  }
+}
+function dismissInstall() {
+  haptic(6);
+  try { localStorage.setItem('brocode_install_dismissed', String(Date.now())); } catch {}
+  setState({ installDismissed: true });
+}
+function isStandalone() {
+  try {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || (typeof navigator !== 'undefined' && navigator.standalone === true);
+  } catch { return false; }
+}
+function isIOSSafari() {
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPad|iPod/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua);
+}
+function shouldShowInstallBanner() {
+  if (state.installDismissed) return false;
+  if (isStandalone()) return false;
+  if (!state.profile?.lastPeriod) return false;  // wait until onboarded
+  // Show if we have a real install prompt (Chrome) OR iOS Safari (manual) after enough engagement
+  if (state.installPrompt) return state.visits >= 2;
+  if (isIOSSafari()) return state.visits >= 3;
+  return false;
+}
+function renderInstallBanner() {
+  if (!shouldShowInstallBanner()) return '';
+  const ios = !state.installPrompt && isIOSSafari();
+  const cta = ios
+    ? `<span class="label" style="color:rgba(245,236,215,0.7);font-size:11px;display:block;margin-top:8px">Tap <strong>Share</strong> → <strong>Add to Home Screen</strong></span>`
+    : `<button class="btn btn-primary" style="padding:8px 14px;font-size:12px;margin-top:8px" onclick="triggerInstall()">+ ADD TO HOME SCREEN</button>`;
+  return `
+    <div class="card install-banner" style="border-left:3px solid var(--orange)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0;flex:1">
+          <div class="label">// install :: only works if it's on your home screen</div>
+          <p style="margin:6px 0 0;color:var(--cream);line-height:1.45;font-size:14px">Push reminders and the badge need the installed app. One tap.</p>
+          ${cta}
+        </div>
+        <button class="x" onclick="dismissInstall()" aria-label="Later" style="background:none;border:0;color:rgba(245,236,215,0.55);font-size:20px;cursor:pointer;padding:0 4px;flex:0 0 auto">×</button>
+      </div>
+    </div>
+  `;
 }
 
 // ---------- BOOT ----------
