@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --beige: #e8ddd0;
+  --cream: #f5f0e8;
+  --clay: #c9a88f;
+  --sage: #a8b5a0;
+  --ink: #1f1b17;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--beige);
+  color: var(--ink);
+}
+
+/* 4% paper grain overlay — pure CSS noise, no image needed. */
+.paper-grain {
+  position: relative;
+}
+.paper-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+/* Soft card used throughout */
+.soft-card {
+  background: var(--cream);
+  border: 1px solid rgba(31, 27, 23, 0.06);
+  box-shadow: 0 1px 2px rgba(31, 27, 23, 0.04),
+    0 4px 12px rgba(31, 27, 23, 0.04);
+  border-radius: 4px;
+}
+
+/* Pin card — softer, paper-edge feel */
+.pin-card {
+  background: var(--cream);
+  box-shadow: 0 2px 6px rgba(31, 27, 23, 0.08),
+    0 8px 20px rgba(31, 27, 23, 0.04);
+  border-radius: 2px;
+}
+
+/* Faded serif used for project labels on zoom-out */
+.serif-faded {
+  font-family: var(--font-serif, Georgia, serif);
+  color: rgba(31, 27, 23, 0.55);
+  letter-spacing: 0.02em;
+}
+
+/* Disable text selection on the canvas */
+.canvas-host {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}

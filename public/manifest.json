@@ -1,0 +1,21 @@
+{
+  "name": "Soft Studio",
+  "short_name": "Soft Studio",
+  "description": "A calm visual studio that sits on top of your Pinterest.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8DDD0",
+  "theme_color": "#E8DDD0",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
