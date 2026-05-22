@@ -1958,7 +1958,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.14 · Her method</footer>
+    <footer class="app">BRO CODE · v2.15 · First-time install</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2017,14 +2017,53 @@ function renderShareModal() {
 }
 
 function renderWelcome() {
+  const plat = installPlatform();
+  let installBlock = '';
+  if (plat === 'installed') {
+    installBlock = `
+      <p style="margin:18px 0 14px;color:rgba(245,236,215,0.85);font-size:14px;line-height:1.5">Already installed. Welcome back.</p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissWelcome()">CONTINUE →</button>
+    `;
+  } else if (plat === 'native') {
+    installBlock = `
+      <div class="label" style="margin:18px 0 8px;color:var(--orange)">// install</div>
+      <p style="margin:0 0 12px;color:rgba(245,236,215,0.85);font-size:14px;line-height:1.5">Tap below and confirm. Takes one second. It'll live on your home screen like any other app.</p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px" onclick="triggerInstall(); dismissWelcome()">+ ADD TO HOME SCREEN</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="dismissWelcome()">continue in browser</button>
+    `;
+  } else if (plat === 'ios') {
+    installBlock = `
+      <div class="label" style="margin:18px 0 8px;color:var(--orange)">// install on iphone</div>
+      <ol style="margin:0 0 14px;padding-left:22px;color:rgba(245,236,215,0.9);font-size:14px;line-height:1.7">
+        <li>Tap the <strong>Share</strong> icon <span style="display:inline-block;font-size:16px">⌫</span> in Safari's toolbar.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong> in the top right.</li>
+      </ol>
+      <p style="margin:0 0 14px;color:rgba(245,236,215,0.55);font-size:12px;line-height:1.5">The icon lands on your home screen. Open it from there — that's the installed app.</p>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="dismissWelcome()">continue in browser</button>
+    `;
+  } else {
+    installBlock = `
+      <div class="label" style="margin:18px 0 8px;color:var(--orange)">// install</div>
+      <p style="margin:0 0 14px;color:rgba(245,236,215,0.85);font-size:14px;line-height:1.5">On your phone: open this page in the browser, tap the <strong>Share</strong> or <strong>⋮ menu</strong>, then pick <strong>Add to Home Screen</strong> or <strong>Install app</strong>.</p>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="dismissWelcome()">continue in browser</button>
+    `;
+  }
   return `
     <div class="modal-bg" onclick="dismissWelcome()">
-      <div class="modal corners" onclick="event.stopPropagation()">
-        <div class="label" style="margin-bottom:14px">// system :: welcome</div>
-        <h2 class="display" style="font-size:34px;line-height:1;margin:0 0 16px">BRO CODE.</h2>
-        <p style="margin:0 0 12px;color:rgba(245,236,215,0.85)">The guys who show up don't do it by accident. They learn. They track. They adjust.</p>
-        <p class="display" style="color:var(--red);font-size:16px;margin:0 0 18px">This is your playbook.</p>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissWelcome()">ENTER →</button>
+      <div class="modal corners" onclick="event.stopPropagation()" style="max-width:420px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="background:var(--red);color:var(--cream);font-family:'Anton',Impact,sans-serif;letter-spacing:0.04em;font-size:13px;padding:5px 8px;border-radius:6px">BC</div>
+          <div class="label">// welcome</div>
+        </div>
+        <h2 class="display" style="font-size:32px;line-height:1;margin:0 0 10px">BRO CODE</h2>
+        <p style="margin:0 0 14px;color:rgba(245,236,215,0.85);line-height:1.5;font-size:14px">A coach for being a better partner. Lives on your device.</p>
+        <ul style="list-style:none;padding:0;margin:0 0 4px;color:rgba(245,236,215,0.85);font-size:13px;line-height:1.7">
+          <li><span style="color:var(--green)">✓</span> No login</li>
+          <li><span style="color:var(--green)">✓</span> No tracking</li>
+          <li><span style="color:var(--green)">✓</span> Works offline once installed</li>
+        </ul>
+        ${installBlock}
       </div>
     </div>
   `;
@@ -3741,6 +3780,12 @@ function isStandalone() {
 function isIOSSafari() {
   const ua = navigator.userAgent || '';
   return /iPhone|iPad|iPod/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua);
+}
+function installPlatform() {
+  if (isStandalone()) return 'installed';
+  if (state.installPrompt) return 'native';
+  if (isIOSSafari()) return 'ios';
+  return 'manual';
 }
 function shouldShowInstallBanner() {
   if (state.installDismissed) return false;
