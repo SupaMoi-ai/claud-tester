@@ -396,8 +396,8 @@
   .phase-arc .meta { color: rgba(245,236,215,0.55); font-size:10px; }
 
   /* 7-day strip */
-  .day-strip { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; padding:8px 0; }
-  .day-strip .cell { aspect-ratio: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:1px solid var(--border); border-radius:8px; font-size:16px; line-height:1; }
+  .day-strip { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; padding:0; }
+  .day-strip .cell { aspect-ratio: 1; max-height: 44px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:1px solid var(--border); border-radius:8px; font-size:14px; line-height:1; }
   .day-strip .cell .dlabel { font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.1em; color: rgba(245,236,215,0.45); }
   .day-strip .cell.today { border-color: var(--red); }
   .day-strip .cell.empty { color: rgba(245,236,215,0.25); }
@@ -1958,7 +1958,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.15 · First-time install</footer>
+    <footer class="app">BRO CODE · v2.16 · Calmer top</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2124,8 +2124,6 @@ function renderDashboard(day, phase, len) {
   }
 
   return `
-  ${renderActivityStrip()}
-  <div style="padding:0 16px 4px">${renderDayStrip()}</div>
   <div class="stagger">
     ${renderInstallBanner()}
     ${renderMethodHint()}
@@ -2210,6 +2208,11 @@ function renderDashboard(day, phase, len) {
     ${renderBroTruth()}
 
     ${renderReceiptCard()}
+
+    <div class="card">
+      <div class="label" style="margin-bottom:10px">// last 7 days</div>
+      ${renderDayStrip()}
+    </div>
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -2400,70 +2403,6 @@ function renderDayStrip() {
     cells.push(`<div class="cell ${cls} ${isToday ? 'today' : ''}" title="${dStr}"><span>${emoji}</span><span class="dlabel">${h(label)}</span></div>`);
   }
   return `<div class="day-strip">${cells.join('')}</div>`;
-}
-
-function renderActivityStrip() {
-  const log = loadLog();
-  const listened = loadListened();
-  const streak = currentStreak();
-  const items = [];
-  // Latest 4 log entries
-  const recent = (log || []).slice(-4).reverse();
-  for (const r of recent) {
-    items.push({ kind: r.kind, label: kindLabel(r.kind), at: r.at });
-  }
-  // Latest 1-2 listened items
-  const openL = (listened || []).filter(x => x.status === 'open').slice(-2).reverse();
-  for (const l of openL) {
-    items.push({ kind: 'listened', label: 'heard "' + (l.note.length > 24 ? l.note.slice(0,22)+'…' : l.note) + '"', at: l.at });
-  }
-  // Sort by time desc, cap at 6
-  items.sort((a,b) => (b.at||0) - (a.at||0));
-  const top = items.slice(0, 6);
-  const milestone = [3,7,14,30,60,90,180,365].includes(streak);
-  return `
-    <div class="activity-strip">
-      <div class="row">
-        <span class="pill-act" style="border-color:rgba(245,236,215,0.15);color:rgba(245,236,215,0.55)">// activity</span>
-        ${streak > 0 ? `<span class="pill-act streak${milestone?' milestone':''}">🔥 ${streak}-day streak</span>` : ''}
-        ${top.length ? top.map(it => `
-          <span class="pill-act">${kindIcon(it.kind)} ${h(it.label)} · ${h(relativeAgo(it.at, state.activityNow))}</span>
-        `).join('') : `<span class="pill-act" style="color:rgba(245,236,215,0.45)">no activity yet — log your first move below</span>`}
-      </div>
-    </div>
-  `;
-}
-
-function kindLabel(k) {
-  switch (k) {
-    case 'gift': return 'gift logged';
-    case 'talk': return 'real talk';
-    case 'conflict': return 'conflict logged';
-    case 'apology': return 'apology logged';
-    case 'move': return 'today\'s move done';
-    default: return k;
-  }
-}
-function kindIcon(k) {
-  switch (k) {
-    case 'gift': return '🎁';
-    case 'talk': return '💬';
-    case 'conflict': return '⚡';
-    case 'apology': return '🙏';
-    case 'move': return '✓';
-    case 'listened': return '👂';
-    default: return '·';
-  }
-}
-function relativeAgo(at, now) {
-  const ms = (now || Date.now()) - (at || 0);
-  if (ms < 60_000) return 'just now';
-  const m = Math.floor(ms / 60_000);
-  if (m < 60) return m + 'm ago';
-  const hr = Math.floor(m / 60);
-  if (hr < 24) return hr + 'h ago';
-  const d = Math.floor(hr / 24);
-  return d + 'd ago';
 }
 
 function renderPulseCard() {
