@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0D1117" />
+<meta name="description" content="BRO CODE — privacy. Everything stays on your device." />
+<title>BRO CODE — privacy</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+  @font-face { font-family: 'Anton';   font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/Anton-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
+  :root {
+    --red: #C8322C; --cream: #F5ECD7; --night: #0D1117;
+    --dark: #161B24; --mid: #1F2837; --border: #2A3547; --green: #3DAA6A;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--night); color: var(--cream); }
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 22px 80px; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  header .logo { background: var(--red); color: var(--cream); font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.04em; font-size: 16px; padding: 6px 10px; border-radius: 6px; }
+  header .name { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 18px; }
+  h1 { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.04em; font-size: clamp(32px, 7vw, 44px); line-height: 1; margin: 0 0 18px; }
+  h2 { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 18px; color: var(--red); margin: 30px 0 8px; }
+  .label { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,236,215,0.55); margin-bottom: 6px; }
+  p { color: rgba(245,236,215,0.85); margin: 0 0 12px; font-size: 15px; }
+  ul { color: rgba(245,236,215,0.85); padding-left: 22px; margin: 0 0 12px; }
+  li { margin-bottom: 6px; font-size: 15px; }
+  .card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+  .card.her { border-left: 3px solid var(--green); }
+  .back { display: inline-block; margin-top: 14px; color: var(--cream); text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 6px; }
+  .back:hover { border-color: var(--red); }
+  a { color: var(--red); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="logo">BC</span>
+      <span class="name">BRO CODE · privacy</span>
+    </header>
+
+    <h1>YOUR DATA STAYS ON YOUR PHONE.</h1>
+
+    <div class="card">
+      <div class="label">// the short version</div>
+      <p>BRO CODE stores everything in this browser's local storage on this device. No login. No accounts. No tracking. No analytics. Your data never leaves your phone.</p>
+      <p>If you clear your browser data, it's gone. If you switch phones, use <strong>Export</strong> in Her Profile to save a JSON file, then <strong>Import</strong> on the new device.</p>
+    </div>
+
+    <h2>What we store</h2>
+    <ul>
+      <li>Her profile — name, cycle length, last period, any optional fields you fill in.</li>
+      <li>Your logs — what you've logged (gift / talk / conflict / apology / listened).</li>
+      <li>Your settings — reminder slots, the accordions you've opened, your install nudge state.</li>
+    </ul>
+
+    <h2>What we don't do</h2>
+    <ul>
+      <li>No account creation. No email required.</li>
+      <li>No tracking pixels. No telemetry. No analytics scripts.</li>
+      <li>No third-party SDKs, no ad networks, no fingerprinting.</li>
+      <li>No data sent to any server. The app loads, then runs entirely on your device.</li>
+    </ul>
+
+    <h2>Notifications</h2>
+    <p>If you enable any of the three reminder slots, the browser fires them locally from a timer on your phone. The notification content never leaves your device. Push permissions are managed by your browser's notification settings.</p>
+
+    <h2>Calendar export</h2>
+    <p>The <em>Add to calendar</em> buttons generate a <code>.ics</code> file that downloads to your device. You decide whether to add it to your system calendar. Nothing is uploaded.</p>
+
+    <div class="card her">
+      <div class="label" style="color: var(--green)">// if you found this on his phone</div>
+      <p>This is a tool for him, not surveillance of you. Cycle data is entered by him; nothing is sent anywhere. He's trying to be a better partner — that's the whole point. If you'd rather he didn't use it, tell him. He'll listen.</p>
+    </div>
+
+    <h2>Questions</h2>
+    <p>Send a note to <a href="mailto:feedback@brocode.app?subject=BRO+CODE+privacy">feedback@brocode.app</a>.</p>
+
+    <a class="back" href="app.html">← BACK TO APP</a>
+  </div>
+</body>
+</html>

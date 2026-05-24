@@ -1,10 +1,11 @@
 // BRO CODE service worker — network-first for HTML, cache-first for static assets.
-const CACHE = 'brocode-v17';
+const CACHE = 'brocode-v18';
 const SHELL = [
   './',
   './index.html',
   './bro-code.html',
   './app.html',
+  './privacy.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

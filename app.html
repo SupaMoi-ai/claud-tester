@@ -1958,7 +1958,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.16 · Calmer top</footer>
+    <footer class="app">BRO CODE · v2.17 · Beta-ready · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.17+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a></footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2010,7 +2010,7 @@ function renderShareModal() {
           </div>
           <div class="label" style="text-align:center;margin-top:10px;color:rgba(245,236,215,0.55)">scan with the camera</div>
         ` : ''}
-        <div class="label" style="margin-top:18px;text-align:center;color:rgba(245,236,215,0.4)">— no login · no tracking · all local —</div>
+        <div class="label" style="margin-top:18px;text-align:center;color:rgba(245,236,215,0.4)">— no login · no tracking · all local · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">privacy</a> —</div>
       </div>
     </div>
   `;
@@ -2063,6 +2063,7 @@ function renderWelcome() {
           <li><span style="color:var(--green)">✓</span> No tracking</li>
           <li><span style="color:var(--green)">✓</span> Works offline once installed</li>
         </ul>
+        <p style="margin:4px 0 0;font-size:11px;color:rgba(245,236,215,0.45)"><a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">how the data works →</a></p>
         ${installBlock}
       </div>
     </div>
