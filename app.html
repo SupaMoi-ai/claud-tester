@@ -1809,11 +1809,14 @@ let state = {
     if (legacy && localStorage.getItem('brocode_notif_morning') === null) {
       try { localStorage.setItem('brocode_notif_morning', '1'); } catch {}
     }
-    return {
-      morning: localStorage.getItem('brocode_notif_morning') === '1',
-      midday:  localStorage.getItem('brocode_notif_midday')  === '1',
-      evening: localStorage.getItem('brocode_notif_evening') === '1'
+    // Absent key → default ON (bros forget to enable). Explicit '0' → respected off.
+    const pref = (slot) => {
+      const v = localStorage.getItem('brocode_notif_' + slot);
+      if (v === '1') return true;
+      if (v === '0') return false;
+      return true;
     };
+    return { morning: pref('morning'), midday: pref('midday'), evening: pref('evening') };
   })(),
   profileOpen: (() => {
     try { return JSON.parse(localStorage.getItem('brocode_profile_open')) || { basics: true }; }
@@ -1837,6 +1840,9 @@ let state = {
   todayMoveDone: localStorage.getItem('brocode_move_done') || null,
   activityNow: Date.now(),
   hapticsEnabled: localStorage.getItem('brocode_haptics') !== '0',
+  periodConfirm: 0,
+  justLoggedPeriod: 0,
+  notifNudged: localStorage.getItem('brocode_notif_nudged') === '1',
   pulseDismissals: (() => { try { return JSON.parse(localStorage.getItem(PULSE_DISMISS)) || {}; } catch { return {}; } })(),
   installPrompt: null,
   installDismissed: (() => {
@@ -1958,7 +1964,7 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.17 · Beta-ready · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.17+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a></footer>
+    <footer class="app">BRO CODE · v2.18 · Reminders on · log day 1 · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.18+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a></footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2127,6 +2133,7 @@ function renderDashboard(day, phase, len) {
   return `
   <div class="stagger">
     ${renderInstallBanner()}
+    ${renderNotifNudge()}
     ${renderMethodHint()}
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
@@ -2144,6 +2151,8 @@ function renderDashboard(day, phase, len) {
     </div>
 
     ${lateBanner}
+
+    ${renderPeriodLogButton(day, len, late)}
 
     ${showAlert ? `
       <div class="alert ${alert.tone==='red'?'red':''}">
@@ -2491,6 +2500,34 @@ function renderPhaseArc(day, phase, len) {
       <div class="line"><span class="meta">→ ${h(nextLabel)}</span></div>
     </div>
   `;
+}
+
+function renderPeriodLogButton(day, len, late) {
+  if (!state.profile?.lastPeriod) return '';
+  const justLogged = state.justLoggedPeriod && (Date.now() - state.justLoggedPeriod) < 5000;
+  if (justLogged) {
+    return `
+      <div class="card" style="border-left:3px solid var(--red)">
+        <div class="label" style="margin-bottom:4px;color:var(--red)">// day 1 locked in</div>
+        <p style="margin:0;color:var(--cream);font-size:14px;line-height:1.45">Logged. Day 1 = today. Cycle recalibrated to ~${state.profile.cycleLength || 28} days. It gets sharper every month.</p>
+      </div>`;
+  }
+  const confirming = state.periodConfirm && (Date.now() - state.periodConfirm) < 4000;
+  const days = daysToNextPeriod(state.profile);
+  const prominent = late || (typeof days === 'number' && days <= 2);
+  if (prominent) {
+    return `
+      <div class="card" style="border-left:3px solid var(--red)">
+        <div class="label" style="margin-bottom:6px;color:var(--red)">// did she start?</div>
+        <p style="margin:0 0 12px;color:var(--cream);font-size:14px;line-height:1.45">${confirming ? 'Tap again to confirm — day 1 = today.' : 'The day her period starts, log it. Keeps the whole cycle accurate.'}</p>
+        <button class="btn ${confirming ? 'btn-primary' : 'btn-ghost'}" style="width:100%;justify-content:center" onclick="confirmPeriodStart()">🩸 ${confirming ? 'CONFIRM — DAY 1 IS TODAY' : 'SHE STARTED TODAY'}</button>
+      </div>`;
+  }
+  // Quiet variant for early / off-schedule starts.
+  return `
+    <div style="display:flex;justify-content:center;padding:2px 0 6px">
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:rgba(245,236,215,0.6)" onclick="confirmPeriodStart()">🩸 ${confirming ? 'tap again to confirm — day 1 today' : 'period started early? log it'}</button>
+    </div>`;
 }
 
 function renderUpcomingCard() {
@@ -3262,6 +3299,47 @@ function quickLog(kind, phase) {
     render();
   }, 950);
 }
+
+// Two-step confirm so an accidental tap doesn't nuke the cycle anchor.
+function confirmPeriodStart() {
+  const now = Date.now();
+  if (state.periodConfirm && (now - state.periodConfirm) < 4000) {
+    logPeriodStart();
+  } else {
+    haptic(6);
+    setState({ periodConfirm: now });
+    setTimeout(() => {
+      if (state.periodConfirm && (Date.now() - state.periodConfirm) >= 4000) {
+        setState({ periodConfirm: 0 });
+      }
+    }, 4200);
+  }
+}
+function logPeriodStart() {
+  const p = state.profile;
+  if (!p?.lastPeriod) return;
+  const today = new Date().toISOString().slice(0, 10);
+  let log = Array.isArray(p.periodLog) ? p.periodLog.slice() : [];
+  if (!log.length && p.lastPeriod) log.push(p.lastPeriod);
+  if (log[log.length - 1] === today) { setState({ periodConfirm: 0 }); return; }
+  log.push(today);
+  log.sort();
+  log = log.slice(-12);
+  const lens = [];
+  for (let i = 1; i < log.length; i++) {
+    const d = Math.round((new Date(log[i]) - new Date(log[i - 1])) / DAY);
+    if (d >= 21 && d <= 40) lens.push(d);
+  }
+  const next = { ...p, lastPeriod: today, periodLog: log };
+  if (lens.length) {
+    const recent = lens.slice(-3);
+    next.cycleLength = Math.max(21, Math.min(35, Math.round(recent.reduce((a, b) => a + b, 0) / recent.length)));
+  }
+  state.profile = saveProfile(next);
+  haptic(14);
+  setState({ profile: state.profile, periodConfirm: 0, justLoggedPeriod: Date.now() });
+  setTimeout(() => { if (Date.now() - (state.justLoggedPeriod || 0) >= 5000) setState({ justLoggedPeriod: 0 }); }, 5200);
+}
 function openSituation(name) {
   haptic(8);
   // Tapping the same chip again closes
@@ -3456,6 +3534,53 @@ const NOTIF_DAY_CAP = 3;
 
 function anyNotifOn() {
   return !!(state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening));
+}
+
+async function requestNotifPermission() {
+  haptic(8);
+  if (typeof Notification === 'undefined') {
+    alert('this browser does not support notifications.\n\ntip: install the app to your home screen (share → add to home screen) and reopen.');
+    dismissNotifNudge();
+    return;
+  }
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  try { localStorage.setItem('brocode_notif_nudged', '1'); } catch {}
+  if (perm === 'granted') {
+    try { localStorage.setItem(NOTIF_KEY, '1'); } catch {}
+    setState({ notifNudged: true, notifEnabled: true });
+    scheduleAllSlots();
+  } else {
+    setState({ notifNudged: true });
+  }
+}
+function dismissNotifNudge() {
+  haptic(6);
+  try { localStorage.setItem('brocode_notif_nudged', '1'); } catch {}
+  setState({ notifNudged: true });
+}
+function shouldShowNotifNudge() {
+  if (state.notifNudged) return false;
+  if (!state.profile?.lastPeriod) return false;
+  if (typeof Notification === 'undefined') return false;
+  if (Notification.permission === 'granted') return false;
+  const s = state.notifSlots || {};
+  return !!(s.morning || s.midday || s.evening);
+}
+function renderNotifNudge() {
+  if (!shouldShowNotifNudge()) return '';
+  return `
+    <div class="card" style="border-left:3px solid var(--orange)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0;flex:1">
+          <div class="label">// reminders are on</div>
+          <p style="margin:6px 0 0;color:var(--cream);line-height:1.45;font-size:14px">Allow notifications so the daily nudge actually reaches you. Gentle, max 3 a day, only when there's something worth saying.</p>
+          <button class="btn btn-primary" style="padding:8px 14px;font-size:12px;margin-top:8px" onclick="requestNotifPermission()">ALLOW NOTIFICATIONS</button>
+        </div>
+        <button class="x" onclick="dismissNotifNudge()" aria-label="Later" style="background:none;border:0;color:rgba(245,236,215,0.55);font-size:20px;cursor:pointer;padding:0 4px;flex:0 0 auto">×</button>
+      </div>
+    </div>
+  `;
 }
 
 async function toggleNotifSlot(slot) {
