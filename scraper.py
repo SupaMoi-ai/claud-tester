@@ -30,6 +30,10 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 from docx import Document
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 SECTION_URL = "https://www.minskole.no/rosseland/seksjon/23538"
 CLASS_NAME = "2B"
@@ -122,29 +126,33 @@ def select_plan(links: list[PlanLink], target_week: int) -> PlanLink | None:
 
 
 def parse_docx(data: bytes) -> dict:
-    """Extract paragraphs and tables from the .docx into a structured dict."""
+    """Extract the .docx body as ordered blocks (paragraphs and tables)."""
     doc = Document(BytesIO(data))
-    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-    tables: list[list[list[str]]] = []
-    for table in doc.tables:
-        rows = []
-        for row in table.rows:
-            rows.append([cell.text.strip() for cell in row.cells])
-        tables.append(rows)
-    return {"paragraphs": paragraphs, "tables": tables}
+    blocks: list[dict] = []
+    for child in doc.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            text = Paragraph(child, doc).text.strip()
+            if text:
+                blocks.append({"type": "p", "text": text})
+        elif isinstance(child, CT_Tbl):
+            rows = [[cell.text.strip() for cell in row.cells]
+                    for row in Table(child, doc).rows]
+            blocks.append({"type": "table", "rows": rows})
+    return {"blocks": blocks}
 
 
 def plan_to_text(plan: dict) -> str:
-    """Render parsed plan content into readable plain text."""
+    """Render parsed plan content into readable plain text, in document order."""
     lines: list[str] = []
-    for para in plan["paragraphs"]:
-        lines.append(para)
-    for table in plan["tables"]:
-        lines.append("")
-        for row in table:
-            cells = [c for c in row if c]
-            if cells:
-                lines.append("  " + " | ".join(cells))
+    for block in plan["blocks"]:
+        if block["type"] == "p":
+            lines.append(block["text"])
+        else:
+            for row in block["rows"]:
+                cells = [c for c in row if c]
+                if cells:
+                    lines.append("  " + " | ".join(cells))
+            lines.append("")
     return "\n".join(lines).strip()
 
 
@@ -217,9 +225,19 @@ def main() -> int:
                         help="Parse and print, but do not send email or update state")
     parser.add_argument("--week", type=int, default=None,
                         help="Override the target ISO week number")
+    parser.add_argument("--file", default=None,
+                        help="Test mode: parse a local .docx and print the email, no network/send")
     args = parser.parse_args()
 
     target_week = args.week or datetime.now(TZ).isocalendar().week
+
+    if args.file:
+        data = Path(args.file).read_bytes()
+        plan_text = plan_to_text(parse_docx(data))
+        subject, body = render_email(target_week, plan_text, f"(local file: {args.file})")
+        print(f"SUBJECT: {subject}\n\n{body}")
+        return 0
+
     session = make_session()
 
     print(f"Fetching section page: {SECTION_URL}")

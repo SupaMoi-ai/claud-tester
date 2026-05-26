@@ -52,14 +52,24 @@ The Monday schedule (`cron: "0 5 * * 1"`) only fires once this workflow file is
 on the repository's **default branch**. Merge the branch, and the weekly email
 starts arriving. Manual **Run workflow** works from any branch for testing.
 
-## Running locally
+## Test it (no network, no secrets)
+A sample week plan is included so you can see exactly what the email looks like:
 ```bash
 pip install -r requirements.txt
+python samples/make_sample_ukeplan.py                       # (re)build the sample
+python scraper.py --file samples/ukeplan-eksempel.docx      # prints the email
+```
+You can also point `--file` at any real `.docx` you've downloaded to check how
+it parses.
+
+## Running against the live site
+```bash
 python scraper.py --no-email        # fetch + parse + print, no email
 python scraper.py --dump            # also save HTML + docx to debug/
 python scraper.py --force           # send email even if unchanged
 python scraper.py --week 23         # override the target week
 ```
+(These need internet access to `minskole.no`.)
 
 ## Adjusting
 - **Send time:** edit the `cron` line in `.github/workflows/weekly-plan.yml`
