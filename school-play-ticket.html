@@ -334,6 +334,7 @@
     display: flex;
     min-height: 72px;
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
   }
   .tab {
     flex: 1;
@@ -377,6 +378,75 @@
     font-size: 22px;
     line-height: 1;
   }
+
+  /* Inspection validation overlay */
+  .inspection-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    display: none;
+    flex-direction: column;
+    background: rgba(20,20,20,0.25);
+    z-index: 50;
+  }
+  .inspection-overlay.open { display: flex; }
+  .inspection-sheet {
+    background: #fff;
+    border-radius: 14px;
+    margin: calc(64px + env(safe-area-inset-top, 0px)) 14px calc(84px + env(safe-area-inset-bottom, 0px));
+    padding: 22px 18px 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .insp-title { font-size: 22px; font-weight: 600; color: #1a1a1a; }
+  .insp-sub { font-size: 17px; color: #555; margin-top: 4px; }
+  .insp-qr { margin: 22px 0 18px; }
+  .insp-qr svg { width: 170px; height: 170px; display: block; }
+  .insp-image {
+    position: relative;
+    width: 78%;
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 30% 78%, #5a7d3c 0 7%, transparent 7.5%),
+      radial-gradient(ellipse at 70% 70%, #6b8a44 0 11%, transparent 11.5%),
+      radial-gradient(circle at 52% 88%, #4f7038 0 9%, transparent 9.5%),
+      linear-gradient(#cfe6ef 0%, #9cc6dd 32%, #2f7fb5 55%, #1c5f93 100%);
+  }
+  .insp-tint {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    animation: liveTint 5s linear infinite;
+  }
+  @keyframes liveTint {
+    0%   { background-color: rgba(70, 200, 90, 0.85); }
+    25%  { background-color: rgba(60, 120, 230, 0.80); }
+    50%  { background-color: rgba(210, 70, 200, 0.78); }
+    75%  { background-color: rgba(235, 165, 40, 0.80); }
+    100% { background-color: rgba(70, 200, 90, 0.85); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .insp-tint { animation-duration: 14s; }
+  }
+  .insp-close {
+    margin-top: auto;
+    width: 100%;
+    background: #e9e9ea;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1d1d1d;
+  }
+  .insp-close:active { opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -422,7 +492,7 @@
 
         <div class="time-row">
           <span class="clock" id="ticket-time">09:53</span>
-          <span class="code">DC</span>
+          <span class="code" id="ticket-code">3B</span>
         </div>
 
         <div class="expires-section">
@@ -463,7 +533,8 @@
           <div class="detail-line" id="purchased-text">Purchased 29. April 09:52</div>
           <div class="detail-line">Price kr 49.00 of which VAT kr 5.25</div>
           <div class="detail-line">Paid with Vipps</div>
-          <button class="inspection-btn">
+          <div class="detail-line">Ticket ID: 10 62 74 47 30</div>
+          <button class="inspection-btn" onclick="openInspection()">
             <span class="qr-icon"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             Inspection
           </button>
@@ -487,12 +558,24 @@
         <div>More</div>
       </div>
     </div>
+
+    <div class="inspection-overlay" id="inspection-overlay" aria-hidden="true">
+      <div class="inspection-sheet">
+        <div class="insp-title">1 Adult, Nord-Jæren</div>
+        <div class="insp-sub" id="insp-sub">26. May 09:19 3B</div>
+        <div class="insp-qr" id="insp-qr"></div>
+        <div class="insp-image"><div class="insp-tint"></div></div>
+        <button class="insp-close" onclick="closeInspection()">Close</button>
+      </div>
+    </div>
   </div>
 
 <script>
   // ----- Config: school play ticket -----
   // Ticket is valid for this many minutes from page load.
   const VALID_FOR_MINUTES = 56;
+
+  const ZONE_CODE = '3B';
 
   const purchasedAt = new Date();
   const expiresAt = new Date(purchasedAt.getTime() + VALID_FOR_MINUTES * 60 * 1000);
@@ -550,6 +633,95 @@
     const collapsed = body.classList.toggle('collapsed');
     txt.textContent = collapsed ? 'Show details' : 'Hide details';
     chev.style.transform = collapsed ? 'rotate(135deg)' : 'rotate(-45deg)';
+  }
+
+  document.getElementById('ticket-code').textContent = ZONE_CODE;
+
+  // ----- Inspection screen -----
+  // Decorative QR look-alike: realistic finder/timing patterns + stable
+  // pseudo-random data modules. Encodes nothing (prop use only).
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildFakeQR() {
+    const n = 25;          // modules per side
+    const q = 2;           // quiet-zone modules
+    const total = n + q * 2;
+    const cell = 8;        // px per module in the SVG
+    const dim = total * cell;
+    const rand = mulberry32(0x5eed1234);
+
+    const filled = [];
+    for (let r = 0; r < n; r++) filled.push(new Array(n).fill(false));
+
+    const inFinder = (r, c) =>
+      (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
+
+    // Finder patterns: 7x7 ring with 3x3 centre.
+    function placeFinder(r0, c0) {
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          const ring = (r === 0 || r === 6 || c === 0 || c === 6);
+          const core = (r >= 2 && r <= 4 && c >= 2 && c <= 4);
+          filled[r0 + r][c0 + c] = ring || core;
+        }
+      }
+    }
+    placeFinder(0, 0);
+    placeFinder(0, n - 7);
+    placeFinder(n - 7, 0);
+
+    // Timing patterns on row/col 6.
+    for (let i = 8; i < n - 8; i++) {
+      if (!inFinder(6, i)) filled[6][i] = (i % 2 === 0);
+      if (!inFinder(i, 6)) filled[i][6] = (i % 2 === 0);
+    }
+
+    // Data modules.
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (inFinder(r, c) || r === 6 || c === 6) continue;
+        filled[r][c] = rand() > 0.5;
+      }
+    }
+
+    let rects = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (filled[r][c]) {
+          const x = (c + q) * cell, y = (r + q) * cell;
+          rects += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}"/>`;
+        }
+      }
+    }
+    return `<svg viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg">` +
+           `<rect width="${dim}" height="${dim}" fill="#fff"/>` +
+           `<g fill="#000">${rects}</g></svg>`;
+  }
+
+  const overlay = document.getElementById('inspection-overlay');
+  const qrHost = document.getElementById('insp-qr');
+  const inspSub = document.getElementById('insp-sub');
+  let qrBuilt = false;
+
+  function openInspection() {
+    if (!qrBuilt) { qrHost.innerHTML = buildFakeQR(); qrBuilt = true; }
+    inspSub.textContent =
+      purchasedAt.getDate() + '. ' + monthNames[purchasedAt.getMonth()] +
+      ' ' + formatTime(purchasedAt) + ' ' + ZONE_CODE;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeInspection() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
   }
 </script>
 </body>
