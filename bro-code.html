@@ -513,6 +513,19 @@
     .hero::after, .activity-strip .pill-act.streak.milestone, .qlog.just-logged .floater { animation: none; }
     .stagger > * { animation-duration: 0.01ms; }
   }
+
+  /* In-app toast */
+  .bro-toast {
+    position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%);
+    background: var(--dark); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 18px; font-size: 14px; color: var(--cream);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 200;
+    max-width: 320px; width: calc(100% - 40px); text-align: center;
+    animation: toastIn 0.2s ease; pointer-events: none;
+  }
+  .bro-toast.success { border-left: 3px solid var(--green); }
+  .bro-toast.error   { border-left: 3px solid var(--red); }
+  @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 </style>
 </head>
 <body>
@@ -1225,6 +1238,37 @@ const GUIDE = {
   }
 };
 
+const FERTILITY_TIMING = {
+  peak: {
+    avoid: {
+      headline: '⚠️ HIGH ALERT, BRO',
+      body: "Real talk: those little guys you, uh... send in there can survive up to 5 days. Her egg shows up right about now. That's not a coincidence — that's just the math. If avoiding is the goal, this window calls for extra coverage. You know what I'm saying."
+    },
+    ttc: {
+      headline: '🎯 THIS IS IT, BRO',
+      body: "Peak fertility. Her body literally just opened the window. The science: those little guys live up to 5 days but her egg is ready TODAY. If there was ever a time to, you know... this is it. No excuses. Go be a biological hero."
+    },
+    off: {
+      headline: '📊 FYI BRO',
+      body: "She's at peak fertility right now. Biology fact: from when you, uh, contribute — the little guys can hang around for up to 5 days. Her egg lands right about now. Just... worth knowing."
+    }
+  },
+  fertile: {
+    avoid: {
+      headline: '🟠 WINDOW IS OPEN',
+      body: "Fertile window active. Biology is real here — anything you, you know... send today can still be around when ovulation hits. If avoiding pregnancy is the plan, now's the time for full discipline."
+    },
+    ttc: {
+      headline: '✅ IN THE WINDOW',
+      body: "She's in the fertile window. Her egg isn't out yet but the little guys you send today will be waiting. Up to 5 days they live in there, bro. That's the play. Keep showing up this week."
+    },
+    off: {
+      headline: '📊 FERTILE WINDOW',
+      body: "Fertile window, just so you know. Anything you, um, contribute this week has a real shot at meeting its match. Not saying anything — just dropping the biology."
+    }
+  }
+};
+
 const PERSONALIZE = {
   menstrual: [
     [p => has(p.neurology,'adhd'),    "Bro, keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
@@ -1301,6 +1345,21 @@ function fertilityFor(day, len=28) {
   if (distance === 0) return { state:'peak', label:'Peak fertility', ovuDay, distance };
   if (distance >= -5 && distance <= 1) return { state:'fertile', label:'Fertile window', ovuDay, distance };
   return { state:'low', label:'Low chance', ovuDay, distance };
+}
+function cycleVariability() {
+  const log = state.profile?.periodLog || [];
+  if (log.length < 3) return null;
+  const sorted = [...log].sort();
+  const gaps = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const diff = Math.round((new Date(sorted[i]) - new Date(sorted[i-1])) / 86400000);
+    if (diff >= 18 && diff <= 45) gaps.push(diff);
+  }
+  if (gaps.length < 2) return null;
+  const avg = Math.round(gaps.reduce((a,b) => a+b, 0) / gaps.length);
+  const min = Math.min(...gaps);
+  const max = Math.max(...gaps);
+  return { avg, min, max, samples: gaps.length };
 }
 function latePeriodState(p, today=new Date()) {
   if (!p?.lastPeriod) return null;
@@ -1678,6 +1737,7 @@ const LOG_KEY = 'brocode_log';
 const NOTIF_KEY = 'brocode_notif';
 const NOTIF_LAST = 'brocode_notif_last';
 const INSTALL_DISMISS = 'brocode_install_dismissed';
+const FERT_DISMISS = 'brocode_fert_dismiss';
 function loadProfile() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
 function saveProfile(p) {
   const stamped = { ...p, updatedAt: new Date().toISOString() };
@@ -1706,6 +1766,20 @@ function addLog(kind, phase) {
   log.push({ date: new Date().toISOString().slice(0,10), kind, phase, at: Date.now() });
   if (log.length > 365) log.splice(0, log.length - 365);
   localStorage.setItem(LOG_KEY, JSON.stringify(log));
+}
+function adaptiveInsights() {
+  const log = loadLog();
+  if (!log.length) return null;
+  const now = Date.now();
+  const recent14 = log.filter(e => (now - new Date(e.date).getTime()) < 14 * DAY);
+  const recent7  = log.filter(e => (now - new Date(e.date).getTime()) < 7 * DAY);
+  if (recent14.length >= 5) return "You've been logging consistently — she's feeling seen, bro. Keep it up.";
+  if (recent7.length === 0 && log.length > 0) return "You haven't logged anything in a week. Small actions compound. Even one thing today counts.";
+  const listened = log.find(e => e.kind === 'listened');
+  if (listened) return "You've been listening. That's the whole thing right there.";
+  const apology = log.find(e => e.kind === 'apology');
+  if (apology) return "You logged an apology. Hard to do. She noticed.";
+  return null;
 }
 function loggedToday() {
   const today = new Date().toISOString().slice(0,10);
@@ -1856,12 +1930,31 @@ let state = {
   })(),
   justLogged: null,
   streakTick: 0,
-  updateReady: false
+  updateReady: false,
+  insightDismissed: (() => { try { const d=localStorage.getItem('brocode_insight_dismissed'); return !!(d && (Date.now()-parseInt(d))<864e5); } catch { return false; } })()
 };
 
 function setState(patch) {
   state = { ...state, ...patch };
   render();
+}
+function showToast(msg, type) {
+  const existing = document.getElementById('bro-toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'bro-toast';
+  el.className = 'bro-toast ' + (type || 'success');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+function dismissFertCard(day, len) {
+  try { localStorage.setItem(FERT_DISMISS, JSON.stringify({day, len})); } catch {}
+  render();
+}
+function dismissInsight() {
+  try { localStorage.setItem('brocode_insight_dismissed', String(Date.now())); } catch {}
+  setState({ insightDismissed: true });
 }
 
 function updateTitle() {
@@ -1964,7 +2057,11 @@ function render() {
       </div>
     </nav>
     <main>${body}</main>
-    <footer class="app">BRO CODE · v2.18 · Reminders on · log day 1 · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.18+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a></footer>
+    <footer class="app">${(() => {
+      const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
+      const logCount = loadLog().length;
+      return `BRO CODE · v2.19 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.19+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+    })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
         <div style="flex:1;line-height:1.35">
@@ -2109,13 +2206,30 @@ function renderDashboard(day, phase, len) {
   const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
 
   let fertPill = '';
+  let fertCard = '';
   if (fert.state !== 'low' && fert.state !== 'unknown') {
     const peak = fert.state === 'peak';
     let bg = 'rgba(245,236,215,0.18)', fg = 'var(--cream)', txt = peak ? 'PEAK FERTILITY' : 'FERTILE WINDOW';
-    if (mode === 'ttc')   { bg = 'rgba(61,170,106,0.22)'; fg = '#7DE0A5'; txt = peak ? 'PEAK • TRY TONIGHT' : 'FERTILE • TRY TONIGHT'; }
-    if (mode === 'avoid') { bg = 'rgba(200,50,44,0.25)';  fg = '#FF9B96'; txt = peak ? 'PEAK • HIGH RISK'  : 'FERTILE • PROTECT'; }
+    if (mode === 'ttc')     { bg = 'rgba(61,170,106,0.22)'; fg = '#7DE0A5'; txt = peak ? 'PEAK • TRY TONIGHT' : 'FERTILE • TRY TONIGHT'; }
+    if (mode === 'avoid')   { bg = 'rgba(200,50,44,0.25)';  fg = '#FF9B96'; txt = peak ? 'PEAK • HIGH RISK'  : 'FERTILE • PROTECT'; }
     fertPill = `<div style="display:inline-flex;align-items:center;gap:6px;background:${bg};color:${fg};font-family:'Anton',Impact,sans-serif;letter-spacing:0.1em;font-size:11px;padding:4px 10px;border-radius:999px;margin-top:8px">${peak?'🔴':'🟡'} ${txt}</div>`;
+    const timing = FERTILITY_TIMING[fert.state]?.[mode];
+    if (timing) {
+      const dismissed = (() => { try { const d=JSON.parse(localStorage.getItem(FERT_DISMISS)||'null'); return d && d.day===day && d.len===len; } catch { return false; } })();
+      if (!dismissed) {
+        const isAvoid = mode === 'avoid';
+        const cardBg = isAvoid ? 'rgba(200,50,44,0.12)' : mode==='ttc' ? 'rgba(61,170,106,0.12)' : 'rgba(245,236,215,0.07)';
+        const cardBdr = isAvoid ? 'var(--red)' : mode==='ttc' ? 'var(--green)' : 'var(--border)';
+        fertCard = `<div style="background:${cardBg};border:1px solid ${cardBdr};border-radius:10px;padding:14px 16px;margin-top:12px;position:relative">
+          <div style="font-family:'Anton',Impact,sans-serif;letter-spacing:0.06em;font-size:13px;color:var(--cream);margin-bottom:6px">${timing.headline}</div>
+          <div style="font-size:13px;color:rgba(245,236,215,0.85);line-height:1.55">${timing.body}</div>
+          <button onclick="dismissFertCard(${day},${len})" style="position:absolute;top:8px;right:10px;background:none;border:0;color:rgba(245,236,215,0.4);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" aria-label="Dismiss">×</button>
+        </div>`;
+      }
+    }
   }
+  const variability = cycleVariability();
+  const insight = !state.insightDismissed ? adaptiveInsights() : null;
 
   let lateBanner = '';
   if (late) {
@@ -2146,9 +2260,18 @@ function renderDashboard(day, phase, len) {
         <div class="day">
           <div class="emoji">${PHASE_EMOJI[phase]}</div>
           <div class="num">DAY ${day} / ${len}</div>
+          ${variability ? `<div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.55;margin-top:4px">AVG ${variability.avg}d (${variability.min}–${variability.max})</div>` : ''}
         </div>
       </div>
     </div>
+
+    ${fertCard}
+
+    ${insight ? `<div class="card" style="border-left:3px solid var(--orange);position:relative">
+      <div class="label" style="color:var(--orange);margin-bottom:6px">// coach insight</div>
+      <p style="margin:0;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">${insight}</p>
+      <button onclick="dismissInsight()" style="position:absolute;top:8px;right:10px;background:none;border:0;color:rgba(245,236,215,0.4);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" aria-label="Dismiss">×</button>
+    </div>` : ''}
 
     ${lateBanner}
 
@@ -2497,7 +2620,10 @@ function renderPhaseArc(day, phase, len) {
         <span class="meta">· ${daysToPeriod === 0 ? 'period today' : `${daysToPeriod}d to period`}</span>
       </div>
       <div class="bar"><span style="width:${pct}%;background:${color}"></span></div>
-      <div class="line"><span class="meta">→ ${h(nextLabel)}</span></div>
+      <div class="line">
+        <span class="meta">→ ${h(nextLabel)}</span>
+        ${(() => { const v = cycleVariability(); return v ? `<span class="meta" style="margin-left:auto">avg ${v.avg}d · ${v.min}–${v.max} range</span>` : ''; })()}
+      </div>
     </div>
   `;
 }
@@ -3083,6 +3209,11 @@ function renderGuide(currentPhase) {
               <div class="label" style="margin-bottom:6px;color:${color}">// pro tip</div>
               <p style="margin:0;color:var(--cream);line-height:1.5">${g.pro}</p>
             </div>
+            ${p === 'ovulation' ? `
+            <div style="margin-top:18px;background:rgba(232,184,75,0.1);border:1px solid rgba(232,184,75,0.3);border-radius:8px;padding:14px 16px">
+              <div class="label" style="margin-bottom:6px;color:var(--alert)">// the timing science</div>
+              <p style="margin:0;font-size:13px;color:rgba(245,236,215,0.85);line-height:1.55">The biology lesson: from the moment you, uh, do your thing — the little swimmers can stay mission-ready for up to 5 days inside. Her egg shows up around day ${state.profile?.cycleLength ? Math.max(1,Math.round((state.profile.cycleLength||28)-14)) : 14}. You do the math. This is why the fertile window opens <em>before</em> peak day — those little guys are waiting in position.</p>
+            </div>` : ''}
           </div>` : ''}
       </div>
       <div style="height:14px"></div>
@@ -3512,8 +3643,8 @@ function importProfile(e) {
       if (!data.lastPeriod) throw new Error('No lastPeriod field.');
       state.profile = saveProfile(data);
       render();
-      alert('Profile imported.');
-    } catch (err) { alert('Import failed: ' + err.message); }
+      showToast('Profile imported.', 'success');
+    } catch (err) { showToast('Import failed: ' + err.message, 'error'); }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -3539,7 +3670,7 @@ function anyNotifOn() {
 async function requestNotifPermission() {
   haptic(8);
   if (typeof Notification === 'undefined') {
-    alert('this browser does not support notifications.\n\ntip: install the app to your home screen (share → add to home screen) and reopen.');
+    showToast('Install the app to your home screen first, then enable reminders.', 'error');
     dismissNotifNudge();
     return;
   }
@@ -3586,7 +3717,7 @@ function renderNotifNudge() {
 async function toggleNotifSlot(slot) {
   if (!['morning','midday','evening'].includes(slot)) return;
   if (typeof Notification === 'undefined') {
-    alert('this browser does not support notifications.\n\ntip: install the app to your home screen (share → add to home screen) and reopen.');
+    showToast('Install the app to your home screen first, then enable reminders.', 'error');
     return;
   }
   const slots = { ...(state.notifSlots || {}) };
@@ -3599,7 +3730,7 @@ async function toggleNotifSlot(slot) {
   let perm = Notification.permission;
   if (perm === 'default') perm = await Notification.requestPermission();
   if (perm !== 'granted') {
-    alert('notifications were not granted. enable them in your browser settings to receive reminders.');
+    showToast('Enable notifications in your browser settings to receive reminders.', 'error');
     return;
   }
   slots[slot] = true;
@@ -3828,7 +3959,7 @@ function triggerInstall() {
     p.userChoice?.then(() => { state.installPrompt = null; render(); });
   } else {
     // iOS / unsupported: show the manual hint
-    alert('Add to home screen for badge + reminders:\n\nTap the Share icon, then "Add to Home Screen".');
+    showToast('Tap the Share icon → "Add to Home Screen" to install.', 'success');
   }
 }
 function dismissInstall() {
