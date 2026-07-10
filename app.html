@@ -553,7 +553,7 @@ const PHASE_MOOD = { menstrual:'Tired', follicular:'Rising', ovulation:'Peak', l
 const TIPS = {
   menstrual: {
     early: [
-      "Bro, go get her favorite snacks right now. Don't ask, just do it.",
+      "Bro, go get snacks for {name} right now. The favorites. Don't ask, just do it.",
       "Brooooo, run her a hot bath tonight. Towels ready. Phone on silent.",
       "Psst bro — take over dinner. Completely. Don't ask what she wants.",
       "Bro listen — top up the heating pad. Make sure ibuprofen is within reach.",
@@ -569,7 +569,7 @@ const TIPS = {
   follicular: {
     early: [
       "Brooooo, energy's climbing. Suggest something fun for the weekend.",
-      "Bro, plan a date. Pick the place, pick the time, just tell her.",
+      "Bro, plan a date with {name}. Pick the place, pick the time, just tell her.",
       "Psst bro — she's open to new things this week. Suggest one. Anything."
     ],
     late: [
@@ -580,7 +580,7 @@ const TIPS = {
   },
   ovulation: {
     early: [
-      "Bro, tell her she looks incredible today. Mean it. Be specific.",
+      "Bro, tell {name} she looks incredible today. Mean it. Be specific.",
       "Psst bro — initiate. She wants to be desired right now.",
       "Bro listen — big conversations land easy this week. Have the one you've been avoiding."
     ],
@@ -593,7 +593,7 @@ const TIPS = {
   luteal: {
     early: [
       "Psst bro — cozy mode starts. Less plans, more presence.",
-      "Bro, order in tonight. Pick the comfort food. Surprise her.",
+      "Bro, order in tonight. Pick the comfort food {name} always wants. Surprise her.",
       "Brooooo, notice the small stuff. Compliment something specific."
     ],
     late: [
@@ -609,12 +609,29 @@ const ALERTS = {
   P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:"Bro, stock up. Ibuprofen, snacks, heating pad. Don't make her ask.", icon:'🚨' },
   P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Brooooo, get the supplies in the house today. Future-you will thank you.', icon:'🚨' },
   P1:  { id:'p-1',  tone:'red',   title:'PERIOD TOMORROW',      body:'Psst bro — patience mode tonight. No big talks. Just be present.', icon:'🚨' },
-  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'Bro. She needs you. Go check on her right now.', icon:'🩸' },
+  P0:  { id:'p-0',  tone:'red',   title:'TODAY IS DAY 1',       body:'Bro. She needs you. Go check on {name} right now.', icon:'🩸' },
   OVU2:{ id:'ovu-2',tone:'alert', title:'OVULATION IN 2 DAYS',  body:"Heads up — peak window starts Thursday. Plan one thing worth doing.", icon:'⭐' },
   OVU: { id:'ovu',  tone:'alert', title:'OVULATION WINDOW OPEN',body:"Bro listen — peak window. Match her energy. Plan the thing.", icon:'⭐' },
   LUT2:{ id:'lut-2',tone:'alert', title:'LUTEAL IN 2 DAYS',     body:'Heads up — sensitivity rises in 2 days. Volume down, patience up. Plan softer this week.', icon:'🌙' },
   LUT: { id:'lut',  tone:'alert', title:'LUTEAL STARTS',        body:'Real talk bro — cozy mode begins. Less plans, more presence.', icon:'🌙' }
 };
+
+// Profile-aware heads-ups. Each `when` pins to ONE dayInPhase so it fires once
+// per cycle, on days the numeric ALERTS above don't already claim.
+const PROFILE_ALERTS = [
+  { id:'pa-lut-anx',  tone:'alert', icon:'🫀', title:'ANXIETY WEATHER ADVISORY',
+    when:(p,phase,dip) => phase==='luteal' && dip===2 && has(p.neurology,'anxiety'),
+    body:"Bro, luteal + her anxiety = spikes out of nowhere this week. Reassure early, reassure often. 'We're good' costs you nothing." },
+  { id:'pa-lut-dep',  tone:'red',   icon:'🌧️', title:'WATCH THE DIP',
+    when:(p,phase,dip) => phase==='luteal' && dip===5 && has(p.neurology,'depression'),
+    body:"Real talk bro — late luteal is the most vulnerable window for {name} when it comes to mood drops. Don't fix, don't lecture. Be present, check in daily." },
+  { id:'pa-men-sens', tone:'alert', icon:'🔇', title:'SENSORY OVERLOAD RISK HIGH',
+    when:(p,phase,dip) => phase==='menstrual' && dip===2 && has(p.neurology,'sensory'),
+    body:"Psst bro — period week + her sensory sensitivity: everything is louder, brighter, scratchier. Be the low-stim zone." },
+  { id:'pa-lut-aut',  tone:'alert', icon:'📅', title:'PROTECT THE ROUTINE',
+    when:(p,phase,dip) => phase==='luteal' && dip===3 && has(p.neurology,'autism'),
+    body:"Bro listen — luteal makes routine changes hit twice as hard for her. No surprise plans this week. Predictable = safe = loved." }
+];
 
 const RULES = [
   'Bro, never say "are you on your period?" as an explanation for anything. Ever.',
@@ -1030,6 +1047,28 @@ const SIT_MODIFIERS = {
   'messup.react.passive':{ label: 'INVITE DIRECTNESS',         body: "Don't play the passive game back. ‘I can tell something's off and I'd rather hear it straight than dance around it.’" }
 };
 
+// Trait-aware situation tips. Keyed "<sit>.<trait>", wildcard "*.<trait>" for any
+// situation; specific beats wildcard. Same {label, body} shape as SIT_MODIFIERS.
+// Never key on 'acts' — it collides between comfort and love arrays.
+const SIT_TRAIT_TIPS = {
+  'crying.anxiety':    { label: 'ANXIETY ON BOARD',      body: "Bro, her anxiety reads you leaving the room as abandonment. Don't 'give her space' unless she asks for it. Stay visible, stay calm." },
+  'crying.space':      { label: 'SHE RECHARGES ALONE',   body: "Psst bro — her profile says space is her comfort. Give her the room but not the silence: 'I'm in the kitchen if you want me.' Then actually stay reachable." },
+  'crying.held':       { label: 'ARMS FIRST',            body: "Bro, she calms down through contact. Ask once — 'can I hold you?' — then hold her. Words come second." },
+  'crying.depression': { label: "DON'T PEP-TALK",        body: "Real talk bro — if the low runs deeper than today, 'cheer up' lands like an insult. 'I'm here, take your time' is the whole script." },
+  'angry.adhd':        { label: 'RSD CHECK',             body: "Real talk bro — ADHD brains feel criticism 10x (rejection sensitivity). Don't critique HOW she's reacting. Address the issue, protect her dignity." },
+  'angry.anxiety':     { label: 'ANGER OVER FEAR',       body: "Psst bro — with her anxiety, anger is often fear wearing armor. Find what she's scared of underneath and answer THAT." },
+  'angry.introvert':   { label: 'NO AUDIENCE',           body: "Bro, never hash it out in front of people. Take it private or table it — she can't process with witnesses." },
+  'quiet.introvert':   { label: 'QUIET ≠ WRONG',         body: "Bro listen — for her, quiet is charging, not sulking. Check once, then let the silence be comfortable." },
+  'quiet.extrovert':   { label: 'QUIET IS A FLAG',       body: "Heads up bro — she's an extrovert. Days of quiet is NOT her baseline. Something's up. Ask directly, kindly." },
+  'quiet.depression':  { label: 'WATCH THE PATTERN',     body: "Real talk bro — with her history, multiple quiet days deserve a gentle direct check-in, not just waiting it out." },
+  'messup.anxiety':    { label: 'CLOSE THE LOOP FAST',   body: "Bro, her anxiety will replay this on loop until it's resolved. Don't let it sit overnight if you can help it. Repair early." },
+  'messup.autism':     { label: 'CONCRETE REPAIR',       body: "Bro listen — vague 'I'll do better' means nothing to her. Name exactly what you did and exactly what changes. Specifics are the apology." },
+  '*.autism':          { label: 'SAY IT STRAIGHT',       body: "Bro listen — no hints, no subtext, no 'you know what you did.' Say exactly what you mean, ask exactly what you want to know. Literal is love." },
+  '*.sensory':         { label: 'DROP THE STIMULATION',  body: "Bro, dim the lights, kill the TV, lower your own volume. A calmer room does half the work for you." },
+  '*.verbal':          { label: 'SAY IT OUT LOUD',       body: "Psst bro — her comfort is verbal reassurance. Thinking supportive thoughts doesn't count. Say the words: 'we're okay, I'm here.'" },
+  '*.b-type':          { label: 'NO CLOCK ON THIS',      body: "Bro, don't rush her to resolution. She processes at her own pace — pushing for closure tonight makes it worse, not better." }
+};
+
 const FIXED_EVENTS = [
   { id: 'valentine', label: "VALENTINE'S DAY", monthDay: '02-14', emoji: '❤️' }
 ];
@@ -1079,6 +1118,13 @@ const OCCASION_PLAYS = {
     ovulation:  ["Re-do the date this week."],
     luteal:     ["Small + quiet. A photo and a sentence is enough."]
   }
+};
+
+const REL_ANNIV = {
+  wife:       "Bro, you MARRIED her. Say the vows part out loud again — one line, from memory, unprompted.",
+  girlfriend: "Psst bro — anniversaries are auditions for the long game. Show her you keep score of the good stuff.",
+  partner:    "Real talk bro — 'partner' means teammate. Toast to the team tonight, name one play she carried.",
+  other:      "Bro, whatever you two call it — mark it like it matters. Because it does."
 };
 
 const FAQ = [
@@ -1273,36 +1319,69 @@ const PERSONALIZE = {
   menstrual: [
     [p => has(p.neurology,'adhd'),    "Bro, keep requests minimal. Don't ask her to make decisions. Reduce visual clutter."],
     [p => has(p.neurology,'anxiety'), "Brooooo, extra physical closeness helps. Don't leave her alone if she seems distressed."],
+    [p => has(p.neurology,'sensory'), "Bro, her senses are dialed to 11 this week. Dim lights, low volume, soft fabrics. Be the quiet room."],
+    [p => has(p.neurology,'autism'),  "Psst bro — pain plus disrupted routine is a double hit. Keep the schedule predictable, announce any changes early."],
     [p => p.social==='introvert',     "Psst bro — don't fill the silence. Presence without pressure."],
     [p => p.social==='extrovert',     "Bro, she still wants company — just low-energy company."],
     [p => has(p.love,'acts'),         "Bro listen — do the dishes, the laundry, dinner. No asking. Just do."],
     [p => has(p.love,'words'),        "Real talk bro, tell her she's strong. Her body is doing something incredible."],
     [p => has(p.love,'touch'),        "Bro, hold her. Back rubs. Warm presence. That's the whole move."],
-    [p => p.type==='a-type',          "Psst bro — she hates feeling unproductive. Normalize rest as productive."]
+    [p => has(p.comfort,'held'),      "Psst bro — she wants to be held, not talked at. Arms first, words later."],
+    [p => p.type==='a-type',          "Psst bro — she hates feeling unproductive. Normalize rest as productive."],
+    [p => p.type==='b-type',          "Real talk bro — she's not behind on anything. Don't project a schedule onto her rest."]
   ],
   follicular: [
     [p => p.social==='extrovert',     "Brooooo, she wants social. Be her hype man and plan something."],
+    [p => p.social==='ambivert',      "Bro, she's got social battery this week — one night out, one night in. Plan both."],
     [p => p.type==='a-type',          "Bro, she's in optimal mode. Support ambitious plans, don't dim the lights."],
     [p => has(p.neurology,'adhd'),    "Psst bro — she may hyperfocus on a new project. Support it, don't redirect."],
-    [p => has(p.love,'time'),         "Bro listen — she wants adventures together. Plan it. Tonight."]
+    [p => has(p.neurology,'autism'),  "Brooooo, new plans are welcome this week — but announce them early. Novelty yes, ambush no."],
+    [p => has(p.love,'time'),         "Bro listen — she wants adventures together. Plan it. Tonight."],
+    [p => has(p.love,'gifts'),        "Bro, energy's up — surprise her with tickets to a thing, not an object. Experience beats stuff this week."]
   ],
   ovulation: [
     [p => p.type==='a-type',          "Bro, this is her peak performance window. Don't slow her down."],
     [p => has(p.love,'touch'),        "Brooooo, she's most interested in intimacy now. Match that energy."],
     [p => has(p.love,'words'),        "Bro, tell her she's incredible. She wants to hear it from you. Specifically."],
-    [p => has(p.neurology,'adhd'),    "Psst bro — great window for important conversations. She's most focused this week."]
+    [p => has(p.comfort,'verbal'),    "Psst bro — say the compliment OUT LOUD. Thinking it doesn't count this week."],
+    [p => has(p.neurology,'adhd'),    "Psst bro — great window for important conversations. She's most focused this week."],
+    [p => has(p.neurology,'sensory'), "Bro, she can handle more stimulation this week — but she'll still clock the scratchy shirt. Details matter."],
+    [p => p.social==='ambivert',      "Bro listen — her social side is loudest at peak. Say yes to the plans she floats."]
   ],
   luteal: [
     [p => has(p.neurology,'anxiety'),    "Bro listen — late luteal amplifies anxiety. Be extra steady."],
     [p => has(p.neurology,'depression'), "Real talk bro, most vulnerable window. Watch for mood drops. Be present, don't lecture."],
+    [p => has(p.neurology,'sensory'),    "Psst bro — sensory tolerance drops hard in luteal. The tag, the noise, the bright kitchen light — fix it before she has to say it."],
+    [p => has(p.neurology,'autism'),     "Bro, luteal makes routine changes hit twice as hard. No surprise plans. Predictable = safe = loved."],
     [p => p.social==='introvert',        "Bro, give her the quiet she needs without making her feel guilty about it."],
     [p => p.type==='a-type',             "Brooooo, her productivity dips naturally. Normalize this. Don't comment on it."],
+    [p => p.type==='b-type',             "Psst bro — her pace slows even more now. That's not a problem to solve. Match it."],
     [p => has(p.love,'acts'),            "Psst bro — this is when acts of service matter most. Do everything. No announcement."],
+    [p => has(p.love,'gifts'),           "Psst bro — comfort-object week. Her exact snack, the fuzzy socks, the candle. Small and specific."],
+    [p => has(p.comfort,'space'),        "Bro, 'I'm around if you need me' — then actually be around. Space with a lifeline."],
     [p => has(p.neurology,'adhd'),       "Bro, routine matters more now. Don't disrupt it. Hold the line."]
   ]
 };
 
 function has(arr, val) { return Array.isArray(arr) && arr.includes(val); }
+
+// Trait priority — order IS the cap order when trait tips get sliced.
+const TRAIT_ORDER_NEURO   = ['autism','sensory','anxiety','adhd','depression'];
+const TRAIT_ORDER_COMFORT = ['space','held','verbal','cuddles'];
+function profileTraits(p) {
+  if (!p) return [];
+  const out = [];
+  TRAIT_ORDER_NEURO.forEach(t => { if (has(p.neurology, t)) out.push(t); });
+  TRAIT_ORDER_COMFORT.forEach(t => { if (has(p.comfort, t)) out.push(t); });
+  if (p.social) out.push(p.social);
+  if (p.type)   out.push(p.type);
+  return out;
+}
+function fillName(str) {
+  if (!str) return str;
+  const n = (state.profile?.name || '').trim();
+  return str.replace(/\{name\}/g, n || 'her');
+}
 
 // ---------- CYCLE MATH ----------
 const DAY = 86400000;
@@ -1476,11 +1555,15 @@ function pickGifts(profile) {
     out.push('A note. Three sentences. What you actually appreciate.');
     out.push('Take a chore off her plate. Don\'t mention it.');
   }
+  const diet = (profile?.dietary || '').trim();
+  if (diet && (has(cravings,'sweet') || has(cravings,'salty') || has(cravings,'carbs') || has(cravings,'spicy'))) {
+    out.unshift(`Heads up — she's ${diet}. Check the label before you buy the snack, bro.`);
+  }
   return out.slice(0, 4);
 }
 
 // ---------- ADAPTIVE SITUATION COMPOSER ----------
-function composePlay(sit, phase, ctx) {
+function composePlay(sit, phase, ctx, profile) {
   const baseMove = SITUATION_FIRST[sit]?.[phase] || '';
   const dontSay  = SITUATION_NEVER[sit] || '';
   let phrases = [];
@@ -1494,8 +1577,13 @@ function composePlay(sit, phase, ctx) {
   const modifiers = Object.keys(ctx)
     .map(qid => SIT_MODIFIERS[`${sit}.${qid}.${ctx[qid]}`])
     .filter(Boolean);
+  const traitTips = profileTraits(profile)
+    .map(t => SIT_TRAIT_TIPS[`${sit}.${t}`] || SIT_TRAIT_TIPS[`*.${t}`])
+    .filter(Boolean)
+    .filter((m, i, a) => a.findIndex(x => x.label === m.label) === i)
+    .slice(0, 2);
   const trail = [phase + ' phase', ...Object.keys(ctx).map(qid => ctx[qid])].join(' · ');
-  return { baseMove, modifiers, phrases: phrases.slice(0, 3), dontSay, trail };
+  return { baseMove, modifiers, traitTips, phrases: phrases.slice(0, 3), dontSay, trail };
 }
 
 // ---------- IMPORTANT DATES ----------
@@ -1639,6 +1727,11 @@ function buildAlert(profile, day) {
   if (day === 14) return ALERTS.OVU;
   if (day === 16) return ALERTS.LUT2;
   if (day === 18) return ALERTS.LUT;
+  const len = profile.cycleLength || 28;
+  const ph = phaseFor(day, len), dip = dayInPhase(day, len);
+  for (const a of PROFILE_ALERTS) {
+    try { if (a.when(profile, ph, dip)) return a; } catch {}
+  }
   return null;
 }
 
@@ -2060,7 +2153,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v2.19 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.19+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v2.20 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.20+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -2282,7 +2375,7 @@ function renderDashboard(day, phase, len) {
         <div class="icon">${alert.icon}</div>
         <div class="text">
           <div class="title">${alert.title}</div>
-          <div class="body">${alert.body}</div>
+          <div class="body">${h(fillName(alert.body))}</div>
         </div>
         <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
       </div>` : ''}
@@ -2312,7 +2405,7 @@ function renderDashboard(day, phase, len) {
       </div>
 
       ${state.situation ? renderSituationPanel(state.situation, phase) : `
-        <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(tip||'')}</p>
+        <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(fillName(tip||''))}</p>
       `}
 
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:6px">
@@ -2421,7 +2514,8 @@ function renderThinkingStep() {
 }
 
 function renderPlayingStep(sit, phase, ctx) {
-  const play = composePlay(sit, phase, ctx);
+  const play = composePlay(sit, phase, ctx, state.profile);
+  const intel = (state.profile?.notes || '').trim();
   return `
     <div class="trail">// reading: ${h(play.trail.toLowerCase())}</div>
 
@@ -2433,6 +2527,13 @@ function renderPlayingStep(sit, phase, ctx) {
     ${play.modifiers.map(m => `
       <div class="play-block" style="margin-top:14px">
         <div class="label" style="margin-bottom:4px;color:var(--orange)">// ${h(m.label.toLowerCase())}</div>
+        <p style="margin:0;color:rgba(245,236,215,0.92);line-height:1.45;font-size:14px">${h(m.body)}</p>
+      </div>
+    `).join('')}
+
+    ${(play.traitTips || []).map(m => `
+      <div class="play-block" style="margin-top:14px">
+        <div class="label" style="margin-bottom:4px;color:var(--green)">// her wiring — ${h(m.label.toLowerCase())}</div>
         <p style="margin:0;color:rgba(245,236,215,0.92);line-height:1.45;font-size:14px">${h(m.body)}</p>
       </div>
     `).join('')}
@@ -2450,6 +2551,13 @@ function renderPlayingStep(sit, phase, ctx) {
       <div class="play-block" style="margin-top:14px">
         <div class="label" style="color:var(--red);margin-bottom:6px">// don't say</div>
         <div><span class="red-strike" style="font-size:14px">${h(play.dontSay)}</span></div>
+      </div>
+    ` : ''}
+
+    ${intel ? `
+      <div class="play-block" style="margin-top:14px;opacity:0.75">
+        <div class="label" style="margin-bottom:4px">// your intel</div>
+        <p style="margin:0;color:rgba(245,236,215,0.8);line-height:1.45;font-size:13px;font-style:italic">${h(intel.slice(0, 140))}</p>
       </div>
     ` : ''}
 
@@ -2488,7 +2596,7 @@ function renderOneMove(day, phase, len) {
   const dInPhase = dayInPhase(day, len);
   const seed = (state.skipCount || 0) + (state.justLogged === 'skipped' ? 1 : 0);
   // Use smart-tip selection plus a seed-shift when skipping so re-rolls feel fresh
-  const tip = pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.';
+  const tip = fillName(pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.');
   const moveText = done
     ? "Bro, that's the move. See you tomorrow."
     : tip;
@@ -2791,7 +2899,8 @@ function renderPlaysCard(phase) {
   } else if (tab === 'occasion' && occ) {
     const lib = OCCASION_PLAYS[occ.id] || {};
     const phaseLines = lib[phase] || [];
-    items = [...phaseLines, ...(lib.universal || [])];
+    const relLine = occ.id === 'anniversary' ? REL_ANNIV[state.profile?.relationship || 'girlfriend'] : null;
+    items = [...(relLine ? [relLine] : []), ...phaseLines, ...(lib.universal || [])];
     const dLabel = occ.daysUntil === 0 ? 'TODAY' : `${occ.daysUntil}D`;
     title = `${occ.emoji} ${occ.label} — ${dLabel}`;
   }
@@ -3196,8 +3305,13 @@ function renderGuide(currentPhase) {
             <div style="margin-top:14px"><div class="label" style="margin-bottom:8px">// what's happening in her body</div><p style="margin:0;color:rgba(245,236,215,0.85);line-height:1.5">${g.bio}</p></div>
             <div style="margin-top:18px">
               <div class="label" style="margin-bottom:8px;color:${color}">// for her</div>
-              ${personal.length ? `<ul class="bullets">${personal.map(x=>`<li><span style="color:${color}">▸</span><span>${h(x)}</span></li>`).join('')}</ul>` :
+              ${personal.length ? `<ul class="bullets">${personal.map(x=>`<li><span style="color:${color}">▸</span><span>${h(fillName(x))}</span></li>`).join('')}</ul>` :
                 `<p style="margin:0;color:rgba(245,236,215,0.7);font-style:italic">Fill in more of her profile to unlock personalized cues.</p>`}
+              ${(state.profile?.notes||'').trim() ? `
+                <div style="margin-top:10px;border:1px dashed var(--border);border-radius:8px;padding:10px 12px">
+                  <div class="label" style="margin-bottom:4px">// your intel</div>
+                  <p style="margin:0;color:rgba(245,236,215,0.75);font-size:13px;line-height:1.45;font-style:italic;white-space:pre-wrap">${h(state.profile.notes.trim())}</p>
+                </div>` : ''}
             </div>
             <div style="margin-top:18px"><div class="label" style="margin-bottom:8px;color:var(--green)">// the code says</div>
               <ul class="bullets">${g.say.map(x=>`<li><span style="color:var(--green)">✓</span><span>"${h(x)}"</span></li>`).join('')}</ul>
@@ -3783,7 +3897,7 @@ function notifBodyForSlot(slot) {
 
   if (slot === 'morning') {
     // Always fires when enabled. Phase-aware brief, gentle.
-    const tip = lowerSoftly(pickTip(p, phase, dayInPhase(day, len)) || 'show up today, no agenda.');
+    const tip = lowerSoftly(fillName(pickTip(p, phase, dayInPhase(day, len)) || 'show up today, no agenda.'));
     return { title: 'BRO CODE · ' + phaseLower + ' d' + day, body: tip };
   }
 
