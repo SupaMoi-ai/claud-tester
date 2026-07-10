@@ -605,6 +605,53 @@ const TIPS = {
   }
 };
 
+// Her Weather Forecast — bro-voice meteorology per phase, early/late split like TIPS.
+const WEATHER = {
+  menstrual: {
+    early: { icon:'⛈️', headline:'STORM SYSTEM ACTIVE', sky:'Heavy cramp front. Low energy pressure. Visibility on her patience: near zero.',
+      odds:[['snappiness',70],['tears out of nowhere',55],['cancelled plans',80]],
+      gear:['heating pad','ibuprofen within reach','snacks','zero demands'] },
+    late:  { icon:'🌦️', headline:'CLEARING UP', sky:'Storm passing. Sun breaking through by evening. Energy front approaching from the west.',
+      odds:[['wanting a walk',60],['appetite returning',75]],
+      gear:['light plans','her favorite meal'] }
+  },
+  follicular: {
+    early: { icon:'🌤️', headline:'MOSTLY SUNNY, WARMING UP', sky:'High-pressure energy system building. Mood climbing steadily all week.',
+      odds:[['spontaneous plans',65],['new project energy',70],['saying yes to things',75]],
+      gear:['an open calendar','date ideas ready','your walking shoes'] },
+    late:  { icon:'☀️', headline:'CLEAR SKIES, HIGH ENERGY', sky:'Full sunshine. Peak momentum conditions. Whatever you plan, she is IN.',
+      odds:[['wanting adventure',80],['beating you at the thing',60]],
+      gear:['a booked plan','matching energy'] }
+  },
+  ovulation: {
+    early: { icon:'🔥', headline:'HEATWAVE WARNING', sky:'Peak confidence system parked overhead. Magnetic field: strong. She knows it.',
+      odds:[['her being right',90],['wanting to go OUT out',75],['big talks landing well',85]],
+      gear:['your A-game','a dinner reservation','compliments (specific ones)'] },
+    late:  { icon:'🌡️', headline:'STILL HOT, PRESSURE SHIFTING', sky:'Heatwave holding but a cozy front is forming offshore. Enjoy the sun while it lasts.',
+      odds:[['peak charm',80],['last-call adventure energy',70]],
+      gear:['one more date night','camera out — capture this week'] }
+  },
+  luteal: {
+    early: { icon:'🌥️', headline:'CLOUD COVER MOVING IN', sky:'Cozy front settling. Sensitivity rising steadily through the week.',
+      odds:[['needing the blanket',80],['noticing everything you do',95]],
+      gear:['patience','snacks stocked','volume down'] },
+    late:  { icon:'⚠️', headline:'SEVERE SENSITIVITY ADVISORY', sky:'Full luteal system. Her bullshit detector is at maximum sensitivity. Do NOT test it.',
+      odds:[['the wrong tone landing wrong',85],['big talks going sideways',90]],
+      gear:['steady presence','no surprises','pre-period supplies'] }
+  }
+};
+
+// Trait overlays — first key that matches "<phase>.<trait>" wins (one per day).
+const WEATHER_TRAITS = {
+  'luteal.anxiety':     "💨 Anxiety gusts likely — reassure early, reassure often.",
+  'luteal.depression':  "🌫️ Low-mood fog possible late week. Stay close, stay warm.",
+  'menstrual.sensory':  "🔊 Sensory storm warning — noise and light hit harder today.",
+  'luteal.sensory':     "🔊 Sensory tolerance dropping — fix the scratchy tag before she has to say it.",
+  'menstrual.anxiety':  "💨 Anxiety pressure elevated — don't leave without saying where you're going.",
+  'follicular.adhd':    "🌪️ Hyperfocus vortex possible — she found a new project. Feed it, don't fight it.",
+  'ovulation.adhd':     "☀️ Clearest air of the month — best week for the big conversation."
+};
+
 const ALERTS = {
   P3:  { id:'p-3',  tone:'alert', title:'PERIOD IN 3 DAYS',     body:"Bro, stock up. Ibuprofen, snacks, heating pad. Don't make her ask.", icon:'🚨' },
   P2:  { id:'p-2',  tone:'alert', title:'PERIOD IN 2 DAYS',     body:'Brooooo, get the supplies in the house today. Future-you will thank you.', icon:'🚨' },
@@ -1460,6 +1507,31 @@ function infoFor(p, date) {
   return { day, phase: phaseFor(day, len) };
 }
 
+function forecastFor(profile, date = new Date()) {
+  const info = infoFor(profile, date);
+  if (!info.phase) return null;
+  const len = profile.cycleLength || 28;
+  const dip = dayInPhase(info.day, len);
+  const bucket = WEATHER[info.phase];
+  if (!bucket) return null;
+  const w = dip <= 3 ? bucket.early : bucket.late;
+  // ±10 deterministic daily wobble so percentages feel alive without randomness.
+  const wobble = ((date.getDate() * 7 + info.day * 3) % 21) - 10;
+  const odds = w.odds.map(([label, pct]) => [label, Math.max(5, Math.min(95, pct + wobble))]);
+  let traitLine = null;
+  for (const t of profileTraits(profile)) {
+    const hit = WEATHER_TRAITS[`${info.phase}.${t}`];
+    if (hit) { traitLine = hit; break; }
+  }
+  let fertLine = null;
+  const fert = fertilityFor(info.day, len);
+  const mode = profile.fertilityMode || 'off';
+  if (fert.state === 'peak' || fert.state === 'fertile') {
+    if (mode === 'ttc')   fertLine = "🔥 Heatwave bonus: conditions ideal for, you know... gardening.";
+    if (mode === 'avoid') fertLine = "⚡ Lightning-strike risk elevated. Full protective equipment advised.";
+  }
+  return { icon: w.icon, headline: w.headline, sky: w.sky, odds, gear: w.gear, traitLine, fertLine, phase: info.phase, day: info.day };
+}
 
 function pickTip(profile, phase, dInPhase) {
   const personal = (PERSONALIZE[phase]||[])
@@ -2024,7 +2096,8 @@ let state = {
   justLogged: null,
   streakTick: 0,
   updateReady: false,
-  insightDismissed: (() => { try { const d=localStorage.getItem('brocode_insight_dismissed'); return !!(d && (Date.now()-parseInt(d))<864e5); } catch { return false; } })()
+  insightDismissed: (() => { try { const d=localStorage.getItem('brocode_insight_dismissed'); return !!(d && (Date.now()-parseInt(d))<864e5); } catch { return false; } })(),
+  weatherOpen: localStorage.getItem('brocode_weather_open') !== '0'
 };
 
 function setState(patch) {
@@ -2119,6 +2192,13 @@ function setProfileOpen(key, isOpen) {
   // NO render() — <details> already toggled visually; this just persists.
 }
 
+function toggleWeather() {
+  haptic(6);
+  const open = !state.weatherOpen;
+  try { localStorage.setItem('brocode_weather_open', open ? '1' : '0'); } catch {}
+  setState({ weatherOpen: open });
+}
+
 function render() {
   const snap = captureFocus();
   const root = $('#app');
@@ -2153,7 +2233,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v2.20 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.20+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v2.21 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.21+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -2365,6 +2445,8 @@ function renderDashboard(day, phase, len) {
       <p style="margin:0;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">${insight}</p>
       <button onclick="dismissInsight()" style="position:absolute;top:8px;right:10px;background:none;border:0;color:rgba(245,236,215,0.4);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" aria-label="Dismiss">×</button>
     </div>` : ''}
+
+    ${renderWeatherCard()}
 
     ${lateBanner}
 
@@ -2707,6 +2789,96 @@ function renderPulseCard() {
     `;
   }
   return '';
+}
+
+function renderWeatherCard() {
+  const p = state.profile;
+  if (!p?.lastPeriod) return '';
+  const late = latePeriodState(p);
+  const open = state.weatherOpen;
+  const header = `
+    <button onclick="toggleWeather()" style="width:100%;background:none;border:0;color:inherit;padding:0;display:flex;justify-content:space-between;align-items:center;cursor:pointer">
+      <div class="label">// her weather</div>
+      <div class="label" style="color:rgba(245,236,215,0.5)">${open ? '▾' : '▸'}</div>
+    </button>`;
+
+  if (late) {
+    return `
+    <div class="card">
+      ${header}
+      ${open ? `
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+        <span style="font-size:34px;line-height:1">🌀</span>
+        <div>
+          <div class="display" style="font-size:16px;letter-spacing:0.06em;color:var(--cream)">PATTERN DISRUPTION</div>
+          <p style="margin:4px 0 0;font-size:13px;color:rgba(245,236,215,0.75);line-height:1.45">Forecast models recalibrating. Period late by ${late.lateBy} day${late.lateBy===1?'':'s'}. Fly by instruments, bro — read her, not the calendar.</p>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }
+
+  const f = forecastFor(p);
+  if (!f) return '';
+  const color = PHASE_COLOR[f.phase] || 'var(--cream)';
+  const len = p.cycleLength || 28;
+
+  // 7-day outlook + first phase front within the window
+  const today = midnight(new Date());
+  let front = null;
+  const cells = [0,1,2,3,4,5,6].map(i => {
+    const d = new Date(today); d.setDate(d.getDate() + i);
+    const fc = forecastFor(p, d);
+    const info = infoFor(p, d);
+    if (!front && i > 0) {
+      const prev = new Date(today); prev.setDate(prev.getDate() + i - 1);
+      const prevInfo = infoFor(p, prev);
+      if (prevInfo.phase && info.phase && prevInfo.phase !== info.phase) {
+        front = { phase: info.phase, weekday: d.toLocaleDateString('en-US', { weekday: 'long' }), days: i };
+      }
+    }
+    const wd = d.toLocaleDateString('en-US', { weekday: 'narrow' });
+    return `
+      <div style="flex:1;text-align:center;background:${i===0?'rgba(245,236,215,0.08)':'transparent'};border:1px solid ${i===0?'var(--border)':'transparent'};border-radius:6px;padding:5px 2px;max-height:52px">
+        <div class="label" style="font-size:9px;margin-bottom:2px">${i===0?'NOW':wd}</div>
+        <div style="font-size:15px;line-height:1">${fc ? fc.icon : '·'}</div>
+      </div>`;
+  }).join('');
+
+  return `
+  <div class="card">
+    ${header}
+    ${open ? `
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+      <span style="font-size:34px;line-height:1">${f.icon}</span>
+      <div>
+        <div class="display" style="font-size:16px;letter-spacing:0.06em;color:${color}">${f.headline}</div>
+        <p style="margin:4px 0 0;font-size:13px;color:rgba(245,236,215,0.75);line-height:1.45">${f.sky}</p>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="label" style="margin-bottom:8px">// chance of</div>
+      ${f.odds.map(([label, pct]) => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="flex:1;font-size:13px;color:rgba(245,236,215,0.85)">${h(label)}</div>
+          <div style="width:90px;height:6px;background:rgba(245,236,215,0.12);border-radius:999px;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:${color}"></span></div>
+          <div class="mono" style="font-size:11px;width:34px;text-align:right;color:rgba(245,236,215,0.6)">${pct}%</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:12px">
+      <div class="label" style="margin-bottom:8px">// recommended gear</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${f.gear.map(g => `<span style="font-size:12px;background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:rgba(245,236,215,0.85)">${h(g)}</span>`).join('')}
+      </div>
+    </div>
+    ${f.traitLine ? `<p style="margin:12px 0 0;font-size:13px;color:rgba(245,236,215,0.7);line-height:1.45">${h(f.traitLine)}</p>` : ''}
+    ${f.fertLine ? `<p style="margin:8px 0 0;font-size:13px;color:rgba(245,236,215,0.7);line-height:1.45">${h(f.fertLine)}</p>` : ''}
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div class="label" style="margin-bottom:8px">// 7-day outlook</div>
+      <div style="display:flex;gap:4px">${cells}</div>
+      ${front ? `<div style="margin-top:8px;font-size:12px;color:${PHASE_COLOR[front.phase]}">⚠️ ${PHASE_LABEL[front.phase].toLowerCase()} front moving in ${front.days === 1 ? 'tomorrow' : front.weekday}</div>` : ''}
+    </div>` : ''}
+  </div>`;
 }
 
 function renderPhaseArc(day, phase, len) {
