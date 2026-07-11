@@ -1,3 +1,21 @@
 __pycache__/
 *.pyc
 debug/
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.local
+
+# env
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+npm-debug.log*
+coverage/

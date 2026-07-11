@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Hjemmet",
+    "slug": "hjemmet",
+    "scheme": "hjemmet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F4F1EA"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "no.hjemmet.app"
+    },
+    "android": {
+      "package": "no.hjemmet.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F4F1EA"
+      }
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
+    "notification": {
+      "iosDisplayInForeground": true
+    }
+  }
+}
