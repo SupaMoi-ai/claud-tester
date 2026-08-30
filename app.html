@@ -799,6 +799,90 @@ const CLEARSKY = [
   "Clear-sky protocol, part 2: ask her one thing you should STOP doing during her PMS week. Take the hit now, while skies are clear. Write it down in She Told You."
 ];
 
+// ---------- BRO UNIVERSITY (pop quiz bank — one question a day, points on the line) ----------
+const TRIVIA = [
+  { q:"The luteal phase is always how long, no matter the cycle length?",
+    opts:["Half the cycle","~14 days","Depends on stress"], a:1,
+    why:"Always ~14 days. Ovulation = period day minus 14. That's the whole math, bro." },
+  { q:"A 2025 meta-analysis of 25 trials says a heating pad performs about as well as...?",
+    opts:["Ibuprofen","A nap","Nothing — it's placebo"], a:0,
+    why:"Heat rivals painkillers for cramps. The heating pad is medical equipment. Hand it over accordingly." },
+  { q:"Per 2025 clinical research, what measurably LOWERS her symptom severity?",
+    opts:["More sleep only","Nothing can","Your support"], a:2,
+    why:"Partner support directly lowers symptom severity — and being dismissed makes it worse. You're literally treatment, bro." },
+  { q:"The most lab-verified cramp reliever you can OFFER her is...?",
+    opts:["A gentle walk","Ice cream","Giving her space"], a:0,
+    why:"Exercise has the strongest evidence of anything. Offer the walk — don't prescribe it." },
+  { q:"Those little swimmers can wait around for the egg up to...?",
+    opts:["12 hours","2 days","5 days"], a:2,
+    why:"Up to 5 days. That's why the fertile window opens BEFORE ovulation day. They camp early." },
+  { q:"When do support plans actually stick, per research?",
+    opts:["Made mid-argument","Made when she feels good","Made on day 28"], a:1,
+    why:"Plans built in the sunny week hold in the storm. That's the Clear-Sky Protocol, bro." },
+  { q:"PMDD — the severe form of PMS — affects roughly...?",
+    opts:["3–8% of women","50% of women","It's not a real condition"], a:0,
+    why:"3–8%, and it's on the WHO disease list. Not 'vibes.' Medicine." },
+  { q:"What does grand-gesture romance lose to, per daily-diary studies?",
+    opts:["Expensive gifts","Small acts done daily","Nothing beats grand gestures"], a:1,
+    why:"Small daily acts build intimacy better than grand gestures. One rep a day, bro. That's the science." },
+  { q:"Her sense of smell peaks during which phase?",
+    opts:["Menstrual","Luteal","Ovulation"], a:2,
+    why:"Sharpest at ovulation. Your cologne is landing DIFFERENT this week. Ease up or lean in." },
+  { q:"Why do chocolate cravings in luteal actually make sense?",
+    opts:["Pure habit","Magnesium drops","Marketing"], a:1,
+    why:"Magnesium dips in luteal and dark chocolate is loaded with it. The craving has a chemistry degree." },
+  { q:"The cycle is synced to the moon. True?",
+    opts:["Obviously","Only full moons","No — that's vibes"], a:2,
+    why:"No sync. That one's folklore, bro. Sorry to ruin the aesthetic." },
+  { q:"Cortisol (stress) does what to progesterone?",
+    opts:["Blocks it","Boosts it","Nothing"], a:0,
+    why:"Blocks it. Overwhelmed + luteal = chemical pile-up. Your job: subtract stress, not add it." },
+  { q:"Endometriosis affects about how many women?",
+    opts:["1 in 100","1 in 10","1 in 1000"], a:1,
+    why:"~10%, wildly underdiagnosed. If she says period pain is BAD, believe her the first time." },
+  { q:"Total blood lost in an average period is about...?",
+    opts:["2 tablespoons","2 cups","1 liter"], a:0,
+    why:"30–40ml — about 2 tablespoons. It feels like way more. Respect either way." },
+  { q:"Sleep gets worse in luteal because...?",
+    opts:["She's on her phone","Progesterone changes","It doesn't"], a:1,
+    why:"Progesterone shifts wreck sleep architecture. She's not lazy — she's chemically tired." },
+  { q:"During ovulation, women also get a spike of...?",
+    opts:["Testosterone","Melatonin","Adrenaline only"], a:0,
+    why:"Yes — testosterone. That's the bolder, sharper, more magnetic energy this week. Match it." },
+  { q:"What share of women say their guy's health-knowledge gap hurts the relationship?",
+    opts:["Almost none","About 6 in 10","All of them"], a:1,
+    why:"~60%. You're in an app closing yours right now. Points for that, honestly." },
+  { q:"Roughly how many women feel some premenstrual symptoms?",
+    opts:["90%","Half","25%"], a:0,
+    why:"~90%. The ones who don't aren't lying — people vary. Track HER pattern, not the internet's." },
+  { q:"The research-approved way to know what she needs right now?",
+    opts:["Guess confidently","Ask her","Wait it out"], a:1,
+    why:"Ask. Support only counts when it lands as support — that's the actual science of responsiveness." },
+  { q:"Late-luteal words should be read as...?",
+    opts:["Final verdicts","Weather","Tests you must pass"], a:1,
+    why:"Weather, not verdicts. Read the phase, not the transcript. Revisit big topics after the front passes." },
+  { q:"Cycle-syncing exercise means...?",
+    opts:["High intensity in follicular, restorative in luteal","Never exercising","Same workout daily"], a:0,
+    why:"Real research: push hard when estrogen's up (follicular), go restorative in luteal." },
+  { q:"On hormonal birth control, the four phases...?",
+    opts:["Work exactly the same","May be muted or gone","Get more intense"], a:1,
+    why:"Hormonal methods can suppress the cycle partly or fully. Read HER, not just the calendar." },
+  { q:"Best week of the cycle for the big conversation (money, future, the hard thing)?",
+    opts:["Ovulation week","Day 1","Late luteal"], a:0,
+    why:"Ovulation — peak clarity and confidence. Late luteal is the WORST week for it. Time it, bro." },
+  { q:"After having a baby, her cycle typically returns...?",
+    opts:["Immediately","In 6–18 months","Never changes"], a:1,
+    why:"6–18 months, sometimes chaotic on the way back. Zero expectations, maximum patience." }
+];
+
+const CHEERS = [
+  "REP DONE. +15 🔥 Real-life points hit different, bro.",
+  "BROOOO. +15. She noticed. Trust.",
+  "+15 banked. Good-boyfriend compound interest.",
+  "That's the move. +15. Keep stacking, legend.",
+  "+15. Small act, big science. Certified."
+];
+
 const DECODER = [
   { phrase: "I'm fine",             meaning: "Bro, she's not fine. She wants you to notice without being asked.",                 move: "Sit next to her. Don't ask why. Hand on her back. 'I'm here, no rush.'" },
   { phrase: "Whatever",             meaning: "Brooooo, she has a preference and you missed it.",                                   move: "Pick something specific. Wrong pick > no pick. Decisiveness beats correctness." },
@@ -1999,6 +2083,43 @@ function currentStreak() {
   return streak;
 }
 
+// ---------- BRO POINTS (the game) ----------
+const POINTS_KEY = 'brocode_points';
+const QUIZ_KEY = 'brocode_quiz';
+const RANKS = [
+  { min: 0,    title: 'ROOKIE',           emoji: '🌱' },
+  { min: 50,   title: 'SOLID BRO',        emoji: '🤝' },
+  { min: 150,  title: 'BRO SCHOLAR',      emoji: '📚' },
+  { min: 300,  title: 'CERTIFIED BRO',    emoji: '🎓' },
+  { min: 600,  title: 'BRO LEGEND',       emoji: '🏆' },
+  { min: 1000, title: 'HALL OF FAME BRO', emoji: '👑' }
+];
+function broPoints() {
+  const n = parseInt(localStorage.getItem(POINTS_KEY) || '0', 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function addPoints(n) {
+  const next = Math.max(0, broPoints() + n);
+  try { localStorage.setItem(POINTS_KEY, String(next)); } catch {}
+  state.broPoints = next;
+  return next;
+}
+function rankFor(pts) {
+  let cur = RANKS[0], next = null;
+  for (let i = 0; i < RANKS.length; i++) {
+    if (pts >= RANKS[i].min) { cur = RANKS[i]; next = RANKS[i+1] || null; }
+  }
+  const pct = next ? Math.round(((pts - cur.min) / (next.min - cur.min)) * 100) : 100;
+  return { ...cur, next, pct };
+}
+function loadQuiz() { try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; } catch { return {}; } }
+function todayQuizAnswer() { return loadQuiz()[new Date().toISOString().slice(0,10)] || null; }
+function saveQuizAnswer(picked, correct) {
+  const q = loadQuiz();
+  q[new Date().toISOString().slice(0,10)] = { picked, correct };
+  try { localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); } catch {}
+}
+
 // ---------- LISTENED (Did-She-Tell-You) ----------
 const LISTENED_KEY = 'brocode_listened';
 function loadListened() { try { return JSON.parse(localStorage.getItem(LISTENED_KEY)) || []; } catch { return []; } }
@@ -2111,6 +2232,7 @@ let state = {
   showShareQR: false,
   copiedAt: 0,
   todayMoveDone: localStorage.getItem('brocode_move_done') || null,
+  broPoints: broPoints(),
   activityNow: Date.now(),
   hapticsEnabled: localStorage.getItem('brocode_haptics') !== '0',
   periodConfirm: 0,
@@ -2269,7 +2391,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.0 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.0+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.1 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.1+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -2442,7 +2564,6 @@ function renderDashboard(day, phase, len) {
   if (late) { day = len; phase = 'luteal'; }
   const fert = fertilityFor(day, len);
   const mode = state.profile.fertilityMode || 'off';
-  const didToday = loggedToday();
 
   const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
 
@@ -2500,6 +2621,8 @@ function renderDashboard(day, phase, len) {
 
     ${renderOneMove(day, phase, len)}
 
+    ${renderQuizCard()}
+
     ${renderWeatherCard()}
 
     ${renderPeriodLogButton(day, len, late)}
@@ -2513,16 +2636,6 @@ function renderDashboard(day, phase, len) {
       </div>
 
       ${state.situation ? renderSituationPanel(state.situation, phase) : ''}
-
-      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
-        <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+1</span></button>
-          <button class="btn btn-ghost qlog${state.justLogged==='talk'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK<span class="floater">+1</span></button>
-          <button class="btn btn-ghost qlog${state.justLogged==='conflict'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT<span class="floater">+1</span></button>
-          <button class="btn btn-ghost qlog${state.justLogged==='apology'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY<span class="floater">+1</span></button>
-        </div>
-      </div>
     </div>
 
     ${renderUpcomingCard()}
@@ -2673,8 +2786,11 @@ function renderOneMove(day, phase, len) {
   return `
     <div class="move-card${done ? ' done' : ''}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div class="label move-label">// daily rep :: one small act</div>
-        ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
+        <div class="label move-label">// daily rep :: +15 pts irl</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
+          <div class="label" style="color:var(--alert)">${rankFor(broPoints()).emoji} ${broPoints()} PTS</div>
+        </div>
       </div>
       <h2>${h(moveText)}</h2>
       ${lab ? `<p style="margin:0 0 14px;font-size:12px;color:rgba(245,236,215,0.6);line-height:1.5">${h(lab.line)} <span class="mono" style="font-size:10px;color:rgba(245,236,215,0.45);white-space:nowrap">— lab-verified · ${h(lab.tag)}</span></p>` : ''}
@@ -2690,6 +2806,67 @@ function renderOneMove(day, phase, len) {
       `}
     </div>
   `;
+}
+
+function dailyQuizIndex() {
+  const daysSinceEpoch = Math.floor(midnight(new Date()).getTime() / DAY);
+  return daysSinceEpoch % TRIVIA.length;
+}
+
+function answerQuiz(i) {
+  if (todayQuizAnswer()) return; // already played today — no double-dipping
+  const t = TRIVIA[dailyQuizIndex()];
+  const correct = i === t.a;
+  saveQuizAnswer(i, correct);
+  addPoints(correct ? 10 : 3);
+  haptic(correct ? 18 : 8);
+  showToast(correct ? 'BROOOO! 🔥 +10 — certified knowledge.' : '+3 — wrong, but you learned. That still counts, bro.', correct ? 'success' : '');
+  setState({});
+}
+
+function renderQuizCard() {
+  const t = TRIVIA[dailyQuizIndex()];
+  const pts = broPoints();
+  const rank = rankFor(pts);
+  const ans = todayQuizAnswer();
+  const header = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+      <div class="label">// pop quiz :: bro university</div>
+      <div class="label" style="color:var(--alert)">${rank.emoji} ${pts} PTS</div>
+    </div>`;
+
+  if (!ans) {
+    return `
+    <div class="card">
+      ${header}
+      <p style="margin:0 0 12px;font-size:16px;color:var(--cream);line-height:1.4;font-weight:300">${h(t.q)}</p>
+      <div style="display:grid;gap:8px">
+        ${t.opts.map((o, i) => `<button class="btn btn-ghost" style="justify-content:flex-start;text-align:left;padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0.02em" onclick="answerQuiz(${i})">${String.fromCharCode(65+i)}. ${h(o)}</button>`).join('')}
+      </div>
+      <div class="label" style="margin-top:10px;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(245,236,215,0.45)">+10 if you know it. +3 if you learn it. either way you win, bro.</div>
+    </div>`;
+  }
+
+  return `
+  <div class="card" style="border-left:3px solid ${ans.correct ? 'var(--green)' : 'var(--alert)'}">
+    ${header}
+    <p style="margin:0 0 10px;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.4">${h(t.q)}</p>
+    <div style="display:grid;gap:6px;margin-bottom:12px">
+      ${t.opts.map((o, i) => {
+        const isCorrect = i === t.a, wasPicked = i === ans.picked;
+        const color = isCorrect ? 'var(--green)' : (wasPicked ? 'var(--red)' : 'rgba(245,236,215,0.4)');
+        const mark = isCorrect ? '✓' : (wasPicked ? '✕' : '·');
+        return `<div style="font-size:13px;color:${color};${wasPicked && !isCorrect ? 'text-decoration:line-through;' : ''}">${mark} ${h(o)}</div>`;
+      }).join('')}
+    </div>
+    <p style="margin:0 0 12px;font-size:13px;color:rgba(245,236,215,0.8);line-height:1.5">${h(t.why)}</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+      <div class="label" style="color:${ans.correct ? 'var(--green)' : 'var(--alert)'}">${ans.correct ? '+10 BANKED' : '+3 FOR SHOWING UP'}</div>
+      <div class="label" style="color:rgba(245,236,215,0.55)">${rank.next ? `${pts}/${rank.next.min} → ${rank.next.emoji} ${rank.next.title}` : `${rank.emoji} MAX RANK`}</div>
+    </div>
+    <div style="height:5px;background:rgba(245,236,215,0.12);border-radius:999px;overflow:hidden"><span style="display:block;height:100%;width:${rank.pct}%;background:var(--alert)"></span></div>
+    <div class="label" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(245,236,215,0.45)">new question tomorrow, bro. rep still pays +15 today.</div>
+  </div>`;
 }
 
 function renderDayStrip() {
@@ -3107,11 +3284,23 @@ function jumpToOccasionPlays() {
 
 function renderToolbox(phase) {
   if (!state.profile?.lastPeriod) return renderQuickStart();
+  const didToday = loggedToday();
   return `
   <div class="stagger">
     ${renderPlaysCard(phase)}
 
     ${renderListenedCard()}
+
+    <div class="card">
+      <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+1</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='talk'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK<span class="floater">+1</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='conflict'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT<span class="floater">+1</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='apology'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY<span class="floater">+1</span></button>
+      </div>
+      <div class="label" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(245,236,215,0.45)">feeds the receipt + your streak. log what actually happened, bro.</div>
+    </div>
 
     ${renderReceiptCard()}
 
@@ -3695,6 +3884,8 @@ function markMoveDone() {
   const phase = phaseFor(day, state.profile?.cycleLength || 28);
   addLog('move', phase || 'menstrual');
   localStorage.setItem('brocode_move_done', today);
+  addPoints(15);
+  showToast(CHEERS[new Date().getDate() % CHEERS.length], 'success');
   haptic(18);
   state.todayMoveDone = today;
   state.streakTick = 1;
@@ -3707,6 +3898,7 @@ function undoMove() {
   const log = loadLog().filter(l => !(l.date === today && l.kind === 'move'));
   localStorage.setItem(LOG_KEY, JSON.stringify(log));
   localStorage.removeItem('brocode_move_done');
+  addPoints(-15);
   haptic(8);
   setState({ todayMoveDone: null });
 }
