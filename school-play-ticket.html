@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ticket" />
+<meta name="theme-color" content="#ffffff" />
+<title>Single ticket</title>
+<!-- Self-contained: no external CSS/JS/fonts/network calls. Works fully offline once saved.
+     On iPhone: Share → Add to Home Screen, then launch from the icon for full-screen (no URL bar). -->
+
+<style>
+  :root {
+    --header-bg: #1f2d3d;
+    --bg: #f2f2f2;
+    --card: #ffffff;
+    --green: #74a93f;
+    --blue-link: #1f6fd1;
+    --inspection: #2178e8;
+    --text: #1d1d1d;
+    --muted: #6b6b6b;
+    --border: #e3e3e3;
+    --pill-bg: #f4f4f4;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* Native-feel polish: kill webby behaviors on touch */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  /* Top overscroll bleeds into the header color; bottom bleeds into the page bg. */
+  html { background: var(--header-bg); }
+  body { background: var(--bg); }
+
+  .phone {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* iOS-style status bar */
+  .status-bar {
+    background: var(--header-bg);
+    color: #fff;
+    min-height: 50px;
+    padding-top: env(safe-area-inset-top, 0px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 22px;
+    padding-right: 22px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  /* When launched from Home Screen (standalone), let the real iOS status bar
+     show through, and hide the in-page fake clock/wifi/battery widgets. */
+  @media (display-mode: standalone), (display-mode: fullscreen) {
+    .status-bar #status-time,
+    .status-bar .status-right { visibility: hidden; }
+  }
+  .status-left { display: flex; align-items: center; gap: 6px; }
+  .status-left .arrow {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-top: 2px solid #fff;
+    border-right: 2px solid #fff;
+    transform: rotate(45deg);
+    margin-left: 2px;
+  }
+  .vipps-back { font-size: 14px; opacity: .85; margin-left: 4px; font-weight: 500; }
+  .status-right { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .status-right svg { display: block; }
+  .battery-pct { font-size: 14px; font-weight: 500; }
+
+  /* Page header */
+  .page-header {
+    background: var(--header-bg);
+    color: #fff;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    position: relative;
+  }
+  .back-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .back-btn::before {
+    content: "";
+    width: 12px; height: 12px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(45deg);
+    margin-left: 4px;
+  }
+  .page-title {
+    position: absolute;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    padding: 14px 12px 90px;
+  }
+
+  .ticket-card {
+    background: var(--card);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    margin-bottom: 12px;
+  }
+
+  .valid-banner {
+    background: var(--green);
+    color: #fff;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .valid-banner.expired {
+    background: #c64a3a;
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    color: #5a5a5a;
+    font-size: 14px;
+  }
+  .time-row .clock { color: #6e6e6e; }
+  .time-row .code { color: #6e6e6e; letter-spacing: 1px; }
+
+  .expires-section {
+    padding: 18px 0 8px;
+    text-align: center;
+  }
+  .expires-label {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .counter {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .counter .box {
+    background: var(--pill-bg);
+    border-radius: 4px;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 600;
+    color: #1d1d1d;
+    font-variant-numeric: tabular-nums;
+  }
+  .counter-units {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  .counter-units div {
+    width: 64px;
+    text-align: center;
+  }
+
+  .dashed {
+    border: 0;
+    border-top: 1px dashed #cfcfcf;
+    margin: 0 18px;
+  }
+
+  .info-row {
+    display: flex;
+    padding: 16px 18px 6px;
+    gap: 24px;
+  }
+  .info-row .col { flex: 1; }
+  .info-row .label {
+    color: var(--muted);
+    font-size: 12.5px;
+    letter-spacing: .8px;
+    margin-bottom: 6px;
+  }
+  .info-row .value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .ticket-link {
+    display: block;
+    padding: 10px 18px 18px;
+    color: var(--blue-link);
+    text-decoration: underline;
+    font-size: 16px;
+    line-height: 1.35;
+    cursor: pointer;
+  }
+
+  /* Details card */
+  .details-card {
+    background: var(--card);
+    border-radius: 4px;
+    border: 1px solid #e8e8e8;
+    padding: 14px 18px 0;
+    text-align: center;
+  }
+  .hide-details {
+    color: var(--blue-link);
+    font-size: 17px;
+    padding: 4px 0 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .hide-details .chev {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-top: 2px solid var(--blue-link);
+    border-right: 2px solid var(--blue-link);
+    transform: rotate(-45deg);
+    transition: transform .2s;
+  }
+  .details-body { display: block; }
+  .details-body.collapsed { display: none; }
+  .detail-line {
+    color: #555;
+    font-size: 17px;
+    padding: 8px 0;
+  }
+
+  .inspection-btn {
+    width: calc(100% + 36px);
+    margin: 14px -18px 0;
+    background: var(--inspection);
+    color: #fff;
+    border: 0;
+    padding: 16px 0;
+    font-size: 22px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .qr-icon {
+    width: 22px; height: 22px;
+    display: inline-grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    gap: 2px;
+  }
+  .qr-icon i {
+    background: #fff;
+    border-radius: 1px;
+  }
+  .qr-icon i:nth-child(2),
+  .qr-icon i:nth-child(4),
+  .qr-icon i:nth-child(8) { background: transparent; }
+
+  .receipt-peek {
+    margin-top: -2px;
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-top: 0;
+    border-radius: 0 0 22px 22px;
+    width: 60%;
+    margin: 0 auto;
+    padding: 10px 0 4px;
+    background: #fff;
+    position: relative;
+    top: -2px;
+  }
+
+  /* Tap feedback so interactive elements feel responsive */
+  .tab:active, .back-btn:active, .inspection-btn:active,
+  .hide-details:active, .ticket-link:active { opacity: 0.6; }
+
+  /* Bottom tab bar */
+  .tabbar {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-top: 1px solid #e3e3e3;
+    display: flex;
+    min-height: 72px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #6b6b6b;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--inspection); }
+  .tab .icon-wrap {
+    width: 40px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tab.active .icon-wrap {
+    background: #e6f0fc;
+    border-radius: 14px;
+    padding: 4px 12px;
+  }
+  .tab .arrow-icon {
+    width: 14px; height: 14px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+  .tab .more-dots {
+    display: flex; gap: 4px;
+  }
+  .tab .more-dots i {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .tab .bike-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Inspection validation overlay */
+  .inspection-overlay {
+    position: fixed;
+    inset: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    display: none;
+    flex-direction: column;
+    background: rgba(20,20,20,0.25);
+    z-index: 50;
+  }
+  .inspection-overlay.open { display: flex; }
+  .inspection-sheet {
+    background: #fff;
+    border-radius: 14px;
+    margin: calc(64px + env(safe-area-inset-top, 0px)) 14px calc(84px + env(safe-area-inset-bottom, 0px));
+    padding: 22px 18px 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .insp-title { font-size: 22px; font-weight: 600; color: #1a1a1a; }
+  .insp-sub { font-size: 17px; color: #555; margin-top: 4px; }
+  .insp-qr { margin: 22px 0 18px; }
+  .insp-qr svg { width: 170px; height: 170px; display: block; }
+  .insp-image {
+    position: relative;
+    width: 78%;
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 30% 78%, #5a7d3c 0 7%, transparent 7.5%),
+      radial-gradient(ellipse at 70% 70%, #6b8a44 0 11%, transparent 11.5%),
+      radial-gradient(circle at 52% 88%, #4f7038 0 9%, transparent 9.5%),
+      linear-gradient(#cfe6ef 0%, #9cc6dd 32%, #2f7fb5 55%, #1c5f93 100%);
+  }
+  .insp-tint {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    animation: liveTint 5s linear infinite;
+  }
+  @keyframes liveTint {
+    0%   { background-color: rgba(70, 200, 90, 0.85); }
+    25%  { background-color: rgba(60, 120, 230, 0.80); }
+    50%  { background-color: rgba(210, 70, 200, 0.78); }
+    75%  { background-color: rgba(235, 165, 40, 0.80); }
+    100% { background-color: rgba(70, 200, 90, 0.85); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .insp-tint { animation-duration: 14s; }
+  }
+  .insp-close {
+    margin-top: auto;
+    width: 100%;
+    background: #e9e9ea;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1d1d1d;
+  }
+  .insp-close:active { opacity: 0.6; }
+</style>
+</head>
+<body>
+  <div class="phone">
+
+    <div class="status-bar">
+      <div class="status-left">
+        <span id="status-time">09:53</span>
+        <span class="arrow"></span>
+        <span class="vipps-back">◀ Vipps</span>
+      </div>
+      <div class="status-right">
+        <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
+          <rect x="0"  y="8" width="3" height="3" rx="0.6" fill="#fff"/>
+          <rect x="4"  y="6" width="3" height="5" rx="0.6" fill="#fff"/>
+          <rect x="8"  y="3" width="3" height="8" rx="0.6" fill="#fff"/>
+          <rect x="12" y="0" width="3" height="11" rx="0.6" fill="#fff"/>
+        </svg>
+        <svg width="15" height="11" viewBox="0 0 15 11" aria-hidden="true" fill="none" stroke="#fff" stroke-linecap="round">
+          <path d="M1 4.2 A 9 9 0 0 1 14 4.2" stroke-width="1.4"/>
+          <path d="M3.2 6.4 A 6 6 0 0 1 11.8 6.4" stroke-width="1.4"/>
+          <path d="M5.4 8.6 A 3 3 0 0 1 9.6 8.6" stroke-width="1.4"/>
+          <circle cx="7.5" cy="10" r="0.9" fill="#fff" stroke="none"/>
+        </svg>
+        <span class="battery-pct">44</span>
+        <svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="22" height="11" rx="2.5" ry="2.5" fill="none" stroke="#fff" stroke-width="1"/>
+          <rect x="24" y="3.5" width="1.8" height="5" rx="0.9" fill="#fff"/>
+          <rect x="2" y="2" width="8.8" height="8" rx="1.2" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="page-header">
+      <div class="back-btn"></div>
+      <div class="page-title">Single ticket</div>
+    </div>
+
+    <div class="content">
+
+      <div class="ticket-card">
+        <div class="valid-banner" id="valid-banner">Valid</div>
+
+        <div class="time-row">
+          <span class="clock" id="ticket-time">09:53</span>
+          <span class="code" id="ticket-code">3B</span>
+        </div>
+
+        <div class="expires-section">
+          <div class="expires-label">EXPIRES IN:</div>
+          <div class="counter">
+            <div class="box" id="min-box">59</div>
+            <div class="box" id="sec-box">54</div>
+          </div>
+          <div class="counter-units">
+            <div>min</div>
+            <div>sec</div>
+          </div>
+        </div>
+
+        <hr class="dashed" />
+
+        <div class="info-row">
+          <div class="col">
+            <div class="label">TRAVELLERS</div>
+            <div class="value">1 Adult</div>
+          </div>
+          <div class="col">
+            <div class="label">VALID IN</div>
+            <div class="value">Nord-Jæren</div>
+          </div>
+        </div>
+
+        <a class="ticket-link">See which means of transport this ticket covers.</a>
+      </div>
+
+      <div class="details-card">
+        <div class="hide-details" onclick="toggleDetails(this)">
+          <span id="hd-text">Hide details</span><span class="chev"></span>
+        </div>
+        <div class="details-body" id="details-body">
+          <div class="detail-line">Single ticket</div>
+          <div class="detail-line" id="expires-text">Expires Wednesday 29. April 2026 10:53</div>
+          <div class="detail-line" id="purchased-text">Purchased 29. April 09:52</div>
+          <div class="detail-line">Price kr 49.00 of which VAT kr 5.25</div>
+          <div class="detail-line">Paid with Vipps</div>
+          <div class="detail-line">Ticket ID: 10 62 74 47 30</div>
+          <button class="inspection-btn" onclick="openInspection()">
+            <span class="qr-icon"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            Inspection
+          </button>
+        </div>
+      </div>
+
+      <div class="receipt-peek">Receipt</div>
+    </div>
+
+    <div class="tabbar">
+      <div class="tab active">
+        <div class="icon-wrap"><span class="arrow-icon"></span></div>
+        <div>Tickets</div>
+      </div>
+      <div class="tab">
+        <div class="icon-wrap"><span class="bike-icon">🚲</span></div>
+        <div>City Bike</div>
+      </div>
+      <div class="tab">
+        <div class="icon-wrap"><span class="more-dots"><i></i><i></i><i></i></span></div>
+        <div>More</div>
+      </div>
+    </div>
+
+    <div class="inspection-overlay" id="inspection-overlay" aria-hidden="true">
+      <div class="inspection-sheet">
+        <div class="insp-title">1 Adult, Nord-Jæren</div>
+        <div class="insp-sub" id="insp-sub">26. May 09:19 3B</div>
+        <div class="insp-qr" id="insp-qr"></div>
+        <div class="insp-image"><div class="insp-tint"></div></div>
+        <button class="insp-close" onclick="closeInspection()">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ----- Config: school play ticket -----
+  // Ticket is valid for this many minutes from page load.
+  const VALID_FOR_MINUTES = 56;
+
+  const ZONE_CODE = '3B';
+
+  const purchasedAt = new Date();
+  const expiresAt = new Date(purchasedAt.getTime() + VALID_FOR_MINUTES * 60 * 1000);
+
+  const pad = n => String(n).padStart(2, '0');
+
+  const formatTime = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function formatExpires(d) {
+    return 'Expires ' + dayNames[d.getDay()] + ' ' + d.getDate() + '. ' + monthNames[d.getMonth()] + ' ' + d.getFullYear() + ' ' + formatTime(d);
+  }
+  function formatPurchased(d) {
+    return 'Purchased ' + d.getDate() + '. ' + monthNames[d.getMonth()] + ' ' + formatTime(d);
+  }
+
+  document.getElementById('expires-text').textContent = formatExpires(expiresAt);
+  document.getElementById('purchased-text').textContent = formatPurchased(purchasedAt);
+
+  const minBox = document.getElementById('min-box');
+  const secBox = document.getElementById('sec-box');
+  const banner = document.getElementById('valid-banner');
+  const statusTime = document.getElementById('status-time');
+  const ticketTime = document.getElementById('ticket-time');
+
+  function tick() {
+    const now = new Date();
+    statusTime.textContent = formatTime(now);
+    ticketTime.textContent = formatTime(purchasedAt);
+
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) {
+      minBox.textContent = '00';
+      secBox.textContent = '00';
+      banner.textContent = 'Expired';
+      banner.classList.add('expired');
+      return;
+    }
+    const totalSec = Math.floor(diffMs / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    minBox.textContent = pad(mins);
+    secBox.textContent = pad(secs);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  function toggleDetails(el) {
+    const body = document.getElementById('details-body');
+    const txt = document.getElementById('hd-text');
+    const chev = el.querySelector('.chev');
+    const collapsed = body.classList.toggle('collapsed');
+    txt.textContent = collapsed ? 'Show details' : 'Hide details';
+    chev.style.transform = collapsed ? 'rotate(135deg)' : 'rotate(-45deg)';
+  }
+
+  document.getElementById('ticket-code').textContent = ZONE_CODE;
+
+  // ----- Inspection screen -----
+  // Decorative QR look-alike: realistic finder/timing patterns + stable
+  // pseudo-random data modules. Encodes nothing (prop use only).
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildFakeQR() {
+    const n = 25;          // modules per side
+    const q = 2;           // quiet-zone modules
+    const total = n + q * 2;
+    const cell = 8;        // px per module in the SVG
+    const dim = total * cell;
+    const rand = mulberry32(0x5eed1234);
+
+    const filled = [];
+    for (let r = 0; r < n; r++) filled.push(new Array(n).fill(false));
+
+    const inFinder = (r, c) =>
+      (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
+
+    // Finder patterns: 7x7 ring with 3x3 centre.
+    function placeFinder(r0, c0) {
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          const ring = (r === 0 || r === 6 || c === 0 || c === 6);
+          const core = (r >= 2 && r <= 4 && c >= 2 && c <= 4);
+          filled[r0 + r][c0 + c] = ring || core;
+        }
+      }
+    }
+    placeFinder(0, 0);
+    placeFinder(0, n - 7);
+    placeFinder(n - 7, 0);
+
+    // Timing patterns on row/col 6.
+    for (let i = 8; i < n - 8; i++) {
+      if (!inFinder(6, i)) filled[6][i] = (i % 2 === 0);
+      if (!inFinder(i, 6)) filled[i][6] = (i % 2 === 0);
+    }
+
+    // Data modules.
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (inFinder(r, c) || r === 6 || c === 6) continue;
+        filled[r][c] = rand() > 0.5;
+      }
+    }
+
+    let rects = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (filled[r][c]) {
+          const x = (c + q) * cell, y = (r + q) * cell;
+          rects += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}"/>`;
+        }
+      }
+    }
+    return `<svg viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg">` +
+           `<rect width="${dim}" height="${dim}" fill="#fff"/>` +
+           `<g fill="#000">${rects}</g></svg>`;
+  }
+
+  const overlay = document.getElementById('inspection-overlay');
+  const qrHost = document.getElementById('insp-qr');
+  const inspSub = document.getElementById('insp-sub');
+  let qrBuilt = false;
+
+  function openInspection() {
+    if (!qrBuilt) { qrHost.innerHTML = buildFakeQR(); qrBuilt = true; }
+    inspSub.textContent =
+      purchasedAt.getDate() + '. ' + monthNames[purchasedAt.getMonth()] +
+      ' ' + formatTime(purchasedAt) + ' ' + ZONE_CODE;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeInspection() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+</script>
+</body>
+</html>
