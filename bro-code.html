@@ -767,7 +767,36 @@ const BRO_FACTS = [
   "Bro fact: the cycle isn't synced to the moon. That's vibes, not biology. Sorry to ruin that one.",
   "Real talk bro — perimenopause can start in her late 30s. Cycle gets unpredictable years before it stops.",
   "Bro, on the day of ovulation, her face is measurably more symmetric. Yes, peer-reviewed. Yes, wild.",
-  "Brooooo, women average 3 more REM sleep cycles per night than men. She's not 'extra tired' — you're just less tired."
+  "Brooooo, women average 3 more REM sleep cycles per night than men. She's not 'extra tired' — you're just less tired.",
+  "Bro fact: 2025 research shows partner support measurably LOWERS her symptom severity. You're not a bystander — you're treatment. [lab-verified]",
+  "Real talk bro — meta-analysis of 25 trials: heat rivals painkillers for cramps. The heating pad is medical equipment. [lab-verified]",
+  "Psst bro — daily-diary studies say small acts done today beat grand gestures for building intimacy. One rep a day. [lab-verified]",
+  "Bro fact: 6 in 10 women say their guy's health-knowledge gap hurts the relationship. You're literally in an app closing yours. [survey data]"
+];
+
+// Evidence bank — real 2025 findings in bro voice. phase omitted = fits any day.
+const LAB = [
+  { line:"Grand gestures are overrated. Daily-diary studies show small acts done TODAY are what build intimacy. One rep a day, bro.", tag:"couples research" },
+  { line:"Don't guess what she needs — ask. Support only counts when it lands as support. That's the actual science of responsiveness.", tag:"couples research" },
+  { line:"6 in 10 women say their guy's knowledge gap hurts the relationship. You, reading this? Closing it.", tag:"survey data" },
+  { line:"Tracking her cycle with her isn't creepy, it's teamwork — shared cycle literacy is linked to better symptom management.", tag:"health-literacy research" },
+  { line:"The heating pad is not a cute gesture — meta-analysis of 25 trials says heat rivals painkillers for cramps. Hand it over like the medical equipment it is.", tag:"meta-analysis, 2025", phase:'menstrual' },
+  { line:"A walk is the most lab-verified cramp reliever there is. Offer one, don't prescribe one.", tag:"systematic review", phase:'menstrual' },
+  { line:"Make the game plan in the sunny week. Research says support plans built when she feels good actually hold in the storm.", tag:"2025 clinical survey", phase:'follicular' },
+  { line:"Your backup is literally medicine, bro. Studies show partner support measurably lowers her symptom severity — and being dismissed makes it worse.", tag:"2025 clinical survey", phase:'luteal' },
+  { line:"Luteal words are weather, not verdicts. Research says read the phase, not the transcript.", tag:"2025 clinical survey", phase:'luteal' }
+];
+
+function labLineFor(phase) {
+  const pool = LAB.filter(e => !e.phase || e.phase === phase);
+  if (!pool.length) return null;
+  return pool[(new Date().getDate() + phase.length) % pool.length];
+}
+
+// Clear-Sky Protocol — build the support plan while she feels good (research-backed habit).
+const CLEARSKY = [
+  "Clear-sky protocol, bro: she's at full strength this week. Ask her — \"what actually helps most on your rough days?\" Then save her answer in She Told You (Toolbox). Plans made in the sun hold in the storm.",
+  "Clear-sky protocol, part 2: ask her one thing you should STOP doing during her PMS week. Take the hit now, while skies are clear. Write it down in She Told You."
 ];
 
 const DECODER = [
@@ -1306,28 +1335,32 @@ const GUIDE = {
     bio:"Bro, estrogen and progesterone are at rock bottom. The uterine lining is literally shedding. Energy down, pain up, sleep broken. Her body is doing real measurable work. Treat it that way.",
     say:["I'm taking care of dinner. Don't lift a finger.","What sounds good? Snack run, food, anything.","You don't owe anyone productivity this week."],
     never:["Aren't you done with that yet?","You were fine yesterday.","It can't be that bad."],
-    pro:"Real talk bro — the first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week."
+    pro:"Real talk bro — the first 48 hours are the hardest. Cancel optional plans, lower the lights, take everything off her plate. This is the show-up week.",
+    lab:"A 2025 meta-analysis of 25 trials found heat rivals painkillers for cramps — and exercise is the best-evidenced reliever there is. Translation: the heating pad is medicine and a gentle walk offer is a clinical intervention. You're not being cute, you're being effective."
   },
   follicular: {
     days:'Days 6-13',
     bio:"Brooooo, estrogen's climbing. Energy back. Mood up. Brain sharper. She wants new things, social connection, motion. This is her building phase. Match it.",
     say:["What's the plan this weekend? I'm in.","You're on fire lately. I see it.","Want to try something new tonight?"],
     never:["Why are you suddenly so busy?","Calm down with all the plans.","You're being too much."],
-    pro:"Bro listen — plan adventures now. Book the trip. Start the project together. The momentum here is real and finite. Use it."
+    pro:"Bro listen — plan adventures now. Book the trip. Start the project together. The momentum here is real and finite. Use it.",
+    lab:"Research says support plans built when she feels good actually hold when things get rough. This is the week to ask 'what helps most on your hard days?' — that's the Clear-Sky Protocol, and it's evidence-based."
   },
   ovulation: {
     days:'Days 14-17',
     bio:"Bro, estrogen peaks. Testosterone spikes. Maximum cognitive performance, social confidence, and libido. This is her sharpest, boldest, most magnetic window. Don't sleep on it.",
     say:["You look incredible.","Whatever you want to do - yes.","Tell me about the thing you're working on."],
     never:["You're full of yourself today.","Why are you so flirty?","Slow down a bit."],
-    pro:"Psst bro — have the important conversation NOW. Money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it."
+    pro:"Psst bro — have the important conversation NOW. Money, the future, the hard thing. She's most clear-headed and confident here. Don't waste it.",
+    lab:"Couples research backs this: support only counts when it lands as support — and this is the window where big conversations land best. Ask, don't assume; her answers this week are the clearest data you'll get all cycle."
   },
   luteal: {
     days:'Days 18-28',
     bio:"Real talk bro — progesterone rises then crashes. Sensitivity to noise, smell, social slights goes up. Patience for nonsense goes down. Her bullshit detector is at peak. Be honest, be steady, be present.",
     say:["I noticed you handled that today. That was strong.","Tonight is whatever you want it to be.","I'm not going anywhere. We're good."],
     never:["Why are you so emotional?","It's just the cycle, right?","Can you let it go?"],
-    pro:"Bro, late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here — she's reading the truth more clearly than usual."
+    pro:"Bro, late luteal = no big discussions. Postpone any conflict that can wait. She's not less reasonable here — she's reading the truth more clearly than usual.",
+    lab:"2025 clinical research: partner support measurably lowers symptom severity, and being dismissed makes it worse. Your steadiness this week is literally medicine. And read luteal words as weather, not verdicts — the phase, not the transcript."
   }
 };
 
@@ -1833,8 +1866,9 @@ function computePulse() {
   const sorted = [...log].sort((a, b) => (b.at || 0) - (a.at || 0));
   const lastAny = sorted[0]?.at || 0;
   const daysSinceAny = lastAny ? Math.floor((now - lastAny) / 864e5) : Infinity;
-  if (daysSinceAny >= 4 && (!dismissals.ghost || now - dismissals.ghost > 48 * 36e5)) {
-    return { kind: 'ghost', daysSince: daysSinceAny === Infinity ? null : daysSinceAny };
+  // lastAny required: a fresh user with zero logs isn't ghosting, they just arrived.
+  if (lastAny && daysSinceAny >= 4 && (!dismissals.ghost || now - dismissals.ghost > 48 * 36e5)) {
+    return { kind: 'ghost', daysSince: daysSinceAny };
   }
 
   // Switch the Channel — 3+ gifts this cycle AND 0 talks
@@ -1883,7 +1917,7 @@ function pulseToOneMove() {
 
 function pulseToTalkPlays() {
   haptic(8);
-  setState({ playsTab: 'ask' });
+  setState({ playsTab: 'ask', tab: 'toolbox' });
   setTimeout(() => {
     const card = document.querySelector('.plays-tabs');
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2158,6 +2192,7 @@ function updateBadge() {
 const TABS = [
   { id:'dashboard', label:'Dashboard' },
   { id:'calendar',  label:'Calendar' },
+  { id:'toolbox',   label:'Toolbox' },
   { id:'profile',   label:'Her Profile' },
   { id:'guide',     label:'The Guide' },
   { id:'code',      label:'The Code' }
@@ -2209,6 +2244,7 @@ function render() {
   let body = '';
   if (state.tab === 'dashboard') body = renderDashboard(day, phase, len);
   else if (state.tab === 'calendar') body = renderCalendar();
+  else if (state.tab === 'toolbox') body = renderToolbox(phase);
   else if (state.tab === 'profile') body = renderProfile();
   else if (state.tab === 'guide') body = renderGuide(phase);
   else if (state.tab === 'code') body = renderCode();
@@ -2233,7 +2269,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v2.21 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v2.21+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.0 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.0+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -2346,35 +2382,67 @@ function renderWelcome() {
   `;
 }
 
+// One advisory at a time — highest-priority signal wins, the rest wait their turn.
+function pickAdvisory(day, phase, len, late) {
+  if (late) {
+    const high = late.severity === 'high';
+    return `
+      <div class="alert ${high?'red':''}">
+        <div class="icon">${high?'⚠️':'⏳'}</div>
+        <div class="text">
+          <div class="title">${high?'PERIOD LATE BY '+late.lateBy+' DAYS':'PERIOD RUNNING LATE'}</div>
+          <div class="body">${high?'Consider a pregnancy test. Could also be stress, travel, or illness. Be calm. Be present.':'Late by '+late.lateBy+' day'+(late.lateBy===1?'':'s')+'. Not unusual — but worth noting. Watch for symptoms.'}</div>
+        </div>
+      </div>`;
+  }
+  const alert = buildAlert(state.profile, day);
+  if (alert && !dismissedToday(alert.id)) {
+    return `
+      <div class="alert ${alert.tone==='red'?'red':''}">
+        <div class="icon">${alert.icon}</div>
+        <div class="text">
+          <div class="title">${alert.title}</div>
+          <div class="body">${h(fillName(alert.body))}</div>
+        </div>
+        <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
+      </div>`;
+  }
+  const insight = !state.insightDismissed ? adaptiveInsights() : null;
+  if (insight) {
+    return `<div class="card" style="border-left:3px solid var(--orange);position:relative">
+      <div class="label" style="color:var(--orange);margin-bottom:6px">// coach insight</div>
+      <p style="margin:0;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">${insight}</p>
+      <button onclick="dismissInsight()" style="position:absolute;top:8px;right:10px;background:none;border:0;color:rgba(245,236,215,0.4);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" aria-label="Dismiss">×</button>
+    </div>`;
+  }
+  const stale = getStaleListened();
+  if (stale) {
+    return `<div class="card" style="border-left:3px solid var(--orange)">
+      <div class="label" style="color:var(--orange);margin-bottom:6px">// she told you</div>
+      <p style="margin:0 0 10px;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">"${h(stale.text)}" — still open, bro. She said it. You wrote it down. Close the loop.</p>
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="go('toolbox')">→ TOOLBOX</button>
+    </div>`;
+  }
+  return renderPulseCard();
+}
+
+// At most one onboarding banner per load — priority: install > notifications > her method.
+function pickBanner() {
+  const install = renderInstallBanner();
+  if (install) return install;
+  const notif = renderNotifNudge();
+  if (notif) return notif;
+  return renderMethodHint();
+}
+
 function renderDashboard(day, phase, len) {
   if (!state.profile?.lastPeriod) return renderQuickStart();
 
   const late = latePeriodState(state.profile);
   if (late) { day = len; phase = 'luteal'; }
-  const days = late ? 0 : daysToNextPeriod(state.profile);
-  const tip = pickSmartTip(state.profile, phase, dayInPhase(day, len));
-  const alert = late ? null : buildAlert(state.profile, day);
-  const showAlert = alert && !dismissedToday(alert.id);
-  const ranges = phaseRanges(len);
-  const pct = ((day-1)/len)*100;
   const fert = fertilityFor(day, len);
   const mode = state.profile.fertilityMode || 'off';
-  const streak = currentStreak();
   const didToday = loggedToday();
-  const todayIdx = Math.floor((midnight(new Date()) - midnight(new Date('2024-01-01'))) / DAY);
-  const avoid = RED_LIST[todayIdx % RED_LIST.length];
-
-  const today = new Date();
-  const next = [1,2,3,4].map(i => {
-    const d = new Date(today); d.setDate(d.getDate()+i);
-    const info = infoFor(state.profile, d);
-    return { d, ...info, label: i===1?'Tomorrow':'+ '+i };
-  });
-
-  const segments = PHASES.map(p => {
-    const [s,e] = ranges[p];
-    return `<span style="background:${PHASE_COLOR[p]};width:${((e-s+1)/len)*100}%"></span>`;
-  }).join('');
 
   const heroName = state.profile.name ? state.profile.name.toUpperCase() : 'today';
 
@@ -2401,27 +2469,9 @@ function renderDashboard(day, phase, len) {
       }
     }
   }
-  const variability = cycleVariability();
-  const insight = !state.insightDismissed ? adaptiveInsights() : null;
-
-  let lateBanner = '';
-  if (late) {
-    const high = late.severity === 'high';
-    lateBanner = `
-      <div class="alert ${high?'red':''}">
-        <div class="icon">${high?'⚠️':'⏳'}</div>
-        <div class="text">
-          <div class="title">${high?'PERIOD LATE BY '+late.lateBy+' DAYS':'PERIOD RUNNING LATE'}</div>
-          <div class="body">${high?'Consider a pregnancy test. Could also be stress, travel, or illness. Be calm. Be present.':'Late by '+late.lateBy+' day'+(late.lateBy===1?'':'s')+'. Not unusual — but worth noting. Watch for symptoms.'}</div>
-        </div>
-      </div>`;
-  }
-
   return `
   <div class="stagger">
-    ${renderInstallBanner()}
-    ${renderNotifNudge()}
-    ${renderMethodHint()}
+    ${pickBanner()}
     <div class="hero corners" data-phase="${phase}">
       <div class="top">
         <div>
@@ -2433,52 +2483,28 @@ function renderDashboard(day, phase, len) {
         <div class="day">
           <div class="emoji">${PHASE_EMOJI[phase]}</div>
           <div class="num">DAY ${day} / ${len}</div>
-          ${variability ? `<div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.55;margin-top:4px">AVG ${variability.avg}d (${variability.min}–${variability.max})</div>` : ''}
         </div>
       </div>
+      <div style="margin-top:14px">${renderPhaseArc(day, phase, len)}</div>
+      ${(() => {
+        const sup = cycleSuppression(state.profile);
+        if (sup === 'full')    return `<div class="label" style="margin-top:8px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal contraception — phases may be muted. coaching still applies; calendar is approximate.</div>`;
+        if (sup === 'partial') return `<div class="label" style="margin-top:8px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal IUD / mini-pill — phases sometimes present. read her, not just the calendar.</div>`;
+        return '';
+      })()}
     </div>
 
     ${fertCard}
 
-    ${insight ? `<div class="card" style="border-left:3px solid var(--orange);position:relative">
-      <div class="label" style="color:var(--orange);margin-bottom:6px">// coach insight</div>
-      <p style="margin:0;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">${insight}</p>
-      <button onclick="dismissInsight()" style="position:absolute;top:8px;right:10px;background:none;border:0;color:rgba(245,236,215,0.4);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1" aria-label="Dismiss">×</button>
-    </div>` : ''}
-
-    ${renderWeatherCard()}
-
-    ${lateBanner}
-
-    ${renderPeriodLogButton(day, len, late)}
-
-    ${showAlert ? `
-      <div class="alert ${alert.tone==='red'?'red':''}">
-        <div class="icon">${alert.icon}</div>
-        <div class="text">
-          <div class="title">${alert.title}</div>
-          <div class="body">${h(fillName(alert.body))}</div>
-        </div>
-        <button class="x" onclick="dismissAlertNow('${alert.id}')">×</button>
-      </div>` : ''}
+    ${pickAdvisory(day, phase, len, late)}
 
     ${renderOneMove(day, phase, len)}
 
+    ${renderWeatherCard()}
+
+    ${renderPeriodLogButton(day, len, late)}
+
     <div class="card corners">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
-        <div class="label">// daily brief</div>
-        ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
-      </div>
-
-      ${renderPhaseArc(day, phase, len)}
-
-      ${(() => {
-        const sup = cycleSuppression(state.profile);
-        if (sup === 'full')    return `<div class="label" style="margin:-6px 0 12px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal contraception — phases may be muted. coaching still applies; calendar is approximate.</div>`;
-        if (sup === 'partial') return `<div class="label" style="margin:-6px 0 12px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.5">hormonal IUD / mini-pill — phases sometimes present. read her, not just the calendar.</div>`;
-        return '';
-      })()}
-
       <div class="sit-row">
         <div class="label" style="margin-right:4px">// right now</div>
         ${SITUATIONS.map(s => `
@@ -2486,15 +2512,9 @@ function renderDashboard(day, phase, len) {
         `).join('')}
       </div>
 
-      ${state.situation ? renderSituationPanel(state.situation, phase) : `
-        <p style="font-size:20px;line-height:1.35;margin:0 0 14px;color:var(--cream);font-weight:300">${h(fillName(tip||''))}</p>
-      `}
+      ${state.situation ? renderSituationPanel(state.situation, phase) : ''}
 
-      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:6px">
-        <div class="label" style="color:var(--red);margin-bottom:6px">// avoid today</div>
-        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="red-strike" style="font-size:15px">${h(avoid.phrase)}</span><span style="color:rgba(245,236,215,0.6);font-size:13px">${h(avoid.why)}</span></div>
-      </div>
-      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
+      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
         <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
           <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+1</span></button>
@@ -2505,47 +2525,9 @@ function renderDashboard(day, phase, len) {
       </div>
     </div>
 
-    ${renderPulseCard()}
-
     ${renderUpcomingCard()}
 
-    ${renderPlaysCard(phase)}
-
-    ${renderListenedCard()}
-
     ${renderBroTruth()}
-
-    ${renderReceiptCard()}
-
-    <div class="card">
-      <div class="label" style="margin-bottom:10px">// last 7 days</div>
-      ${renderDayStrip()}
-    </div>
-
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="label">// cycle progress</div>
-        <div class="label">${days===0?'PERIOD TODAY':`${days} ${days===1?'DAY':'DAYS'} TO PERIOD`}</div>
-      </div>
-      <div class="progress">
-        ${segments}
-        <span class="dot" style="left:${pct}%"></span>
-      </div>
-      <div class="progress-row"><span>MENSTRUAL</span><span>FOLLICULAR</span><span>OVULATION</span><span>LUTEAL</span></div>
-    </div>
-
-    <div class="card">
-      <div class="label" style="margin-bottom:14px">// what's coming</div>
-      <div class="next">
-        ${next.map(n => `
-          <div class="day" style="border-left-color:${PHASE_COLOR[n.phase]}">
-            <div class="lab">${n.label}</div>
-            <div class="d">${n.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase()}</div>
-            <div class="mood" style="color:${PHASE_COLOR[n.phase]}">${PHASE_MOOD[n.phase]}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
   </div>`;
 }
 
@@ -2677,15 +2659,25 @@ function renderOneMove(day, phase, len) {
   const done  = state.todayMoveDone === today;
   const dInPhase = dayInPhase(day, len);
   const seed = (state.skipCount || 0) + (state.justLogged === 'skipped' ? 1 : 0);
-  // Use smart-tip selection plus a seed-shift when skipping so re-rolls feel fresh
-  const tip = fillName(pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.');
+  // Clear-Sky Protocol: on follicular days 2 and 5, the rep is building the support plan
+  // while she feels good (research-backed). A skip falls through to the normal tip engine.
+  const clearSky = phase === 'follicular' && (dInPhase === 2 || dInPhase === 5) && seed === 0;
+  const tip = clearSky
+    ? fillName(CLEARSKY[dInPhase === 2 ? 0 : 1])
+    : fillName(pickSmartTip(state.profile, phase, dInPhase + seed) || 'Show up today. Quiet presence.');
   const moveText = done
-    ? "Bro, that's the move. See you tomorrow."
+    ? "Bro, that's the rep. See you tomorrow."
     : tip;
+  const streak = currentStreak();
+  const lab = labLineFor(phase);
   return `
     <div class="move-card${done ? ' done' : ''}">
-      <div class="label move-label">// your one move today</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div class="label move-label">// daily rep :: one small act</div>
+        ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
+      </div>
       <h2>${h(moveText)}</h2>
+      ${lab ? `<p style="margin:0 0 14px;font-size:12px;color:rgba(245,236,215,0.6);line-height:1.5">${h(lab.line)} <span class="mono" style="font-size:10px;color:rgba(245,236,215,0.45);white-space:nowrap">— lab-verified · ${h(lab.tag)}</span></p>` : ''}
       ${done ? `
         <div class="row">
           <button class="btn btn-ghost" style="padding:10px 18px;font-size:13px" onclick="undoMove()">↺ UNDO</button>
@@ -3106,11 +3098,28 @@ function renderPlaysCard(phase) {
 
 function jumpToOccasionPlays() {
   haptic(8);
-  setState({ playsTab: 'occasion' });
+  setState({ playsTab: 'occasion', tab: 'toolbox' });
   setTimeout(() => {
     const card = document.querySelector('.plays-tabs');
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 50);
+}
+
+function renderToolbox(phase) {
+  if (!state.profile?.lastPeriod) return renderQuickStart();
+  return `
+  <div class="stagger">
+    ${renderPlaysCard(phase)}
+
+    ${renderListenedCard()}
+
+    ${renderReceiptCard()}
+
+    <div class="card">
+      <div class="label" style="margin-bottom:10px">// last 7 days</div>
+      ${renderDayStrip()}
+    </div>
+  </div>`;
 }
 
 function renderQuickStart() {
@@ -3495,6 +3504,11 @@ function renderGuide(currentPhase) {
               <div class="label" style="margin-bottom:6px;color:${color}">// pro tip</div>
               <p style="margin:0;color:var(--cream);line-height:1.5">${g.pro}</p>
             </div>
+            ${g.lab ? `
+            <div style="margin-top:14px;background:rgba(245,236,215,0.05);border:1px dashed var(--border);border-radius:8px;padding:12px 14px">
+              <div class="label" style="margin-bottom:6px">// the lab says <span class="mono" style="font-size:9px;opacity:0.6;text-transform:none;letter-spacing:0.05em">not vibes. peer-reviewed.</span></div>
+              <p style="margin:0;font-size:13px;color:rgba(245,236,215,0.8);line-height:1.55">${h(g.lab)}</p>
+            </div>` : ''}
             ${p === 'ovulation' ? `
             <div style="margin-top:18px;background:rgba(232,184,75,0.1);border:1px solid rgba(232,184,75,0.3);border-radius:8px;padding:14px 16px">
               <div class="label" style="margin-bottom:6px;color:var(--alert)">// the timing science</div>
