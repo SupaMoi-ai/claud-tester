@@ -3246,7 +3246,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.4 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.4+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.5 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.5+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -3527,7 +3527,7 @@ function renderDashboard(day, phase, len) {
 
     ${renderUpcomingCard()}
 
-    ${renderBroTruth()}
+    ${renderTrophyStrip()}
   </div>`;
 }
 
@@ -3676,10 +3676,7 @@ function renderOneMove(day, phase, len) {
     <div class="move-card${done ? ' done' : ''}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
         <div class="label move-label">// daily rep :: +15 pts irl</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
-          <div class="label" style="color:var(--alert)">${rankFor(broPoints()).emoji} ${broPoints()} PTS</div>
-        </div>
+        ${streak > 0 ? `<div class="label streak-pill${state.streakTick ? ' tick' : ''}" style="color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</div>` : ''}
       </div>
       <h2>${h(moveText)}</h2>
       ${lab ? `<p style="margin:0 0 14px;font-size:12px;color:rgba(245,236,215,0.6);line-height:1.5">${h(lab.line)} <span class="mono" style="font-size:10px;color:rgba(245,236,215,0.45);white-space:nowrap">— lab-verified · ${h(lab.tag)}</span></p>` : ''}
@@ -4209,6 +4206,55 @@ function jumpToOccasionPlays() {
   }, 50);
 }
 
+// Compact dashboard version — status at a glance plus the ONE trophy he's closest to.
+// The full 28-item case stays in the Toolbox; this is a window into it, not a copy.
+function renderTrophyStrip() {
+  const unlocked = loadAchievements();
+  let ctx = null;
+  try { ctx = achievementContext(); } catch {}
+  const got = ACHIEVEMENTS.filter(a => unlocked[a.id]);
+  const pts = broPoints();
+  const rank = rankFor(pts);
+  const passes = broPasses();
+  // Next trophy to chase: cheapest locked one, so the hint always feels reachable.
+  const next = ACHIEVEMENTS.filter(a => !unlocked[a.id]).sort((a, b) => a.pts - b.pts)[0];
+  // Most recent unlocks first — that's the part worth showing off.
+  const recent = got.slice().sort((a, b) => (unlocked[b.id] || 0) - (unlocked[a.id] || 0)).slice(0, 8);
+
+  return `
+  <div class="card corners">
+    <button onclick="go('toolbox')" style="width:100%;background:none;border:0;color:inherit;padding:0;text-align:left;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <div class="label">// trophy case</div>
+        <div class="label" style="color:var(--alert)">${got.length} / ${ACHIEVEMENTS.length} →</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px">${rank.emoji} ${h(rank.title)}</span>
+        <span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px;color:var(--alert)">${pts} PTS</span>
+        ${ctx && ctx.streak > 0 ? `<span class="label streak-pill${state.streakTick ? ' tick' : ''}" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px;color:var(--orange)">🔥 ${ctx.streak}D</span>` : ''}
+        ${passes > 0 ? `<span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px">🎟️ ${passes}</span>` : ''}
+      </div>
+      ${rank.next ? `
+        <div class="label" style="margin-bottom:5px;color:rgba(245,236,215,0.55)">${pts}/${rank.next.min} → ${rank.next.emoji} ${h(rank.next.title)}</div>
+        <div style="height:5px;background:rgba(245,236,215,0.12);border-radius:999px;overflow:hidden"><span style="display:block;height:100%;width:${rank.pct}%;background:var(--alert)"></span></div>
+      ` : `<div class="label" style="color:var(--green)">👑 MAX RANK — nothing left to prove, bro.</div>`}
+    </button>
+    ${recent.length ? `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+        ${recent.map(a => `<span title="${h(a.name)}" style="font-size:19px;line-height:1">${a.emoji}</span>`).join('')}
+        ${got.length > recent.length ? `<span class="label" style="align-self:center;color:rgba(245,236,215,0.45)">+${got.length - recent.length}</span>` : ''}
+      </div>` : ''}
+    ${next ? `
+      <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:19px;line-height:1;opacity:0.4">${next.emoji}</span>
+        <div style="min-width:0;flex:1">
+          <div class="label" style="color:rgba(245,236,215,0.5);margin-bottom:2px">next up · +${next.pts}</div>
+          <div style="font-size:12px;color:rgba(245,236,215,0.75);line-height:1.4">${h(next.desc)}</div>
+        </div>
+      </div>` : ''}
+  </div>`;
+}
+
 function renderTrophyCase() {
   const unlocked = loadAchievements();
   let ctx = null;
@@ -4279,6 +4325,8 @@ function renderToolbox(phase) {
   return `
   <div class="stagger">
     ${renderTrophyCase()}
+
+    ${renderBroTruth()}
 
     ${renderPlaysCard(phase)}
 
