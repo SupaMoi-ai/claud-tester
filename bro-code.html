@@ -336,6 +336,12 @@
   .stagger > *:nth-child(4) { animation-delay: 0.22s; }
   .stagger > *:nth-child(5) { animation-delay: 0.28s; }
   .stagger > *:nth-child(6) { animation-delay: 0.34s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.40s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.46s; }
+  .stagger > *:nth-child(9) { animation-delay: 0.52s; }
+  .stagger > *:nth-child(10) { animation-delay: 0.58s; }
+  .stagger > *:nth-child(11) { animation-delay: 0.64s; }
+  .stagger > *:nth-child(n+12) { animation-delay: 0.70s; }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
   /* Hero ambient breathing — subtle alive feeling on the phase glow */
@@ -508,10 +514,39 @@
   .move-card .skip { background: none; border: 0; color: rgba(245,236,215,0.55); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; padding: 6px 8px; cursor: pointer; }
   .move-card .skip:hover { color: var(--cream); }
 
+  /* Celebration — landmarks only */
+  .celebrate-modal { text-align: center; border-color: var(--orange); animation: celebrate-in 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+  .celebrate-emoji { font-size: 62px; line-height: 1; margin: 10px 0 12px; animation: badge-pop 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes celebrate-in { from { opacity: 0; transform: scale(0.88) translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes badge-pop { 0% { transform: scale(0.3) rotate(-14deg); opacity: 0; } 60% { transform: scale(1.18) rotate(4deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+  .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .confetti-bit {
+    position: absolute; top: -14px; width: 8px; height: 14px; border-radius: 2px; opacity: 0.9;
+    animation: confetti-fall 2.4s linear forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Trophy case */
+  .trophy { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .trophy .tico { font-size: 22px; line-height: 1; flex: 0 0 auto; width: 26px; text-align: center; }
+  .trophy.locked { opacity: 0.42; }
+  .trophy.locked .tico { filter: grayscale(1); }
+  .trophy .tname { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 13px; color: var(--cream); }
+  .trophy.unlocked .tname { color: var(--green); }
+  .trophy .tdesc { font-size: 12px; color: rgba(245,236,215,0.65); line-height: 1.45; margin-top: 2px; }
+
   /* Reduced motion respect */
   @media (prefers-reduced-motion: reduce) {
-    .hero::after, .activity-strip .pill-act.streak.milestone, .qlog.just-logged .floater { animation: none; }
+    .hero::after, .activity-strip .pill-act.streak.milestone, .qlog.just-logged .floater,
+    .confetti-bit, .celebrate-modal, .celebrate-emoji, .modal, .modal-bg, .bro-toast,
+    .sit-panel, .sit-flow-step, .sit-chip.active, .play-block, .thinking span,
+    .verdict, .activity-strip .pill-act { animation: none !important; }
     .stagger > * { animation-duration: 0.01ms; }
+    .confetti { display: none; }
+    * { transition-duration: 0.01ms !important; }
   }
 
   /* In-app toast */
@@ -573,7 +608,8 @@ const TIPS = {
       "Real talk bro, she's been horizontal for days. Fresh air, short walk, no agenda.",
       "Psst bro — restock whatever ran out this week. She shouldn't discover it empty next month.",
       "Brooooo, tell her she handled a rough week well. People rarely get credit for enduring.",
-      "Bro, iron's low after bleeding. Feed her properly today — that exhaustion is physical, not mood."
+      "Bro, iron's low after bleeding. Feed her properly today — that exhaustion is physical, not mood.",
+      "Psst bro — when she says something small today, look up. Phone down. Those ten-second moments are 65% of the whole thing."
     ]
   },
   follicular: {
@@ -597,7 +633,8 @@ const TIPS = {
       "Bro listen — say yes to whatever she proposes this week. Momentum beats optimization.",
       "Real talk bro, ask about her actual ambitions. Not logistics — the real ones.",
       "Brooooo, surprise her with something spontaneous. Zero planning, just go.",
-      "Bro, learn something together this week. New recipe, new route, new anything."
+      "Bro, learn something together this week. New recipe, new route, new anything.",
+      "Bro listen — she is chatty this week. Every \u201clook at this\u201d is a bid for connection. Turn toward it, every time."
     ]
   },
   ovulation: {
@@ -621,7 +658,8 @@ const TIPS = {
       "Brooooo, ask her what she wants more of in the relationship. She'll answer honestly right now.",
       "Bro, sunshine's still up but fading. Don't waste this week on admin and errands.",
       "Real talk bro — if she wants to go out, go out. This energy isn't on tap year-round.",
-      "Psst bro — write down what she says she needs this week. Week four you'll want the notes."
+      "Psst bro — write down what she says she needs this week. Week four you'll want the notes.",
+      "Real talk bro — put the phone in another room tonight. Catch every bid she throws. Highest-value hour you will spend all week."
     ]
   },
   luteal: {
@@ -645,7 +683,8 @@ const TIPS = {
       "Bro listen — if it gets tense, offer a repair. A joke, a hand, 'we're okay.' It works.",
       "Real talk bro — don't go quiet on her. Say 'I need 20 minutes,' then actually come back.",
       "Bro, whatever she says this week — read the phase, not the transcript. Weather, not verdicts.",
-      "Psst bro — reassure her before she has to fish for it. Early and often beats perfectly worded."
+      "Psst bro — reassure her before she has to fish for it. Early and often beats perfectly worded.",
+      "Bro, in luteal a missed bid stings double. When she talks, stop what you are doing and actually turn toward her."
     ]
   }
 };
@@ -920,7 +959,9 @@ const BRO_FACTS = [
   "Brooooo — paraphrasing what she said before you respond is measurably effective. Sounds robotic, works anyway.",
   "Bro fact: affectionate touch tracks with how responsive she perceives you to be. The hand on the back is real work.",
   "Psst bro — stonewalling (going quiet to escape tension) reads as abandonment. Say 'I need 20 minutes' and actually come back.",
-  "Bro fact: perceived partner responsiveness is called the bedrock of intimacy in the literature. Translation — she has to FEEL heard, not just be heard."
+  "Bro fact: perceived partner responsiveness is called the bedrock of intimacy in the literature. Translation — she has to FEEL heard, not just be heard.",
+  "Bro, when she says 'huh, weird' and shows you her phone — that's a bid for connection. Couples who lasted answered those 86% of the time. The ones who split: 33%.",
+  "Real talk: turning toward her small everyday bids accounts for ~65% of relationship satisfaction. It costs ten seconds and most guys still fumble it."
 ];
 
 // Evidence bank — real 2025 findings in bro voice. phase omitted = fits any day.
@@ -947,6 +988,8 @@ const LAB = [
   { line:"Disagreeing about who does what predicts worse relationship quality on its own. Get explicit about the split before it becomes the fight.", tag:"mental-load study 2025" },
   { line:"Paraphrase what she said before you respond. Sounds dumb, works absurdly well — that's active listening, and it's measurable.", tag:"couples research" },
   { line:"Affectionate touch tracks with perceived responsiveness. The hand on the back is doing real work, bro.", tag:"couples research" },
+  { line:"Couples who lasted turned toward each other's small bids 86% of the time. The ones who split? 33%. That gap IS the relationship.", tag:"Gottman lab" },
+  { line:"A 'bid' is her showing you a photo, or saying 'huh, weird.' Look up and answer. That tiny move is ~65% of relationship satisfaction, bro.", tag:"Gottman lab" },
   // — menstrual —
   { line:"Estrogen is a natural painkiller. It bottoms out right before her period — so pain receptors get more sensitive AND blood vessels dilate. That's the migraine setup.", tag:"migraine research", phase:'menstrual' },
   { line:"Menstrual migraines last up to 35% longer than her regular ones. If she says this headache is different, she's not exaggerating.", tag:"migraine research", phase:'menstrual' },
@@ -1177,6 +1220,15 @@ const TRIVIA = [
   { q:"What's the honest read on 'I'm fine' in late luteal?",
     opts:["She wants you to notice without being asked","She's fine","She wants space forever"], a:0,
     why:"Sit down next to her. Don't interrogate. Presence over questions, bro." },
+  { q:"What's a 'bid for connection'?",
+    opts:["A small everyday attempt to get your attention","A formal relationship talk","An argument opener"], a:0,
+    why:"She shows you a photo, sighs, says 'huh.' That's a bid. Looking up and engaging is called turning toward — and it's the whole ballgame." },
+  { q:"Couples who STAYED together turned toward each other's bids how often?",
+    opts:["33% of the time","86% of the time","About half"], a:1,
+    why:"86% versus 33% for couples who split. Same tiny moments, wildly different outcomes, bro." },
+  { q:"Roughly how much of relationship satisfaction comes from turning toward bids?",
+    opts:["About 65%","About 10%","It's not measurable"], a:0,
+    why:"~65%. Not date nights, not gifts — answering the small stuff. Put your phone down when she says something." },
   { q:"Restorative exercise (yoga, walking) fits best in which phase?",
     opts:["Luteal","Ovulation","Follicular"], a:0,
     why:"Cycle-syncing: push hard when estrogen's up, go restorative in luteal. Actual research, not wellness fluff." }
@@ -1732,6 +1784,8 @@ const HEALTH_LIT = [
     body:"Decades of research tracking hundreds of couples predicted relationship outcomes with over 90% accuracy — from HOW couples argue, not how often. The four most destructive patterns: criticism (attacking character, not behaviour), contempt (mockery, eye-rolling — the single strongest predictor of a breakup), defensiveness (counter-attacking instead of hearing it), and stonewalling (shutting down and withdrawing). Happy couples don't argue less. They argue differently." },
   { title:"Repair attempts", tag:"Gottman lab",
     body:"A repair attempt is any small move to reconnect mid-conflict — humour, affection, a touch, or just 'we're okay.' Couples who make them AND accept them maintain satisfaction even when conflict is frequent and intense. Related: soften the startup. How a hard conversation opens strongly predicts how it ends, so lead with 'I feel' and a specific request, never 'you always.'" },
+  { title:"Bids for connection", tag:"Gottman lab",
+    body:"The highest-leverage thing in this entire app. A 'bid' is any small attempt to get your attention — she shows you a photo, sighs, says 'huh, weird,' reads something out loud. You either TURN TOWARD it (look up, respond, engage) or turn away (grunt, keep scrolling). Couples who were still together six years later turned toward bids 86% of the time. Couples who divorced: 33%. Research concluded turning toward accounts for roughly 65% of why couples feel satisfied with each other. Not the holidays, not the gifts — the ten-second moments you're currently missing because your phone is in your hand." },
   { title:"Responsiveness", tag:"couples research",
     body:"Perceived partner responsiveness is described as the bedrock of intimacy — and it's driven by enacted responsiveness, meaning concrete daily acts. Daily-diary studies show small acts done today predict intimacy better than grand gestures. It also has to LAND as support: what you intended matters less than what she experienced. Which is why asking beats assuming, every time." },
   { title:"Cycle literacy as teamwork", tag:"health-literacy research",
@@ -1756,6 +1810,7 @@ const FAQ = [
   { q:"Does bad sleep actually mess with her cycle?", a:"Yeah. Rotating shift work is linked to shorter or longer cycles, and progesterone wrecks sleep quality in luteal anyway. Sleep is cycle infrastructure — protecting hers is a real contribution." },
   { q:"What's the 'mental load' everyone talks about?", a:"The invisible half, bro — remembering, planning, noticing what needs doing. Research puts mothers at ~71% of it. And it doesn't shrink because you help more; it shrinks when you OWN a category outright. Take the whole job, permanently, no reminders." },
   { q:"What actually predicts whether a relationship lasts?", a:"Gottman's lab hit 90%+ accuracy predicting it — from HOW couples argue, not how much. The four killers: criticism, contempt, defensiveness, stonewalling. Contempt is the worst. And the couples who make it are the ones who repair afterward." },
+  { q:"What's the single highest-value habit I could build?", a:"Turning toward her bids, bro. A 'bid' is any small attempt at connection — showing you a photo, sighing, saying 'huh, weird.' You either look up and engage, or you grunt and keep scrolling. Couples still together six years later turned toward bids 86% of the time; couples who divorced, 33%. Research puts it at roughly 65% of why couples feel satisfied with each other. It costs ten seconds and it beats every grand gesture you could plan." },
   { q:"What's a 'repair attempt'?", a:"Any small move to reconnect mid-conflict — a joke, a hand on her arm, 'hey, we're okay.' Sounds trivial, but it's one of the strongest predictors of couples surviving fights. Offer them, and accept hers when she offers first." }
 ];
 
@@ -2522,10 +2577,23 @@ const NOTIF_LAST = 'brocode_notif_last';
 const INSTALL_DISMISS = 'brocode_install_dismissed';
 const FERT_DISMISS = 'brocode_fert_dismiss';
 function loadProfile() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
+// 21–35 is the clinically normal range and what the profile input allows. Anything
+// outside it produces nonsense phase maths, and an imported file can carry anything.
+function clampCycleLength(n) {
+  const v = parseInt(n, 10);
+  if (!Number.isFinite(v)) return 28;
+  return Math.max(21, Math.min(35, v));
+}
 function saveProfile(p) {
   const stamped = { ...p, updatedAt: new Date().toISOString() };
   if (!stamped.createdAt) stamped.createdAt = stamped.updatedAt;
-  localStorage.setItem(KEY, JSON.stringify(stamped));
+  if (stamped.cycleLength !== undefined) stamped.cycleLength = clampCycleLength(stamped.cycleLength);
+  try {
+    localStorage.setItem(KEY, JSON.stringify(stamped));
+  } catch {
+    showToast("Storage is full or blocked, bro — check private browsing mode.", 'error');
+    return null;
+  }
   return stamped;
 }
 function clearProfile() { localStorage.removeItem(KEY); }
@@ -2548,7 +2616,11 @@ function addLog(kind, phase) {
   const log = loadLog();
   log.push({ date: new Date().toISOString().slice(0,10), kind, phase, at: Date.now() });
   if (log.length > 365) log.splice(0, log.length - 365);
-  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+  try {
+    localStorage.setItem(LOG_KEY, JSON.stringify(log));
+  } catch {
+    showToast("Storage is full or blocked, bro — check private browsing mode.", 'error');
+  }
 }
 function adaptiveInsights() {
   const log = loadLog();
@@ -2568,19 +2640,66 @@ function loggedToday() {
   const today = new Date().toISOString().slice(0,10);
   return loadLog().some(l => l.date === today);
 }
+// ---------- BRO PASS (streak freeze — "mercy infrastructure") ----------
+// One missed day shouldn't nuke a 90-day run. He banks a pass every 7 streak days,
+// holds max 2, and a gap auto-burns exactly one. Being human is allowed here.
+const PASS_KEY = 'brocode_passes';
+const PASS_USED_KEY = 'brocode_passes_used';
+const MAX_PASSES = 2;
+function broPasses() {
+  const n = parseInt(localStorage.getItem(PASS_KEY) || '0', 10);
+  return Number.isFinite(n) && n > 0 ? Math.min(MAX_PASSES, n) : 0;
+}
+function setBroPasses(n) {
+  const v = Math.max(0, Math.min(MAX_PASSES, n));
+  try { localStorage.setItem(PASS_KEY, String(v)); } catch {}
+  state.broPasses = v;
+  return v;
+}
+function loadPassesUsed() { try { return JSON.parse(localStorage.getItem(PASS_USED_KEY)) || {}; } catch { return {}; } }
+function savePassesUsed(m) { try { localStorage.setItem(PASS_USED_KEY, JSON.stringify(m)); } catch {} }
+
+// Gap-tolerant streak. A pass covers a SINGLE missed day: the streak survives but the
+// frozen day earns nothing (he didn't do anything — it's a shield, not a freebie).
+// A gap of two or more days ends the streak without wasting a pass on it.
 function currentStreak() {
   const log = loadLog();
   if (!log.length) return 0;
   const days = new Set(log.map(l => l.date));
+  const used = loadPassesUsed();
+  const key = (dt) => dt.toISOString().slice(0,10);
+  let usedDirty = false;
+  let available = broPasses();
   let streak = 0;
   let d = new Date();
   for (let i = 0; i < 365; i++) {
-    const key = d.toISOString().slice(0,10);
-    if (days.has(key)) streak++;
-    else if (i > 0) break;
+    const k = key(d);
+    if (days.has(k)) {
+      streak++;
+    } else if (i === 0) {
+      // Today isn't logged yet — the day isn't over, so it's not a break.
+    } else if (used[k]) {
+      // Already shielded on an earlier render. Preserve, don't increment.
+    } else {
+      // Only a one-day gap is coverable. Peek one day further back.
+      const prev = new Date(d); prev.setDate(prev.getDate() - 1);
+      const isolated = days.has(key(prev)) || used[key(prev)];
+      if (!isolated || available <= 0) break;
+      used[k] = true; usedDirty = true;
+      available--; setBroPasses(available);
+    }
     d.setDate(d.getDate() - 1);
   }
+  if (usedDirty) savePassesUsed(used);
   return streak;
+}
+// Days since his last log of any kind — drives the welcome-back card.
+function daysSinceLastLog() {
+  const log = loadLog();
+  if (!log.length) return null;
+  const last = log.reduce((m, l) => Math.max(m, l.at || 0), 0);
+  if (!last) return null;
+  return Math.floor((midnight(new Date()) - midnight(new Date(last))) / DAY);
 }
 
 // ---------- BRO POINTS (the game) ----------
@@ -2598,11 +2717,75 @@ function broPoints() {
   const n = parseInt(localStorage.getItem(POINTS_KEY) || '0', 10);
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
+// Rank-up copy — the moment the app was missing entirely until v3.3.
+const RANK_UP = {
+  'SOLID BRO':        "You're not winging it anymore, bro. That's a real habit forming.",
+  'BRO SCHOLAR':      "You know more about this than most guys ever will. And you're using it.",
+  'CERTIFIED BRO':    "Certified. She's noticing the difference by now — guaranteed.",
+  'BRO LEGEND':       "Legend status. This isn't a phase, it's who you are now.",
+  'HALL OF FAME BRO': "Hall of fame, bro. Whatever you're doing — keep doing exactly that."
+};
 function addPoints(n) {
-  const next = Math.max(0, broPoints() + n);
+  const before = broPoints();
+  const next = Math.max(0, before + n);
   try { localStorage.setItem(POINTS_KEY, String(next)); } catch {}
   state.broPoints = next;
+  // Landmark: crossing into a new rank. Only ever fires going up.
+  if (n > 0) {
+    const r0 = rankFor(before), r1 = rankFor(next);
+    if (r1.title !== r0.title && r1.min > r0.min) {
+      celebrate({ kind:'rank', emoji: r1.emoji, title: r1.title,
+        line: RANK_UP[r1.title] || "New rank unlocked, bro. Keep stacking." });
+    }
+  }
   return next;
+}
+
+// ---------- CELEBRATION QUEUE (landmarks only — reps keep the plain toast) ----------
+function celebrate(item) {
+  state.celebrateQueue = [...(state.celebrateQueue || []), item];
+}
+function dismissCelebration() {
+  haptic(8);
+  setState({ celebrateQueue: (state.celebrateQueue || []).slice(1) });
+}
+
+// ---------- STREAK MILESTONES (early wins first, per habit research) ----------
+const STREAK_MILESTONES = [
+  { d: 3,   pts: 10,  emoji:'🌱', title:'3 DAYS',   line:"Three in a row, bro. That's not luck anymore — that's a pattern." },
+  { d: 7,   pts: 25,  emoji:'🔥', title:'ONE WEEK', line:"A full week. This is the point where most guys quit and you didn't." },
+  { d: 14,  pts: 40,  emoji:'⚡', title:'TWO WEEKS',line:"Two weeks straight. She's felt the difference by now, trust." },
+  { d: 30,  pts: 75,  emoji:'🏅', title:'30 DAYS',  line:"A whole month. A whole cycle. You showed up for every phase of it." },
+  { d: 50,  pts: 100, emoji:'💎', title:'50 DAYS',  line:"Fifty days. At this point you're just built different, bro." },
+  { d: 100, pts: 200, emoji:'💯', title:'100 DAYS', line:"One hundred days. Frame this one. Genuinely elite behavior." },
+  { d: 200, pts: 350, emoji:'🚀', title:'200 DAYS', line:"Two hundred. You're not using an app anymore, you're just this guy now." },
+  { d: 365, pts: 750, emoji:'👑', title:'ONE YEAR', line:"A full year of showing up. Bro. Take the win. You earned every day of it." }
+];
+const STREAK_SEEN_KEY = 'brocode_streak_seen';
+function loadStreakSeen() { try { return JSON.parse(localStorage.getItem(STREAK_SEEN_KEY)) || []; } catch { return []; } }
+// Called after any point-earning action. Celebrates each milestone exactly once.
+function checkStreakMilestone() {
+  const streak = currentStreak();
+  const seen = loadStreakSeen();
+  let changed = false;
+  for (const m of STREAK_MILESTONES) {
+    if (streak >= m.d && !seen.includes(m.d)) {
+      seen.push(m.d); changed = true;
+      celebrate({ kind:'streak', emoji:m.emoji, title:m.title + ' STREAK', line:m.line, pts:m.pts });
+      addPoints(m.pts);
+    }
+  }
+  if (changed) { try { localStorage.setItem(STREAK_SEEN_KEY, JSON.stringify(seen)); } catch {} }
+  // Bank a Bro Pass every 7 streak days (capped).
+  const earned = Math.floor(streak / 7);
+  const claimed = parseInt(localStorage.getItem('brocode_passes_earned') || '0', 10) || 0;
+  if (earned > claimed) {
+    try { localStorage.setItem('brocode_passes_earned', String(earned)); } catch {}
+    if (broPasses() < MAX_PASSES) {
+      setBroPasses(broPasses() + 1);
+      showToast('🎟️ BRO PASS EARNED — one missed day won\'t kill your streak now.', 'success');
+    }
+  }
 }
 function rankFor(pts) {
   let cur = RANKS[0], next = null;
@@ -2612,6 +2795,147 @@ function rankFor(pts) {
   const pct = next ? Math.round(((pts - cur.min) / (next.min - cur.min)) * 100) : 100;
   return { ...cur, next, pct };
 }
+// ---------- ACHIEVEMENTS ----------
+// Rule: every one of these rewards something he did in REAL LIFE with her.
+// None of them reward opening the app or poking around the UI.
+const ACH_KEY = 'brocode_achievements';
+const ACHIEVEMENTS = [
+  { id:'day-one',    emoji:'🥇', name:'DAY ONE',            pts:10, desc:'Set up the code. Everyone starts here.',
+    check:c => !!c.profile?.lastPeriod },
+  { id:'first-rep',  emoji:'✅', name:'FIRST REP',          pts:10, desc:'Complete your first daily rep.',
+    check:c => c.kinds.move >= 1 },
+  { id:'listener',   emoji:'🎧', name:'CERTIFIED LISTENER', pts:40, desc:'Write down 10 things she actually said.',
+    check:c => c.listenedCount >= 10 },
+  { id:'repairman',  emoji:'🩹', name:'THE REPAIRMAN',      pts:50, desc:'Apologize within a day of a conflict, 3 times.',
+    check:c => c.fastRepairs >= 3 },
+  { id:'storm',      emoji:'⛈️', name:'STORM CHASER',       pts:35, desc:'Complete 5 reps during her period.',
+    check:c => (c.movesByPhase.menstrual || 0) >= 5 },
+  { id:'bids',       emoji:'🧲', name:'BID CATCHER',        pts:45, desc:'Log 15 real conversations. The 65% skill.',
+    check:c => c.kinds.talk >= 15 },
+  { id:'ironchef',   emoji:'🥩', name:'IRON CHEF',          pts:30, desc:'Show up on day 1 of her cycle, 3 times.',
+    check:c => c.dayOneShowUps >= 3 },
+  { id:'scholar',    emoji:'🎓', name:'THE SCHOLAR',        pts:40, desc:'Get 25 quiz questions right.',
+    check:c => c.quizCorrect >= 25 },
+  { id:'perfect10',  emoji:'🧠', name:'BIG BRAIN',          pts:60, desc:'Get 10 quiz questions right in a row.',
+    check:c => c.quizBestRun >= 10 },
+  { id:'unbothered', emoji:'🧊', name:'UNBOTHERED',         pts:35, desc:'A 7-day streak with zero conflicts logged.',
+    check:c => c.streak >= 7 && c.conflictsLast7 === 0 },
+  { id:'clearsky',   emoji:'☀️', name:'CLEAR-SKY OPERATOR', pts:40, desc:'Do a rep during her follicular week.',
+    check:c => (c.movesByPhase.follicular || 0) >= 3 },
+  { id:'fullcircle', emoji:'📅', name:'FULL CIRCLE',        pts:75, desc:'Show up in all four phases of one cycle.',
+    check:c => PHASES.every(p => (c.movesByPhase[p] || 0) >= 1) },
+  { id:'human',      emoji:'🎟️', name:'HUMAN BEING',        pts:15, desc:'Burn a Bro Pass. Nobody does this perfectly.',
+    check:c => c.passesUsed >= 1 },
+  { id:'comeback',   emoji:'🔄', name:'THE COMEBACK',       pts:30, desc:'Return and log after a week away.',
+    check:c => c.hadComeback },
+  { id:'week1',      emoji:'🔥', name:'WEEK ONE',           pts:25, desc:'Hit a 7-day streak.',
+    check:c => c.streak >= 7 },
+  { id:'month1',     emoji:'🏅', name:'THE MONTH',          pts:60, desc:'Hit a 30-day streak.',
+    check:c => c.streak >= 30 },
+  { id:'century',    emoji:'💯', name:'CENTURION',          pts:150, desc:'Hit a 100-day streak.',
+    check:c => c.streak >= 100 },
+  { id:'profile',    emoji:'📋', name:'DID THE HOMEWORK',   pts:35, desc:'Fill in her traits, comforts and love languages.',
+    check:c => (c.profile?.neurology?.length || 0) + (c.profile?.comfort?.length || 0) + (c.profile?.love?.length || 0) >= 5 },
+  { id:'method',     emoji:'💊', name:'KNOWS THE METHOD',   pts:20, desc:'Record what contraception she uses.',
+    check:c => !!c.profile?.contraception },
+  { id:'notetaker',  emoji:'📝', name:'THE NOTETAKER',      pts:25, desc:'Write actual notes about her in her profile.',
+    check:c => (c.profile?.notes || '').trim().length >= 40 },
+  { id:'dates',      emoji:'🎂', name:'NEVER FORGETS',      pts:30, desc:'Save her birthday and your anniversary.',
+    check:c => !!(c.profile?.dates?.birthday && c.profile?.dates?.anniversary) },
+  { id:'closer',     emoji:'✔️', name:'THE CLOSER',         pts:35, desc:'Close the loop on 5 things she told you.',
+    check:c => c.listenedDone >= 5 },
+  { id:'generous',   emoji:'🎁', name:'THE GIFT GUY',       pts:25, desc:'Log 10 gifts. Small ones count.',
+    check:c => c.kinds.gift >= 10 },
+  { id:'accountable',emoji:'🙏', name:'ACCOUNTABLE',        pts:35, desc:'Log 5 apologies. Takes a real spine.',
+    check:c => c.kinds.apology >= 5 },
+  { id:'honest',     emoji:'📓', name:'BRUTALLY HONEST',    pts:20, desc:'Log a conflict instead of pretending it didn\'t happen.',
+    check:c => c.kinds.conflict >= 1 },
+  { id:'century-pt', emoji:'💰', name:'TRIPLE DIGITS',      pts:25, desc:'Bank 100 bro points.',
+    check:c => c.points >= 100 },
+  { id:'grand',      emoji:'🏦', name:'THE THOUSAND',       pts:100, desc:'Bank 1000 bro points.',
+    check:c => c.points >= 1000 },
+  { id:'landed',     emoji:'🎯', name:'DIALED IN',          pts:40, desc:'Rate how 10 of your moves actually landed.',
+    check:c => c.landedCount >= 10 }
+];
+function loadAchievements() { try { return JSON.parse(localStorage.getItem(ACH_KEY)) || {}; } catch { return {}; } }
+function achievementContext() {
+  const log = loadLog();
+  const kinds = { move:0, gift:0, talk:0, conflict:0, apology:0, listened:0 };
+  const movesByPhase = {};
+  for (const l of log) {
+    if (kinds[l.kind] !== undefined) kinds[l.kind]++;
+    if (l.kind === 'move' && l.phase) movesByPhase[l.phase] = (movesByPhase[l.phase] || 0) + 1;
+  }
+  // Apologies that landed within 24h of a conflict — the Gottman repair signal.
+  const conflicts = log.filter(l => l.kind === 'conflict');
+  const apologies = log.filter(l => l.kind === 'apology');
+  let fastRepairs = 0;
+  for (const c of conflicts) {
+    if (apologies.some(a => (a.at || 0) > (c.at || 0) && (a.at || 0) - (c.at || 0) <= DAY)) fastRepairs++;
+  }
+  const listened = loadListened();
+  const quiz = Object.values(loadQuiz());
+  const quizCorrect = quiz.filter(q => q && q.correct).length;
+  // Longest run of correct answers, in date order.
+  const byDate = Object.keys(loadQuiz()).sort();
+  let run = 0, quizBestRun = 0;
+  for (const d of byDate) {
+    if (loadQuiz()[d]?.correct) { run++; quizBestRun = Math.max(quizBestRun, run); } else run = 0;
+  }
+  const now = Date.now();
+  const conflictsLast7 = conflicts.filter(c => now - (c.at || 0) < 7 * DAY).length;
+  // Day-1 show-ups: a move logged on a day her cycle day was 1.
+  let dayOneShowUps = 0;
+  const p = state.profile;
+  if (p?.lastPeriod) {
+    const len = p.cycleLength || 28;
+    const seen = new Set();
+    for (const l of log) {
+      if (l.kind !== 'move') continue;
+      const info = infoFor(p, new Date(l.date));
+      if (info.day === 1 && !seen.has(l.date)) { seen.add(l.date); dayOneShowUps++; }
+    }
+  }
+  // Comeback: any gap of 7+ days between consecutive log dates, followed by more activity.
+  const dates = [...new Set(log.map(l => l.date))].sort();
+  let hadComeback = false;
+  for (let i = 1; i < dates.length; i++) {
+    const gap = Math.floor((midnight(dates[i]) - midnight(dates[i-1])) / DAY);
+    if (gap >= 7) hadComeback = true;
+  }
+  let landedCount = 0;
+  try { landedCount = Object.keys(JSON.parse(localStorage.getItem('brocode_landed')) || {}).length; } catch {}
+  return {
+    log, kinds, movesByPhase, fastRepairs, profile: state.profile, points: broPoints(),
+    streak: currentStreak(), quizCorrect, quizBestRun, conflictsLast7, dayOneShowUps, hadComeback,
+    listenedCount: listened.length, listenedDone: listened.filter(x => x.status === 'done').length,
+    passesUsed: Object.keys(loadPassesUsed()).length, landedCount
+  };
+}
+// Evaluate everything; celebrate + pay out anything newly unlocked.
+function checkAchievements() {
+  const unlocked = loadAchievements();
+  let ctx;
+  try { ctx = achievementContext(); } catch { return; }
+  let changed = false;
+  for (const a of ACHIEVEMENTS) {
+    if (unlocked[a.id]) continue;
+    let hit = false;
+    try { hit = !!a.check(ctx); } catch { hit = false; }
+    if (hit) {
+      unlocked[a.id] = Date.now(); changed = true;
+      celebrate({ kind:'achievement', emoji:a.emoji, title:a.name, line:a.desc, pts:a.pts });
+      addPoints(a.pts);
+    }
+  }
+  if (changed) { try { localStorage.setItem(ACH_KEY, JSON.stringify(unlocked)); } catch {} }
+}
+// One call after any scoring action.
+function afterScoringAction() {
+  checkStreakMilestone();
+  checkAchievements();
+}
+
 function loadQuiz() { try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; } catch { return {}; } }
 function todayQuizAnswer() { return loadQuiz()[new Date().toISOString().slice(0,10)] || null; }
 function saveQuizAnswer(picked, correct) {
@@ -2623,7 +2947,10 @@ function saveQuizAnswer(picked, correct) {
 // ---------- LISTENED (Did-She-Tell-You) ----------
 const LISTENED_KEY = 'brocode_listened';
 function loadListened() { try { return JSON.parse(localStorage.getItem(LISTENED_KEY)) || []; } catch { return []; } }
-function saveListened(arr) { localStorage.setItem(LISTENED_KEY, JSON.stringify(arr)); }
+function saveListened(arr) {
+  try { localStorage.setItem(LISTENED_KEY, JSON.stringify(arr)); }
+  catch { showToast("Storage is full or blocked, bro — check private browsing mode.", 'error'); }
+}
 function addListened(note) {
   const n = (note || '').trim();
   if (!n) return;
@@ -2733,6 +3060,8 @@ let state = {
   copiedAt: 0,
   todayMoveDone: localStorage.getItem('brocode_move_done') || null,
   broPoints: broPoints(),
+  broPasses: broPasses(),
+  celebrateQueue: [],
   archiveQuery: '',
   archiveOpen: (() => { try { return JSON.parse(localStorage.getItem('brocode_archive_open')) || {}; } catch { return {}; } })(),
   activityNow: Date.now(),
@@ -2768,6 +3097,8 @@ function showToast(msg, type) {
   const el = document.createElement('div');
   el.id = 'bro-toast';
   el.className = 'bro-toast ' + (type || 'success');
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
   el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }, 3000);
@@ -2895,7 +3226,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.2 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.2+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.3 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.3+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -2915,6 +3246,7 @@ function render() {
       </div>` : ''}
     ${state.showWelcome ? renderWelcome() : ''}
     ${state.showShare ? renderShareModal() : ''}
+    ${renderCelebration()}
   `;
   applyOnlineStatus();
   updateTitle();
@@ -2952,6 +3284,35 @@ function renderShareModal() {
       </div>
     </div>
   `;
+}
+
+// Landmark celebration — rank-ups, streak milestones, achievements. Nothing else.
+// Reps keep the plain toast; the contrast is what makes this land.
+function renderCelebration() {
+  const item = (state.celebrateQueue || [])[0];
+  if (!item) return '';
+  const kindLabel = item.kind === 'rank' ? '// rank up'
+                  : item.kind === 'streak' ? '// streak milestone'
+                  : '// achievement unlocked';
+  const more = (state.celebrateQueue || []).length - 1;
+  const confetti = Array.from({ length: 14 }, (_, i) => {
+    const colors = ['var(--red)','var(--orange)','var(--green)','var(--alert)','var(--cream)'];
+    return `<span class="confetti-bit" style="left:${(i * 7 + 3) % 100}%;background:${colors[i % colors.length]};animation-delay:${(i % 7) * 0.12}s"></span>`;
+  }).join('');
+  return `
+    <div class="modal-bg celebrate-bg" onclick="dismissCelebration()" role="dialog" aria-modal="true" aria-label="${h(item.title)}">
+      <div class="confetti" aria-hidden="true">${confetti}</div>
+      <div class="modal celebrate-modal" onclick="event.stopPropagation()">
+        <div class="label" style="color:var(--orange);text-align:center">${kindLabel}</div>
+        <div class="celebrate-emoji" aria-hidden="true">${item.emoji}</div>
+        <h2 class="display" style="font-size:26px;margin:0 0 10px;text-align:center;color:var(--cream);letter-spacing:0.06em">${h(item.title)}</h2>
+        <p style="margin:0 0 16px;text-align:center;font-size:14px;color:rgba(245,236,215,0.85);line-height:1.5">${h(item.line)}</p>
+        ${item.pts ? `<div class="label" style="text-align:center;color:var(--green);margin-bottom:14px">+${item.pts} PTS BANKED</div>` : ''}
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissCelebration()" data-keep="celebrate-ok">
+          ${more > 0 ? `NEXT (${more} MORE) →` : "LET'S GO →"}
+        </button>
+      </div>
+    </div>`;
 }
 
 function renderWelcome() {
@@ -3120,6 +3481,8 @@ function renderDashboard(day, phase, len) {
     </div>
 
     ${fertCard}
+
+    ${renderComebackCard()}
 
     ${pickAdvisory(day, phase, len, late)}
 
@@ -3301,6 +3664,7 @@ function renderOneMove(day, phase, len) {
       <h2>${h(moveText)}</h2>
       ${lab ? `<p style="margin:0 0 14px;font-size:12px;color:rgba(245,236,215,0.6);line-height:1.5">${h(lab.line)} <span class="mono" style="font-size:10px;color:rgba(245,236,215,0.45);white-space:nowrap">— lab-verified · ${h(lab.tag)}</span></p>` : ''}
       ${done ? `
+        ${renderLandedPrompt(phase)}
         <div class="row">
           <button class="btn btn-ghost" style="padding:10px 18px;font-size:13px" onclick="undoMove()">↺ UNDO</button>
         </div>
@@ -3312,6 +3676,42 @@ function renderOneMove(day, phase, len) {
       `}
     </div>
   `;
+}
+
+// Two taps, zero typing. Men bounce off journaling — this is a switch, not a diary.
+// Shown on roughly 1 day in 4, deterministic by date (no Math.random anywhere in this app).
+const LANDED_KEY = 'brocode_landed';
+function loadLanded() { try { return JSON.parse(localStorage.getItem(LANDED_KEY)) || {}; } catch { return {}; } }
+function shouldAskLanded() {
+  return epochDay() % 4 === 0;
+}
+function rateLanded(v) {
+  const today = new Date().toISOString().slice(0,10);
+  const all = loadLanded();
+  all[today] = { v, phase: phaseFor(cycleDay(state.profile), state.profile?.cycleLength || 28) };
+  try { localStorage.setItem(LANDED_KEY, JSON.stringify(all)); } catch {}
+  haptic(12);
+  showToast(v === 'hit' ? "Noted. More of that, bro." : v === 'meh' ? "Noted. Not every rep is a banger." : "Noted. Rough one — tomorrow's a fresh rep.", 'success');
+  afterScoringAction();
+  setState({});
+}
+function renderLandedPrompt(phase) {
+  if (!shouldAskLanded()) return '';
+  const today = new Date().toISOString().slice(0,10);
+  const rated = loadLanded()[today];
+  if (rated) {
+    const label = rated.v === 'hit' ? '🔥 landed well' : rated.v === 'meh' ? '😐 landed okay' : '💀 missed';
+    return `<div class="label" style="margin:0 0 14px;color:rgba(245,236,215,0.5);text-transform:none;letter-spacing:0;font-size:11px">rated: ${label} — that's how the coach learns, bro.</div>`;
+  }
+  return `
+    <div style="margin:0 0 14px;padding:10px 0;border-top:1px solid var(--border)">
+      <div class="label" style="margin-bottom:8px">// how'd that land?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="rateLanded('hit')">🔥 NAILED IT</button>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="rateLanded('meh')">😐 FINE</button>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="rateLanded('miss')">💀 MISSED</button>
+      </div>
+    </div>`;
 }
 
 function dailyQuizIndex() {
@@ -3327,6 +3727,7 @@ function answerQuiz(i) {
   addPoints(correct ? 10 : 3);
   haptic(correct ? 18 : 8);
   showToast(correct ? 'BROOOO! 🔥 +10 — certified knowledge.' : '+3 — wrong, but you learned. That still counts, bro.', correct ? 'success' : '');
+  afterScoringAction();
   setState({});
 }
 
@@ -3675,7 +4076,7 @@ function renderListenedCard() {
         </div>
       ` : ''}
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input id="listened-input" placeholder="e.g., sister's wedding May 20" style="flex:1" oninput="state.listenedDraft = this.value" value="${h(state.listenedDraft || '')}" />
+        <input id="listened-input" data-keep="listened-input" maxlength="140" placeholder="e.g., sister's wedding May 20" style="flex:1" oninput="state.listenedDraft = this.value" value="${h(state.listenedDraft || '')}" />
         <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="addListenedFromInput()">+ ADD</button>
       </div>
       ${recent.length ? recent.map(item => {
@@ -3788,11 +4189,77 @@ function jumpToOccasionPlays() {
   }, 50);
 }
 
+function renderTrophyCase() {
+  const unlocked = loadAchievements();
+  let ctx = null;
+  try { ctx = achievementContext(); } catch {}
+  const got = ACHIEVEMENTS.filter(a => unlocked[a.id]);
+  const left = ACHIEVEMENTS.filter(a => !unlocked[a.id]);
+  const pts = broPoints();
+  const rank = rankFor(pts);
+  const passes = broPasses();
+  const streak = ctx ? ctx.streak : 0;
+  return `
+  <div class="card corners">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px">
+      <div class="label">// trophy case</div>
+      <div class="label" style="color:var(--alert)">${got.length} / ${ACHIEVEMENTS.length}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px">${rank.emoji} ${h(rank.title)}</span>
+      <span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px;color:var(--alert)">${pts} PTS</span>
+      ${streak > 0 ? `<span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px;color:var(--orange)">🔥 ${streak} DAY${streak===1?'':'S'}</span>` : ''}
+      <span class="label" style="background:rgba(245,236,215,0.08);border:1px solid var(--border);border-radius:999px;padding:5px 11px" title="Bro Passes protect your streak on a missed day">🎟️ ${passes} PASS${passes===1?'':'ES'}</span>
+    </div>
+    ${rank.next ? `
+      <div class="label" style="margin-bottom:5px;color:rgba(245,236,215,0.55)">${pts}/${rank.next.min} → ${rank.next.emoji} ${h(rank.next.title)}</div>
+      <div style="height:5px;background:rgba(245,236,215,0.12);border-radius:999px;overflow:hidden;margin-bottom:14px"><span style="display:block;height:100%;width:${rank.pct}%;background:var(--alert)"></span></div>
+    ` : `<div class="label" style="margin-bottom:14px;color:var(--green)">👑 MAX RANK — nothing left to prove, bro.</div>`}
+    ${got.map(a => `
+      <div class="trophy unlocked">
+        <span class="tico">${a.emoji}</span>
+        <div style="min-width:0">
+          <div class="tname">${h(a.name)} ✓</div>
+          <div class="tdesc">${h(a.desc)}</div>
+        </div>
+      </div>`).join('')}
+    ${left.map(a => `
+      <div class="trophy locked">
+        <span class="tico">${a.emoji}</span>
+        <div style="min-width:0">
+          <div class="tname">${h(a.name)}</div>
+          <div class="tdesc">${h(a.desc)} <span style="color:rgba(245,236,215,0.4)">· +${a.pts}</span></div>
+        </div>
+      </div>`).join('')}
+    <div class="label" style="margin-top:12px;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(245,236,215,0.45)">every one of these is earned out there, not in here. no points for scrolling, bro.</div>
+  </div>`;
+}
+
+// Welcome back — no guilt, no red, no "you lost your streak". Research is explicit:
+// users who feel welcomed back stay; users who get shamed delete the app.
+function renderComebackCard() {
+  const gap = daysSinceLastLog();
+  if (gap === null || gap < 2) return '';
+  const streak = currentStreak();
+  const saved = streak > 0;
+  return `
+  <div class="card" style="border-left:3px solid var(--green)">
+    <div class="label" style="color:var(--green);margin-bottom:6px">// welcome back</div>
+    <p style="margin:0;font-size:14px;color:rgba(245,236,215,0.9);line-height:1.5">
+      ${saved
+        ? `Bro. You're back — and your ${streak}-day streak survived. ${gap === 2 ? 'One day off' : gap + ' days off'} is nothing. Nobody does this perfectly, that's the whole point.`
+        : `Bro. You're back. That's genuinely the hard part — most guys don't return. Streak resets, but everything you learned didn't. Let's go.`}
+    </p>
+  </div>`;
+}
+
 function renderToolbox(phase) {
   if (!state.profile?.lastPeriod) return renderQuickStart();
   const didToday = loggedToday();
   return `
   <div class="stagger">
+    ${renderTrophyCase()}
+
     ${renderPlaysCard(phase)}
 
     ${renderListenedCard()}
@@ -3800,10 +4267,10 @@ function renderToolbox(phase) {
     <div class="card">
       <div class="label" style="margin-bottom:10px">// log today ${didToday?'<span style="color:var(--green)">✓</span>':''}</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-        <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+1</span></button>
-        <button class="btn btn-ghost qlog${state.justLogged==='talk'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK<span class="floater">+1</span></button>
-        <button class="btn btn-ghost qlog${state.justLogged==='conflict'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT<span class="floater">+1</span></button>
-        <button class="btn btn-ghost qlog${state.justLogged==='apology'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY<span class="floater">+1</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='gift'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('gift','${phase}')">🎁 GIFT<span class="floater">+5</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='talk'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('talk','${phase}')">💬 TALK<span class="floater">+5</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='conflict'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('conflict','${phase}')">⚡ CONFLICT<span class="floater">+2</span></button>
+        <button class="btn btn-ghost qlog${state.justLogged==='apology'?' just-logged':''}" style="padding:10px 6px;font-size:12px;justify-content:center" onclick="quickLog('apology','${phase}')">🙏 APOLOGY<span class="floater">+5</span></button>
       </div>
       <div class="label" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(245,236,215,0.45)">feeds the receipt + your streak. log what actually happened, bro.</div>
     </div>
@@ -3824,24 +4291,42 @@ function renderQuickStart() {
     <div class="hero corners" data-phase="menstrual">
       <div class="label" style="color:rgba(245,236,215,0.8)">// new playbook</div>
       <h1 style="font-size:clamp(34px,9vw,56px)">START THE CODE.</h1>
-      <div class="sub">Two fields. One minute. The whole app lights up.</div>
+      <div class="sub">One date. One minute. The whole app lights up.</div>
     </div>
     <div class="card">
       <div class="label" style="margin-bottom:14px">// quick start</div>
       <form onsubmit="quickStart(event)">
         <label class="field">
           <span class="label" style="margin-bottom:8px">Her name (optional)</span>
-          <input id="qs-name" placeholder="e.g., Maya" />
+          <input id="qs-name" maxlength="40" placeholder="e.g., Maya" />
         </label>
         <label class="field">
           <span class="label" style="margin-bottom:8px">First day of her last period</span>
           <input id="qs-date" type="date" max="${today}" required />
         </label>
+        <label class="field">
+          <span class="label" style="margin-bottom:8px">Her cycle length (days)</span>
+          <input id="qs-len" type="number" min="21" max="35" value="28" />
+          <span class="label" style="margin-top:6px;text-transform:none;letter-spacing:0;font-size:11px;color:rgba(245,236,215,0.5)">28 is the average — leave it. It self-corrects as you log her actual periods.</span>
+        </label>
+        <p style="margin:2px 0 14px;font-size:13px;color:rgba(245,236,215,0.7);line-height:1.5">
+          Here's what happens next, bro: the app works out which of her four phases she's in, then gives you
+          <strong>one small move a day</strong> — plus the science behind why it works. That's the whole thing.
+        </p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">
           <button class="btn btn-primary" type="submit">ENTER THE CODE →</button>
           <button class="btn btn-ghost" type="button" onclick="go('profile')">Or build full profile</button>
         </div>
       </form>
+    </div>
+    <div class="card">
+      <div class="label" style="margin-bottom:8px">// straight up</div>
+      <p style="margin:0;font-size:13px;color:rgba(245,236,215,0.7);line-height:1.55">
+        Everything stays on this device — no login, no server, no one else sees it.
+        And bro: tell her you're using this. Research is clear that tracking together beats tracking secretly —
+        "I want to show up better for you" lands as care every time.
+        <a href="privacy.html" target="_blank" rel="noopener" style="color:rgba(245,236,215,0.85);text-decoration:underline">how the data works →</a>
+      </p>
     </div>
   </div>`;
 }
@@ -4501,13 +4986,20 @@ function go(tab) {
 function dismissWelcome() { localStorage.setItem(SEEN, '1'); setState({ showWelcome: false }); }
 function quickStart(e) {
   e.preventDefault();
-  const name = $('#qs-name').value.trim();
+  const name = $('#qs-name').value.trim().slice(0, 40);
   const lastPeriod = $('#qs-date').value;
   if (!lastPeriod) return;
+  const lenRaw = parseInt($('#qs-len')?.value, 10);
+  const cycleLength = clampCycleLength(Number.isFinite(lenRaw) ? lenRaw : 28);
   const profile = saveProfile({
-    name, lastPeriod, cycleLength: 28, relationship: 'girlfriend',
+    name, lastPeriod, cycleLength, relationship: 'girlfriend',
     neurology: [], comfort: [], cravings: [], love: [], notes: ''
   });
+  if (!profile) return; // storage blocked — saveProfile already surfaced the toast
+  state.profile = profile;
+  // End the very first interaction on a win — early wins are what build the habit.
+  addPoints(10);
+  afterScoringAction();
   setState({ profile });
 }
 function navMonth(delta) {
@@ -4536,6 +5028,7 @@ function markMoveDone() {
   haptic(18);
   state.todayMoveDone = today;
   state.streakTick = 1;
+  afterScoringAction();
   render();
   setTimeout(() => { state.streakTick = 0; render(); }, 240);
 }
@@ -4557,11 +5050,16 @@ function skipMove() {
 // ---------- ACTIVITY TICK ----------
 function tickActivity() { setState({ activityNow: Date.now() }); }
 
+// Real points, matching the floater the button shows. Conflicts pay less but still pay —
+// logging one honestly is the behavior we want, not something to punish.
+const LOG_POINTS = { gift: 5, talk: 5, apology: 5, conflict: 2 };
 function quickLog(kind, phase) {
   addLog(kind, phase);
+  addPoints(LOG_POINTS[kind] || 0);
   haptic(12);
   state.justLogged = kind;
   state.streakTick = 1;
+  afterScoringAction();
   render();
   setTimeout(() => {
     state.justLogged = null;
@@ -4605,7 +5103,7 @@ function logPeriodStart() {
     const recent = lens.slice(-3);
     next.cycleLength = Math.max(21, Math.min(35, Math.round(recent.reduce((a, b) => a + b, 0) / recent.length)));
   }
-  state.profile = saveProfile(next);
+  state.profile = saveProfile(next) || state.profile;
   haptic(14);
   setState({ profile: state.profile, periodConfirm: 0, justLoggedPeriod: Date.now() });
   setTimeout(() => { if (Date.now() - (state.justLoggedPeriod || 0) >= 5000) setState({ justLoggedPeriod: 0 }); }, 5200);
@@ -4670,6 +5168,7 @@ function addListenedFromInput() {
   if (!note || !note.trim()) return;
   addListened(note);
   state.listenedDraft = '';
+  afterScoringAction();
   render();
 }
 function markListened(id) { markListenedDone(id); render(); }
@@ -4727,7 +5226,7 @@ function debouncedSave(p) {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     if (!p.lastPeriod) return;
-    state.profile = saveProfile(p);
+    state.profile = saveProfile(p) || state.profile;
     flashSaved();
   }, 500);
 }
@@ -4780,7 +5279,10 @@ function importProfile(e) {
     try {
       const data = JSON.parse(reader.result);
       if (!data.lastPeriod) throw new Error('No lastPeriod field.');
-      state.profile = saveProfile(data);
+      data.cycleLength = clampCycleLength(data.cycleLength);
+      const saved = saveProfile(data);
+      if (!saved) throw new Error('Storage blocked.');
+      state.profile = saved;
       render();
       showToast('Profile imported.', 'success');
     } catch (err) { showToast('Import failed: ' + err.message, 'error'); }
@@ -5055,6 +5557,13 @@ function applyOnlineStatus() {
 }
 window.addEventListener('online',  applyOnlineStatus);
 window.addEventListener('offline', applyOnlineStatus);
+
+// Escape closes whatever overlay is up, celebration first.
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if ((state.celebrateQueue || []).length) { dismissCelebration(); return; }
+  if (state.showShare) { closeShare(); return; }
+});
 
 // ---------- UPDATE PROMPT ----------
 function applyUpdate() { window.location.reload(); }
