@@ -910,8 +910,8 @@ const BRO_TRUTHS = [
 
 
 const BRO_FACTS = [
-  "Bro fact: women experience pain at lower thresholds during ovulation. Yes, even period pain. Yes, that's biology.",
-  "Brooooo fact: estrogen affects how she perceives YOUR mood. If you're stressed, she feels it 2x. Calm down for her.",
+  "Bro fact: pain sensitivity does appear to shift across her cycle, though studies disagree on exactly when. Short version: believe her, don't audit her.",
+  "Brooooo fact: stress is contagious in couples — your mood genuinely lands on her. No magic multiplier, but regulating yourself is doing real work.",
   "Psst bro — testosterone spikes in her during ovulation. Yes, women have testosterone. That's why she's bolder this week.",
   "Bro real quick: the luteal phase is ALWAYS 14 days. Doesn't matter what cycle length. Ovulation = period day minus 14.",
   "Brooooo, sleep gets worse in luteal due to progesterone changes. She's not lazy. She's chemically tired.",
@@ -920,7 +920,7 @@ const BRO_FACTS = [
   "Bro listen — orgasms can reduce period cramps. Make of that what you will.",
   "Brooooo fact: cortisol (stress) blocks progesterone. If she's overwhelmed AND in luteal, that's a chemical pile-up.",
   "Real talk bro — her gut bacteria literally change across the cycle. Cravings aren't 'just cravings.'",
-  "Bro fact: cycle-syncing exercise — high intensity in follicular, restorative in luteal — is actual research.",
+  "Bro fact: 'cycle syncing' your workouts is mostly hype — 2023-25 reviews found cycle phase doesn't meaningfully change strength or endurance. Train by how she FEELS, not by a chart.",
   "Psst bro — birth control changes ALL of this. If she's on hormonal birth control, phases work differently.",
   "Brooooo, the average woman bleeds 30-40ml total per period. About 2 tablespoons. It feels like more.",
   "Bro fact: roughly 90% of women feel some premenstrual symptoms. The 10% who don't aren't lying. People vary.",
@@ -930,8 +930,8 @@ const BRO_FACTS = [
   "Psst bro — endometriosis affects ~10% of women and is wildly underdiagnosed. If she says period pain is bad, believe her.",
   "Bro fact: the cycle isn't synced to the moon. That's vibes, not biology. Sorry to ruin that one.",
   "Real talk bro — perimenopause can start in her late 30s. Cycle gets unpredictable years before it stops.",
-  "Bro, on the day of ovulation, her face is measurably more symmetric. Yes, peer-reviewed. Yes, wild.",
-  "Brooooo, women average 3 more REM sleep cycles per night than men. She's not 'extra tired' — you're just less tired.",
+  "Bro, those viral 'she wants different men at ovulation' claims? Large replication studies mostly killed them. What DID hold up: general sexual desire rises. That's it.",
+  "Brooooo, the 'women need way more sleep' thing is overstated online — differences are modest. But her sleep genuinely gets wrecked in luteal. That part is real.",
   "Bro fact: 2025 research shows partner support measurably LOWERS her symptom severity. You're not a bystander — you're treatment. [lab-verified]",
   "Real talk bro — meta-analysis of 25 trials: heat rivals painkillers for cramps. The heating pad is medical equipment. [lab-verified]",
   "Psst bro — daily-diary studies say small acts done today beat grand gestures for building intimacy. One rep a day. [lab-verified]",
@@ -941,7 +941,7 @@ const BRO_FACTS = [
   "Brooooo, menstrual migraines last up to 35% longer than regular ones. 'It's just a headache' is objectively wrong.",
   "Bro fact: a migraine that hits a few days INTO her period is usually iron loss, not hormones. Feed her, don't just dim the lights.",
   "Psst bro — vitamin C helps her absorb iron. Steak with citrus, lentils with peppers. Tiny trick, real difference.",
-  "Bro listen — Gottman's lab predicted divorce with 90%+ accuracy just from HOW couples argued. Not how often. How.",
+  "Bro listen — Gottman's famous 90% divorce-prediction number was fitted after the fact and didn't fully hold up on retest. The useful part stands: HOW you argue matters more than how often.",
   "Bro fact: the four relationship killers are criticism, contempt, defensiveness, and stonewalling. Contempt is the deadliest. No eye-rolls, ever.",
   "Real talk — a 'repair attempt' is any small move to reconnect mid-fight. A joke, a hand, 'we're okay.' Couples who make them survive.",
   "Brooooo, happy couples don't argue less. They argue differently. Soften how you open and you've won most of it.",
@@ -976,7 +976,7 @@ const LAB = [
   { line:"Your backup is literally medicine, bro. Studies show partner support measurably lowers her symptom severity — and being dismissed makes it worse.", tag:"2025 clinical survey", phase:'luteal' },
   { line:"Luteal words are weather, not verdicts. Research says read the phase, not the transcript.", tag:"2025 clinical survey", phase:'luteal' },
   // — unphased —
-  { line:"Gottman's lab predicted divorce with over 90% accuracy — not from how much couples fought, but from HOW. Style beats frequency, bro.", tag:"Gottman lab" },
+  { line:"That famous 90% divorce-prediction stat was fitted to the same data it came from — treat the number with suspicion. The finding that survives: style of arguing beats frequency.", tag:"Gottman lab · contested" },
   { line:"The four relationship killers: criticism, contempt, defensiveness, stonewalling. Contempt is the worst one. Zero eye-rolls, bro.", tag:"Gottman lab" },
   { line:"A repair attempt is any small move to reconnect mid-fight — a joke, a hand, 'we're okay.' Couples who make them survive fights that would sink others.", tag:"Gottman lab" },
   { line:"Happy couples don't argue less. They argue differently. Soften the opener and you've won most of it already.", tag:"Gottman lab" },
@@ -1001,7 +1001,7 @@ const LAB = [
   { line:"Endometriosis affects ~10% of women, takes years to diagnose, and drives both heavy bleeding and chronic inflammation. Believing her the first time is the whole play.", tag:"clinical research", phase:'menstrual' },
   // — follicular —
   { line:"Rising estrogen sharpens verbal memory and mood. She's not 'suddenly fine' — her brain chemistry genuinely shifted. Match the energy.", tag:"neuroendocrine research", phase:'follicular' },
-  { line:"High-intensity training lands best when estrogen's climbing. If she wants to go hard this week, that's physiology, not a phase.", tag:"cycle-syncing research", phase:'follicular' },
+  { line:"If she wants to train hard this week, back her — but skip the 'cycle syncing' scripts. Reviews found phase doesn't reliably change performance. Her energy today beats any chart.", tag:"2023 umbrella review", phase:'follicular' },
   { line:"This is the week to redistribute a chore permanently — decisions made in a good mood stick better than ones made under pressure.", tag:"mental-load study 2025", phase:'follicular' },
   { line:"Novelty hits harder for both of you when her energy's up. New restaurant, new route, new anything. Book it this week.", tag:"couples research", phase:'follicular' },
   { line:"Ask the awkward logistics question now — money, in-laws, the calendar. Clear-headed week, clean answer.", tag:"couples research", phase:'follicular' },
@@ -1103,9 +1103,9 @@ const TRIVIA = [
   { q:"Late-luteal words should be read as...?",
     opts:["Final verdicts","Weather","Tests you must pass"], a:1,
     why:"Weather, not verdicts. Read the phase, not the transcript. Revisit big topics after the front passes." },
-  { q:"Cycle-syncing exercise means...?",
-    opts:["High intensity in follicular, restorative in luteal","Never exercising","Same workout daily"], a:0,
-    why:"Real research: push hard when estrogen's up (follicular), go restorative in luteal." },
+  { q:"Does \u201ccycle syncing\u201d your workouts hold up scientifically?",
+    opts:["No \u2014 reviews found little real effect","Yes, it's settled science","Only for elite athletes"], a:0,
+    why:"A 2023 umbrella review and 2025 studies found cycle phase doesn't meaningfully change strength or endurance. Train to how she feels that day, bro \u2014 not to a chart." },
   { q:"On hormonal birth control, the four phases...?",
     opts:["Work exactly the same","May be muted or gone","Get more intense"], a:1,
     why:"Hormonal methods can suppress the cycle partly or fully. Read HER, not just the calendar." },
@@ -1115,9 +1115,9 @@ const TRIVIA = [
   { q:"After having a baby, her cycle typically returns...?",
     opts:["Immediately","In 6–18 months","Never changes"], a:1,
     why:"6–18 months, sometimes chaotic on the way back. Zero expectations, maximum patience." },
-  { q:"Gottman's lab predicted whether couples would last with what accuracy?",
-    opts:["Over 90%","About 50%","Around 65%"], a:0,
-    why:"Over 90% — from HOW they argued, not how much. Style beats frequency, bro." },
+  { q:"That famous \u201c90% accurate divorce prediction\u201d stat is...?",
+    opts:["Rock solid","Fitted after the fact and contested","Never been questioned"], a:1,
+    why:"It was calculated on the same data it came from, and independent cross-validation failed. The durable finding is simpler: HOW you argue beats how often." },
   { q:"Which of these did Gottman name the single most corrosive?",
     opts:["Contempt","Being messy","Arguing loudly"], a:0,
     why:"Contempt — eye-rolls, mockery, sneering. It's the strongest predictor of a relationship ending. Zero tolerance for it in yourself." },
@@ -1229,9 +1229,12 @@ const TRIVIA = [
   { q:"Roughly how much of relationship satisfaction comes from turning toward bids?",
     opts:["About 65%","About 10%","It's not measurable"], a:0,
     why:"~65%. Not date nights, not gifts — answering the small stuff. Put your phone down when she says something." },
-  { q:"Restorative exercise (yoga, walking) fits best in which phase?",
-    opts:["Luteal","Ovulation","Follicular"], a:0,
-    why:"Cycle-syncing: push hard when estrogen's up, go restorative in luteal. Actual research, not wellness fluff." }
+  { q:"If she wants to train hard during her period, you should...?",
+    opts:["Back her — it's her call","Talk her out of it","Insist she rests instead"], a:0,
+    why:"Exercise is the best-evidenced cramp reliever, and cycle phase doesn't reliably limit performance. Support what she wants, don't prescribe it." },
+  { q:"The 'love languages' framework is...?",
+    opts:["Popular but weakly supported","Rigorously proven","Completely made up"], a:0,
+    why:"A 2024 review found its three core claims don't hold up — people value all of them, and matching doesn't reliably predict satisfaction. Being responsive to what SHE actually asks for is what works." }
 ];
 
 const CHEERS = [
@@ -1781,13 +1784,17 @@ const HEALTH_LIT = [
   { title:"The mental load", tag:"mental-load study 2025",
     body:"Beyond physical chores there's cognitive labour — remembering, planning, monitoring, and carrying responsibility. Research puts mothers at roughly 71% of the mental load and 73% of cognitive planning, while physical execution is far more shared. Critically: it does NOT shrink when women earn more, or when couples say they believe in equality. It shrinks when cognitive ownership is explicitly redistributed — when you take a whole category permanently, without reminders. 'Just tell me what to do' leaves her as the manager." },
   { title:"Gottman's four", tag:"Gottman lab",
-    body:"Decades of research tracking hundreds of couples predicted relationship outcomes with over 90% accuracy — from HOW couples argue, not how often. The four most destructive patterns: criticism (attacking character, not behaviour), contempt (mockery, eye-rolling — the single strongest predictor of a breakup), defensiveness (counter-attacking instead of hearing it), and stonewalling (shutting down and withdrawing). Happy couples don't argue less. They argue differently." },
+    body:"Straight up on the famous number first: the \u201c90%+ divorce prediction\u201d stat was calculated on the same data the model was built from, and an independent cross-validation failed to reproduce it. Treat the accuracy claim as marketing. What has held up much better is the descriptive part \u2014 that HOW couples argue matters more than how often. The four most destructive patterns: criticism (attacking character, not behaviour), contempt (mockery, eye-rolling — the single strongest predictor of a breakup), defensiveness (counter-attacking instead of hearing it), and stonewalling (shutting down and withdrawing). Happy couples don't argue less. They argue differently." },
   { title:"Repair attempts", tag:"Gottman lab",
     body:"A repair attempt is any small move to reconnect mid-conflict — humour, affection, a touch, or just 'we're okay.' Couples who make them AND accept them maintain satisfaction even when conflict is frequent and intense. Related: soften the startup. How a hard conversation opens strongly predicts how it ends, so lead with 'I feel' and a specific request, never 'you always.'" },
   { title:"Bids for connection", tag:"Gottman lab",
     body:"The highest-leverage thing in this entire app. A 'bid' is any small attempt to get your attention — she shows you a photo, sighs, says 'huh, weird,' reads something out loud. You either TURN TOWARD it (look up, respond, engage) or turn away (grunt, keep scrolling). Couples who were still together six years later turned toward bids 86% of the time. Couples who divorced: 33%. Research concluded turning toward accounts for roughly 65% of why couples feel satisfied with each other. Not the holidays, not the gifts — the ten-second moments you're currently missing because your phone is in your hand." },
   { title:"Responsiveness", tag:"couples research",
     body:"Perceived partner responsiveness is described as the bedrock of intimacy — and it's driven by enacted responsiveness, meaning concrete daily acts. Daily-diary studies show small acts done today predict intimacy better than grand gestures. It also has to LAND as support: what you intended matters less than what she experienced. Which is why asking beats assuming, every time." },
+  { title:"What we're NOT sure about", tag:"honesty section",
+    body:"Bro, an app that only tells you what's confirmed is lying by omission. Things in here that are solid: heat therapy for cramps, the iron gap, PMDD prevalence, endometriosis rates, progesterone wrecking luteal sleep, partner support lowering symptom severity. Things that are shakier than the internet claims: \"cycle syncing\" your workouts (2023-25 reviews found phase doesn't meaningfully change performance), the viral ovulation mate-preference studies (large replications mostly failed), the famous \"90% divorce prediction\" number (fitted after the fact, failed independent cross-validation), and the five love languages (a 2024 review found its core assumptions don't hold). We still use pace and love-language preferences in here — but as things SHE told you she likes, not as laws of nature. When the science and her actual words disagree, believe her." },
+  { title:"Love languages, honestly", tag:"2024 review",
+    body:"Chapman's five love languages came from a counsellor's observations, not controlled research. A 2024 review in relationship science found the three core assumptions don't hold up: most people don't have one primary language, people value all five, and matching your partner's supposed language doesn't reliably predict satisfaction. All forms of expressed affection tracked with higher satisfaction. What DOES predict it is emotional responsiveness — being tuned into her actual needs and cues right now. So use the profile toggles as a hint about what she enjoys, then let this week's reality override the label." },
   { title:"Cycle literacy as teamwork", tag:"health-literacy research",
     body:"Menstrual health literacy is linked to better symptom management, better help-seeking, and better quality of life. Around 60% of women say their partner's lack of knowledge about female health negatively affects the relationship. Tracking together isn't surveillance — done openly, it's shared infrastructure. The word that matters is 'openly.'" }
 ];
@@ -1809,7 +1816,7 @@ const FAQ = [
   { q:"When does perimenopause start?", a:"Bro, it can start in her late 30s — the cycle gets unpredictable for YEARS before it actually stops. If her pattern changes and she's in that range, it's not 'too young for that.'" },
   { q:"Does bad sleep actually mess with her cycle?", a:"Yeah. Rotating shift work is linked to shorter or longer cycles, and progesterone wrecks sleep quality in luteal anyway. Sleep is cycle infrastructure — protecting hers is a real contribution." },
   { q:"What's the 'mental load' everyone talks about?", a:"The invisible half, bro — remembering, planning, noticing what needs doing. Research puts mothers at ~71% of it. And it doesn't shrink because you help more; it shrinks when you OWN a category outright. Take the whole job, permanently, no reminders." },
-  { q:"What actually predicts whether a relationship lasts?", a:"Gottman's lab hit 90%+ accuracy predicting it — from HOW couples argue, not how much. The four killers: criticism, contempt, defensiveness, stonewalling. Contempt is the worst. And the couples who make it are the ones who repair afterward." },
+  { q:"What actually predicts whether a relationship lasts?", a:"Careful with the famous stat here, bro \u2014 the 90%+ prediction figure was fitted after the fact and didn't survive independent cross-validation, so don't quote it as gospel. The part that's held up: HOW couples argue matters more than how much. The four killers: criticism, contempt, defensiveness, stonewalling. Contempt is the worst. And the couples who make it are the ones who repair afterward." },
   { q:"What's the single highest-value habit I could build?", a:"Turning toward her bids, bro. A 'bid' is any small attempt at connection — showing you a photo, sighing, saying 'huh, weird.' You either look up and engage, or you grunt and keep scrolling. Couples still together six years later turned toward bids 86% of the time; couples who divorced, 33%. Research puts it at roughly 65% of why couples feel satisfied with each other. It costs ten seconds and it beats every grand gesture you could plan." },
   { q:"What's a 'repair attempt'?", a:"Any small move to reconnect mid-conflict — a joke, a hand on her arm, 'hey, we're okay.' Sounds trivial, but it's one of the strongest predictors of couples surviving fights. Offer them, and accept hers when she offers first." }
 ];
@@ -2009,7 +2016,13 @@ const PERSONALIZE = {
     [p => has(p.love,'touch'),        "Bro, hold her. Back rubs. Warm presence. That's the whole move."],
     [p => has(p.comfort,'held'),      "Psst bro — she wants to be held, not talked at. Arms first, words later."],
     [p => p.type==='a-type',          "Psst bro — she hates feeling unproductive. Normalize rest as productive."],
-    [p => p.type==='b-type',          "Real talk bro — she's not behind on anything. Don't project a schedule onto her rest."]
+    [p => p.type==='b-type',          "Real talk bro — she's not behind on anything. Don't project a schedule onto her rest."],
+    [p => has(p.cravings,'sweet'),    "Bro, sweet cravings + low iron week. Dark chocolate covers both — magnesium AND a bit of iron. Get the good stuff."],
+    [p => has(p.cravings,'salty'),    "Psst bro — restock her salty go-to before she goes looking and finds an empty cupboard."],
+    [p => has(p.cravings,'carbs'),    "Brooooo, comfort carbs today. Warm, easy, already made. Don't make her choose."],
+    [p => has(p.cravings,'spicy'),    "Bro, her spicy favourite, ordered without a poll being taken. Just arrive with it."],
+    [p => (p.favorites||'').trim(),   "Bro listen — go get {fav}. You wrote it down for exactly this week."],
+    [p => (p.dietary||'').trim(),     "Psst bro — she's {diet}. Check the label before you turn up proud with the wrong snack."]
   ],
   follicular: [
     [p => p.social==='extrovert',     "Brooooo, she wants social. Be her hype man and plan something."],
@@ -2060,8 +2073,15 @@ function profileTraits(p) {
 }
 function fillName(str) {
   if (!str) return str;
-  const n = (state.profile?.name || '').trim();
-  return str.replace(/\{name\}/g, n || 'her');
+  const p = state.profile || {};
+  const n = (p.name || '').trim();
+  // {fav} takes the first item off her favourites list; {diet} is her stated restriction.
+  const fav = (p.favorites || '').split(',')[0].trim();
+  const diet = (p.dietary || '').trim();
+  return str
+    .replace(/\{name\}/g, n || 'her')
+    .replace(/\{fav\}/g, fav || 'her usual')
+    .replace(/\{diet\}/g, diet || 'got dietary stuff going on');
 }
 
 // ---------- CYCLE MATH ----------
@@ -3226,7 +3246,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.3 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.3+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.4 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.4+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -4524,8 +4544,9 @@ function renderProfile() {
     <details class="acc" id="acc-personality" ${state.profileOpen?.personality ? 'open' : ''} ontoggle="setProfileOpen('personality', this.open)">
       <summary><div class="title-row"><span class="num">03</span><span class="name">Personality</span><span class="opt">// optional</span></div><span class="plus">+</span></summary>
       <div class="body">
-        <div class="label" style="margin-bottom:8px">Type</div>
-        ${pillGroup('type', [{id:'a-type',label:'A-Type'},{id:'b-type',label:'B-Type'}], false)}
+        <div class="label" style="margin-bottom:8px">Pace</div>
+        ${pillGroup('type', [{id:'a-type',label:'Driven / go-go-go'},{id:'b-type',label:'Easy-going'}], false)}
+        <div class="label" style="margin:6px 0 14px;text-transform:none;letter-spacing:0;font-size:11px;color:rgba(245,236,215,0.5);line-height:1.5">Heads up bro — "Type A/B personality" isn't real science, it got abandoned decades ago. We just use this as a shortcut for her natural pace, because it changes how rest advice should land.</div>
         <div class="label" style="margin:14px 0 8px">Social</div>
         ${pillGroup('social', [{id:'introvert',label:'Introvert'},{id:'extrovert',label:'Extrovert'},{id:'ambivert',label:'Ambivert'}], false)}
       </div>
@@ -4574,6 +4595,7 @@ function renderProfile() {
         ${pillGroup('love', [
           {id:'words',label:'Words of Affirmation'},{id:'acts',label:'Acts of Service'},
           {id:'gifts',label:'Receiving Gifts'},{id:'time',label:'Quality Time'},{id:'touch',label:'Physical Touch'}])}
+        <div class="label" style="margin-top:12px;text-transform:none;letter-spacing:0;font-size:11px;color:rgba(245,236,215,0.5);line-height:1.55">Straight up: a 2024 review found the "five love languages" don't really hold up — most people value all five, and matching them doesn't reliably predict a happier relationship. Tick what she's actually told you she likes and we'll bias tips that way. But the thing that genuinely works is responding to what she asks for THIS week, not typing her forever.</div>
       </div>
     </details>
 
