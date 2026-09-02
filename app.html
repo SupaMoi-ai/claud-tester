@@ -3036,6 +3036,64 @@ const h = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
 
+// ---------- DEMO MODE ----------
+// `app.html?demo=1` seeds a fictional profile ("Maya") so the website's "try the demo" button and
+// the screenshot pipeline get a populated app. It NEVER overwrites a real profile.
+const DEMO_KEY = 'brocode_demo';
+function seedDemoIfRequested() {
+  let wanted = false;
+  try { wanted = /(?:^|[?&])demo=1(?:&|$)/.test(location.search); } catch { return; }
+  if (!wanted) return;
+  if (loadProfile()) return;                       // real data present — leave it alone
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const today = midnight(new Date());
+  const lastPeriod = new Date(today); lastPeriod.setDate(lastPeriod.getDate() - 23);   // cycle day 24: late luteal
+  const len = 28;
+  const set = (k, v) => { try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch {} };
+  saveProfile({
+    name: 'Maya', cycleLength: len, lastPeriod: iso(lastPeriod), relationship: 'girlfriend',
+    neurology: ['anxiety'], comfort: ['heat', 'held'], love: ['words', 'time'], cravings: ['sweet'],
+    favorites: 'Thai green curry, dark chocolate', dietary: '', social: 'introvert', type: 'a-type',
+    contraception: 'none', notes: 'Hates surprises when tired. Loves a plan she can see coming.',
+    dates: {}
+  });
+  // 12 consecutive days of activity so the streak reads 12 and the banked Bro Pass stays banked.
+  const log = [];
+  const at = (daysAgo, hour) => { const d = new Date(today); d.setDate(d.getDate() - daysAgo); d.setHours(hour, 0, 0, 0); return d; };
+  const push = (daysAgo, kind, hour = 19) => {
+    const d = at(daysAgo, hour);
+    const cycleDay = ((24 - daysAgo - 1 + len) % len) + 1;
+    log.push({ date: iso(d), kind, phase: phaseFor(cycleDay, len), at: d.getTime() });
+  };
+  for (let d = 11; d >= 0; d--) push(d, 'move');
+  [7, 4, 1].forEach(d => push(d, 'talk', 20));
+  push(5, 'gift', 18);
+  push(3, 'conflict', 21);
+  push(2, 'apology', 9);                           // repaired inside 24h — the Gottman signal
+  log.sort((a, b) => a.at - b.at);
+  set(LOG_KEY, log);
+  set(POINTS_KEY, '185');
+  set(PASS_KEY, '1');
+  set(STREAK_SEEN_KEY, [3, 7]);
+  const now = Date.now();
+  const ach = {};
+  ['day-one', 'first-rep', 'profile', 'week1', 'listener', 'honest', 'repairman'].forEach((id, i) => { ach[id] = now - (7 - i) * DAY; });
+  set(ACH_KEY, ach);
+  // Today's quiz answered correctly, plus a short back-run of correct days.
+  const quiz = {};
+  [2, 1].forEach(d => { quiz[iso(at(d, 12))] = { picked: 0, correct: true }; });
+  const q = TRIVIA[dailyQuizIndex()];
+  quiz[iso(today)] = { picked: q.a, correct: true };
+  set(QUIZ_KEY, quiz);
+  set(LISTENED_KEY, [
+    { id: 'L1', note: "Heating pad on the LEFT side, not the middle", at: now - 6 * DAY, status: 'done', doneAt: now - 2 * DAY },
+    { id: 'L2', note: "Don't ask 'what's wrong' — just sit down", at: now - 3 * DAY, status: 'open' }
+  ]);
+  set(SEEN, '1');                                  // skip the welcome modal
+  set(DEMO_KEY, '1');
+}
+seedDemoIfRequested();
+
 // ---------- STATE ----------
 let state = {
   tab: 'dashboard',
@@ -3246,7 +3304,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.5 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.5+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.6 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.6+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -3434,7 +3492,42 @@ function pickAdvisory(day, phase, len, late) {
 }
 
 // At most one onboarding banner per load — priority: install > notifications > her method.
+function renderDemoBanner() {
+  let on = false;
+  try { on = localStorage.getItem(DEMO_KEY) === '1'; } catch {}
+  if (!on) return '';
+  return `
+    <div class="card" style="border-left:3px solid var(--alert)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0;flex:1">
+          <div class="label" style="color:var(--alert)">// demo profile</div>
+          <p style="margin:6px 0 0;color:var(--cream);line-height:1.45;font-size:14px">This is Maya. She's not real, bro. Everything you see is seeded so you can poke around — swap in your actual partner under Her Profile, or wipe it and start clean.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="go('profile')">→ HER PROFILE</button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:rgba(245,236,215,0.7)" onclick="startFreshFromDemo()">START FRESH</button>
+          </div>
+        </div>
+        <button class="x" onclick="dismissDemoBanner()" aria-label="Got it" style="background:none;border:0;color:rgba(245,236,215,0.55);font-size:20px;cursor:pointer;padding:0 4px;flex:0 0 auto">×</button>
+      </div>
+    </div>
+  `;
+}
+function dismissDemoBanner() {
+  haptic(6);
+  try { localStorage.removeItem(DEMO_KEY); } catch {}
+  setState({});
+}
+function startFreshFromDemo() {
+  haptic(8);
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith('brocode_')).forEach(k => localStorage.removeItem(k));
+  } catch {}
+  location.replace(location.pathname);            // drop ?demo=1 so it doesn't reseed
+}
+
 function pickBanner() {
+  const demo = renderDemoBanner();
+  if (demo) return demo;
   const install = renderInstallBanner();
   if (install) return install;
   const notif = renderNotifNudge();

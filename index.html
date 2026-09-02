@@ -4,31 +4,32 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0D1117" />
-<meta name="description" content="BRO CODE — the cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta name="description" content="BRO CODE — the cycle-aware coach for guys who want to be a better partner. One small act a day, a pop quiz, her weather forecast, and a trophy case you can only fill in real life. Funny on the surface, peer-reviewed underneath. No login, no tracking." />
 <title>BRO CODE — the playbook for showing up</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="BRO CODE — the playbook for showing up" />
-<meta property="og:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta property="og:description" content="The cycle-aware coach for guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone." />
 <meta property="og:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <meta property="og:url" content="https://supamoi-ai.github.io/claud-tester/" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="BRO CODE — the playbook for showing up" />
-<meta name="twitter:description" content="The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology." />
+<meta name="twitter:description" content="The cycle-aware coach for guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone." />
 <meta name="twitter:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <style>
   @font-face { font-family: 'Anton';   font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/Anton-Regular.woff2') format('woff2'); }
   @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
-  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
   @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
   :root {
     --red: #C8322C; --orange: #E07A4A; --cream: #F5ECD7; --night: #0D1117;
     --dark: #161B24; --mid: #1F2837; --border: #2A3547; --green: #3DAA6A; --alert: #E8B84B;
     --m: #C8322C; --f: #3DAA6A; --o: #E8B84B; --l: #7B68B8;
+    --muted: rgba(245,236,215,0.72);
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   html, body { margin: 0; padding: 0; background: var(--night); color: var(--cream); }
   body {
     font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -41,47 +42,61 @@
     opacity: 0.05; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 100; background: var(--red); color: var(--cream); padding: 8px 12px; border-radius: 4px; }
+  .skip:focus { left: 8px; }
   .display { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 400; }
   .label   { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: #b8b0a0; }
   .wrap    { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; padding: 0 18px; }
+  a { color: var(--cream); }
   header {
     position: sticky; top: 0; z-index: 30;
     background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
   }
-  header .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; max-width: 1100px; margin: 0 auto; }
-  .logo { display: flex; align-items: center; gap: 10px; }
+  header .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; max-width: 1100px; margin: 0 auto; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .logo .badge { width: 32px; height: 32px; background: var(--red); display: grid; place-items: center; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: var(--cream); }
   .logo .name  { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 18px; }
-  header .top-cta { padding: 7px 14px; background: var(--red); color: var(--cream); border-radius: 4px; text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; }
+  header nav { display: none; gap: 18px; }
+  header nav a { text-decoration: none; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.16em; font-size: 11px; color: var(--muted); }
+  header nav a:hover { color: var(--red); }
+  @media (min-width: 720px) { header nav { display: flex; } }
+  header .top-cta { padding: 7px 14px; background: var(--red); color: var(--cream); border-radius: 4px; text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; white-space: nowrap; }
 
   /* Hero */
-  .hero { padding: 56px 0 48px; text-align: left; }
+  .hero { padding: 56px 0 44px; display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 900px) { .hero { grid-template-columns: 1.2fr 0.8fr; } }
   .hero .eyebrow { color: var(--red); margin-bottom: 12px; }
   .hero h1 {
     font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
-    font-size: clamp(48px, 14vw, 112px); line-height: 0.92; letter-spacing: 0.02em;
-    margin: 0 0 22px; color: var(--cream); max-width: 16ch;
+    font-size: clamp(48px, 13vw, 108px); line-height: 0.92; letter-spacing: 0.02em;
+    margin: 0 0 22px; color: var(--cream); max-width: 12ch;
   }
   .hero h1 .red { color: var(--red); }
-  .hero .sub { font-size: clamp(17px, 4.4vw, 22px); line-height: 1.45; color: rgba(245,236,215,0.85); max-width: 36ch; margin: 0 0 26px; }
+  .hero .sub { font-size: clamp(17px, 4.4vw, 22px); line-height: 1.45; color: rgba(245,236,215,0.86); max-width: 34ch; margin: 0 0 26px; }
   .cta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.08em; font-size: 17px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; text-decoration: none; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
   .btn-primary { background: var(--red); color: var(--cream); box-shadow: 0 8px 24px rgba(200,50,44,0.32); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(200,50,44,0.45); }
   .btn-ghost { background: transparent; color: var(--cream); border-color: var(--border); }
   .btn-ghost:hover { border-color: var(--red); color: var(--red); }
-  .trust { font-size: 12px; color: rgba(245,236,215,0.55); font-family: 'Courier New', monospace; letter-spacing: 0.18em; text-transform: uppercase; }
+  .trust { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; letter-spacing: 0.18em; text-transform: uppercase; }
   .hero-dots { display: flex; gap: 8px; margin-top: 20px; }
   .hero-dots span { width: 10px; height: 10px; border-radius: 999px; }
   .hero-dots .m { background: var(--m); } .hero-dots .f { background: var(--f); } .hero-dots .o { background: var(--o); } .hero-dots .l { background: var(--l); }
+  .hero-shot { display: none; justify-self: center; }
+  @media (min-width: 900px) { .hero-shot { display: block; } }
+  .phone { width: 250px; border-radius: 26px; border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,0.5); background: var(--dark); display: block; }
+  .phone.small { width: 100%; max-width: 250px; }
 
   /* Sections */
   .section { padding: 48px 0; border-top: 1px solid var(--border); }
   .section h2 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(28px, 6vw, 44px); letter-spacing: 0.03em; margin: 6px 0 8px; }
-  .section p.lead { color: rgba(245,236,215,0.75); margin: 0 0 28px; font-size: 16px; max-width: 48ch; }
-  .pillars { display: grid; gap: 14px; grid-template-columns: 1fr; }
-  @media (min-width: 720px) { .pillars { grid-template-columns: repeat(3, 1fr); } }
+  .section p.lead { color: var(--muted); margin: 0 0 28px; font-size: 16px; max-width: 52ch; line-height: 1.5; }
+  .grid3 { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
+  .grid2 { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .grid2 { grid-template-columns: repeat(2, 1fr); } }
   .pillar {
     background: var(--dark); border: 1px solid var(--border); border-radius: 12px;
     padding: 22px; position: relative; overflow: hidden;
@@ -91,160 +106,314 @@
   .pillar::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
   .pillar .emoji { font-size: 30px; }
   .pillar h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 22px; margin: 10px 0 8px; color: var(--cream); }
-  .pillar p  { margin: 0; color: rgba(245,236,215,0.78); line-height: 1.5; font-size: 15px; }
+  .pillar p  { margin: 0; color: rgba(245,236,215,0.8); line-height: 1.5; font-size: 15px; }
+  .pillar .pts { color: var(--alert); font-family: 'Courier New', monospace; letter-spacing: 0.14em; font-size: 11px; margin-top: 10px; display: block; }
   .pillar:nth-child(2)::before, .pillar:nth-child(2)::after { border-color: var(--green); }
-  .pillar:nth-child(3)::before, .pillar:nth-child(3)::after { border-color: var(--orange); }
+  .pillar:nth-child(3)::before, .pillar:nth-child(3)::after { border-color: var(--alert); }
+  .pillar .phone { margin-top: 16px; width: 100%; max-width: 260px; }
+  blockquote.app { margin: 12px 0 0; padding: 12px 14px; border-left: 3px solid var(--l); background: rgba(123,104,184,0.08); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.9); }
+  blockquote.app .label { display: block; margin-bottom: 4px; }
 
-  /* Screenshots */
+  /* Screenshots strip */
   .screens { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -18px; padding: 0 18px 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .screens::-webkit-scrollbar { display: none; }
-  .screens img {
-    flex: 0 0 auto; width: 240px; height: 480px; object-fit: cover; object-position: top center;
-    border-radius: 22px; border: 1px solid var(--border);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.45);
-    scroll-snap-align: start;
-    background: var(--dark);
-  }
-  @media (min-width: 720px) {
-    .screens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; overflow: visible; margin: 0; padding: 0; }
-    .screens img { width: 100%; height: auto; aspect-ratio: 9/19; }
-  }
+  .screens figure { flex: 0 0 auto; width: 230px; margin: 0; scroll-snap-align: start; }
+  .screens img { width: 100%; height: auto; aspect-ratio: 1170/2532; object-fit: cover; object-position: top center; border-radius: 22px; border: 1px solid var(--border); box-shadow: 0 18px 40px rgba(0,0,0,0.45); background: var(--dark); display: block; }
+  .screens figcaption { margin-top: 8px; }
+  @media (min-width: 900px) { .screens { display: grid; grid-template-columns: repeat(5, 1fr); overflow: visible; margin: 0; padding: 0; } .screens figure { width: auto; } }
 
-  /* Numbered steps */
+  /* Game */
+  .ladder { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 22px; padding: 0; list-style: none; }
+  @media (min-width: 720px) { .ladder { grid-template-columns: repeat(6, 1fr); } }
+  .ladder li { background: var(--dark); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .ladder .e { font-size: 24px; }
+  .ladder .t { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 13px; margin-top: 6px; }
+  .ladder .p { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.14em; color: var(--alert); margin-top: 2px; }
+  .trophies { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 0; margin: 0; list-style: none; }
+  @media (min-width: 720px) { .trophies { grid-template-columns: repeat(2, 1fr); } }
+  .trophies li { display: flex; gap: 12px; align-items: flex-start; background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .trophies .e { font-size: 24px; line-height: 1; }
+  .trophies .n { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 15px; color: var(--green); }
+  .trophies .d { font-size: 14px; color: rgba(245,236,215,0.82); line-height: 1.4; margin-top: 2px; }
+  .rule { margin: 22px 0 0; padding: 14px 16px; border: 1px dashed var(--border); border-radius: 10px; font-family: 'Courier New', monospace; font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
+
+  /* Personalization */
+  .fields { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
+  .fields li { font-size: 13px; background: rgba(245,236,215,0.06); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; color: rgba(245,236,215,0.86); }
+  .compare { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .compare { grid-template-columns: 1fr 1fr; } }
+  .compare .who { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .compare .who .label { display: block; margin-bottom: 8px; }
+  .compare .who p { margin: 0; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
+  .compare .who .tip { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--red); background: rgba(200,50,44,0.08); border-radius: 0 6px 6px 0; }
+
+  /* Science */
+  .science { display: grid; gap: 12px; grid-template-columns: 1fr; padding: 0; margin: 0 0 18px; list-style: none; }
+  @media (min-width: 720px) { .science { grid-template-columns: repeat(2, 1fr); } }
+  .science li { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .science .tag { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--alert); }
+  .science h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 18px; margin: 6px 0 6px; }
+  .science p { margin: 0 0 8px; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
+  .science a { font-size: 12px; color: var(--muted); }
+  .science a:hover { color: var(--red); }
+  .honest { border: 1px dashed var(--alert); border-radius: 12px; padding: 18px; background: rgba(232,184,75,0.06); }
+  .honest .label { color: var(--alert); }
+  .honest p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: rgba(245,236,215,0.9); }
+
+  /* Steps */
   ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
-  ol.steps li {
-    counter-increment: step; padding: 14px 0 14px 56px; position: relative; border-top: 1px solid var(--border);
-    color: rgba(245,236,215,0.9); line-height: 1.45; font-size: 16px;
-  }
+  ol.steps li { counter-increment: step; padding: 14px 0 14px 56px; position: relative; border-top: 1px solid var(--border); color: rgba(245,236,215,0.92); line-height: 1.45; font-size: 16px; }
   ol.steps li:first-child { border-top: 0; }
-  ol.steps li::before {
-    content: counter(step, decimal-leading-zero);
-    position: absolute; left: 0; top: 14px;
-    font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: var(--red); letter-spacing: 0.04em;
-  }
+  ol.steps li::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 14px; font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: var(--red); letter-spacing: 0.04em; }
 
-  /* What it isn't */
-  .nots { display: grid; gap: 14px; grid-template-columns: 1fr; }
-  @media (min-width: 720px) { .nots { grid-template-columns: repeat(3, 1fr); } }
-  .not {
-    background: var(--dark); border: 1px solid var(--border); border-left: 4px solid var(--red);
-    border-radius: 8px; padding: 16px;
-  }
+  /* Nots / for her / install */
+  .not { background: var(--dark); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: 8px; padding: 16px; }
   .not .display { font-size: 16px; margin-bottom: 4px; color: var(--cream); }
-  .not p { margin: 0; color: rgba(245,236,215,0.75); font-size: 14px; line-height: 1.45; }
+  .not p { margin: 0; color: rgba(245,236,215,0.8); font-size: 14px; line-height: 1.45; }
+  .forher { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+  .forher h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 20px; margin: 0 0 8px; }
+  .forher p { margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: rgba(245,236,215,0.9); }
+  .forher ul { margin: 0 0 12px; padding-left: 18px; color: rgba(245,236,215,0.86); font-size: 15px; line-height: 1.55; }
+  .install { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .install { grid-template-columns: repeat(3, 1fr); } }
+  .install div { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
+  .install .display { font-size: 15px; margin-bottom: 6px; color: var(--cream); }
+  kbd { font-family: inherit; background: rgba(245,236,215,0.1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 13px; }
 
-  /* Final CTA */
+  /* Final */
   .final { text-align: center; padding: 64px 0; border-top: 1px solid var(--border); }
   .final h2 { margin: 0 0 18px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(30px, 7vw, 52px); }
-
   footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; }
-  footer .label { color: rgba(245,236,215,0.45); }
-  footer a { color: rgba(245,236,215,0.55); text-decoration: none; }
+  footer .label { color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; }
   footer a:hover { color: var(--red); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .btn, .btn:hover { transition: none; transform: none; }
+  }
 </style>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
   <header>
     <div class="row">
-      <div class="logo">
+      <a class="logo" href="./" aria-label="BRO CODE home">
         <div class="badge">BC</div>
         <div class="name">Bro Code</div>
-      </div>
+      </a>
+      <nav aria-label="Sections">
+        <a href="#daily">Daily</a>
+        <a href="#game">The game</a>
+        <a href="#science">Science</a>
+        <a href="#for-her">For her</a>
+        <a href="#install">Install</a>
+      </nav>
       <a class="top-cta" href="app.html">OPEN APP →</a>
     </div>
   </header>
 
-  <div class="wrap">
+  <main id="main" class="wrap">
     <section class="hero">
-      <div class="label eyebrow">// section :: bro code</div>
-      <h1>The playbook<br/>for <span class="red">showing up.</span></h1>
-      <p class="sub">The cycle-aware app for guys who want to be a better partner. Built for the bros. Calibrated to her biology.</p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
-        <a class="btn btn-ghost" href="#how">SEE HOW IT WORKS</a>
+      <div>
+        <div class="label eyebrow">// the cycle-aware coach for guys</div>
+        <h1>The playbook<br/>for <span class="red">showing up.</span></h1>
+        <p class="sub">For guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
+          <a class="btn btn-ghost" href="app.html?demo=1">TRY THE DEMO</a>
+        </div>
+        <div class="trust">No login · No tracking · Everything stays on your phone</div>
+        <div class="hero-dots" aria-hidden="true"><span class="m"></span><span class="f"></span><span class="o"></span><span class="l"></span></div>
       </div>
-      <div class="trust">No login · No tracking · Everything stays on your phone</div>
-      <div class="hero-dots"><span class="m"></span><span class="f"></span><span class="o"></span><span class="l"></span></div>
-    </section>
-
-    <section class="section">
-      <div class="label">// what it does</div>
-      <h2>Three things, every day.</h2>
-      <p class="lead">Each phase of her cycle has a different code. The app reads where she is, then tells you what to do.</p>
-      <div class="pillars">
-        <div class="pillar">
-          <div class="emoji">🔥</div>
-          <h3>Know the cycle</h3>
-          <p>Phase-aware daily moves, fertility window, late-period detection, and a 4-phase calendar so you're never surprised.</p>
-        </div>
-        <div class="pillar">
-          <div class="emoji">💬</div>
-          <h3>Say the right thing</h3>
-          <p>Situation chips, a Decoder for what she actually means, and a Pre-Send Check that flags red-flag phrases before you hit send.</p>
-        </div>
-        <div class="pillar">
-          <div class="emoji">🫁</div>
-          <h3>Show up consistently</h3>
-          <p>One-tap log for gifts, talks, conflicts, apologies. Streak counter. End-of-cycle Receipt of how you actually showed up.</p>
-        </div>
+      <div class="hero-shot">
+        <img class="phone" src="screens/s1-dashboard.png" alt="BRO CODE dashboard: the LUTEAL phase hero for Maya, day 24 of 28, five days to her period, a coach insight, and the Daily Rep card with a 12-day streak" width="390" height="844" />
       </div>
     </section>
 
-    <section class="section">
-      <div class="label">// what it looks like</div>
-      <h2>Built for the phone in your hand.</h2>
-      <p class="lead">Swipe through. Same app, different surfaces.</p>
+    <section class="section" id="daily">
+      <div class="label">// every day :: three taps</div>
+      <h2>One small act. One question. One forecast.</h2>
+      <p class="lead">The app reads where she is in her cycle and gives you exactly three things a day. That's the whole routine — under two minutes, and the research says small daily acts beat grand gestures anyway.</p>
+      <div class="grid3">
+        <div class="pillar">
+          <div class="emoji">✅</div>
+          <h3>Daily Rep</h3>
+          <p>One specific move tuned to her phase and her profile. Hit DONE when you've actually done it — out there, not in here. Under every rep, one line of the science behind it.</p>
+          <span class="pts">+15 PTS · REAL-LIFE POINTS</span>
+        </div>
+        <div class="pillar">
+          <div class="emoji">🎓</div>
+          <h3>Pop Quiz</h3>
+          <p>One question a day from Bro University: 64 of them, all pulled from real studies. Get it right and it explains why. Get it wrong and it still explains why.</p>
+          <span class="pts">+10 RIGHT · +3 WRONG — YOU LEARNED</span>
+          <img class="phone small" src="screens/s3-quiz.png" alt="The Pop Quiz card in its answered state, showing the correct answer, the explanation, +10 banked, and progress toward the next rank" loading="lazy" width="390" height="844" />
+        </div>
+        <div class="pillar">
+          <div class="emoji">⛈️</div>
+          <h3>Her Weather</h3>
+          <p>A meteorologist's take on her week. Phase-driven, profile-aware, with a 7-day outlook and a warning when a front is moving in.</p>
+          <blockquote class="app"><span class="label">// her weather · late luteal</span>SEVERE SENSITIVITY ADVISORY — Full luteal system. Her bullshit detector is at maximum sensitivity. Do NOT test it. Gear: steady presence, no surprises, pre-period supplies.</blockquote>
+          <img class="phone small" src="screens/s2-weather.png" alt="Her Weather card: a severe sensitivity advisory, chance-of bars, recommended gear chips, an anxiety-gusts overlay, and a 7-day outlook with a menstrual front moving in Monday" loading="lazy" width="390" height="844" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="game">
+      <div class="label">// the game you win in real life</div>
+      <h2>Points, ranks, and a trophy case.</h2>
+      <p class="lead">Every point comes from something you did with her or something you learned about her. Six ranks to climb, 28 trophies to earn, and a streak that survives real life — you bank a Bro Pass every seven days, so one rough day doesn't zero a 90-day run.</p>
+      <ol class="ladder" aria-label="Rank ladder">
+        <li><div class="e">🌱</div><div class="t">Rookie</div><div class="p">0 PTS</div></li>
+        <li><div class="e">🤝</div><div class="t">Solid Bro</div><div class="p">50 PTS</div></li>
+        <li><div class="e">📚</div><div class="t">Bro Scholar</div><div class="p">150 PTS</div></li>
+        <li><div class="e">🎓</div><div class="t">Certified Bro</div><div class="p">300 PTS</div></li>
+        <li><div class="e">🏆</div><div class="t">Bro Legend</div><div class="p">600 PTS</div></li>
+        <li><div class="e">👑</div><div class="t">Hall of Fame</div><div class="p">1000 PTS</div></li>
+      </ol>
+      <div class="grid2">
+        <div>
+          <div class="label" style="margin-bottom:10px">// six of the twenty-eight</div>
+          <ul class="trophies">
+            <li><span class="e">🧲</span><div><div class="n">Bid Catcher</div><div class="d">Log 15 real conversations. The 65% skill — turning toward her small bids for attention is the single biggest predictor of a relationship lasting.</div></div></li>
+            <li><span class="e">🩹</span><div><div class="n">The Repairman</div><div class="d">Apologize within a day of a conflict, 3 times. Repair attempts are what separate couples who last from couples who don't.</div></div></li>
+            <li><span class="e">🥩</span><div><div class="n">Iron Chef</div><div class="d">Show up on day 1 of her cycle, 3 times. She needs 18mg of iron a day. You need 8.</div></div></li>
+            <li><span class="e">⛈️</span><div><div class="n">Storm Chaser</div><div class="d">Complete 5 reps during her period.</div></div></li>
+            <li><span class="e">🧊</span><div><div class="n">Unbothered</div><div class="d">A 7-day streak with zero conflicts logged.</div></div></li>
+            <li><span class="e">🎟️</span><div><div class="n">Human Being</div><div class="d">Burn a Bro Pass. Nobody does this perfectly — the app rewards coming back, never guilts the miss.</div></div></li>
+          </ul>
+          <div class="rule">"every one of these is earned out there, not in here. no points for scrolling, bro." — the trophy case, verbatim</div>
+        </div>
+        <div style="justify-self:center">
+          <img class="phone" src="screens/s4-trophies.png" alt="The trophy case: Bro Scholar rank, 185 points, a 12-day streak, one Bro Pass, progress toward Certified Bro, and unlocked trophies including Day One, First Rep, Certified Listener and The Repairman" loading="lazy" width="390" height="844" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="her">
+      <div class="label">// she's not a spreadsheet</div>
+      <h2>Built for her. Specifically her.</h2>
+      <p class="lead">Ten seconds of profile turns generic cycle advice into advice about the actual person you live with. Every field you fill in changes what the app says.</p>
+      <ul class="fields" aria-label="Profile fields that shape the advice">
+        <li>anxiety · ADHD · autism · depression · sensory</li>
+        <li>what comforts her — heat, space, being held, words</li>
+        <li>her pace and her social battery</li>
+        <li>cravings, favourites, dietary stuff</li>
+        <li>her contraception — it changes how the calendar reads</li>
+        <li>important dates</li>
+      </ul>
+      <div class="compare">
+        <div class="who">
+          <span class="label">// partner A · anxiety, wants space, introvert, salty snacks</span>
+          <p>Late luteal, day 24.</p>
+          <div class="tip">"Anxiety gusts likely — reassure early, reassure often. Then give her the quiet she needs without making her feel guilty about it."</div>
+        </div>
+        <div class="who">
+          <span class="label">// partner B · ADHD, wants to be held, extrovert, sweet tooth</span>
+          <p>Same day, same phase.</p>
+          <div class="tip">"Executive function's dropping — she's not flaking, her tank's empty. Handle the logistics. Dark chocolate in the house: magnesium AND a bit of iron."</div>
+        </div>
+      </div>
+      <p class="lead" style="margin-top:18px">Verified in the test suite: two differently-configured partners get <strong>zero</strong> overlapping personalized tips.</p>
+    </section>
+
+    <section class="section" id="science">
+      <div class="label">// not vibes. sources.</div>
+      <h2>The part that's actually peer-reviewed.</h2>
+      <p class="lead">Every "lab-verified" line in the app traces to a real study. Here are the ones that carry the most weight — and, further down, the ones we're honest about being shaky.</p>
+      <ul class="science">
+        <li><span class="tag">meta-analysis · 2025</span><h3>Heat rivals painkillers for cramps</h3><p>A systematic review of 25 randomised trials found heat therapy reduced period pain comparably to NSAIDs, with fewer side effects. The heating pad is medical equipment.</p><a href="https://www.frontiersin.org/articles/10.3389/fmed.2025.1730505/full" rel="noopener">Frontiers in Medicine, 2025 →</a></li>
+        <li><span class="tag">clinical survey · 2025</span><h3>Your support is measurable</h3><p>Partner support had a direct effect on premenstrual symptom severity — more supportive partners, less severe symptoms. Being dismissed made distress worse.</p><a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0322314" rel="noopener">PLOS ONE, 2025 →</a></li>
+        <li><span class="tag">nutrition data</span><h3>The iron gap</h3><p>A menstruating woman needs roughly 18mg of iron a day. A man needs 8. She stores around 300mg; he stores around 1000mg. Feed her accordingly.</p><a href="https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/" rel="noopener">NIH Office of Dietary Supplements →</a></li>
+        <li><span class="tag">mental-load research · 2024–25</span><h3>She carries ~71% of the invisible work</h3><p>The remembering, planning and worrying — not the chores. And it doesn't shrink when you "help more." It shrinks when you own a whole category outright.</p><a href="https://www.frontiersin.org/journals/sociology/articles/10.3389/fsoc.2025.1683261/full" rel="noopener">Frontiers in Sociology, 2025 →</a></li>
+        <li><span class="tag">migraine research</span><h3>Why the pre-period headache</h3><p>Estrogen acts as a natural painkiller and regulates blood vessels. When it drops before her period, pain receptors sensitise — and these attacks last up to 35% longer than her other headaches.</p><a href="https://unmhealth.org/stories/2025/05/headaches-and-hormones.html" rel="noopener">UNM Health, 2025 →</a></li>
+        <li><span class="tag">Gottman lab · contested</span><h3>How you argue beats how often</h3><p>Repair attempts — a joke, a hand, "we're okay" — are what let couples survive frequent conflict. We use the finding; we do <em>not</em> repeat the famous "90% divorce prediction" stat, which was fitted after the fact and failed independent cross-validation.</p><a href="https://www.researchgate.net/publication/6730328_The_Hazards_of_Predicting_Divorce_Without_Crossvalidation" rel="noopener">Heyman &amp; Slep, the critique →</a></li>
+      </ul>
+      <div class="honest">
+        <span class="label">// what we're NOT sure about — straight from the app's archive</span>
+        <p>"An app that only tells you what's confirmed is lying by omission. Things in here that are solid: heat therapy for cramps, the iron gap, PMDD prevalence, endometriosis rates, progesterone wrecking luteal sleep, partner support lowering symptom severity. Things that are shakier than the internet claims: <strong>cycle-syncing</strong> your workouts (2023–25 reviews found phase doesn't meaningfully change performance), the viral <strong>ovulation mate-preference</strong> studies (large replications mostly failed), the famous <strong>90% divorce prediction</strong> number, and the <strong>five love languages</strong> (a 2024 review found its core assumptions don't hold). We still use pace and love-language preferences — as things SHE told you she likes, not as laws of nature. When the science and her actual words disagree, believe her."</p>
+        <p style="font-size:12px;color:var(--muted)">Sources for the shaky ones: <a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2023.1054542/full" rel="noopener">cycle phase &amp; performance</a> · <a href="https://journals.sagepub.com/doi/10.1177/09637214231217663" rel="noopener">love languages review, 2024</a></p>
+      </div>
+    </section>
+
+    <section class="section" id="archive">
+      <div class="label">// the archive</div>
+      <h2>495 entries. Searchable.</h2>
+      <p class="lead">Every daily tip, every lab line, every quiz question, every decoder phrase, the what-to-say bank, the health literacy deep-dives — in one place, filterable by a word. Type "iron" and the whole app rearranges itself around iron.</p>
       <div class="screens">
-        <img src="screens/s1-dashboard.png" alt="Dashboard with phase hero, daily brief, and situation chips" />
-        <img src="screens/s2-situation.png" alt="Situation panel with phase-aware first move and exact phrases" />
-        <img src="screens/s3-decoder.png"   alt="The Decoder translating 'we need to talk' into the move" />
-        <img src="screens/s4-calendar.png"  alt="Calendar view with the 4-phase cycle laid out by day" />
+        <figure><img src="screens/s1-dashboard.png" alt="Dashboard" loading="lazy" width="390" height="844" /><figcaption class="label">dashboard</figcaption></figure>
+        <figure><img src="screens/s2-weather.png" alt="Her Weather forecast" loading="lazy" width="390" height="844" /><figcaption class="label">her weather</figcaption></figure>
+        <figure><img src="screens/s3-quiz.png" alt="Pop quiz" loading="lazy" width="390" height="844" /><figcaption class="label">pop quiz</figcaption></figure>
+        <figure><img src="screens/s4-trophies.png" alt="Trophy case" loading="lazy" width="390" height="844" /><figcaption class="label">trophy case</figcaption></figure>
+        <figure><img src="screens/s5-archive.png" alt="The Archive, filtered to the word iron: 27 of 495 entries, showing daily tips and lab lines about iron" loading="lazy" width="390" height="844" /><figcaption class="label">archive · "iron"</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="section" id="for-her">
+      <div class="label">// show her this</div>
+      <h2>If he just showed you this page:</h2>
+      <div class="forher">
+        <h3>Hi. This is a coach for him, not a tracker of you.</h3>
+        <p>He enters the first day of your last period, and the app tells <em>him</em> what to do on any given day — bring the heating pad, don't start the money conversation this week, ask instead of assuming. It's trying to make him better at being on your team. That's the entire product.</p>
+        <ul>
+          <li><strong>What it knows:</strong> one date, a cycle length, and whatever he chose to note about what helps you. Nothing you didn't tell him.</li>
+          <li><strong>Where it lives:</strong> only on his phone. There is no account, no server, no company reading it. He can export it or wipe it in two taps, and so can you.</li>
+          <li><strong>What it isn't:</strong> medical advice, a mood-reading device, or an excuse. If he ever says "is this your cycle?" the app has a page telling him that's the opposite of the point.</li>
+        </ul>
+        <p>The research the app leans on says shared cycle literacy improves symptom management and that partner support measurably lowers symptom severity — but only when it's done in the open. In the app's own words:</p>
+        <blockquote class="app"><span class="label">// the archive · health literacy</span>"Tracking together isn't surveillance — done openly, it's shared infrastructure. The word that matters is 'openly.'"</blockquote>
+        <p style="margin-top:14px;margin-bottom:0">If you want, you can fill in your own profile section together. It gets better at him the more it knows about you — on your terms.</p>
       </div>
     </section>
 
     <section class="section" id="how">
       <div class="label">// how it works</div>
-      <h2>30 seconds to set up.</h2>
+      <h2>Thirty seconds to set up.</h2>
       <p class="lead">No bloated onboarding. No friend invites. Just the math.</p>
       <ol class="steps">
-        <li>Add the first day of her last period. That's it.</li>
-        <li>The app figures out where she is in the cycle.</li>
-        <li>Every day, you get one specific move tuned to her phase + her profile.</li>
-        <li>When something's happening right now, tap a situation chip. Phase-aware moves + exact phrases.</li>
-        <li>End of the cycle: a one-page Receipt of how you actually showed up.</li>
+        <li>Enter the first day of her last period. That's the only required field.</li>
+        <li>The app works out where she is in the cycle and forecasts the next few weeks. It self-corrects every time you log an actual period.</li>
+        <li>Every day: one rep, one quiz question, one weather report. Tap DONE when the rep is done in real life.</li>
+        <li>When something's happening right now — she's crying, she's angry, you messed up — tap the situation chip for phase-aware moves and exact phrases.</li>
+        <li>Rank up. Fill the trophy case. Check the Receipt at the end of each cycle to see how you actually showed up.</li>
       </ol>
     </section>
 
-    <section class="section">
+    <section class="section" id="honest">
       <div class="label">// what it isn't</div>
       <h2>Some honesty up front.</h2>
-      <div class="nots">
-        <div class="not">
-          <div class="display">Not a doctor.</div>
-          <p>This isn't medical advice. PMDD, endometriosis, anything severe — that's a real conversation with a real provider.</p>
-        </div>
-        <div class="not">
-          <div class="display">Not a tracker for her.</div>
-          <p>This is for you. She has Clue, Flo, whatever she likes. This is the coach in your pocket.</p>
-        </div>
-        <div class="not">
-          <div class="display">Not data collection.</div>
-          <p>No account, no server, no tracking. Everything lives in your phone's local storage. Export or wipe whenever.</p>
-        </div>
+      <div class="grid3">
+        <div class="not"><div class="display">Not a doctor.</div><p>Not medical advice. PMDD, endometriosis, heavy bleeding, anything severe — the app's job is to tell you to believe her and back her getting seen, not to diagnose.</p></div>
+        <div class="not"><div class="display">Not a tracker for her.</div><p>She has Clue, Flo, whatever she likes. This is the coach in <em>your</em> pocket, and it works best when she knows it exists.</p></div>
+        <div class="not"><div class="display">Not data collection.</div><p>No account, no server, no analytics, no tracking pixels — not even on this page. Everything lives in your phone's local storage. Export or wipe whenever.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <div class="label">// install</div>
+      <h2>Put it on your home screen.</h2>
+      <p class="lead">It's a web app, so there's nothing to download from a store — but the reminders and the app badge only work once it's installed. Takes one tap.</p>
+      <div class="install">
+        <div><div class="display">iPhone</div>Open the app in Safari, tap <kbd>Share</kbd>, then <kbd>Add to Home Screen</kbd>.</div>
+        <div><div class="display">Android</div>Open the app in Chrome, tap the <kbd>⋮</kbd> menu, then <kbd>Install app</kbd> or <kbd>Add to Home Screen</kbd>.</div>
+        <div><div class="display">After that</div>It works offline, updates itself, and can send up to three gentle reminders a day — only when there's something worth saying.</div>
       </div>
     </section>
 
     <section class="final">
       <h2>Stop guessing. Start showing up.</h2>
-      <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
+      <div class="cta-row" style="justify-content:center">
+        <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
+        <a class="btn btn-ghost" href="app.html?demo=1">TRY THE DEMO</a>
+      </div>
       <div class="trust" style="margin-top:14px">Free. No ads. Works offline.</div>
     </section>
-  </div>
+  </main>
 
   <footer>
     <div class="wrap">
-      <div class="label">BRO CODE · v2.6 · Made by a bro for the bros</div>
-      <div style="margin-top:8px"><a href="https://github.com/SupaMoi-ai/claud-tester" rel="noopener">github</a> · <a href="app.html">app</a></div>
+      <div class="label">BRO CODE · v3.6 · Made by a bro for the bros</div>
+      <div style="margin-top:8px"><a href="https://github.com/SupaMoi-ai/claud-tester" rel="noopener">github</a> · <a href="privacy.html">privacy</a> · <a href="app.html">app</a></div>
     </div>
   </footer>
 </body>

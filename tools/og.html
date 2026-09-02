@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BRO CODE — share card</title>
+<style>
+  @font-face { font-family: 'Anton';   src: url('../fonts/Anton-Regular.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'DM Sans'; src: url('../fonts/DMSans.woff2') format('woff2'); font-display: block; }
+  :root { --red:#C8322C; --cream:#F5ECD7; --night:#0D1117; --dark:#161B24; --border:#2A3547; --m:#C8322C; --f:#3DAA6A; --o:#E8B84B; --l:#7B68B8; }
+  html, body { margin:0; width:1200px; height:630px; background:var(--night); color:var(--cream); font-family:'DM Sans', system-ui, sans-serif; overflow:hidden; }
+  .card { position:relative; width:1200px; height:630px; padding:64px 72px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; }
+  .grid { position:absolute; inset:0; opacity:.07; background-image:linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size:48px 48px; }
+  .corner { position:absolute; width:28px; height:28px; border:3px solid var(--red); }
+  .tl { top:28px; left:28px; border-right:0; border-bottom:0; } .br { bottom:28px; right:28px; border-left:0; border-top:0; }
+  .logo { display:flex; align-items:center; gap:16px; position:relative; }
+  .badge { width:56px; height:56px; background:var(--red); border-radius:8px; display:grid; place-items:center; font-family:'Anton', Impact, sans-serif; font-size:24px; }
+  .name { font-family:'Anton', Impact, sans-serif; text-transform:uppercase; letter-spacing:.1em; font-size:28px; }
+  .label { font-family:'Courier New', monospace; text-transform:uppercase; letter-spacing:.22em; font-size:16px; color:#b8b0a0; }
+  h1 { font-family:'Anton', Impact, sans-serif; text-transform:uppercase; font-size:118px; line-height:.9; margin:0; letter-spacing:.01em; position:relative; }
+  h1 .red { color:var(--red); }
+  .sub { font-size:28px; color:rgba(245,236,215,.85); margin:22px 0 0; max-width:30ch; line-height:1.3; position:relative; }
+  .foot { display:flex; align-items:center; justify-content:space-between; position:relative; }
+  .dots { display:flex; gap:12px; } .dots span { width:18px; height:18px; border-radius:999px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="grid"></div>
+    <div class="corner tl"></div><div class="corner br"></div>
+    <div class="logo"><div class="badge">BC</div><div class="name">Bro Code</div></div>
+    <div>
+      <div class="label" style="margin-bottom:14px">// the cycle-aware coach for guys</div>
+      <h1>The playbook<br/>for <span class="red">showing up.</span></h1>
+      <p class="sub">Funny on the surface. Peer-reviewed underneath. Lives on your phone.</p>
+    </div>
+    <div class="foot">
+      <div class="dots"><span style="background:var(--m)"></span><span style="background:var(--f)"></span><span style="background:var(--o)"></span><span style="background:var(--l)"></span></div>
+      <div class="label">no login · no tracking · works offline · v3.6</div>
+    </div>
+  </div>
+</body>
+</html>
