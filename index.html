@@ -4,15 +4,21 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0D1117" />
-<meta name="description" content="BRO CODE — the cycle-aware coach for guys who want to be a better partner. One small act a day, a pop quiz, her weather forecast, and a trophy case you can only fill in real life. Funny on the surface, peer-reviewed underneath. No login, no tracking." />
-<title>BRO CODE — the playbook for showing up</title>
+<meta name="description" data-i18n-content="meta.desc" content="BRO CODE — the cycle-aware coach for guys who want to be a better partner. One small act a day, a pop quiz, her weather forecast, and a trophy case you can only fill in real life. Funny on the surface, peer-reviewed underneath. No login, no tracking." />
+<title data-i18n="meta.title">BRO CODE — the playbook for showing up</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
-<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+<link rel="manifest" href="manifest.json" />
+<link rel="alternate" hreflang="en" href="https://supamoi-ai.github.io/claud-tester/?lang=en" />
+<link rel="alternate" hreflang="nb" href="https://supamoi-ai.github.io/claud-tester/?lang=no" />
+<link rel="alternate" hreflang="x-default" href="https://supamoi-ai.github.io/claud-tester/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="BRO CODE — the playbook for showing up" />
 <meta property="og:description" content="The cycle-aware coach for guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone." />
 <meta property="og:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <meta property="og:url" content="https://supamoi-ai.github.io/claud-tester/" />
+<meta property="og:locale" content="en_GB" />
+<meta property="og:locale:alternate" content="nb_NO" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="BRO CODE — the playbook for showing up" />
 <meta name="twitter:description" content="The cycle-aware coach for guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone." />
@@ -31,28 +37,15 @@
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   html, body { margin: 0; padding: 0; background: var(--night); color: var(--cream); }
-  body {
-    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
-  }
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-    opacity: 0.05; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
+  body { font-family: 'DM Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.05; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
   .skip { position: absolute; left: -999px; top: 8px; z-index: 100; background: var(--red); color: var(--cream); padding: 8px 12px; border-radius: 4px; }
   .skip:focus { left: 8px; }
   .display { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 400; }
   .label   { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: #b8b0a0; }
   .wrap    { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; padding: 0 18px; }
   a { color: var(--cream); }
-  header {
-    position: sticky; top: 0; z-index: 30;
-    background: rgba(13,17,23,0.92); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
+  header { position: sticky; top: 0; z-index: 30; background: rgba(13,17,23,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
   header .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; max-width: 1100px; margin: 0 auto; }
   .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .logo .badge { width: 32px; height: 32px; background: var(--red); display: grid; place-items: center; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; font-size: 14px; color: var(--cream); }
@@ -60,18 +53,17 @@
   header nav { display: none; gap: 18px; }
   header nav a { text-decoration: none; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.16em; font-size: 11px; color: var(--muted); }
   header nav a:hover { color: var(--red); }
-  @media (min-width: 720px) { header nav { display: flex; } }
+  @media (min-width: 860px) { header nav { display: flex; } }
+  .hright { display: flex; align-items: center; gap: 10px; }
+  .lang { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .lang button { background: none; border: 0; color: var(--muted); font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; padding: 7px 9px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: rgba(245,236,215,0.12); color: var(--cream); }
   header .top-cta { padding: 7px 14px; background: var(--red); color: var(--cream); border-radius: 4px; text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; white-space: nowrap; }
 
-  /* Hero */
   .hero { padding: 56px 0 44px; display: grid; gap: 28px; align-items: center; }
   @media (min-width: 900px) { .hero { grid-template-columns: 1.2fr 0.8fr; } }
   .hero .eyebrow { color: var(--red); margin-bottom: 12px; }
-  .hero h1 {
-    font-family: 'Anton', Impact, sans-serif; text-transform: uppercase;
-    font-size: clamp(48px, 13vw, 108px); line-height: 0.92; letter-spacing: 0.02em;
-    margin: 0 0 22px; color: var(--cream); max-width: 12ch;
-  }
+  .hero h1 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(46px, 12.5vw, 104px); line-height: 0.92; letter-spacing: 0.02em; margin: 0 0 22px; color: var(--cream); max-width: 12ch; }
   .hero h1 .red { color: var(--red); }
   .hero .sub { font-size: clamp(17px, 4.4vw, 22px); line-height: 1.45; color: rgba(245,236,215,0.86); max-width: 34ch; margin: 0 0 26px; }
   .cta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
@@ -89,7 +81,6 @@
   .phone { width: 250px; border-radius: 26px; border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,0.5); background: var(--dark); display: block; }
   .phone.small { width: 100%; max-width: 250px; }
 
-  /* Sections */
   .section { padding: 48px 0; border-top: 1px solid var(--border); }
   .section h2 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(28px, 6vw, 44px); letter-spacing: 0.03em; margin: 6px 0 8px; }
   .section p.lead { color: var(--muted); margin: 0 0 28px; font-size: 16px; max-width: 52ch; line-height: 1.5; }
@@ -97,10 +88,7 @@
   @media (min-width: 720px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
   .grid2 { display: grid; gap: 14px; grid-template-columns: 1fr; }
   @media (min-width: 720px) { .grid2 { grid-template-columns: repeat(2, 1fr); } }
-  .pillar {
-    background: var(--dark); border: 1px solid var(--border); border-radius: 12px;
-    padding: 22px; position: relative; overflow: hidden;
-  }
+  .pillar { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 22px; position: relative; overflow: hidden; }
   .pillar::before, .pillar::after { content: ''; position: absolute; width: 12px; height: 12px; border-color: var(--red); border-style: solid; }
   .pillar::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
   .pillar::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
@@ -114,7 +102,22 @@
   blockquote.app { margin: 12px 0 0; padding: 12px 14px; border-left: 3px solid var(--l); background: rgba(123,104,184,0.08); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.9); }
   blockquote.app .label { display: block; margin-bottom: 4px; }
 
-  /* Screenshots strip */
+  /* Download */
+  .dl { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .dl { grid-template-columns: 1.1fr 0.9fr; } }
+  .dl .card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .dl h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 20px; margin: 0 0 8px; }
+  .dl p { margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
+  .stores { display: flex; flex-wrap: wrap; gap: 10px; }
+  .store { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; background: rgba(245,236,215,0.04); }
+  .store .ico { font-size: 22px; line-height: 1; }
+  .store .t1 { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .store .t2 { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 15px; }
+  .store.soon { opacity: 0.55; cursor: default; }
+  .qr { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+  .qr img { width: 120px; height: 120px; border-radius: 8px; image-rendering: pixelated; background: #fff; }
+  kbd { font-family: inherit; background: rgba(245,236,215,0.1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 13px; }
+
   .screens { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -18px; padding: 0 18px 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .screens::-webkit-scrollbar { display: none; }
   .screens figure { flex: 0 0 auto; width: 230px; margin: 0; scroll-snap-align: start; }
@@ -122,7 +125,6 @@
   .screens figcaption { margin-top: 8px; }
   @media (min-width: 900px) { .screens { display: grid; grid-template-columns: repeat(5, 1fr); overflow: visible; margin: 0; padding: 0; } .screens figure { width: auto; } }
 
-  /* Game */
   .ladder { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 22px; padding: 0; list-style: none; }
   @media (min-width: 720px) { .ladder { grid-template-columns: repeat(6, 1fr); } }
   .ladder li { background: var(--dark); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
@@ -137,7 +139,6 @@
   .trophies .d { font-size: 14px; color: rgba(245,236,215,0.82); line-height: 1.4; margin-top: 2px; }
   .rule { margin: 22px 0 0; padding: 14px 16px; border: 1px dashed var(--border); border-radius: 10px; font-family: 'Courier New', monospace; font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
 
-  /* Personalization */
   .fields { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
   .fields li { font-size: 13px; background: rgba(245,236,215,0.06); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; color: rgba(245,236,215,0.86); }
   .compare { display: grid; gap: 12px; grid-template-columns: 1fr; }
@@ -147,7 +148,6 @@
   .compare .who p { margin: 0; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
   .compare .who .tip { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--red); background: rgba(200,50,44,0.08); border-radius: 0 6px 6px 0; }
 
-  /* Science */
   .science { display: grid; gap: 12px; grid-template-columns: 1fr; padding: 0; margin: 0 0 18px; list-style: none; }
   @media (min-width: 720px) { .science { grid-template-columns: repeat(2, 1fr); } }
   .science li { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
@@ -160,13 +160,11 @@
   .honest .label { color: var(--alert); }
   .honest p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: rgba(245,236,215,0.9); }
 
-  /* Steps */
   ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
   ol.steps li { counter-increment: step; padding: 14px 0 14px 56px; position: relative; border-top: 1px solid var(--border); color: rgba(245,236,215,0.92); line-height: 1.45; font-size: 16px; }
   ol.steps li:first-child { border-top: 0; }
   ol.steps li::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 14px; font-family: 'Anton', Impact, sans-serif; font-size: 22px; color: var(--red); letter-spacing: 0.04em; }
 
-  /* Nots / for her / install */
   .not { background: var(--dark); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: 8px; padding: 16px; }
   .not .display { font-size: 16px; margin-bottom: 4px; color: var(--cream); }
   .not p { margin: 0; color: rgba(245,236,215,0.8); font-size: 14px; line-height: 1.45; }
@@ -174,95 +172,123 @@
   .forher h3 { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 20px; margin: 0 0 8px; }
   .forher p { margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: rgba(245,236,215,0.9); }
   .forher ul { margin: 0 0 12px; padding-left: 18px; color: rgba(245,236,215,0.86); font-size: 15px; line-height: 1.55; }
-  .install { display: grid; gap: 12px; grid-template-columns: 1fr; }
-  @media (min-width: 720px) { .install { grid-template-columns: repeat(3, 1fr); } }
-  .install div { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-size: 14px; line-height: 1.5; color: rgba(245,236,215,0.86); }
-  .install .display { font-size: 15px; margin-bottom: 6px; color: var(--cream); }
-  kbd { font-family: inherit; background: rgba(245,236,215,0.1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 13px; }
+  .faq details { border-top: 1px solid var(--border); padding: 12px 0; }
+  .faq summary { cursor: pointer; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 16px; }
+  .faq p { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: rgba(245,236,215,0.86); }
 
-  /* Final */
   .final { text-align: center; padding: 64px 0; border-top: 1px solid var(--border); }
   .final h2 { margin: 0 0 18px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: clamp(30px, 7vw, 52px); }
   footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; }
   footer .label { color: var(--muted); }
   footer a { color: var(--muted); text-decoration: none; }
   footer a:hover { color: var(--red); }
-
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .btn, .btn:hover { transition: none; transform: none; }
-  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn, .btn:hover { transition: none; transform: none; } }
 </style>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
+  <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
   <header>
     <div class="row">
-      <a class="logo" href="./" aria-label="BRO CODE home">
+      <a class="logo" href="./" aria-label="BRO CODE">
         <div class="badge">BC</div>
         <div class="name">Bro Code</div>
       </a>
       <nav aria-label="Sections">
-        <a href="#daily">Daily</a>
-        <a href="#game">The game</a>
-        <a href="#science">Science</a>
-        <a href="#for-her">For her</a>
-        <a href="#install">Install</a>
+        <a href="#download" data-i18n="nav.download">Download</a>
+        <a href="#daily" data-i18n="nav.daily">Daily</a>
+        <a href="#game" data-i18n="nav.game">The game</a>
+        <a href="#science" data-i18n="nav.science">Science</a>
+        <a href="#for-her" data-i18n="nav.her">For her</a>
+        <a href="#faq" data-i18n="nav.faq">FAQ</a>
       </nav>
-      <a class="top-cta" href="app.html">OPEN APP →</a>
+      <div class="hright">
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" onclick="setLang('en')" data-lang-btn="en" aria-pressed="true">EN</button>
+          <button type="button" onclick="setLang('no')" data-lang-btn="no" aria-pressed="false">NO</button>
+        </div>
+        <a class="top-cta" href="app.html" data-i18n="nav.open">OPEN APP →</a>
+      </div>
     </div>
   </header>
 
   <main id="main" class="wrap">
     <section class="hero">
       <div>
-        <div class="label eyebrow">// the cycle-aware coach for guys</div>
-        <h1>The playbook<br/>for <span class="red">showing up.</span></h1>
-        <p class="sub">For guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone.</p>
+        <div class="label eyebrow" data-i18n="hero.eyebrow">// the cycle-aware coach for guys</div>
+        <h1 data-i18n="hero.h1">The playbook<br/>for <span class="red">showing up.</span></h1>
+        <p class="sub" data-i18n="hero.sub">For guys who want to be a better partner. Funny on the surface. Peer-reviewed underneath. Lives on your phone.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
-          <a class="btn btn-ghost" href="app.html?demo=1">TRY THE DEMO</a>
+          <a class="btn btn-primary" href="#download" data-i18n="hero.cta1">GET THE APP →</a>
+          <a class="btn btn-ghost" href="app.html?demo=1" data-i18n="hero.cta2">TRY THE DEMO</a>
         </div>
-        <div class="trust">No login · No tracking · Everything stays on your phone</div>
+        <div class="trust" data-i18n="hero.trust">No login · No tracking · Everything stays on your phone</div>
         <div class="hero-dots" aria-hidden="true"><span class="m"></span><span class="f"></span><span class="o"></span><span class="l"></span></div>
       </div>
       <div class="hero-shot">
-        <img class="phone" src="screens/s1-dashboard.png" alt="BRO CODE dashboard: the LUTEAL phase hero for Maya, day 24 of 28, five days to her period, a coach insight, and the Daily Rep card with a 12-day streak" width="390" height="844" />
+        <img class="phone" src="screens/s1-dashboard.png" data-i18n-alt="alt.dash" alt="BRO CODE dashboard: the LUTEAL phase hero for Maya, day 24 of 28, a coach insight, and the Daily Rep card with a 12-day streak" width="390" height="844" />
+      </div>
+    </section>
+
+    <section class="section" id="download">
+      <div class="label" data-i18n="dl.label">// get the app</div>
+      <h2 data-i18n="dl.h2">Download BRO CODE.</h2>
+      <p class="lead" data-i18n="dl.lead">It's a web app: it installs straight from your browser today, and it's packaged for the App Store and Google Play. Free either way. No account.</p>
+      <div class="dl">
+        <div class="card">
+          <h3 data-i18n="dl.now.h3">Install now — works on every phone</h3>
+          <p data-i18n="dl.now.p">Open the app, then add it to your home screen. It runs offline, updates itself, and can send up to three gentle reminders a day.</p>
+          <div class="cta-row"><a class="btn btn-primary" href="app.html" data-i18n="dl.now.btn">OPEN BRO CODE →</a></div>
+          <p data-i18n="dl.now.ios"><strong>iPhone:</strong> in Safari, tap <kbd>Share</kbd> → <kbd>Add to Home Screen</kbd>.</p>
+          <p data-i18n="dl.now.android"><strong>Android:</strong> in Chrome, tap the <kbd>⋮</kbd> menu → <kbd>Install app</kbd>. (That's the "Chrome store" path — Chrome installs web apps directly.)</p>
+          <div class="qr">
+            <img src="share-qr.png" alt="QR code linking to BRO CODE" loading="lazy" width="120" height="120" />
+            <p data-i18n="dl.now.qr">On a computer? Point your phone's camera at this. It opens the app.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3 data-i18n="dl.stores.h3">App Store &amp; Google Play</h3>
+          <p data-i18n="dl.stores.p">The same app, wrapped for the stores. Links go live the moment each listing is approved — until then the button above does exactly the same thing.</p>
+          <div class="stores">
+            <a class="store soon" id="store-ios" href="#download" aria-disabled="true"><span class="ico"></span><span><span class="t1" data-i18n="dl.stores.soon">coming soon on the</span><br/><span class="t2">App Store</span></span></a>
+            <a class="store soon" id="store-play" href="#download" aria-disabled="true"><span class="ico">▶</span><span><span class="t1" data-i18n="dl.stores.soon2">coming soon on</span><br/><span class="t2">Google Play</span></span></a>
+          </div>
+          <p style="margin-top:14px" data-i18n="dl.stores.note"><strong>Language note:</strong> this website is in English and Norwegian. The app itself is in English for now.</p>
+        </div>
       </div>
     </section>
 
     <section class="section" id="daily">
-      <div class="label">// every day :: three taps</div>
-      <h2>One small act. One question. One forecast.</h2>
-      <p class="lead">The app reads where she is in her cycle and gives you exactly three things a day. That's the whole routine — under two minutes, and the research says small daily acts beat grand gestures anyway.</p>
+      <div class="label" data-i18n="daily.label">// every day :: three taps</div>
+      <h2 data-i18n="daily.h2">One small act. One question. One forecast.</h2>
+      <p class="lead" data-i18n="daily.lead">The app reads where she is in her cycle and gives you exactly three things a day. That's the whole routine — under two minutes, and the research says small daily acts beat grand gestures anyway.</p>
       <div class="grid3">
         <div class="pillar">
           <div class="emoji">✅</div>
-          <h3>Daily Rep</h3>
-          <p>One specific move tuned to her phase and her profile. Hit DONE when you've actually done it — out there, not in here. Under every rep, one line of the science behind it.</p>
-          <span class="pts">+15 PTS · REAL-LIFE POINTS</span>
+          <h3 data-i18n="daily.rep.h3">Daily Rep</h3>
+          <p data-i18n="daily.rep.p">One specific move tuned to her phase and her profile. Hit DONE when you've actually done it — out there, not in here. Under every rep, one line of the science behind it.</p>
+          <span class="pts" data-i18n="daily.rep.pts">+15 PTS · REAL-LIFE POINTS</span>
         </div>
         <div class="pillar">
           <div class="emoji">🎓</div>
-          <h3>Pop Quiz</h3>
-          <p>One question a day from Bro University: 64 of them, all pulled from real studies. Get it right and it explains why. Get it wrong and it still explains why.</p>
-          <span class="pts">+10 RIGHT · +3 WRONG — YOU LEARNED</span>
-          <img class="phone small" src="screens/s3-quiz.png" alt="The Pop Quiz card in its answered state, showing the correct answer, the explanation, +10 banked, and progress toward the next rank" loading="lazy" width="390" height="844" />
+          <h3 data-i18n="daily.quiz.h3">Pop Quiz</h3>
+          <p data-i18n="daily.quiz.p">One question a day from Bro University: 64 of them, all pulled from real studies. Get it right and it explains why. Get it wrong and it still explains why.</p>
+          <span class="pts" data-i18n="daily.quiz.pts">+10 RIGHT · +3 WRONG — YOU LEARNED</span>
+          <img class="phone small" src="screens/s3-quiz.png" data-i18n-alt="alt.quiz" alt="The Pop Quiz card in its answered state, showing the correct answer, the explanation, +10 banked, and progress toward the next rank" loading="lazy" width="390" height="844" />
         </div>
         <div class="pillar">
           <div class="emoji">⛈️</div>
-          <h3>Her Weather</h3>
-          <p>A meteorologist's take on her week. Phase-driven, profile-aware, with a 7-day outlook and a warning when a front is moving in.</p>
-          <blockquote class="app"><span class="label">// her weather · late luteal</span>SEVERE SENSITIVITY ADVISORY — Full luteal system. Her bullshit detector is at maximum sensitivity. Do NOT test it. Gear: steady presence, no surprises, pre-period supplies.</blockquote>
-          <img class="phone small" src="screens/s2-weather.png" alt="Her Weather card: a severe sensitivity advisory, chance-of bars, recommended gear chips, an anxiety-gusts overlay, and a 7-day outlook with a menstrual front moving in Monday" loading="lazy" width="390" height="844" />
+          <h3 data-i18n="daily.wx.h3">Her Weather</h3>
+          <p data-i18n="daily.wx.p">A meteorologist's take on her week. Phase-driven, profile-aware, with a 7-day outlook and a warning when a front is moving in.</p>
+          <blockquote class="app"><span class="label">// her weather · late luteal</span><span data-i18n="daily.wx.q">SEVERE SENSITIVITY ADVISORY — Full luteal system. Her bullshit detector is at maximum sensitivity. Do NOT test it. Gear: steady presence, no surprises, pre-period supplies.</span></blockquote>
+          <img class="phone small" src="screens/s2-weather.png" data-i18n-alt="alt.wx" alt="Her Weather card: a severe sensitivity advisory, chance-of bars, recommended gear chips, and a 7-day outlook with a menstrual front moving in Monday" loading="lazy" width="390" height="844" />
         </div>
       </div>
     </section>
 
     <section class="section" id="game">
-      <div class="label">// the game you win in real life</div>
-      <h2>Points, ranks, and a trophy case.</h2>
-      <p class="lead">Every point comes from something you did with her or something you learned about her. Six ranks to climb, 28 trophies to earn, and a streak that survives real life — you bank a Bro Pass every seven days, so one rough day doesn't zero a 90-day run.</p>
+      <div class="label" data-i18n="game.label">// the game you win in real life</div>
+      <h2 data-i18n="game.h2">Points, ranks, and a trophy case.</h2>
+      <p class="lead" data-i18n="game.lead">Every point comes from something you did with her or something you learned about her. Six ranks to climb, 28 trophies to earn, and a streak that survives real life — you bank a Bro Pass every seven days, so one rough day doesn't zero a 90-day run.</p>
       <ol class="ladder" aria-label="Rank ladder">
         <li><div class="e">🌱</div><div class="t">Rookie</div><div class="p">0 PTS</div></li>
         <li><div class="e">🤝</div><div class="t">Solid Bro</div><div class="p">50 PTS</div></li>
@@ -273,148 +299,309 @@
       </ol>
       <div class="grid2">
         <div>
-          <div class="label" style="margin-bottom:10px">// six of the twenty-eight</div>
+          <div class="label" style="margin-bottom:10px" data-i18n="game.six">// six of the twenty-eight</div>
           <ul class="trophies">
-            <li><span class="e">🧲</span><div><div class="n">Bid Catcher</div><div class="d">Log 15 real conversations. The 65% skill — turning toward her small bids for attention is the single biggest predictor of a relationship lasting.</div></div></li>
-            <li><span class="e">🩹</span><div><div class="n">The Repairman</div><div class="d">Apologize within a day of a conflict, 3 times. Repair attempts are what separate couples who last from couples who don't.</div></div></li>
-            <li><span class="e">🥩</span><div><div class="n">Iron Chef</div><div class="d">Show up on day 1 of her cycle, 3 times. She needs 18mg of iron a day. You need 8.</div></div></li>
-            <li><span class="e">⛈️</span><div><div class="n">Storm Chaser</div><div class="d">Complete 5 reps during her period.</div></div></li>
-            <li><span class="e">🧊</span><div><div class="n">Unbothered</div><div class="d">A 7-day streak with zero conflicts logged.</div></div></li>
-            <li><span class="e">🎟️</span><div><div class="n">Human Being</div><div class="d">Burn a Bro Pass. Nobody does this perfectly — the app rewards coming back, never guilts the miss.</div></div></li>
+            <li><span class="e">🧲</span><div><div class="n">Bid Catcher</div><div class="d" data-i18n="game.t1">Log 15 real conversations. The 65% skill — turning toward her small bids for attention is the single biggest predictor of a relationship lasting.</div></div></li>
+            <li><span class="e">🩹</span><div><div class="n">The Repairman</div><div class="d" data-i18n="game.t2">Apologize within a day of a conflict, 3 times. Repair attempts are what separate couples who last from couples who don't.</div></div></li>
+            <li><span class="e">🥩</span><div><div class="n">Iron Chef</div><div class="d" data-i18n="game.t3">Show up on day 1 of her cycle, 3 times. She needs 18mg of iron a day. You need 8.</div></div></li>
+            <li><span class="e">⛈️</span><div><div class="n">Storm Chaser</div><div class="d" data-i18n="game.t4">Complete 5 reps during her period.</div></div></li>
+            <li><span class="e">🧊</span><div><div class="n">Unbothered</div><div class="d" data-i18n="game.t5">A 7-day streak with zero conflicts logged.</div></div></li>
+            <li><span class="e">🎟️</span><div><div class="n">Human Being</div><div class="d" data-i18n="game.t6">Burn a Bro Pass. Nobody does this perfectly — the app rewards coming back, never guilts the miss.</div></div></li>
           </ul>
-          <div class="rule">"every one of these is earned out there, not in here. no points for scrolling, bro." — the trophy case, verbatim</div>
+          <div class="rule" data-i18n="game.rule">"every one of these is earned out there, not in here. no points for scrolling, bro." — the trophy case, verbatim</div>
         </div>
         <div style="justify-self:center">
-          <img class="phone" src="screens/s4-trophies.png" alt="The trophy case: Bro Scholar rank, 185 points, a 12-day streak, one Bro Pass, progress toward Certified Bro, and unlocked trophies including Day One, First Rep, Certified Listener and The Repairman" loading="lazy" width="390" height="844" />
+          <img class="phone" src="screens/s4-trophies.png" data-i18n-alt="alt.trophy" alt="The trophy case: Bro Scholar rank, 185 points, a 12-day streak, one Bro Pass, and unlocked trophies" loading="lazy" width="390" height="844" />
         </div>
       </div>
     </section>
 
     <section class="section" id="her">
-      <div class="label">// she's not a spreadsheet</div>
-      <h2>Built for her. Specifically her.</h2>
-      <p class="lead">Ten seconds of profile turns generic cycle advice into advice about the actual person you live with. Every field you fill in changes what the app says.</p>
-      <ul class="fields" aria-label="Profile fields that shape the advice">
-        <li>anxiety · ADHD · autism · depression · sensory</li>
-        <li>what comforts her — heat, space, being held, words</li>
-        <li>her pace and her social battery</li>
-        <li>cravings, favourites, dietary stuff</li>
-        <li>her contraception — it changes how the calendar reads</li>
-        <li>important dates</li>
+      <div class="label" data-i18n="her.label">// she's not a spreadsheet</div>
+      <h2 data-i18n="her.h2">Built for her. Specifically her.</h2>
+      <p class="lead" data-i18n="her.lead">Ten seconds of profile turns generic cycle advice into advice about the actual person you live with. Every field you fill in changes what the app says.</p>
+      <ul class="fields" aria-label="Profile fields">
+        <li data-i18n="her.f1">anxiety · ADHD · autism · depression · sensory</li>
+        <li data-i18n="her.f2">what comforts her — heat, space, being held, words</li>
+        <li data-i18n="her.f3">her pace and her social battery</li>
+        <li data-i18n="her.f4">cravings, favourites, dietary stuff</li>
+        <li data-i18n="her.f5">her contraception — it changes how the calendar reads</li>
+        <li data-i18n="her.f6">important dates</li>
       </ul>
       <div class="compare">
         <div class="who">
-          <span class="label">// partner A · anxiety, wants space, introvert, salty snacks</span>
-          <p>Late luteal, day 24.</p>
-          <div class="tip">"Anxiety gusts likely — reassure early, reassure often. Then give her the quiet she needs without making her feel guilty about it."</div>
+          <span class="label" data-i18n="her.a.label">// partner A · anxiety, wants space, introvert, salty snacks</span>
+          <p data-i18n="her.a.p">Late luteal, day 24.</p>
+          <div class="tip" data-i18n="her.a.tip">"Anxiety gusts likely — reassure early, reassure often. Then give her the quiet she needs without making her feel guilty about it."</div>
         </div>
         <div class="who">
-          <span class="label">// partner B · ADHD, wants to be held, extrovert, sweet tooth</span>
-          <p>Same day, same phase.</p>
-          <div class="tip">"Executive function's dropping — she's not flaking, her tank's empty. Handle the logistics. Dark chocolate in the house: magnesium AND a bit of iron."</div>
+          <span class="label" data-i18n="her.b.label">// partner B · ADHD, wants to be held, extrovert, sweet tooth</span>
+          <p data-i18n="her.b.p">Same day, same phase.</p>
+          <div class="tip" data-i18n="her.b.tip">"Executive function's dropping — she's not flaking, her tank's empty. Handle the logistics. Dark chocolate in the house: magnesium AND a bit of iron."</div>
         </div>
       </div>
-      <p class="lead" style="margin-top:18px">Verified in the test suite: two differently-configured partners get <strong>zero</strong> overlapping personalized tips.</p>
+      <p class="lead" style="margin-top:18px" data-i18n="her.verified">Verified in the test suite: two differently-configured partners get <strong>zero</strong> overlapping personalized tips.</p>
     </section>
 
     <section class="section" id="science">
-      <div class="label">// not vibes. sources.</div>
-      <h2>The part that's actually peer-reviewed.</h2>
-      <p class="lead">Every "lab-verified" line in the app traces to a real study. Here are the ones that carry the most weight — and, further down, the ones we're honest about being shaky.</p>
+      <div class="label" data-i18n="sci.label">// not vibes. sources.</div>
+      <h2 data-i18n="sci.h2">The part that's actually peer-reviewed.</h2>
+      <p class="lead" data-i18n="sci.lead">Every "lab-verified" line in the app traces to a real study. Here are the ones that carry the most weight — and, further down, the ones we're honest about being shaky.</p>
       <ul class="science">
-        <li><span class="tag">meta-analysis · 2025</span><h3>Heat rivals painkillers for cramps</h3><p>A systematic review of 25 randomised trials found heat therapy reduced period pain comparably to NSAIDs, with fewer side effects. The heating pad is medical equipment.</p><a href="https://www.frontiersin.org/articles/10.3389/fmed.2025.1730505/full" rel="noopener">Frontiers in Medicine, 2025 →</a></li>
-        <li><span class="tag">clinical survey · 2025</span><h3>Your support is measurable</h3><p>Partner support had a direct effect on premenstrual symptom severity — more supportive partners, less severe symptoms. Being dismissed made distress worse.</p><a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0322314" rel="noopener">PLOS ONE, 2025 →</a></li>
-        <li><span class="tag">nutrition data</span><h3>The iron gap</h3><p>A menstruating woman needs roughly 18mg of iron a day. A man needs 8. She stores around 300mg; he stores around 1000mg. Feed her accordingly.</p><a href="https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/" rel="noopener">NIH Office of Dietary Supplements →</a></li>
-        <li><span class="tag">mental-load research · 2024–25</span><h3>She carries ~71% of the invisible work</h3><p>The remembering, planning and worrying — not the chores. And it doesn't shrink when you "help more." It shrinks when you own a whole category outright.</p><a href="https://www.frontiersin.org/journals/sociology/articles/10.3389/fsoc.2025.1683261/full" rel="noopener">Frontiers in Sociology, 2025 →</a></li>
-        <li><span class="tag">migraine research</span><h3>Why the pre-period headache</h3><p>Estrogen acts as a natural painkiller and regulates blood vessels. When it drops before her period, pain receptors sensitise — and these attacks last up to 35% longer than her other headaches.</p><a href="https://unmhealth.org/stories/2025/05/headaches-and-hormones.html" rel="noopener">UNM Health, 2025 →</a></li>
-        <li><span class="tag">Gottman lab · contested</span><h3>How you argue beats how often</h3><p>Repair attempts — a joke, a hand, "we're okay" — are what let couples survive frequent conflict. We use the finding; we do <em>not</em> repeat the famous "90% divorce prediction" stat, which was fitted after the fact and failed independent cross-validation.</p><a href="https://www.researchgate.net/publication/6730328_The_Hazards_of_Predicting_Divorce_Without_Crossvalidation" rel="noopener">Heyman &amp; Slep, the critique →</a></li>
+        <li><span class="tag" data-i18n="sci.1.tag">meta-analysis · 2025</span><h3 data-i18n="sci.1.h3">Heat rivals painkillers for cramps</h3><p data-i18n="sci.1.p">A systematic review of 25 randomised trials found heat therapy reduced period pain comparably to NSAIDs, with fewer side effects. The heating pad is medical equipment.</p><a href="https://www.frontiersin.org/articles/10.3389/fmed.2025.1730505/full" rel="noopener">Frontiers in Medicine, 2025 →</a></li>
+        <li><span class="tag" data-i18n="sci.2.tag">clinical survey · 2025</span><h3 data-i18n="sci.2.h3">Your support is measurable</h3><p data-i18n="sci.2.p">Partner support had a direct effect on premenstrual symptom severity — more supportive partners, less severe symptoms. Being dismissed made distress worse.</p><a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0322314" rel="noopener">PLOS ONE, 2025 →</a></li>
+        <li><span class="tag" data-i18n="sci.3.tag">nutrition data</span><h3 data-i18n="sci.3.h3">The iron gap</h3><p data-i18n="sci.3.p">A menstruating woman needs roughly 18mg of iron a day. A man needs 8. She stores around 300mg; he stores around 1000mg. Feed her accordingly.</p><a href="https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/" rel="noopener">NIH Office of Dietary Supplements →</a></li>
+        <li><span class="tag" data-i18n="sci.4.tag">mental-load research · 2024–25</span><h3 data-i18n="sci.4.h3">She carries ~71% of the invisible work</h3><p data-i18n="sci.4.p">The remembering, planning and worrying — not the chores. And it doesn't shrink when you "help more." It shrinks when you own a whole category outright.</p><a href="https://www.frontiersin.org/journals/sociology/articles/10.3389/fsoc.2025.1683261/full" rel="noopener">Frontiers in Sociology, 2025 →</a></li>
+        <li><span class="tag" data-i18n="sci.5.tag">migraine research</span><h3 data-i18n="sci.5.h3">Why the pre-period headache</h3><p data-i18n="sci.5.p">Estrogen acts as a natural painkiller and regulates blood vessels. When it drops before her period, pain receptors sensitise — and these attacks last up to 35% longer than her other headaches.</p><a href="https://unmhealth.org/stories/2025/05/headaches-and-hormones.html" rel="noopener">UNM Health, 2025 →</a></li>
+        <li><span class="tag" data-i18n="sci.6.tag">Gottman lab · contested</span><h3 data-i18n="sci.6.h3">How you argue beats how often</h3><p data-i18n="sci.6.p">Repair attempts — a joke, a hand, "we're okay" — are what let couples survive frequent conflict. We use the finding; we do <em>not</em> repeat the famous "90% divorce prediction" stat, which was fitted after the fact and failed independent cross-validation.</p><a href="https://www.researchgate.net/publication/6730328_The_Hazards_of_Predicting_Divorce_Without_Crossvalidation" rel="noopener" data-i18n="sci.6.a">Heyman &amp; Slep, the critique →</a></li>
       </ul>
       <div class="honest">
-        <span class="label">// what we're NOT sure about — straight from the app's archive</span>
-        <p>"An app that only tells you what's confirmed is lying by omission. Things in here that are solid: heat therapy for cramps, the iron gap, PMDD prevalence, endometriosis rates, progesterone wrecking luteal sleep, partner support lowering symptom severity. Things that are shakier than the internet claims: <strong>cycle-syncing</strong> your workouts (2023–25 reviews found phase doesn't meaningfully change performance), the viral <strong>ovulation mate-preference</strong> studies (large replications mostly failed), the famous <strong>90% divorce prediction</strong> number, and the <strong>five love languages</strong> (a 2024 review found its core assumptions don't hold). We still use pace and love-language preferences — as things SHE told you she likes, not as laws of nature. When the science and her actual words disagree, believe her."</p>
-        <p style="font-size:12px;color:var(--muted)">Sources for the shaky ones: <a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2023.1054542/full" rel="noopener">cycle phase &amp; performance</a> · <a href="https://journals.sagepub.com/doi/10.1177/09637214231217663" rel="noopener">love languages review, 2024</a></p>
+        <span class="label" data-i18n="sci.honest.label">// what we're NOT sure about — straight from the app's archive</span>
+        <p data-i18n="sci.honest.p">"An app that only tells you what's confirmed is lying by omission. Things in here that are solid: heat therapy for cramps, the iron gap, PMDD prevalence, endometriosis rates, progesterone wrecking luteal sleep, partner support lowering symptom severity. Things that are shakier than the internet claims: <strong>cycle-syncing</strong> your workouts (2023–25 reviews found phase doesn't meaningfully change performance), the viral <strong>ovulation mate-preference</strong> studies (large replications mostly failed), the famous <strong>90% divorce prediction</strong> number, and the <strong>five love languages</strong> (a 2024 review found its core assumptions don't hold). We still use pace and love-language preferences — as things SHE told you she likes, not as laws of nature. When the science and her actual words disagree, believe her."</p>
+        <p style="font-size:12px;color:var(--muted)"><span data-i18n="sci.honest.src">Sources for the shaky ones:</span> <a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2023.1054542/full" rel="noopener" data-i18n="sci.honest.a1">cycle phase &amp; performance</a> · <a href="https://journals.sagepub.com/doi/10.1177/09637214231217663" rel="noopener" data-i18n="sci.honest.a2">love languages review, 2024</a></p>
       </div>
     </section>
 
     <section class="section" id="archive">
-      <div class="label">// the archive</div>
-      <h2>495 entries. Searchable.</h2>
-      <p class="lead">Every daily tip, every lab line, every quiz question, every decoder phrase, the what-to-say bank, the health literacy deep-dives — in one place, filterable by a word. Type "iron" and the whole app rearranges itself around iron.</p>
+      <div class="label" data-i18n="arc.label">// the archive</div>
+      <h2 data-i18n="arc.h2">495 entries. Searchable.</h2>
+      <p class="lead" data-i18n="arc.lead">Every daily tip, every lab line, every quiz question, every decoder phrase, the what-to-say bank, the health literacy deep-dives — in one place, filterable by a word. Type "iron" and the whole app rearranges itself around iron.</p>
       <div class="screens">
-        <figure><img src="screens/s1-dashboard.png" alt="Dashboard" loading="lazy" width="390" height="844" /><figcaption class="label">dashboard</figcaption></figure>
-        <figure><img src="screens/s2-weather.png" alt="Her Weather forecast" loading="lazy" width="390" height="844" /><figcaption class="label">her weather</figcaption></figure>
-        <figure><img src="screens/s3-quiz.png" alt="Pop quiz" loading="lazy" width="390" height="844" /><figcaption class="label">pop quiz</figcaption></figure>
-        <figure><img src="screens/s4-trophies.png" alt="Trophy case" loading="lazy" width="390" height="844" /><figcaption class="label">trophy case</figcaption></figure>
-        <figure><img src="screens/s5-archive.png" alt="The Archive, filtered to the word iron: 27 of 495 entries, showing daily tips and lab lines about iron" loading="lazy" width="390" height="844" /><figcaption class="label">archive · "iron"</figcaption></figure>
+        <figure><img src="screens/s1-dashboard.png" alt="Dashboard" loading="lazy" width="390" height="844" /><figcaption class="label" data-i18n="arc.c1">dashboard</figcaption></figure>
+        <figure><img src="screens/s2-weather.png" alt="Her Weather" loading="lazy" width="390" height="844" /><figcaption class="label" data-i18n="arc.c2">her weather</figcaption></figure>
+        <figure><img src="screens/s3-quiz.png" alt="Pop quiz" loading="lazy" width="390" height="844" /><figcaption class="label" data-i18n="arc.c3">pop quiz</figcaption></figure>
+        <figure><img src="screens/s4-trophies.png" alt="Trophy case" loading="lazy" width="390" height="844" /><figcaption class="label" data-i18n="arc.c4">trophy case</figcaption></figure>
+        <figure><img src="screens/s5-archive.png" alt="The Archive filtered to the word iron" loading="lazy" width="390" height="844" /><figcaption class="label" data-i18n="arc.c5">archive · "iron"</figcaption></figure>
       </div>
     </section>
 
     <section class="section" id="for-her">
-      <div class="label">// show her this</div>
-      <h2>If he just showed you this page:</h2>
+      <div class="label" data-i18n="fh.label">// show her this</div>
+      <h2 data-i18n="fh.h2">If he just showed you this page:</h2>
       <div class="forher">
-        <h3>Hi. This is a coach for him, not a tracker of you.</h3>
-        <p>He enters the first day of your last period, and the app tells <em>him</em> what to do on any given day — bring the heating pad, don't start the money conversation this week, ask instead of assuming. It's trying to make him better at being on your team. That's the entire product.</p>
+        <h3 data-i18n="fh.h3">Hi. This is a coach for him, not a tracker of you.</h3>
+        <p data-i18n="fh.p1">He enters the first day of your last period, and the app tells <em>him</em> what to do on any given day — bring the heating pad, don't start the money conversation this week, ask instead of assuming. It's trying to make him better at being on your team. That's the entire product.</p>
         <ul>
-          <li><strong>What it knows:</strong> one date, a cycle length, and whatever he chose to note about what helps you. Nothing you didn't tell him.</li>
-          <li><strong>Where it lives:</strong> only on his phone. There is no account, no server, no company reading it. He can export it or wipe it in two taps, and so can you.</li>
-          <li><strong>What it isn't:</strong> medical advice, a mood-reading device, or an excuse. If he ever says "is this your cycle?" the app has a page telling him that's the opposite of the point.</li>
+          <li data-i18n="fh.l1"><strong>What it knows:</strong> one date, a cycle length, and whatever he chose to note about what helps you. Nothing you didn't tell him.</li>
+          <li data-i18n="fh.l2"><strong>Where it lives:</strong> only on his phone. There is no account, no server, no company reading it. He can export it or wipe it in two taps, and so can you.</li>
+          <li data-i18n="fh.l3"><strong>What it isn't:</strong> medical advice, a mood-reading device, or an excuse. If he ever says "is this your cycle?" the app has a page telling him that's the opposite of the point.</li>
         </ul>
-        <p>The research the app leans on says shared cycle literacy improves symptom management and that partner support measurably lowers symptom severity — but only when it's done in the open. In the app's own words:</p>
-        <blockquote class="app"><span class="label">// the archive · health literacy</span>"Tracking together isn't surveillance — done openly, it's shared infrastructure. The word that matters is 'openly.'"</blockquote>
-        <p style="margin-top:14px;margin-bottom:0">If you want, you can fill in your own profile section together. It gets better at him the more it knows about you — on your terms.</p>
+        <p data-i18n="fh.p2">The research the app leans on says shared cycle literacy improves symptom management and that partner support measurably lowers symptom severity — but only when it's done in the open. In the app's own words:</p>
+        <blockquote class="app"><span class="label">// the archive · health literacy</span><span data-i18n="fh.q">"Tracking together isn't surveillance — done openly, it's shared infrastructure. The word that matters is 'openly.'"</span></blockquote>
+        <p style="margin-top:14px;margin-bottom:0" data-i18n="fh.p3">If you want, you can fill in your own profile section together. It gets better at him the more it knows about you — on your terms.</p>
       </div>
     </section>
 
     <section class="section" id="how">
-      <div class="label">// how it works</div>
-      <h2>Thirty seconds to set up.</h2>
-      <p class="lead">No bloated onboarding. No friend invites. Just the math.</p>
+      <div class="label" data-i18n="how.label">// how it works</div>
+      <h2 data-i18n="how.h2">Thirty seconds to set up.</h2>
+      <p class="lead" data-i18n="how.lead">No bloated onboarding. No friend invites. Just the math.</p>
       <ol class="steps">
-        <li>Enter the first day of her last period. That's the only required field.</li>
-        <li>The app works out where she is in the cycle and forecasts the next few weeks. It self-corrects every time you log an actual period.</li>
-        <li>Every day: one rep, one quiz question, one weather report. Tap DONE when the rep is done in real life.</li>
-        <li>When something's happening right now — she's crying, she's angry, you messed up — tap the situation chip for phase-aware moves and exact phrases.</li>
-        <li>Rank up. Fill the trophy case. Check the Receipt at the end of each cycle to see how you actually showed up.</li>
+        <li data-i18n="how.1">Enter the first day of her last period. That's the only required field.</li>
+        <li data-i18n="how.2">The app works out where she is in the cycle and forecasts the next few weeks. It self-corrects every time you log an actual period.</li>
+        <li data-i18n="how.3">Every day: one rep, one quiz question, one weather report. Tap DONE when the rep is done in real life.</li>
+        <li data-i18n="how.4">When something's happening right now — she's crying, she's angry, you messed up — tap the situation chip for phase-aware moves and exact phrases.</li>
+        <li data-i18n="how.5">Rank up. Fill the trophy case. Check the Receipt at the end of each cycle to see how you actually showed up.</li>
       </ol>
     </section>
 
     <section class="section" id="honest">
-      <div class="label">// what it isn't</div>
-      <h2>Some honesty up front.</h2>
+      <div class="label" data-i18n="not.label">// what it isn't</div>
+      <h2 data-i18n="not.h2">Some honesty up front.</h2>
       <div class="grid3">
-        <div class="not"><div class="display">Not a doctor.</div><p>Not medical advice. PMDD, endometriosis, heavy bleeding, anything severe — the app's job is to tell you to believe her and back her getting seen, not to diagnose.</p></div>
-        <div class="not"><div class="display">Not a tracker for her.</div><p>She has Clue, Flo, whatever she likes. This is the coach in <em>your</em> pocket, and it works best when she knows it exists.</p></div>
-        <div class="not"><div class="display">Not data collection.</div><p>No account, no server, no analytics, no tracking pixels — not even on this page. Everything lives in your phone's local storage. Export or wipe whenever.</p></div>
+        <div class="not"><div class="display" data-i18n="not.1.h">Not a doctor.</div><p data-i18n="not.1.p">Not medical advice. PMDD, endometriosis, heavy bleeding, anything severe — the app's job is to tell you to believe her and back her getting seen, not to diagnose.</p></div>
+        <div class="not"><div class="display" data-i18n="not.2.h">Not a tracker for her.</div><p data-i18n="not.2.p">She has Clue, Flo, whatever she likes. This is the coach in <em>your</em> pocket, and it works best when she knows it exists.</p></div>
+        <div class="not"><div class="display" data-i18n="not.3.h">Not data collection.</div><p data-i18n="not.3.p">No account, no server, no analytics, no tracking pixels — not even on this page. Everything lives in your phone's local storage. Export or wipe whenever.</p></div>
       </div>
     </section>
 
-    <section class="section" id="install">
-      <div class="label">// install</div>
-      <h2>Put it on your home screen.</h2>
-      <p class="lead">It's a web app, so there's nothing to download from a store — but the reminders and the app badge only work once it's installed. Takes one tap.</p>
-      <div class="install">
-        <div><div class="display">iPhone</div>Open the app in Safari, tap <kbd>Share</kbd>, then <kbd>Add to Home Screen</kbd>.</div>
-        <div><div class="display">Android</div>Open the app in Chrome, tap the <kbd>⋮</kbd> menu, then <kbd>Install app</kbd> or <kbd>Add to Home Screen</kbd>.</div>
-        <div><div class="display">After that</div>It works offline, updates itself, and can send up to three gentle reminders a day — only when there's something worth saying.</div>
-      </div>
+    <section class="section faq" id="faq">
+      <div class="label">// FAQ</div>
+      <h2 data-i18n="faq.h2">Questions people actually ask.</h2>
+      <details><summary data-i18n="faq.1.q">Is it free?</summary><p data-i18n="faq.1.a">Yes. No ads, no subscription, no "pro" tier. It costs nothing to run because there's no server.</p></details>
+      <details><summary data-i18n="faq.2.q">Does it work offline?</summary><p data-i18n="faq.2.a">Fully, once installed. Everything — the archive, the quiz, the forecast — is on your phone.</p></details>
+      <details><summary data-i18n="faq.3.q">Where's my data?</summary><p data-i18n="faq.3.a">In your browser's local storage on your own device. Nothing is uploaded, ever. Export it as a file from Her Profile if you switch phones; wipe it there too.</p></details>
+      <details><summary data-i18n="faq.4.q">Is this creepy?</summary><p data-i18n="faq.4.a">It's a coach for you, not a tracker of her — and it works best when she knows it exists. There's a whole section above written for her, and the app's own advice on how to bring it up: "I want to understand you better, and your cycle is part of that."</p></details>
+      <details><summary data-i18n="faq.5.q">Is the science real?</summary><p data-i18n="faq.5.a">Every "lab-verified" line traces to a study, and the app is explicit about which popular claims it does <em>not</em> repeat — cycle-syncing workouts, the five love languages, the 90% divorce stat. See the science section.</p></details>
+      <details><summary data-i18n="faq.6.q">What languages?</summary><p data-i18n="faq.6.a">This site is in English and Norwegian. The app is in English for now.</p></details>
     </section>
 
     <section class="final">
-      <h2>Stop guessing. Start showing up.</h2>
+      <h2 data-i18n="final.h2">Stop guessing. Start showing up.</h2>
       <div class="cta-row" style="justify-content:center">
-        <a class="btn btn-primary" href="app.html">OPEN BRO CODE →</a>
-        <a class="btn btn-ghost" href="app.html?demo=1">TRY THE DEMO</a>
+        <a class="btn btn-primary" href="app.html" data-i18n="final.cta1">OPEN BRO CODE →</a>
+        <a class="btn btn-ghost" href="app.html?demo=1" data-i18n="final.cta2">TRY THE DEMO</a>
       </div>
-      <div class="trust" style="margin-top:14px">Free. No ads. Works offline.</div>
+      <div class="trust" style="margin-top:14px" data-i18n="final.trust">Free. No ads. Works offline.</div>
     </section>
   </main>
 
   <footer>
     <div class="wrap">
-      <div class="label">BRO CODE · v3.6 · Made by a bro for the bros</div>
-      <div style="margin-top:8px"><a href="https://github.com/SupaMoi-ai/claud-tester" rel="noopener">github</a> · <a href="privacy.html">privacy</a> · <a href="app.html">app</a></div>
+      <div class="label" data-i18n="foot.line">BRO CODE · v3.7 · Made by a bro for the bros</div>
+      <div style="margin-top:8px"><a href="https://github.com/SupaMoi-ai/claud-tester" rel="noopener">github</a> · <a href="privacy.html" data-i18n="foot.privacy" data-i18n-href="foot.privacy.href">privacy</a> · <a href="app.html">app</a></div>
     </div>
   </footer>
+
+<script>
+// ---------- i18n ----------
+// Only Norwegian strings live here; English is the markup itself (and the fallback).
+// A missing Norwegian key leaves the English in place, so a partial translation never breaks the page.
+const NO = {
+  'meta.title': 'BRO CODE — spilleboka for å stille opp',
+  'meta.desc': 'BRO CODE — den syklusbevisste coachen for gutter som vil bli en bedre partner. Én liten handling om dagen, en pop quiz, værmeldingen hennes og et trofeskap du bare kan fylle i virkeligheten. Morsom på overflaten, fagfellevurdert under. Ingen innlogging, ingen sporing.',
+  'skip': 'Hopp til innhold',
+  'nav.download': 'Last ned', 'nav.daily': 'Hver dag', 'nav.game': 'Spillet', 'nav.science': 'Vitenskap', 'nav.her': 'For henne', 'nav.faq': 'FAQ', 'nav.open': 'ÅPNE APPEN →',
+  'hero.eyebrow': '// den syklusbevisste coachen for gutter',
+  'hero.h1': 'Spilleboka<br/>for å <span class="red">stille opp.</span>',
+  'hero.sub': 'For gutter som vil bli en bedre partner. Morsom på overflaten. Fagfellevurdert under. Bor på telefonen din.',
+  'hero.cta1': 'HENT APPEN →', 'hero.cta2': 'PRØV DEMOEN',
+  'hero.trust': 'Ingen innlogging · Ingen sporing · Alt blir på telefonen din',
+  'alt.dash': 'BRO CODE-dashbordet: LUTEAL-fasen for Maya, dag 24 av 28, et coach-innblikk og Dagens rep med 12 dagers streak',
+  'dl.label': '// hent appen', 'dl.h2': 'Last ned BRO CODE.',
+  'dl.lead': 'Det er en web-app: den installeres rett fra nettleseren i dag, og den er pakket for App Store og Google Play. Gratis uansett. Ingen konto.',
+  'dl.now.h3': 'Installer nå — fungerer på alle telefoner',
+  'dl.now.p': 'Åpne appen, og legg den til på hjemskjermen. Den fungerer uten nett, oppdaterer seg selv og kan sende opptil tre forsiktige påminnelser om dagen.',
+  'dl.now.btn': 'ÅPNE BRO CODE →',
+  'dl.now.ios': '<strong>iPhone:</strong> i Safari, trykk <kbd>Del</kbd> → <kbd>Legg til på Hjem-skjerm</kbd>.',
+  'dl.now.android': '<strong>Android:</strong> i Chrome, trykk <kbd>⋮</kbd>-menyen → <kbd>Installer app</kbd>. (Det er «Chrome-butikken» — Chrome installerer web-apper direkte.)',
+  'dl.now.qr': 'På en datamaskin? Pek telefonkameraet på denne. Den åpner appen.',
+  'dl.stores.h3': 'App Store og Google Play',
+  'dl.stores.p': 'Samme app, pakket for butikkene. Lenkene blir aktive i det øyeblikket hver oppføring er godkjent — inntil da gjør knappen over nøyaktig det samme.',
+  'dl.stores.soon': 'kommer snart på', 'dl.stores.soon2': 'kommer snart på',
+  'dl.stores.note': '<strong>Om språk:</strong> denne nettsiden finnes på engelsk og norsk. Selve appen er foreløpig på engelsk.',
+  'daily.label': '// hver dag :: tre trykk',
+  'daily.h2': 'Én liten handling. Ett spørsmål. Én værmelding.',
+  'daily.lead': 'Appen leser hvor hun er i syklusen og gir deg nøyaktig tre ting om dagen. Det er hele rutinen — under to minutter, og forskningen sier uansett at små daglige handlinger slår store gester.',
+  'daily.rep.h3': 'Dagens rep',
+  'daily.rep.p': 'Ett konkret trekk tilpasset fasen og profilen hennes. Trykk FERDIG når du faktisk har gjort det — der ute, ikke her inne. Under hver rep: én linje om vitenskapen bak.',
+  'daily.rep.pts': '+15 POENG · KUN FOR VIRKELIGE HANDLINGER',
+  'daily.quiz.h3': 'Pop quiz',
+  'daily.quiz.p': 'Ett spørsmål om dagen fra Bro University: 64 av dem, alle hentet fra reelle studier. Svarer du riktig, forklarer den hvorfor. Svarer du feil, forklarer den hvorfor likevel.',
+  'daily.quiz.pts': '+10 RIKTIG · +3 FEIL — DU LÆRTE NOE',
+  'alt.quiz': 'Pop quiz-kortet etter svar: riktig svar, forklaring, +10 i banken og fremgang mot neste nivå',
+  'daily.wx.h3': 'Været hennes',
+  'daily.wx.p': 'En meteorologs blikk på uka hennes. Fasestyrt, profilbevisst, med sjudagersvarsel og advarsel når en front er på vei inn.',
+  'daily.wx.q': 'ALVORLIG FØLSOMHETSVARSEL — Fullt lutealsystem. Tulldetektoren hennes står på maks. IKKE test den. Utstyr: stødig tilstedeværelse, ingen overraskelser, mensutstyr klart.',
+  'alt.wx': 'Været hennes-kortet: alvorlig følsomhetsvarsel, sjanse-for-stolper, anbefalt utstyr og sjudagersvarsel med en mensfront på vei inn mandag',
+  'game.label': '// spillet du vinner i virkeligheten',
+  'game.h2': 'Poeng, nivåer og et trofeskap.',
+  'game.lead': 'Hvert poeng kommer fra noe du gjorde med henne eller noe du lærte om henne. Seks nivåer å klatre, 28 trofeer å tjene, og en streak som overlever virkeligheten — du sparer opp et Bro Pass hver sjuende dag, så én dårlig dag nuller ikke ut 90 dager.',
+  'game.six': '// seks av de tjueåtte',
+  'game.t1': 'Logg 15 ekte samtaler. 65 %-ferdigheten — å vende seg mot hennes små forsøk på kontakt er den største enkeltprediktoren for at et forhold varer.',
+  'game.t2': 'Be om unnskyldning innen ett døgn etter en konflikt, 3 ganger. Reparasjonsforsøk er det som skiller par som varer fra par som ikke gjør det.',
+  'game.t3': 'Still opp på dag 1 i syklusen hennes, 3 ganger. Hun trenger 18 mg jern om dagen. Du trenger 8.',
+  'game.t4': 'Fullfør 5 reps mens hun har mens.',
+  'game.t5': 'En 7-dagers streak med null logga konflikter.',
+  'game.t6': 'Bruk et Bro Pass. Ingen gjør dette perfekt — appen belønner at du kommer tilbake, og skammer deg aldri for dagen du glapp.',
+  'game.rule': '«alle disse tjenes der ute, ikke her inne. ingen poeng for scrolling, bro.» — trofeskapet, ordrett',
+  'alt.trophy': 'Trofeskapet: Bro Scholar-nivå, 185 poeng, 12 dagers streak, ett Bro Pass og opplåste trofeer',
+  'her.label': '// hun er ikke et regneark',
+  'her.h2': 'Bygget for henne. Helt spesifikt.',
+  'her.lead': 'Ti sekunder med profil gjør generelle syklusråd om til råd om den faktiske personen du bor med. Hvert felt du fyller ut endrer hva appen sier.',
+  'her.f1': 'angst · ADHD · autisme · depresjon · sensorisk',
+  'her.f2': 'hva som trøster henne — varme, plass, å bli holdt, ord',
+  'her.f3': 'tempoet hennes og det sosiale batteriet',
+  'her.f4': 'cravings, favoritter, kosthold',
+  'her.f5': 'prevensjonen hennes — den endrer hvordan kalenderen leses',
+  'her.f6': 'viktige datoer',
+  'her.a.label': '// partner A · angst, vil ha plass, introvert, salt snacks',
+  'her.a.p': 'Sen luteal, dag 24.',
+  'her.a.tip': '«Angstkast sannsynlig — berolig tidlig, berolig ofte. Gi henne så roen hun trenger uten å få henne til å føle skyld for det.»',
+  'her.b.label': '// partner B · ADHD, vil bli holdt, ekstrovert, søtsug',
+  'her.b.p': 'Samme dag, samme fase.',
+  'her.b.tip': '«Eksekutivfunksjonen faller — hun sluntrer ikke unna, tanken er tom. Ta logistikken. Mørk sjokolade i huset: magnesium OG litt jern.»',
+  'her.verified': 'Verifisert i testpakken: to ulikt konfigurerte partnere får <strong>null</strong> overlappende personlige tips.',
+  'sci.label': '// ikke vibes. kilder.',
+  'sci.h2': 'Delen som faktisk er fagfellevurdert.',
+  'sci.lead': 'Hver «lab-verifisert» linje i appen sporer til en reell studie. Her er de som veier tyngst — og lenger ned, de vi er ærlige om at er usikre.',
+  'sci.1.tag': 'metaanalyse · 2025', 'sci.1.h3': 'Varme på høyde med smertestillende mot menssmerter',
+  'sci.1.p': 'En systematisk gjennomgang av 25 randomiserte studier fant at varmebehandling reduserte menssmerter på linje med NSAID-er, med færre bivirkninger. Varmeputen er medisinsk utstyr.',
+  'sci.2.tag': 'klinisk undersøkelse · 2025', 'sci.2.h3': 'Støtten din er målbar',
+  'sci.2.p': 'Partnerstøtte hadde en direkte effekt på alvorlighetsgraden av premenstruelle symptomer — mer støttende partnere, mindre alvorlige symptomer. Å bli avfeid gjorde ubehaget verre.',
+  'sci.3.tag': 'ernæringsdata', 'sci.3.h3': 'Jerngapet',
+  'sci.3.p': 'En menstruerende kvinne trenger rundt 18 mg jern om dagen. En mann trenger 8. Hun lagrer rundt 300 mg; han rundt 1000 mg. Gi henne mat deretter.',
+  'sci.4.tag': 'forskning på mental belastning · 2024–25', 'sci.4.h3': 'Hun bærer ~71 % av det usynlige arbeidet',
+  'sci.4.p': 'Huskingen, planleggingen og bekymringen — ikke husarbeidet. Og det minker ikke når du «hjelper mer». Det minker når du eier en hel kategori fullt ut.',
+  'sci.5.tag': 'migreneforskning', 'sci.5.h3': 'Hvorfor hodepinen før mens',
+  'sci.5.p': 'Østrogen fungerer som naturlig smertestillende og regulerer blodårene. Når det faller før mens, blir smertereseptorene mer følsomme — og disse anfallene varer opptil 35 % lenger enn annen hodepine.',
+  'sci.6.tag': 'Gottman-laben · omstridt', 'sci.6.h3': 'Hvordan dere krangler slår hvor ofte',
+  'sci.6.p': 'Reparasjonsforsøk — en spøk, en hånd, «vi er okei» — er det som lar par overleve hyppige konflikter. Vi bruker funnet; vi gjentar <em>ikke</em> den berømte «90 % skilsmisseprediksjon»-statistikken, som ble tilpasset i etterkant og ikke besto uavhengig kryssvalidering.',
+  'sci.6.a': 'Heyman og Slep, kritikken →',
+  'sci.honest.label': '// det vi IKKE er sikre på — rett fra appens arkiv',
+  'sci.honest.p': '«En app som bare forteller deg det som er bekreftet, lyver ved utelatelse. Ting her inne som er solide: varmebehandling mot menssmerter, jerngapet, forekomsten av PMDD, endometriose-tall, at progesteron ødelegger søvnen i lutealfasen, at partnerstøtte senker symptomene. Ting som er mer usikre enn internett påstår: <strong>cycle syncing</strong> av trening (gjennomganger fra 2023–25 fant at fase ikke endrer prestasjon nevneverdig), de virale <strong>partnerpreferanse-studiene ved eggløsning</strong> (store replikasjoner feilet stort sett), det berømte <strong>90 %-skilsmissetallet</strong>, og de <strong>fem kjærlighetsspråkene</strong> (en gjennomgang fra 2024 fant at kjerneantakelsene ikke holder). Vi bruker fortsatt tempo- og kjærlighetsspråk-preferanser — som ting HUN har fortalt deg at hun liker, ikke som naturlover. Når vitenskapen og hennes egne ord er uenige: tro på henne.»',
+  'sci.honest.src': 'Kilder for de usikre:', 'sci.honest.a1': 'syklusfase og prestasjon', 'sci.honest.a2': 'gjennomgang av kjærlighetsspråk, 2024',
+  'arc.label': '// arkivet', 'arc.h2': '495 oppføringer. Søkbare.',
+  'arc.lead': 'Hvert daglige tips, hver lab-linje, hvert quizspørsmål, hver dekoderfrase, hva-du-sier-banken, helsedypdykkene — på ett sted, filtrerbart på ett ord. Skriv «jern», og hele appen ordner seg rundt jern.',
+  'arc.c1': 'dashbord', 'arc.c2': 'været hennes', 'arc.c3': 'pop quiz', 'arc.c4': 'trofeskap', 'arc.c5': 'arkiv · «iron»',
+  'fh.label': '// vis henne dette', 'fh.h2': 'Hvis han nettopp viste deg denne siden:',
+  'fh.h3': 'Hei. Dette er en coach for ham, ikke en tracker av deg.',
+  'fh.p1': 'Han legger inn første dag i din siste mens, og appen forteller <em>ham</em> hva han skal gjøre en gitt dag — hente varmeputen, ikke starte pengesamtalen denne uka, spørre i stedet for å anta. Den prøver å gjøre ham bedre til å være på laget ditt. Det er hele produktet.',
+  'fh.l1': '<strong>Hva den vet:</strong> én dato, en sykluslengde, og det han selv valgte å notere om hva som hjelper deg. Ingenting du ikke har fortalt ham.',
+  'fh.l2': '<strong>Hvor den bor:</strong> bare på telefonen hans. Det finnes ingen konto, ingen server, ikke noe selskap som leser det. Han kan eksportere eller slette alt med to trykk — og det kan du også.',
+  'fh.l3': '<strong>Hva den ikke er:</strong> medisinsk rådgivning, en humørleser eller en unnskyldning. Sier han noen gang «er dette syklusen din?», har appen en side som forteller ham at det er det motsatte av poenget.',
+  'fh.p2': 'Forskningen appen lener seg på sier at delt syklusforståelse bedrer symptomhåndtering, og at partnerstøtte målbart senker symptomene — men bare når det skjer i det åpne. Med appens egne ord:',
+  'fh.q': '«Å følge med sammen er ikke overvåking — gjort åpent er det felles infrastruktur. Ordet som betyr noe er ‘åpent’.»',
+  'fh.p3': 'Om du vil, kan dere fylle ut profildelen din sammen. Den blir bedre på ham jo mer den vet om deg — på dine premisser.',
+  'how.label': '// slik fungerer det', 'how.h2': 'Tretti sekunder å sette opp.',
+  'how.lead': 'Ingen oppblåst onboarding. Ingen venneinvitasjoner. Bare matten.',
+  'how.1': 'Legg inn første dag i hennes siste mens. Det er det eneste obligatoriske feltet.',
+  'how.2': 'Appen regner ut hvor hun er i syklusen og varsler de neste ukene. Den korrigerer seg selv hver gang du logger en faktisk mens.',
+  'how.3': 'Hver dag: én rep, ett quizspørsmål, én værmelding. Trykk FERDIG når repen er gjort i virkeligheten.',
+  'how.4': 'Når noe skjer akkurat nå — hun gråter, hun er sint, du dreit deg ut — trykk på situasjonen for fasebevisste trekk og eksakte setninger.',
+  'how.5': 'Gå opp i nivå. Fyll trofeskapet. Sjekk Kvitteringen på slutten av hver syklus for å se hvordan du faktisk stilte opp.',
+  'not.label': '// hva det ikke er', 'not.h2': 'Litt ærlighet først.',
+  'not.1.h': 'Ikke en lege.', 'not.1.p': 'Ikke medisinsk rådgivning. PMDD, endometriose, kraftige blødninger, alt alvorlig — appens jobb er å si at du skal tro på henne og støtte at hun blir undersøkt, ikke å diagnostisere.',
+  'not.2.h': 'Ikke en tracker for henne.', 'not.2.p': 'Hun har Clue, Flo, det hun liker. Dette er coachen i <em>din</em> lomme, og den fungerer best når hun vet at den finnes.',
+  'not.3.h': 'Ikke datainnsamling.', 'not.3.p': 'Ingen konto, ingen server, ingen analyse, ingen sporingspiksler — ikke engang på denne siden. Alt ligger i telefonens lokale lagring. Eksporter eller slett når du vil.',
+  'faq.h2': 'Spørsmål folk faktisk stiller.',
+  'faq.1.q': 'Er den gratis?', 'faq.1.a': 'Ja. Ingen reklame, ikke noe abonnement, ikke noe «pro»-nivå. Den koster ingenting å drifte fordi det ikke finnes noen server.',
+  'faq.2.q': 'Fungerer den uten nett?', 'faq.2.a': 'Fullt ut, når den er installert. Alt — arkivet, quizen, værmeldingen — ligger på telefonen din.',
+  'faq.3.q': 'Hvor er dataene mine?', 'faq.3.a': 'I nettleserens lokale lagring på din egen enhet. Ingenting lastes opp, noensinne. Eksporter som fil fra Hennes profil hvis du bytter telefon; slett der også.',
+  'faq.4.q': 'Er dette creepy?', 'faq.4.a': 'Det er en coach for deg, ikke en tracker av henne — og den fungerer best når hun vet at den finnes. Det er en hel seksjon over skrevet til henne, og appens eget råd om hvordan du tar det opp: «Jeg vil forstå deg bedre, og syklusen din er en del av det.»',
+  'faq.5.q': 'Er vitenskapen ekte?', 'faq.5.a': 'Hver «lab-verifisert» linje sporer til en studie, og appen er tydelig på hvilke populære påstander den <em>ikke</em> gjentar — cycle syncing av trening, de fem kjærlighetsspråkene, 90 %-skilsmissetallet. Se vitenskapsseksjonen.',
+  'faq.6.q': 'Hvilke språk?', 'faq.6.a': 'Denne siden finnes på engelsk og norsk. Appen er foreløpig på engelsk.',
+  'final.h2': 'Slutt å gjette. Begynn å stille opp.',
+  'final.cta1': 'ÅPNE BRO CODE →', 'final.cta2': 'PRØV DEMOEN', 'final.trust': 'Gratis. Ingen reklame. Fungerer uten nett.',
+  'foot.line': 'BRO CODE · v3.7 · Laget av en bro for broene',
+  'foot.privacy': 'personvern', 'foot.privacy.href': 'personvern.html'
+};
+// English snapshot of every translatable node, captured once so switching back is lossless.
+const EN = {};
+document.querySelectorAll('[data-i18n]').forEach(el => { EN[el.dataset.i18n] = el.innerHTML; });
+document.querySelectorAll('[data-i18n-alt]').forEach(el => { EN[el.dataset.i18nAlt] = el.getAttribute('alt'); });
+document.querySelectorAll('[data-i18n-content]').forEach(el => { EN[el.dataset.i18nContent] = el.getAttribute('content'); });
+document.querySelectorAll('[data-i18n-href]').forEach(el => { EN[el.dataset.i18nHref] = el.getAttribute('href'); });
+
+function applyLang(lang) {
+  const dict = lang === 'no' ? NO : EN;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = dict[el.dataset.i18n]; if (v != null) el.innerHTML = v; });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => { const v = dict[el.dataset.i18nAlt]; if (v != null) el.setAttribute('alt', v); });
+  document.querySelectorAll('[data-i18n-content]').forEach(el => { const v = dict[el.dataset.i18nContent]; if (v != null) el.setAttribute('content', v); });
+  document.querySelectorAll('[data-i18n-href]').forEach(el => { const v = dict[el.dataset.i18nHref]; if (v != null) el.setAttribute('href', v); });
+  document.documentElement.lang = lang === 'no' ? 'nb' : 'en';
+  document.querySelectorAll('[data-lang-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.langBtn === lang)));
+}
+function setLang(lang) {
+  try { localStorage.setItem('brocode_site_lang', lang); } catch {}
+  applyLang(lang);
+  try { const u = new URL(location.href); u.searchParams.set('lang', lang); history.replaceState(null, '', u); } catch {}
+}
+function detectLang() {
+  try { const q = new URLSearchParams(location.search).get('lang'); if (q === 'no' || q === 'en') return q; } catch {}
+  try { const s = localStorage.getItem('brocode_site_lang'); if (s === 'no' || s === 'en') return s; } catch {}
+  const nav = (navigator.languages || [navigator.language || '']).map(l => String(l).toLowerCase());
+  return nav.some(l => /^(nb|nn|no)\b/.test(l)) ? 'no' : 'en';
+}
+applyLang(detectLang());
+
+// ---------- store links ----------
+// Fill these in when the listings are approved; the buttons switch from "coming soon" to live.
+const STORE_LINKS = { ios: '', play: '' };
+for (const [id, url] of [['store-ios', STORE_LINKS.ios], ['store-play', STORE_LINKS.play]]) {
+  const a = document.getElementById(id);
+  if (a && url) { a.href = url; a.classList.remove('soon'); a.removeAttribute('aria-disabled'); a.querySelector('.t1').textContent = id === 'store-ios' ? 'Download on the' : 'Get it on'; }
+}
+</script>
 </body>
 </html>

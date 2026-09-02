@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "shots": "node tools/screenshots.mjs"
+    "shots": "node tools/screenshots.mjs",
+    "store-assets": "node tools/store-assets.mjs",
+    "native:prep": "node tools/native-prep.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

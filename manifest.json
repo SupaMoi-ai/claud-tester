@@ -1,16 +1,36 @@
 {
-  "name": "BRO CODE",
+  "id": "/app.html",
+  "name": "BRO CODE — the playbook for showing up",
   "short_name": "BroCode",
-  "description": "The playbook for showing up.",
+  "description": "The cycle-aware coach for guys who want to be a better partner. One small act a day, a pop quiz, her weather forecast and a trophy case you can only fill in real life. Funny on the surface, peer-reviewed underneath. No login, no tracking — everything stays on your phone.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0D1117",
   "theme_color": "#0D1117",
+  "categories": ["lifestyle", "health", "education"],
+  "prefer_related_applications": false,
+  "launch_handler": { "client_mode": "focus-existing" },
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-192.png",              "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png",              "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png",    "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png",    "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screens/s1-dashboard.png", "sizes": "1170x2532", "type": "image/png", "form_factor": "narrow", "label": "Dashboard: her phase, the daily rep and your streak" },
+    { "src": "screens/s2-weather.png",   "sizes": "1170x2532", "type": "image/png", "form_factor": "narrow", "label": "Her Weather: a 7-day forecast for her cycle" },
+    { "src": "screens/s3-quiz.png",      "sizes": "1170x2532", "type": "image/png", "form_factor": "narrow", "label": "Pop Quiz: one science question a day" },
+    { "src": "screens/s4-trophies.png",  "sizes": "1170x2532", "type": "image/png", "form_factor": "narrow", "label": "Trophy case: ranks, points and achievements earned in real life" },
+    { "src": "screens/s5-archive.png",   "sizes": "1170x2532", "type": "image/png", "form_factor": "narrow", "label": "The Archive: every tip and study, searchable" }
+  ],
+  "shortcuts": [
+    { "name": "Today",     "short_name": "Today",   "description": "Her phase, today's rep and the forecast", "url": "./app.html",                "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Toolbox",   "short_name": "Toolbox", "description": "Plays, She Told You, the trophy case",   "url": "./app.html?tab=toolbox",    "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Archive",   "short_name": "Archive", "description": "Search every tip and study",             "url": "./app.html?tab=archive",    "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

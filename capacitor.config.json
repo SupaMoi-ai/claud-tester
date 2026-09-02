@@ -1,0 +1,21 @@
+{
+  "appId": "app.brocode.ios",
+  "appName": "BRO CODE",
+  "webDir": "dist-native",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#0D1117",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#0D1117",
+    "preferredContentMode": "mobile",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "android": {
+    "backgroundColor": "#0D1117",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0, "backgroundColor": "#0D1117" },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#0D1117" }
+  }
+}

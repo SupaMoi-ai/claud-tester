@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://supamoi-ai.github.io/claud-tester/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
 <link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="BRO CODE" />
@@ -3096,7 +3096,8 @@ seedDemoIfRequested();
 
 // ---------- STATE ----------
 let state = {
-  tab: 'dashboard',
+  // Deep links from home-screen shortcuts / store listings: app.html?tab=toolbox
+  tab: (() => { try { const m = /[?&]tab=(dashboard|calendar|toolbox|profile|guide|code|archive)\b/.exec(location.search); return m ? m[1] : 'dashboard'; } catch { return 'dashboard'; } })(),
   profile: loadProfile(),
   view: new Date(),
   showWelcome: localStorage.getItem(SEEN) !== '1',
@@ -3304,7 +3305,7 @@ function render() {
     <footer class="app">${(() => {
       const nOn = state.notifSlots && (state.notifSlots.morning || state.notifSlots.midday || state.notifSlots.evening);
       const logCount = loadLog().length;
-      return `BRO CODE · v3.6 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.6+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
+      return `BRO CODE · v3.7 · ${nOn ? 'Reminders on' : 'Reminders off'} · ${logCount} log${logCount===1?'':'s'} · <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">privacy</a> · <a href="mailto:feedback@brocode.app?subject=BRO+CODE+v3.7+feedback" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(245,236,215,0.3)">feedback</a>`;
     })()}</footer>
     ${state.updateReady ? `
       <div class="install-hint update" onclick="applyUpdate()">
@@ -5733,7 +5734,8 @@ function applyUpdate() { window.location.reload(); }
 function dismissUpdate() { setState({ updateReady: false }); }
 
 // ---------- PWA ----------
-if ('serviceWorker' in navigator) {
+// Skip the service worker inside a native (Capacitor) shell — assets are bundled there already.
+if ('serviceWorker' in navigator && !window.Capacitor) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
       if (!reg) return;

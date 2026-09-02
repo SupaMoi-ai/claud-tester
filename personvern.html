@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0D1117" />
+<meta name="description" content="BRO CODE — personvern. Alt blir på enheten din." />
+<title>BRO CODE — personvern</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230D1117'/><text x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Impact,sans-serif' font-size='34' fill='%23C8322C'>BC</text></svg>" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+<link rel="alternate" hreflang="en" href="https://supamoi-ai.github.io/claud-tester/privacy.html" />
+<link rel="alternate" hreflang="nb" href="https://supamoi-ai.github.io/claud-tester/personvern.html" />
+<style>
+  @font-face { font-family: 'Anton';   font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/Anton-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/DMSans.woff2') format('woff2'); }
+  :root { --red: #C8322C; --cream: #F5ECD7; --night: #0D1117; --dark: #161B24; --mid: #1F2837; --border: #2A3547; --green: #3DAA6A; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--night); color: var(--cream); }
+  body { font-family: 'DM Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); line-height: 1.6; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 22px 80px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 28px; }
+  header .l { display: flex; align-items: center; gap: 10px; }
+  header .logo { background: var(--red); color: var(--cream); font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.04em; font-size: 16px; padding: 6px 10px; border-radius: 6px; }
+  header .name { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 18px; }
+  header .lang { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; color: rgba(245,236,215,0.7); text-decoration: none; border: 1px solid var(--border); padding: 6px 9px; border-radius: 4px; }
+  h1 { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.04em; font-size: clamp(32px, 7vw, 44px); line-height: 1; margin: 0 0 18px; text-transform: uppercase; }
+  h2 { font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.06em; font-size: 18px; color: var(--red); margin: 30px 0 8px; text-transform: uppercase; }
+  .label { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,236,215,0.7); margin-bottom: 6px; }
+  p { color: rgba(245,236,215,0.85); margin: 0 0 12px; font-size: 15px; }
+  ul { color: rgba(245,236,215,0.85); padding-left: 22px; margin: 0 0 12px; }
+  li { margin-bottom: 6px; font-size: 15px; }
+  .card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+  .card.her { border-left: 3px solid var(--green); }
+  .back { display: inline-block; margin-top: 14px; color: var(--cream); text-decoration: none; font-family: 'Anton', Impact, sans-serif; letter-spacing: 0.08em; font-size: 13px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 6px; }
+  .back:hover { border-color: var(--red); }
+  a { color: var(--red); }
+  code { background: rgba(245,236,215,0.08); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="l"><span class="logo">BC</span><span class="name">BRO CODE · personvern</span></div>
+      <a class="lang" href="privacy.html" hreflang="en">EN</a>
+    </header>
+    <h1>Dataene dine blir på telefonen din.</h1>
+    <div class="card">
+      <div class="label">// kortversjonen</div>
+      <p>BRO CODE lagrer alt i nettleserens lokale lagring på denne enheten. Ingen innlogging. Ingen kontoer. Ingen sporing. Ingen analyse. Dataene dine forlater aldri telefonen.</p>
+      <p>Sletter du nettleserdata, er det borte. Bytter du telefon, bruk <strong>Eksporter</strong> under Hennes profil for å lagre en JSON-fil, og deretter <strong>Importer</strong> på den nye enheten.</p>
+    </div>
+    <h2>Hva vi lagrer</h2>
+    <ul>
+      <li>Hennes profil — navn, sykluslengde, siste mens, og eventuelle valgfrie felt du fyller ut.</li>
+      <li>Loggene dine — det du har logget (gave / samtale / konflikt / unnskyldning / notert), dagens rep, quizsvar, poeng, streak og trofeer.</li>
+      <li>Innstillingene dine — påminnelsesslots, hvilke seksjoner du har åpnet, språkvalg på nettsiden.</li>
+    </ul>
+    <h2>Hva vi ikke gjør</h2>
+    <ul>
+      <li>Ingen kontoopprettelse. Ingen e-post nødvendig.</li>
+      <li>Ingen sporingspiksler. Ingen telemetri. Ingen analyseskript.</li>
+      <li>Ingen tredjeparts-SDK-er, ingen annonsenettverk, ingen fingerprinting.</li>
+      <li>Ingen data sendes til noen server. Appen lastes inn, og kjører deretter helt på enheten din.</li>
+    </ul>
+    <h2>Butikkversjonene (App Store / Google Play)</h2>
+    <p>Butikkversjonene er den samme appen pakket i et tynt skall. De legger ikke til noen innsamling. Apple og Google kan selv registrere at du har lastet ned appen, i tråd med deres egne personvernerklæringer — det er utenfor vår kontroll og ikke noe vi ser.</p>
+    <h2>Varsler</h2>
+    <p>Aktiverer du noen av de tre påminnelsesslotsene, fyres de av lokalt fra en timer på telefonen din. Innholdet i varslene forlater aldri enheten. Varseltillatelser styres av nettleserens eller systemets innstillinger.</p>
+    <h2>Kalendereksport</h2>
+    <p><em>Legg til i kalender</em>-knappene lager en <code>.ics</code>-fil som lastes ned til enheten din. Du bestemmer om du vil legge den til i systemkalenderen. Ingenting lastes opp.</p>
+    <h2>Demoprofilen</h2>
+    <p>Åpner du appen med «Prøv demoen», legges en oppdiktet profil («Maya») inn lokalt så du kan se deg rundt. Den overskriver aldri en eksisterende profil, og «Start på nytt» sletter den fullstendig.</p>
+    <div class="card her">
+      <div class="label" style="color: var(--green)">// hvis du fant dette på telefonen hans</div>
+      <p>Dette er et verktøy for ham, ikke overvåking av deg. Syklusdata legges inn av ham; ingenting sendes noe sted. Han prøver å bli en bedre partner — det er hele poenget. Vil du heller at han ikke bruker den, si det. Han hører etter.</p>
+    </div>
+    <h2>Spørsmål</h2>
+    <p>Send en melding til <a href="mailto:feedback@brocode.app?subject=BRO+CODE+personvern">feedback@brocode.app</a>.</p>
+    <a class="back" href="app.html">← TILBAKE TIL APPEN</a>
+  </div>
+</body>
+</html>

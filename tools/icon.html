@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; background: #0D1117; }
+  /* ?size=512&pad=0.1  →  square canvas, icon scaled into the centre with `pad` of the side on every edge */
+  .canvas { position: relative; overflow: hidden; background: #0D1117; }
+  .canvas img { position: absolute; display: block; }
+</style>
+</head>
+<body>
+<div class="canvas" id="c"><img id="i" src="../icon-512.png" alt="" /></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const size = parseInt(q.get('size') || '512', 10);
+  const pad = parseFloat(q.get('pad') || '0');
+  const c = document.getElementById('c'), i = document.getElementById('i');
+  c.style.width = c.style.height = size + 'px';
+  const inner = Math.round(size * (1 - 2 * pad));
+  i.style.width = i.style.height = inner + 'px';
+  i.style.left = i.style.top = Math.round(size * pad) + 'px';
+</script>
+</body>
+</html>

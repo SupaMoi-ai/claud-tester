@@ -6,3 +6,10 @@ dist
 .env.*
 !.env.example
 .vite
+
+# native shells / signing
+dist-native
+/ios/
+/android/
+*.keystore
+*.jks

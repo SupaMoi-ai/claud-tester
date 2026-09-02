@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /tools/
+Disallow: /dist-native/
+Sitemap: https://supamoi-ai.github.io/claud-tester/sitemap.xml
