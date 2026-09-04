@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Live L5 line information and community signals between Stavanger and Egersund.">
+<title>TRACK 5</title>
+
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/map.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Identity, plus the two facts that must always be on screen: where the
+       train numbers come from, and how many community signals are live. -->
+  <header class="topbar">
+    <span class="topbar__mark">TRACK 5</span>
+    <span class="micro" id="line-mark">L5</span>
+    <span class="topbar__spacer"></span>
+    <span class="feed" id="feed" data-state="connecting">
+      <span class="feed__dot"></span>
+      <span id="feed-label">CONNECTING</span>
+    </span>
+  </header>
+
+  <main class="screens" id="screens">
+    <section class="screen" id="screen-live" data-sheet="peek" aria-label="Live"></section>
+    <section class="screen" id="screen-chat" hidden aria-label="Chat"></section>
+    <section class="screen" id="screen-crew" hidden aria-label="Crew"></section>
+    <section class="screen" id="screen-profile" hidden aria-label="Profile"></section>
+  </main>
+
+  <!-- Four destinations. Reporting is not one of them: it lives on the map,
+       because it is an action taken while looking at the line. -->
+  <nav class="nav" id="nav" aria-label="Primary">
+    <button class="nav__item" type="button" data-tab="live" aria-current="page">LIVE</button>
+    <button class="nav__item" type="button" data-tab="chat">CHAT</button>
+    <button class="nav__item" type="button" data-tab="crew">CREW</button>
+    <button class="nav__item" type="button" data-tab="profile">PROFILE</button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<noscript>
+  <p style="padding:24px;font-family:monospace">
+    Track 5 needs JavaScript to show live departures and community signals.
+  </p>
+</noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

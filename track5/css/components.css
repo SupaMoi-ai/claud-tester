@@ -1,0 +1,403 @@
+/** Reusable primitives. Hard rectangles, terminal controls, no decoration. */
+
+/* --- Buttons ---------------------------------------------------------------
+   A terminal control is a labelled rectangle. Pressed state inverts it, which
+   reads instantly at arm's length on a moving train. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 44px;              /* thumb target, non-negotiable */
+  padding: 0 var(--s4);
+  border: var(--line-strong);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background var(--t-fast) var(--ease),
+              color var(--t-fast) var(--ease);
+}
+
+.btn:active { background: var(--fg); color: var(--bg); }
+
+.btn:disabled {
+  border-color: var(--fg-faint);
+  color: var(--fg-faint);
+  background: var(--bg);
+}
+
+.btn--block { width: 100%; }
+
+.btn--primary { background: var(--fg); color: var(--bg); }
+.btn--primary:active { background: var(--bg); color: var(--fg); }
+
+.btn--ghost { border-color: var(--fg-faint); color: var(--fg-dim); }
+
+/* Confirm / reject pair. Deliberately equal weight — the interface must not
+   nudge people toward confirming something they did not see. */
+.btn--confirm { border-color: var(--ok); color: var(--ok); }
+.btn--confirm:active { background: var(--ok); color: var(--bg); }
+.btn--reject { border-color: var(--fg-dim); color: var(--fg-dim); }
+.btn--reject:active { background: var(--fg-dim); color: var(--bg); }
+
+.btn--lg { min-height: 56px; font-size: var(--fs-body); }
+
+/* --- Panels and rows ------------------------------------------------------- */
+
+.panel {
+  border: var(--line);
+  background: var(--bg-raised);
+  padding: var(--s3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3);
+  border-bottom: var(--line);
+  width: 100%;
+  text-align: left;
+}
+
+.row:last-child { border-bottom: none; }
+.row__main { flex: 1 1 auto; min-width: 0; }
+.row__end { flex: 0 0 auto; text-align: right; }
+
+.row__title {
+  font-size: var(--fs-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Departure row ---------------------------------------------------------
+   The single most-read component in the app. Time is large and tabular;
+   status carries one of the three meanings. */
+
+.dep {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--s3);
+  padding: var(--s3);
+  border-bottom: var(--line);
+}
+
+.dep__time {
+  font-family: var(--font-mono);
+  font-size: var(--fs-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.dep__dest {
+  font-size: var(--fs-body);
+  color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dep__status {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* A scheduled-only time is struck through when it is superseded by a live one,
+   so a delay reads as a correction rather than as two competing numbers. */
+.dep__aimed {
+  text-decoration: line-through;
+  color: var(--fg-faint);
+  font-size: var(--fs-body);
+}
+
+/* --- Signal card -----------------------------------------------------------
+   Used in the sheet, never on the map itself. */
+
+.signal {
+  border: var(--line);
+  border-left-width: 3px;
+  border-left-color: var(--fg-dim);
+  padding: var(--s3);
+  background: var(--bg-raised);
+}
+
+.signal[data-state='CONFIRMED'] { border-left-color: var(--fg); }
+.signal[data-state='HIGH_CONFIDENCE'] { border-left-color: var(--alert); }
+.signal[data-decaying='true'] { border-style: dashed; color: var(--fg-dim); }
+
+.signal__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+
+.signal__station {
+  font-family: var(--font-mono);
+  font-size: var(--fs-data);
+}
+
+.signal__age {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-micro);
+  color: var(--fg-dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.signal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+  margin-top: var(--s3);
+}
+
+/* --- Confidence meter ------------------------------------------------------
+   Segmented, not a smooth bar: a crowdsourced report is a count of people, and
+   discrete blocks say that honestly. It never fills completely, because the
+   interface must never claim certainty it does not have. */
+
+.meter {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin-top: var(--s2);
+}
+
+.meter__seg {
+  flex: 1;
+  border: 1px solid var(--fg-faint);
+}
+
+.meter__seg[data-on='true'] { background: var(--fg); border-color: var(--fg); }
+.signal[data-state='HIGH_CONFIDENCE'] .meter__seg[data-on='true'] {
+  background: var(--alert);
+  border-color: var(--alert);
+}
+
+/* --- State badge ----------------------------------------------------------- */
+
+.badge {
+  display: inline-block;
+  padding: 1px var(--s2);
+  border: var(--line);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.badge[data-state='UNCONFIRMED'] { color: var(--fg-dim); border-color: var(--fg-faint); }
+.badge[data-state='CONFIRMED'] { color: var(--fg); border-color: var(--fg); }
+.badge[data-state='HIGH_CONFIDENCE'] {
+  color: var(--bg);
+  background: var(--alert);
+  border-color: var(--alert);
+}
+.badge[data-state='EXPIRED'],
+.badge[data-state='DISMISSED'] { color: var(--fg-faint); border-color: var(--fg-faint); }
+
+/* --- Empty state -----------------------------------------------------------
+   SECTOR CLEAR is a real, positive answer — not an absence. The brief requires
+   the app to stay interesting when nothing is happening, so this is styled as
+   information rather than as a blank. */
+
+.empty {
+  padding: var(--s5) var(--s4);
+  text-align: center;
+}
+
+.empty__mark {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-head);
+  letter-spacing: 0.1em;
+  color: var(--ok);
+}
+
+.empty__note {
+  margin-top: var(--s2);
+  font-size: var(--fs-body);
+  color: var(--fg-dim);
+  max-width: 34ch;
+  margin-inline: auto;
+}
+
+/* --- Bottom sheet ----------------------------------------------------------
+   Three detents. The map is never fully covered: even at DETAIL a strip of map
+   stays visible above, and BACK TO MAP is pinned within thumb reach. */
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-raised);
+  border-top: var(--line-strong);
+  height: var(--sheet-peek);
+  transition: height var(--t-sheet) var(--ease);
+  will-change: height;
+}
+
+.sheet[data-detent='panel'] { height: 46%; }
+.sheet[data-detent='detail'] { height: 82%; }
+
+/* Grab handle doubles as the collapse affordance. */
+.sheet__grip {
+  flex: 0 0 auto;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: var(--line);
+}
+
+.sheet__grip::after {
+  content: '';
+  width: 36px;
+  height: 2px;
+  background: var(--fg-faint);
+}
+
+.sheet__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* One tap back to the map, always in the same place, never scrolled away. */
+.sheet__back {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  padding: var(--s3);
+  border-bottom: var(--line);
+  background: var(--bg);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+}
+
+.sheet__back:active { background: var(--fg); color: var(--bg); }
+
+/* --- Report overlay --------------------------------------------------------
+   Two taps from the map: context, then direction. No form, no free text. */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay[hidden] { display: none; }
+
+.overlay__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3);
+  border-bottom: var(--line-strong);
+}
+
+.overlay__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--s4);
+}
+
+.overlay__foot {
+  padding: var(--s4);
+  padding-bottom: calc(var(--s4) + var(--safe-b));
+  border-top: var(--line);
+}
+
+/* Choice grid for direction and context */
+.choices {
+  display: grid;
+  gap: var(--s2);
+  margin-top: var(--s3);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  min-height: 56px;
+  padding: 0 var(--s4);
+  border: var(--line-strong);
+  text-align: left;
+}
+
+.choice[aria-pressed='true'] { background: var(--fg); color: var(--bg); }
+.choice__hint { font-size: var(--fs-body); color: var(--fg-dim); }
+.choice[aria-pressed='true'] .choice__hint { color: var(--bg); }
+
+/* Slot indicator — shows the flood limit as a fact, not as a punishment. */
+.slots {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.slots__box {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--fg);
+}
+
+.slots__box[data-used='true'] { background: var(--fg); }
+
+/* --- Toast -----------------------------------------------------------------
+   SIGNAL SENT and similar. Brief, top-anchored so it never covers the thumb. */
+
+.toast {
+  position: absolute;
+  top: var(--s3);
+  left: var(--s3);
+  right: var(--s3);
+  z-index: 60;
+  padding: var(--s3);
+  border: var(--line-strong);
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.toast[hidden] { display: none; }
+
+/* --- Section heading ------------------------------------------------------- */
+
+.section {
+  padding: var(--s3);
+  border-bottom: var(--line);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+
+.section__title {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <rect width="16" height="16" fill="#000"/>
+  <!-- the line -->
+  <rect x="7" y="1" width="2" height="14" fill="#e4e4dc"/>
+  <!-- stations -->
+  <rect x="5" y="3" width="6" height="2" fill="#e4e4dc"/>
+  <rect x="5" y="11" width="6" height="2" fill="#e4e4dc"/>
+  <!-- a signal on the line -->
+  <path d="M8 6 L11 8 L8 10 L5 8 Z" fill="#d9483b"/>
+</svg>

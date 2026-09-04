@@ -1,0 +1,124 @@
+/** Map surface. */
+
+.mapwrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* STRIP scrolls vertically like a line diagram; GEO is panned by dragging. */
+.mapwrap[data-view='strip'] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mapwrap[data-view='geo'] {
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+
+.mapwrap[data-view='geo']:active { cursor: grabbing; }
+
+.map { display: block; }
+
+/* Station labels. Pixel face is fine here — they are short, uppercase, and
+   act as chrome rather than as data people read under time pressure. */
+.ly-label {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.ly-station:focus-visible rect:nth-child(2) { stroke: var(--ok); }
+.ly-signal:focus-visible path { stroke: var(--ok); }
+
+/* Creatures sit behind everything meaningful and never take a tap. */
+.sprite { pointer-events: none; }
+.creature { color: var(--fg-dim); }
+
+/* A newly arrived signal flashes exactly once. Nothing else on the map moves. */
+@keyframes signal-in {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  70% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.ly-signal[data-fresh='true'] { animation: signal-in 400ms steps(4) 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ly-signal[data-fresh='true'] { animation: none; }
+}
+
+/* --- Map chrome ------------------------------------------------------------
+   Floating controls over the map. Kept to the two things that must always be
+   reachable: switching view, and reporting. */
+
+.mapchrome {
+  position: absolute;
+  top: var(--s3);
+  left: var(--s3);
+  right: var(--s3);
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s2);
+  pointer-events: none;
+}
+
+.mapchrome > * { pointer-events: auto; }
+
+/* Segmented view toggle */
+.viewtoggle {
+  display: flex;
+  border: var(--line-strong);
+  background: var(--bg);
+}
+
+.viewtoggle__btn {
+  min-height: 32px;
+  padding: 0 var(--s3);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  color: var(--fg-dim);
+  border-right: var(--line);
+}
+
+.viewtoggle__btn:last-child { border-right: none; }
+.viewtoggle__btn[aria-pressed='true'] { background: var(--fg); color: var(--bg); }
+
+/* REPORT lives on the map, not in the navigation — the brief is explicit that
+   reporting must be reachable from LIVE rather than becoming a destination. */
+.reportbtn {
+  position: absolute;
+  right: var(--s3);
+  bottom: calc(var(--sheet-peek) + var(--s3));
+  z-index: 15;
+  min-height: 52px;
+  padding: 0 var(--s4);
+  border: var(--line-strong);
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  transition: bottom var(--t-sheet) var(--ease);
+}
+
+.reportbtn:active { background: var(--bg); color: var(--fg); }
+.reportbtn:disabled { background: var(--bg); color: var(--fg-faint); border-color: var(--fg-faint); }
+
+/* Follow the sheet so the button is never buried under it. */
+.screen[data-sheet='panel'] .reportbtn { bottom: calc(46% + var(--s3)); }
+.screen[data-sheet='detail'] .reportbtn { display: none; }

@@ -1,0 +1,88 @@
+/**
+ * Track 5 design tokens.
+ *
+ * An old resistance-network terminal that happens to monitor a railway.
+ * Black ground, phosphor-white graphics, hard rectangles, no softness.
+ *
+ * COLOUR IS INFORMATION, NEVER DECORATION.
+ * There are exactly three accents and each has exactly one meaning:
+ *   --warn   delay
+ *   --alert  cancellation, and high-confidence signals
+ *   --ok     on time, sector clear
+ * Everything else is monochrome. This single rule is what keeps the interface
+ * reading as a terminal instead of a mobile game.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Ground and graphics */
+  --bg: #000000;
+  --bg-raised: #0a0a0a;   /* sheet and overlay ground, still nearly black */
+  --fg: #e4e4dc;          /* phosphor off-white — never pure #fff */
+  --fg-dim: #8a8a82;      /* secondary text, inactive nav */
+  --fg-faint: #4a4a45;    /* hairlines, disabled, decayed signals */
+
+  /* The three meanings.
+     --alert is for adverse CERTAINTIES: a cancelled train, or an inspection
+     signal the community has actually corroborated. An unconfirmed report is a
+     claim rather than a finding, and stays monochrome. */
+  --warn: #e8b84b;        /* delayed */
+  --alert: #d9483b;       /* cancelled / corroborated inspection */
+  --ok: #6fbf73;          /* on time / sector clear */
+
+  /* Type */
+  --font-pixel: 'Silkscreen', 'Courier New', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Pixel type carries identity; mono carries meaning. Actual transport
+     information is always mono, because bitmap faces at body size fail the
+     brief's "large readable information" requirement. */
+  --fs-micro: 10px;       /* chrome labels, timestamps */
+  --fs-label: 12px;       /* pixel labels, nav */
+  --fs-body: 14px;        /* readable body */
+  --fs-data: 17px;        /* departure times — the thing people squint at */
+  --fs-head: 20px;
+  --fs-hero: 28px;        /* the one number that matters on LIVE */
+
+  /* Space — a 4px grid, nothing between */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+
+  /* Structure. Every border is 1px and hard. Nothing is ever rounded. */
+  --line: 1px solid var(--fg-faint);
+  --line-strong: 1px solid var(--fg);
+  --radius: 0;
+
+  /* Chrome dimensions */
+  --nav-h: 54px;
+  --topbar-h: 40px;
+  --sheet-peek: 132px;
+
+  /* Motion. Almost nothing moves. */
+  --t-fast: 90ms;
+  --t-sheet: 120ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Safe areas for notched phones */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+/* Track 5 is a single deliberate look. It does not follow the system theme —
+   a light-mode terminal is not the product. Stated explicitly rather than
+   inherited by accident. */
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: dark; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-sheet: 0ms;
+  }
+}
