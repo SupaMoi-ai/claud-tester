@@ -20,14 +20,23 @@ export function ago(ms, nowMs = Date.now()) {
   return m ? `${h} H ${m} AGO` : `${h} H AGO`;
 }
 
-/** "IN 4 MIN" / "NOW" / "12:04" once it is far enough out to need a clock time. */
+/**
+ * Countdown to a departure: "NOW" / "IN 4 MIN" / "IN 1 H 05".
+ *
+ * Always relative, never a clock time. The clock time is already shown right
+ * next to this, and returning one here rendered the same value twice —
+ * "06:43 SCHED 06:43" — which reads as a delay that is not there. The useful
+ * second number is how long you have, not the departure time restated.
+ */
 export function until(ms, nowMs = Date.now()) {
   const d = ms - nowMs;
   if (d <= 0) return 'NOW';
   const mins = Math.round(d / MIN);
   if (mins < 1) return 'NOW';
-  if (mins <= 20) return `IN ${mins} MIN`;
-  return clock(ms);
+  if (mins < 60) return `IN ${mins} MIN`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m ? `IN ${h} H ${String(m).padStart(2, '0')}` : `IN ${h} H`;
 }
 
 /** Local wall-clock time, 24h, zero-padded — "07:42". */

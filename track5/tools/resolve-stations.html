@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track 5 — resolve stations</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/components.css">
+<style>
+  body { padding: 24px; }
+  #app { position: static; inset: auto; display: block; overflow: visible; }
+  main { max-width: 900px; margin: 0 auto; }
+  h1 { font-family: var(--font-pixel); font-size: 20px; letter-spacing: .08em; }
+  p { max-width: 70ch; margin: 12px 0; color: var(--fg-dim); }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--fg-faint); }
+  th { font-family: var(--font-pixel); font-size: 11px; letter-spacing: .08em; color: var(--fg-dim); }
+  td.num { font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); }
+  .bad { color: var(--alert); }
+  .warn { color: var(--warn); }
+  textarea {
+    width: 100%; height: 340px; margin-top: 16px; padding: 12px;
+    background: var(--bg-raised); color: var(--fg); border: 1px solid var(--fg-faint);
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  }
+  .bar { display: flex; gap: 8px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div id="app"><main>
+
+<h1>Resolve L5 stations</h1>
+
+<p>
+  The build environment for Track 5 cannot reach <code>api.entur.io</code>, so
+  <code>js/transport/stations.js</code> ships with approximate coordinates and no
+  NSR StopPlace IDs. Without those IDs the app cannot request a real departure
+  board and falls back to its synthetic timetable.
+</p>
+<p>
+  This page runs in your browser, where Entur <em>is</em> reachable. It looks up all
+  19 stations through Entur's geocoder, shows you what came back so you can check it,
+  and prints a replacement for the <code>STATIONS</code> array. Nothing is written
+  automatically — you paste the result in yourself.
+</p>
+<p>
+  It is also the quickest way to find out whether Entur allows browser requests from
+  wherever you are serving this. If every row fails with a network error, that is a
+  CORS or connectivity problem, not a data problem — and the app's fallback exists
+  precisely so that stays survivable.
+</p>
+
+<div class="bar">
+  <button class="btn btn--primary" id="run">Resolve all 19</button>
+  <button class="btn" id="copy" disabled>Copy stations.js</button>
+  <span class="micro" id="status">READY</span>
+</div>
+
+<table id="results" hidden>
+  <thead>
+    <tr><th>#</th><th>Station</th><th>Matched</th><th>NSR id</th>
+        <th>Lat</th><th>Lon</th><th>Drift</th><th></th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<textarea id="out" spellcheck="false" hidden></textarea>
+
+</main></div>
+
+<script type="module">
+import { STATIONS } from '../js/transport/stations.js';
+import { distanceKm } from '../js/domain/geo.js';
+
+const GEOCODER = 'https://api.entur.io/geocoder/v1/autocomplete';
+const CLIENT_NAME = 'supamoi-track5';
+
+const $ = (s) => document.querySelector(s);
+const tbody = $('#results tbody');
+const resolved = [];
+
+/**
+ * Ask Entur's geocoder for a station.
+ *
+ * Restricted to rail venues in Norway. We take the best match that actually
+ * looks like a railway station rather than the first result, because "Bryne"
+ * on its own also matches bus stops and a locality.
+ */
+async function lookup(station) {
+  const url = `${GEOCODER}?text=${encodeURIComponent(station.name + ' stasjon')}`
+            + `&size=6&lang=no&layers=venue&boundary.country=NOR`;
+
+  const res = await fetch(url, { headers: { 'ET-Client-Name': CLIENT_NAME } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+
+  const features = json.features ?? [];
+  const stopPlaces = features.filter(
+    (f) => String(f.properties?.id ?? '').startsWith('NSR:StopPlace:'),
+  );
+  const rail = stopPlaces.filter(
+    (f) => (f.properties?.category ?? []).includes('railStation'),
+  );
+
+  // Prefer a rail-categorised hit, because "Bryne" alone also matches bus
+  // stops and the locality. Fall back to any StopPlace if the geocoder does
+  // not categorise it, then let the distance sort below pick the right one.
+  const candidates = rail.length ? rail : stopPlaces;
+
+  if (!candidates.length) throw new Error('no StopPlace match');
+
+  candidates.sort((a, b) => {
+    const da = distanceKm(station.lat, station.lon,
+      a.geometry.coordinates[1], a.geometry.coordinates[0]);
+    const db = distanceKm(station.lat, station.lon,
+      b.geometry.coordinates[1], b.geometry.coordinates[0]);
+    return da - db;
+  });
+
+  const best = candidates[0];
+  const [lon, lat] = best.geometry.coordinates;
+  return {
+    nsr: best.properties.id,
+    label: best.properties.label ?? best.properties.name,
+    lat: Number(lat.toFixed(5)),
+    lon: Number(lon.toFixed(5)),
+    drift: distanceKm(station.lat, station.lon, lat, lon),
+  };
+}
+
+function row(station, result, error) {
+  const tr = document.createElement('tr');
+  const cells = [
+    station.idx,
+    station.name,
+    error ? '—' : result.label,
+    error ? '—' : result.nsr,
+    error ? '—' : result.lat,
+    error ? '—' : result.lon,
+    error ? '—' : `${result.drift.toFixed(2)} km`,
+    error ? `FAILED: ${error}` : 'OK',
+  ];
+  cells.forEach((v, i) => {
+    const td = document.createElement('td');
+    td.textContent = String(v);
+    if (i === 0 || (i >= 4 && i <= 6)) td.className = 'num';
+    if (i === 7) td.className = error ? 'bad' : 'ok';
+    // Flag anything that moved a long way — that usually means the geocoder
+    // matched a different place with a similar name, not that our estimate was
+    // bad. Worth a human look before pasting.
+    if (i === 6 && !error && result.drift > 3) td.className = 'num warn';
+    tr.append(td);
+  });
+  tbody.append(tr);
+}
+
+function emit() {
+  const lines = resolved.map(({ station, result }) => {
+    const name = `'${station.name}',`.padEnd(19);
+    const lat = result ? result.lat.toFixed(5) : station.lat.toFixed(5);
+    const lon = result ? result.lon.toFixed(5) : station.lon.toFixed(5);
+    const nsr = result ? `'${result.nsr}'` : 'null';
+    return `  { idx: ${String(station.idx).padStart(2)}, name: ${name} `
+         + `lat: ${lat}, lon: ${lon}, toNext: ${station.toNext}, nsr: ${nsr} },`;
+  });
+
+  const missing = resolved.filter((r) => !r.result).length;
+  const header = missing
+    ? `// ${missing} station(s) could not be resolved and kept their estimates.\n`
+    : '// Resolved from Entur. Coordinates and NSR ids are canonical.\n';
+
+  $('#out').value = `${header}export const STATIONS = [\n${lines.join('\n')}\n];\n`;
+  $('#out').hidden = false;
+  $('#copy').disabled = false;
+}
+
+$('#run').addEventListener('click', async () => {
+  tbody.replaceChildren();
+  resolved.length = 0;
+  $('#results').hidden = false;
+  $('#run').disabled = true;
+
+  let failures = 0;
+  for (const station of STATIONS) {
+    $('#status').textContent = `RESOLVING ${station.name.toUpperCase()}…`;
+    try {
+      const result = await lookup(station);
+      resolved.push({ station, result });
+      row(station, result, null);
+    } catch (err) {
+      failures++;
+      resolved.push({ station, result: null });
+      row(station, null, err.message);
+    }
+    // Entur's API is free and unauthenticated. Pace the requests.
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  $('#status').textContent = failures
+    ? `DONE — ${failures} FAILED, ${STATIONS.length - failures} RESOLVED`
+    : `DONE — ALL ${STATIONS.length} RESOLVED`;
+  $('#status').className = failures ? 'micro warn' : 'micro ok';
+  $('#run').disabled = false;
+  emit();
+});
+
+$('#copy').addEventListener('click', async () => {
+  const text = $('#out').value;
+  try {
+    await navigator.clipboard.writeText(text);
+    $('#status').textContent = 'COPIED — PASTE OVER THE STATIONS ARRAY IN js/transport/stations.js';
+  } catch {
+    $('#out').select();
+    $('#status').textContent = 'SELECT AND COPY MANUALLY';
+  }
+});
+</script>
+</body>
+</html>

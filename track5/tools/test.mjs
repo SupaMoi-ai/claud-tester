@@ -52,6 +52,8 @@ import {
   signalOnJourney,
 } from '../js/domain/geo.js';
 
+import { ago, until, delta } from '../js/core/time.js';
+
 import {
   STATIONS,
   stationByIdx,
@@ -445,6 +447,32 @@ eq('unknown position gives no claim', stopsAhead(null, 'south', 6), null);
 ok('signal inside a journey is relevant', signalOnJourney(4, { fromIdx: 1, toIdx: 6 }));
 ok('signal outside is not', !signalOnJourney(9, { fromIdx: 1, toIdx: 6 }));
 ok('journey direction does not matter', signalOnJourney(4, { fromIdx: 6, toIdx: 1 }));
+
+// ---------------------------------------------------------------------------
+// Time formatting — user-facing, and signal age is load-bearing in this product
+// ---------------------------------------------------------------------------
+
+eq('fresh is JUST NOW', ago(T0, T0), 'JUST NOW');
+eq('30s is still JUST NOW', ago(T0, T0 + 30_000), 'JUST NOW');
+eq('3 minutes reads as the brief specifies', ago(T0, T0 + 3 * MIN), '3 MIN AGO');
+eq('59 minutes stays in minutes', ago(T0, T0 + 59 * MIN), '59 MIN AGO');
+eq('an exact hour', ago(T0, T0 + 60 * MIN), '1 H AGO');
+eq('an hour and change', ago(T0, T0 + 80 * MIN), '1 H 20 AGO');
+eq('a future timestamp never reads as negative', ago(T0 + MIN, T0), 'JUST NOW');
+
+eq('departed is NOW', until(T0, T0), 'NOW');
+eq('imminent is NOW', until(T0 + 20_000, T0), 'NOW');
+eq('4 minutes out', until(T0 + 4 * MIN, T0), 'IN 4 MIN');
+// Regression: this used to fall back to a clock time past 20 minutes, which
+// rendered the departure time twice ("06:43 SCHED 06:43") and read as a delay.
+eq('45 minutes stays relative', until(T0 + 45 * MIN, T0), 'IN 45 MIN');
+eq('over an hour', until(T0 + 65 * MIN, T0), 'IN 1 H 05');
+eq('exact hours drop the minutes', until(T0 + 120 * MIN, T0), 'IN 2 H');
+ok('a countdown never contains a colon', !until(T0 + 90 * MIN, T0).includes(':'));
+
+eq('no delta for an on-time train', delta(0), null);
+eq('a delay is signed', delta(8), '+8 MIN');
+ok('an early train is marked too', delta(-2).includes('2 MIN'));
 
 // ---------------------------------------------------------------------------
 
