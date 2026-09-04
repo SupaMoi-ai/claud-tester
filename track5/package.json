@@ -1,0 +1,9 @@
+{
+  "name": "track5",
+  "private": true,
+  "type": "module",
+  "description": "Present only so Node can run tools/test.mjs against the pure domain modules. Track 5 has no build step and no dependencies — GitHub Pages serves the source files directly and ignores this file.",
+  "scripts": {
+    "test": "node tools/test.mjs"
+  }
+}
