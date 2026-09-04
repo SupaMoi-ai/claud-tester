@@ -19,7 +19,7 @@
 
 import {
   STATE, CONTEXT,
-  resolveState, canReport, isActive,
+  resolveState, canReport, isActive, voteWeight, isOnVoterRoute,
 } from '../domain/signals.js';
 import { XP, rankFor, xpForStateChange } from '../domain/xp.js';
 import { STATIONS } from '../transport/stations.js';
@@ -191,13 +191,20 @@ export async function createReport({ stationIdx, direction, context = CONTEXT.ST
  * Refuses self-votes and double-votes — the two ways a confidence score stops
  * meaning anything.
  */
-export async function voteReport(reportId, vote, { weight = 1 } = {}) {
+export async function voteReport(reportId, vote, { weight = null } = {}) {
   const d = load();
   const report = d.reports.find((r) => r.id === reportId);
   if (!report) return { ok: false, reason: 'SIGNAL NOT FOUND' };
   if (report.userId === d.user.id) return { ok: false, reason: 'CANNOT CONFIRM YOUR OWN SIGNAL' };
   if (d.votes.some((v) => v.reportId === reportId && v.userId === d.user.id)) {
     return { ok: false, reason: 'ALREADY ANSWERED' };
+  }
+
+  // Weighted the same way public.vote_weight_for() does it, so local mode and
+  // the real backend agree about what a vote is worth.
+  if (weight == null) {
+    const onRoute = isOnVoterRoute(null, report.stationIdx, d.journeys ?? []);
+    weight = voteWeight(rankFor(d.user.xp), onRoute);
   }
 
   const before = resolveState(report, Date.now());

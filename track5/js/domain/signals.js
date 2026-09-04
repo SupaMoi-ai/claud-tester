@@ -72,12 +72,26 @@ export const MAX_UNCONFIRMED_PER_USER = 2;
 export const REPORT_COOLDOWN_SEC = 90;
 
 /**
- * A vote from someone far from the reported location is worth less. This is
- * what stops a coordinated group in another city from promoting anything they
- * like. Distance is measured in station indices along the line.
+ * Proximity is an UPLIFT, never a penalty.
+ *
+ * The tempting design is to discount votes from people who are far away, and
+ * an earlier version of this module did exactly that. It does not survive
+ * contact with reality: the only evidence of where someone is comes from the
+ * client, and a client that wants to lie about its GPS will. The server
+ * therefore cannot apply such a discount, and if this module applied one
+ * anyway the interface would predict a confidence the database disagrees with,
+ * and the number would jump on the next refresh.
+ *
+ * So the rule is symmetrical with supabase/schema.sql: an ordinary vote is
+ * worth 1, and being demonstrably on the route — via a saved journey, which
+ * the server can actually check — is worth a little more.
+ *
+ * The real defences against a coordinated group are elsewhere and are all
+ * server-enforced: no self-voting, one vote per person per report, the
+ * two-signal cap, and the report cooldown.
  */
-export const PLAUSIBLE_RADIUS_STOPS = 3;
-export const IMPLAUSIBLE_WEIGHT = 0.25;
+export const ON_ROUTE_RADIUS_STOPS = 3;
+export const ON_ROUTE_UPLIFT = 1.25;
 
 /** Reputation bonus by rank. Caps at +1.0 so no single user can force a state. */
 export const RANK_VOTE_BONUS = {
@@ -95,30 +109,32 @@ export const RANK_VOTE_BONUS = {
 // ---------------------------------------------------------------------------
 
 /**
- * Weight of one vote.
+ * Weight of one vote. Mirrors public.vote_weight_for() in schema.sql.
  *
- * @param {string} rank            Voter's rank name.
- * @param {boolean} plausible      Is the voter near the reported location?
+ * @param {string} rank      Voter's rank name.
+ * @param {boolean} onRoute  Is the report on a route this voter travels?
  * @returns {number}
  */
-export function voteWeight(rank, plausible) {
+export function voteWeight(rank, onRoute) {
   const base = 1 + (RANK_VOTE_BONUS[rank] ?? 0);
-  return plausible ? base : base * IMPLAUSIBLE_WEIGHT;
+  return onRoute ? base * ON_ROUTE_UPLIFT : base;
 }
 
 /**
- * Is a voter close enough for their vote to carry full weight?
- * Either they are physically within PLAUSIBLE_RADIUS_STOPS of the report, or
- * they have a saved journey that covers the reported station.
+ * Is this report on the voter's route?
+ *
+ * True when a saved journey covers the station — the server-verifiable case —
+ * or when the voter's own position is nearby, which this module accepts for
+ * display purposes even though the server does not.
  *
  * @param {number|null} voterStationIdx  Voter's nearest station index, or null.
  * @param {number} reportStationIdx
  * @param {Array<{fromIdx:number,toIdx:number}>} [journeys]
  */
-export function isPlausibleVoter(voterStationIdx, reportStationIdx, journeys = []) {
+export function isOnVoterRoute(voterStationIdx, reportStationIdx, journeys = []) {
   if (
     typeof voterStationIdx === 'number' &&
-    Math.abs(voterStationIdx - reportStationIdx) <= PLAUSIBLE_RADIUS_STOPS
+    Math.abs(voterStationIdx - reportStationIdx) <= ON_ROUTE_RADIUS_STOPS
   ) {
     return true;
   }

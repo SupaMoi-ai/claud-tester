@@ -19,7 +19,7 @@ import {
   TTL_PER_CONFIRM_MIN,
   TTL_MAX_BONUS_MIN,
   voteWeight,
-  isPlausibleVoter,
+  isOnVoterRoute,
   score,
   expiresAt,
   resolveState,
@@ -145,30 +145,37 @@ eq('direction same station', directionBetween(4, 4), null);
 // Vote weighting and plausibility
 // ---------------------------------------------------------------------------
 
-eq('rookie vote weighs 1', voteWeight('ROOKIE', true), 1);
-near('legend vote weighs 2', voteWeight('LEGEND', true), 2);
-near('implausible rookie vote weighs 0.25', voteWeight('ROOKIE', false), 0.25);
-near('implausible legend vote is still discounted', voteWeight('LEGEND', false), 0.5);
-eq('unknown rank falls back to base', voteWeight('NOT_A_RANK', true), 1);
+// An ordinary vote is worth exactly 1, which is what makes "two people agree"
+// the CONFIRMED threshold. This must match public.vote_weight_for() in
+// schema.sql, or the interface will predict a confidence the database
+// disagrees with and the number will jump on the next refresh.
+eq('an ordinary vote weighs 1', voteWeight('ROOKIE', false), 1);
+near('being on the route is an uplift, not a requirement', voteWeight('ROOKIE', true), 1.25);
+near('legend vote weighs 2', voteWeight('LEGEND', false), 2);
+near('legend on route weighs 2.5', voteWeight('LEGEND', true), 2.5);
+eq('unknown rank falls back to base', voteWeight('NOT_A_RANK', false), 1);
+ok('no vote is ever worth less than an ordinary one', voteWeight('ROOKIE', false) >= 1);
 
-ok('voter at the same station is plausible', isPlausibleVoter(11, 11));
-ok('voter 3 stops away is plausible', isPlausibleVoter(8, 11));
-ok('voter 4 stops away is not', !isPlausibleVoter(7, 11));
-ok('voter with no position is not plausible', !isPlausibleVoter(null, 11));
+ok('report at your station is on your route', isOnVoterRoute(11, 11));
+ok('3 stops away is on your route', isOnVoterRoute(8, 11));
+ok('4 stops away is not', !isOnVoterRoute(7, 11));
+ok('unknown position is not', !isOnVoterRoute(null, 11));
 ok(
-  'voter on a covering journey is plausible despite distance',
-  isPlausibleVoter(1, 15, [{ fromIdx: 11, toIdx: 19 }]),
+  'a covering saved journey counts regardless of distance',
+  isOnVoterRoute(1, 15, [{ fromIdx: 11, toIdx: 19 }]),
 );
 ok(
-  'voter on a non-covering journey is not',
-  !isPlausibleVoter(1, 15, [{ fromIdx: 1, toIdx: 6 }]),
+  'a non-covering journey does not',
+  !isOnVoterRoute(1, 15, [{ fromIdx: 1, toIdx: 6 }]),
 );
 
-// A troll ring far from the line cannot promote a signal on its own:
-// four implausible rookie confirmations score 1.0, below the CONFIRMED bar.
-const trollRing = report({ votes: confirms(4, voteWeight('ROOKIE', false)) });
-eq('4 remote votes cannot confirm', resolveState(trollRing, T0 + MIN), STATE.UNCONFIRMED);
-near('4 remote votes score only 1.0', score(trollRing.votes), 1);
+// Two ordinary people agreeing is the bar. Verified against the database in
+// supabase/test/01-security.sql, which reaches CONFIRMED on the second vote.
+const twoStrangers = report({ votes: confirms(2, voteWeight('ROOKIE', false)) });
+eq('two ordinary confirmations reach CONFIRMED',
+   resolveState(twoStrangers, T0 + MIN), STATE.CONFIRMED);
+const oneStranger = report({ votes: confirms(1, voteWeight('ROOKIE', false)) });
+eq('one does not', resolveState(oneStranger, T0 + MIN), STATE.UNCONFIRMED);
 
 // ---------------------------------------------------------------------------
 // Confidence state machine
@@ -200,10 +207,26 @@ eq(
   resolveState(report({ votes: [...confirms(3), ...rejects(2)] }), T0 + MIN),
   STATE.UNCONFIRMED,
 );
+// Reputation genuinely buys influence, and that is the point of having ranks.
+// Two veterans who both travel the route carry 2.125 each, so their agreement
+// is treated as strong evidence rather than merely adequate.
 eq(
-  'a reputable pair can confirm faster than rookies',
+  'two on-route veterans agreeing reaches HIGH CONFIDENCE',
   resolveState(report({ votes: confirms(2, voteWeight('VETERAN', true)) }), T0 + MIN),
+  STATE.HIGH_CONFIDENCE,
+);
+// The ceiling that matters: a single account, however senior, can move a
+// report to CONFIRMED but never straight to HIGH CONFIDENCE. Corroboration by
+// a second person is always required for the strongest state.
+eq(
+  'one legend can confirm but not certify',
+  resolveState(report({ votes: confirms(1, voteWeight('LEGEND', true)) }), T0 + MIN),
   STATE.CONFIRMED,
+);
+ok(
+  'no single vote can reach HIGH CONFIDENCE',
+  voteWeight('LEGEND', true) < THRESHOLD.HIGH_CONFIDENCE,
+  `max single vote is ${voteWeight('LEGEND', true)}`,
 );
 eq('DISMISSED beats a live TTL', resolveState(report({ votes: rejects(3) }), T0), STATE.DISMISSED);
 
