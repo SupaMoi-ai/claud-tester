@@ -187,6 +187,7 @@ function signalContent(s) {
     sectionHead('Signal detail'),
     el('div', { style: 'padding:12px' }, [
       signalCard(signal, {
+        canVote: !isMine(s, signal),
         onConfirm: (id) => vote(id, 1),
         onReject: (id) => vote(id, -1),
       }),
@@ -235,6 +236,7 @@ function stationContent(s) {
       ? here.map((sig) =>
           el('div', { style: 'padding:12px 12px 0' }, [
             signalCard(sig, {
+              canVote: !isMine(s, sig),
               onConfirm: (id) => vote(id, 1),
               onReject: (id) => vote(id, -1),
               onOpen: (id) => {
@@ -277,6 +279,7 @@ function overviewContent(s) {
             ? el('div', {}, onRoute.map(({ signal, ahead }) =>
                 el('div', { style: 'padding:12px 12px 0' }, [
                   signalCard(signal, {
+                    canVote: !isMine(s, signal),
                     onConfirm: (id) => vote(id, 1),
                     onReject: (id) => vote(id, -1),
                     onOpen: (id) => {
@@ -301,6 +304,7 @@ function overviewContent(s) {
       ? elsewhere.map((sig) =>
           el('div', { style: 'padding:12px 12px 0' }, [
             signalCard(sig, {
+              canVote: !isMine(s, sig),
               onConfirm: (id) => vote(id, 1),
               onReject: (id) => vote(id, -1),
               onOpen: (id) => {
@@ -352,6 +356,11 @@ export async function refreshSignals() {
  * location permission is refused, since neither position nor focus is set.
  * One definition, used by both the render and the fetch, so they cannot drift.
  */
+/** Is this signal the current user's own report? */
+function isMine(s, signal) {
+  return Boolean(s.user?.id) && signal.userId === s.user.id;
+}
+
 function primaryStation(s) {
   // An active saved journey outranks a guess: if someone told us they catch
   // the 07:42 from Stavanger, that is the board they want at 07:20, whether or

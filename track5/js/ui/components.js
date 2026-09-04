@@ -81,7 +81,11 @@ export function signalCard(signal, { nowMs = Date.now(), onConfirm, onReject, on
     confidenceMeter(signal),
   ]);
 
-  if (canVote && (state === STATE.UNCONFIRMED || state === STATE.CONFIRMED || state === STATE.HIGH_CONFIDENCE)) {
+  const votable = state === STATE.UNCONFIRMED
+    || state === STATE.CONFIRMED
+    || state === STATE.HIGH_CONFIDENCE;
+
+  if (canVote && votable) {
     card.append(
       el('div', { class: 'signal__actions' }, [
         el('button', {
@@ -95,6 +99,13 @@ export function signalCard(signal, { nowMs = Date.now(), onConfirm, onReject, on
           onclick: (e) => { e.stopPropagation(); onReject?.(signal.id); },
         }, 'Not there'),
       ]),
+    );
+  } else if (!canVote && votable) {
+    // Your own signal. The database refuses a self-vote anyway, so offering
+    // the button and then erroring would be the interface setting a trap.
+    card.append(
+      el('div', { class: 'micro', style: 'margin-top:12px',
+        text: 'YOUR SIGNAL — WAITING FOR SOMEONE ELSE TO CONFIRM' }),
     );
   }
 

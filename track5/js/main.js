@@ -20,6 +20,7 @@ import { mountReport } from './ui/screens/report.js';
 import { mountChat } from './ui/screens/chat.js';
 import { mountCrew } from './ui/screens/crew.js';
 import { mountProfile } from './ui/screens/profile.js';
+import { startAlerts } from './ui/screens/notify.js';
 
 const SCREENS = {
   live: '#screen-live',
@@ -198,6 +199,7 @@ async function boot() {
 
   backend.subscribeSignals(() => refreshSignals());
 
+  startAlerts();
   requestPosition();
   startPolling();
 }

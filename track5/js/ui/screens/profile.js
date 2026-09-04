@@ -15,6 +15,7 @@ import { RANKS, rankFor, nextRank, rankProgress, xpToNext, XP_REASON_LABEL } fro
 import { sectionHead, emptyState } from '../components.js';
 import { journeysSection } from './journeys.js';
 import { lockerSection } from './locker.js';
+import { notifySection } from './notify.js';
 import { renderAvatar } from '../avatar.js';
 import { ago } from '../../core/time.js';
 
@@ -76,6 +77,8 @@ async function render() {
     lockerSection(),
 
     journeysSection(),
+
+    notifySection(),
 
     sectionHead('Ranks'),
     el('div', {}, RANKS.map((r) =>
