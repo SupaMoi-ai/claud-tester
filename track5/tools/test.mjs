@@ -55,6 +55,16 @@ import {
 import { ago, until, delta } from '../js/core/time.js';
 
 import {
+  journeyDirection,
+  journeyStations,
+  isJourneyActive,
+  activeJourney,
+  relevantSignals,
+  nextDeparture,
+  daysLabel,
+} from '../js/domain/journeys.js';
+
+import {
   STATIONS,
   stationByIdx,
   stationName,
@@ -447,6 +457,66 @@ eq('unknown position gives no claim', stopsAhead(null, 'south', 6), null);
 ok('signal inside a journey is relevant', signalOnJourney(4, { fromIdx: 1, toIdx: 6 }));
 ok('signal outside is not', !signalOnJourney(9, { fromIdx: 1, toIdx: 6 }));
 ok('journey direction does not matter', signalOnJourney(4, { fromIdx: 6, toIdx: 1 }));
+
+// ---------------------------------------------------------------------------
+// Saved journeys
+// ---------------------------------------------------------------------------
+
+const commute = {
+  id: 'j1', label: 'HOME → WORK',
+  fromIdx: 1, toIdx: 6,               // Stavanger -> Sandnes sentrum
+  days: [0, 1, 2, 3, 4], windowStart: '07:30', windowEnd: '08:30',
+};
+
+eq('a southbound commute heads south', journeyDirection(commute), 'south');
+eq('a return commute heads north',
+   journeyDirection({ ...commute, fromIdx: 6, toIdx: 1 }), 'north');
+eq('journey covers every stop in order',
+   journeyStations(commute).join(), '1,2,3,4,5,6');
+eq('and reverses cleanly',
+   journeyStations({ ...commute, fromIdx: 6, toIdx: 1 }).join(), '6,5,4,3,2,1');
+
+// A Tuesday. Window is 07:30-08:30 with 25 minutes of lead time.
+const tue = (h, m) => new Date(2026, 8, 8, h, m); // 8 Sep 2026 is a Tuesday
+const sat = (h, m) => new Date(2026, 8, 12, h, m);
+
+ok('inside the window', isJourneyActive(commute, tue(7, 45)));
+ok('lead time covers the walk to the platform', isJourneyActive(commute, tue(7, 10)));
+ok('too early is not active', !isJourneyActive(commute, tue(6, 30)));
+ok('after the window is not active', !isJourneyActive(commute, tue(9, 15)));
+ok('a weekday commute is quiet on Saturday', !isJourneyActive(commute, sat(7, 45)));
+eq('no active journey out of hours', activeJourney([commute], tue(15, 0)), null);
+eq('the active one is found', activeJourney([commute], tue(7, 45))?.id, 'j1');
+
+const onRoute = { id: 's1', stationIdx: 4, createdAtMs: T0, context: CONTEXT.STATION, votes: [] };
+const offRoute = { id: 's2', stationIdx: 15, createdAtMs: T0, context: CONTEXT.STATION, votes: [] };
+
+eq('only on-route signals are relevant',
+   relevantSignals([onRoute, offRoute], commute).map((r) => r.signal.id).join(), 's1');
+eq('stops-ahead is computed from the user position',
+   relevantSignals([onRoute], commute, 2)[0].ahead, 2);
+eq('and stays null when position is unknown',
+   relevantSignals([onRoute], commute, null)[0].ahead, null);
+eq('a signal behind you reports no distance',
+   relevantSignals([onRoute], commute, 5)[0].ahead, null);
+
+// Direction filtering: the northbound platform is no use to a southbound commuter.
+const calls = [
+  { expectedMs: T0 + 5 * MIN, direction: 'north' },
+  { expectedMs: T0 + 9 * MIN, direction: 'south' },
+  { expectedMs: T0 + 2 * MIN, direction: 'north' },
+];
+eq('next departure matches the direction of travel',
+   nextDeparture(calls, commute, T0)?.expectedMs, T0 + 9 * MIN);
+eq('no journey means no answer', nextDeparture(calls, null, T0), null);
+eq('departures already gone are skipped',
+   nextDeparture([{ expectedMs: T0 - 10 * MIN, direction: 'south' }], commute, T0), null);
+
+eq('weekday set is named', daysLabel([0, 1, 2, 3, 4]), 'WEEKDAYS');
+eq('weekend set is named', daysLabel([5, 6]), 'WEEKENDS');
+eq('full week is named', daysLabel([0, 1, 2, 3, 4, 5, 6]), 'EVERY DAY');
+eq('an odd set is spelled out', daysLabel([0, 2, 4]), 'MON WED FRI');
+eq('an empty set says so', daysLabel([]), 'NEVER');
 
 // ---------------------------------------------------------------------------
 // Time formatting — user-facing, and signal age is load-bearing in this product

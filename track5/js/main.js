@@ -185,6 +185,14 @@ async function boot() {
     store.set({ authReady: true });
   }
 
+  // Journeys must load before departures, because an active journey decides
+  // which station the peek row speaks for.
+  try {
+    store.set({ journeys: await backend.listJourneys() });
+  } catch (err) {
+    console.error('[boot] could not load journeys', err);
+  }
+
   await refreshSignals();
   await refreshDepartures();
 

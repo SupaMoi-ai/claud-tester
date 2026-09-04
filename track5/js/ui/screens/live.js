@@ -27,6 +27,9 @@ import {
   resolveState, isActive, MAX_UNCONFIRMED_PER_USER, slotsUsed,
 } from '../../domain/signals.js';
 import { stopsAhead } from '../../domain/geo.js';
+import {
+  activeJourney, nextDeparture, relevantSignals, journeyRouteLabel,
+} from '../../domain/journeys.js';
 import { clock, until, ago } from '../../core/time.js';
 import { openReport } from './report.js';
 
@@ -84,7 +87,7 @@ export function mountLive(container) {
   store.subscribe((s) => {
     screenEl.dataset.sheet = s.sheet;
     renderSheet();
-  }, ['sheet', 'focusSignal', 'focusStation', 'departures', 'user']);
+  }, ['sheet', 'focusSignal', 'focusStation', 'departures', 'user', 'journeys']);
 
   store.subscribe(() => renderSheet(), ['feed']);
 
@@ -128,8 +131,10 @@ function renderSheet() {
  */
 function peekContent(s) {
   const stationIdx = primaryStation(s);
+  const journey = activeJourney(s.journeys ?? []);
   const calls = s.departures[stationIdx] ?? [];
-  const next = calls[0];
+  // On an active journey, lead with a train going the right way.
+  const next = journey ? (nextDeparture(calls, journey) ?? calls[0]) : calls[0];
   const active = s.signals.filter((x) => isActive(resolveState(x)));
 
   return [
@@ -140,7 +145,9 @@ function peekContent(s) {
       onclick: () => router.openSheet('panel'),
     }, [
       el('div', { class: 'row__main' }, [
-        el('div', { class: 'micro', text: `NEXT FROM ${stationName(stationIdx).toUpperCase()}` }),
+        el('div', { class: 'micro', text: journey
+          ? `${journey.label} · ${stationName(stationIdx).toUpperCase()}`
+          : `NEXT FROM ${stationName(stationIdx).toUpperCase()}` }),
         next
           ? el('div', { style: 'display:flex;align-items:baseline;gap:10px;margin-top:2px' }, [
               el('span', { class: 'dep__time data', text: clock(next.expectedMs) }),
@@ -249,10 +256,49 @@ function overviewContent(s) {
     .filter((x) => isActive(resolveState(x)))
     .sort((a, b) => b.createdAtMs - a.createdAtMs);
 
+  const journey = activeJourney(s.journeys ?? []);
+  const onRoute = journey
+    ? relevantSignals(active, journey, s.position?.stationIdx ?? null)
+    : [];
+
+  // "Rest of the line" means the rest. Listing an on-route signal in both
+  // sections makes two signals look like four.
+  const onRouteIds = new Set(onRoute.map((r) => r.signal.id));
+  const elsewhere = active.filter((sig) => !onRouteIds.has(sig.id));
+
   return [
-    sectionHead('Line status', s.feed === 'live' ? 'LIVE' : 'SCHEDULE ONLY'),
-    ...(active.length
-      ? active.map((sig) =>
+    // When a journey is running, what matters on your route comes first, and
+    // the rest of the line is still below it rather than hidden.
+    ...(journey
+      ? [
+          sectionHead(journey.label || 'Your journey',
+            journeyRouteLabel(journey, stationName)),
+          onRoute.length
+            ? el('div', {}, onRoute.map(({ signal, ahead }) =>
+                el('div', { style: 'padding:12px 12px 0' }, [
+                  signalCard(signal, {
+                    onConfirm: (id) => vote(id, 1),
+                    onReject: (id) => vote(id, -1),
+                    onOpen: (id) => {
+                      store.set({ focusSignal: id, focusStation: null });
+                      router.openSheet('detail');
+                    },
+                  }),
+                  ahead != null
+                    ? el('div', { class: 'micro', style: 'margin-top:6px', text:
+                        ahead === 0 ? 'AT YOUR STATION'
+                                    : `${ahead} ${ahead === 1 ? 'STOP' : 'STOPS'} AHEAD` })
+                    : null,
+                ]),
+              ))
+            : sectorClear('Nothing reported on your route.'),
+        ]
+      : []),
+
+    sectionHead(journey ? 'Rest of the line' : 'Line status',
+      s.feed === 'live' ? 'LIVE' : 'SCHEDULE ONLY'),
+    ...(elsewhere.length
+      ? elsewhere.map((sig) =>
           el('div', { style: 'padding:12px 12px 0' }, [
             signalCard(sig, {
               onConfirm: (id) => vote(id, 1),
@@ -264,7 +310,9 @@ function overviewContent(s) {
             }),
           ]),
         )
-      : [sectorClear()]),
+      : [sectorClear(journey
+          ? 'Nothing reported anywhere else on the line.'
+          : undefined)]),
     el('div', { style: 'height:12px' }),
   ];
 }
@@ -305,6 +353,11 @@ export async function refreshSignals() {
  * One definition, used by both the render and the fetch, so they cannot drift.
  */
 function primaryStation(s) {
+  // An active saved journey outranks a guess: if someone told us they catch
+  // the 07:42 from Stavanger, that is the board they want at 07:20, whether or
+  // not location permission was granted.
+  const j = activeJourney(s.journeys ?? []);
+  if (j && !s.focusStation) return j.fromIdx;
   return s.focusStation ?? s.position?.stationIdx ?? 1;
 }
 

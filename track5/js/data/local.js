@@ -237,8 +237,20 @@ export function lastReportAt() {
 
 /* --- Journeys ------------------------------------------------------------- */
 
+/**
+ * Journeys.
+ *
+ * Returns a copy, not the internal array.
+ *
+ * state.js detects change by reference, so handing out the live array meant
+ * saveJourney() mutated it in place, listJourneys() returned the very same
+ * reference, and store.set() concluded nothing had changed — a saved journey
+ * appeared on PROFILE but LIVE went on ignoring it until some unrelated update
+ * happened to force a render. Every accessor here returns fresh objects for
+ * that reason.
+ */
 export async function listJourneys() {
-  return load().journeys;
+  return load().journeys.map((j) => ({ ...j }));
 }
 
 export async function saveJourney(journey) {

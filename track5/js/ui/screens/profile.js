@@ -13,6 +13,7 @@ import { MODE } from '../../data/backend.js';
 import { emit, EVENTS } from '../../core/bus.js';
 import { RANKS, rankFor, nextRank, rankProgress, xpToNext, XP_REASON_LABEL } from '../../domain/xp.js';
 import { sectionHead, emptyState } from '../components.js';
+import { journeysSection } from './journeys.js';
 import { ago } from '../../core/time.js';
 
 let root = null;
@@ -65,6 +66,8 @@ async function render() {
       style: 'margin:0 16px 16px',
       onclick: promptHandle,
     }, user.handle ? 'Change handle' : 'Choose a handle'),
+
+    journeysSection(),
 
     sectionHead('Ranks'),
     el('div', {}, RANKS.map((r) =>
