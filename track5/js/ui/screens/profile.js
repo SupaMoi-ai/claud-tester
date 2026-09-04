@@ -14,6 +14,8 @@ import { emit, EVENTS } from '../../core/bus.js';
 import { RANKS, rankFor, nextRank, rankProgress, xpToNext, XP_REASON_LABEL } from '../../domain/xp.js';
 import { sectionHead, emptyState } from '../components.js';
 import { journeysSection } from './journeys.js';
+import { lockerSection } from './locker.js';
+import { renderAvatar } from '../avatar.js';
 import { ago } from '../../core/time.js';
 
 let root = null;
@@ -42,7 +44,10 @@ async function render() {
   replace(root, [
     sectionHead('Operator'),
 
-    el('div', { style: 'padding:16px' }, [
+    el('div', { style: 'padding:16px;display:flex;gap:16px;align-items:flex-start' }, [
+      el('div', { style: 'flex:0 0 auto;border:1px solid var(--fg-faint);padding:8px' },
+        [renderAvatar(user.avatar ?? {}, 64)]),
+      el('div', { style: 'flex:1;min-width:0' }, [
       el('div', { class: 'pixel', style: 'font-size:20px', text: user.handle || 'UNNAMED' }),
       el('div', { style: 'display:flex;align-items:baseline;gap:10px;margin-top:6px' }, [
         el('span', { class: 'badge', dataset: { state: 'CONFIRMED' }, text: rank }),
@@ -58,6 +63,7 @@ async function render() {
       ),
       el('div', { class: 'micro', style: 'margin-top:6px', text:
         next ? `${xpToNext(user.xp)} XP TO ${next.name}` : 'TOP RANK REACHED' }),
+      ]),
     ]),
 
     el('button', {
@@ -66,6 +72,8 @@ async function render() {
       style: 'margin:0 16px 16px',
       onclick: promptHandle,
     }, user.handle ? 'Change handle' : 'Choose a handle'),
+
+    lockerSection(),
 
     journeysSection(),
 
