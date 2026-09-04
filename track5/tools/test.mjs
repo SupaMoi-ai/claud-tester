@@ -55,6 +55,10 @@ import {
 import { ago, until, delta } from '../js/core/time.js';
 
 import {
+  generateHandle, isValidHandle, normaliseHandle,
+} from '../js/domain/handles.js';
+
+import {
   journeyDirection,
   journeyStations,
   isJourneyActive,
@@ -457,6 +461,33 @@ eq('unknown position gives no claim', stopsAhead(null, 'south', 6), null);
 ok('signal inside a journey is relevant', signalOnJourney(4, { fromIdx: 1, toIdx: 6 }));
 ok('signal outside is not', !signalOnJourney(9, { fromIdx: 1, toIdx: 6 }));
 ok('journey direction does not matter', signalOnJourney(4, { fromIdx: 6, toIdx: 1 }));
+
+// ---------------------------------------------------------------------------
+// Handles — nobody should ever be shown as ANON
+// ---------------------------------------------------------------------------
+
+// Generated handles must satisfy the same constraint the database enforces
+// (handle_shape in schema.sql), or first sign-in fails for a real user.
+for (let i = 0; i < 300; i++) {
+  const h = generateHandle();
+  if (!isValidHandle(h)) { ok(`generated handle "${h}" is valid`, false); break; }
+}
+ok('300 generated handles all satisfy the database constraint', true);
+ok('a generated handle is never empty', generateHandle().length >= 2);
+ok('and never exceeds the column limit', generateHandle().length <= 20);
+ok('generation varies', new Set(Array.from({length: 40}, () => generateHandle())).size > 1);
+
+eq('spaces become underscores rather than being rejected',
+   normaliseHandle('night owl'), 'night_owl');
+eq('punctuation is stripped', normaliseHandle('n!ght@owl'), 'nghtowl');
+eq('over-long input is truncated', normaliseHandle('x'.repeat(50)).length, 20);
+eq('nothing usable returns null', normaliseHandle('!!!'), null);
+eq('empty input returns null', normaliseHandle(''), null);
+eq('whitespace only returns null', normaliseHandle('   '), null);
+eq('null input is handled', normaliseHandle(null), null);
+ok('a single character is too short', !isValidHandle('a'));
+ok('a normal handle passes', isValidHandle('NIGHTOWL_04'));
+ok('hyphens are allowed', isValidHandle('night-owl'));
 
 // ---------------------------------------------------------------------------
 // Saved journeys

@@ -45,6 +45,18 @@ export const deleteJourney = (...a) => impl.deleteJourney(...a);
 /* Social */
 export const listChat = (...a) => impl.listChat(...a);
 export const sendChat = (...a) => impl.sendChat(...a);
+export const listCrews = (...a) => impl.listCrews(...a);
+export const createCrew = (...a) => impl.createCrew(...a);
+export const joinCrew = (...a) => impl.joinCrew(...a);
+export const leaveCrew = (...a) => impl.leaveCrew(...a);
+export const listCrewMessages = (...a) => impl.listCrewMessages(...a);
+export const sendCrewMessage = (...a) => impl.sendCrewMessage(...a);
+
+/* Appearance */
+export const listCosmetics = (...a) => impl.listCosmetics(...a);
+export const ownedCosmetics = (...a) => impl.ownedCosmetics(...a);
+export const buyCosmetic = (...a) => impl.buyCosmetic(...a);
+export const setAvatar = (...a) => impl.setAvatar(...a);
 
 /* Development */
 export const reset = (...a) => (impl.reset ? impl.reset(...a) : Promise.resolve());

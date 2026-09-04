@@ -23,6 +23,7 @@ import {
 } from '../domain/signals.js';
 import { XP, rankFor, xpForStateChange } from '../domain/xp.js';
 import { STATIONS } from '../transport/stations.js';
+import { generateHandle, normaliseHandle } from '../domain/handles.js';
 
 const KEY = 'track5.local.v1';
 
@@ -113,12 +114,21 @@ function seed() {
 
 export async function signIn() {
   const d = load();
+  // Nobody is ever shown as ANON: a usable pseudonym is issued immediately and
+  // can be changed on PROFILE. That is what "no real identity required" should
+  // feel like — not an empty name.
+  if (!d.user.handle) {
+    d.user.handle = generateHandle();
+    save();
+  }
   return { ...d.user, rank: rankFor(d.user.xp) };
 }
 
 export async function setHandle(handle) {
   const d = load();
-  d.user.handle = String(handle).slice(0, 20);
+  const clean = normaliseHandle(handle);
+  if (!clean) throw new Error('HANDLE MUST BE 2-20 LETTERS, DIGITS, _ OR -');
+  d.user.handle = clean;
   save();
   return { ...d.user, rank: rankFor(d.user.xp) };
 }
@@ -290,6 +300,111 @@ export async function sendChat(body) {
   save();
   return msg;
 }
+
+/* --- Crews ----------------------------------------------------------------
+   Real data, but only ever yours: an invite code cannot reach another device
+   from here. The crew screen says so rather than implying otherwise. */
+
+export async function listCrews() {
+  const d = load();
+  return d.crews.map((c) => ({ ...c, members: [...c.members] }));
+}
+
+export async function createCrew(name) {
+  const d = load();
+  const crew = {
+    id: `c-${Date.now().toString(36)}`,
+    name: String(name).slice(0, 24),
+    // Ambiguous characters left out so a code can be read aloud on a platform.
+    code: Array.from({ length: 6 }, () =>
+      'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join(''),
+    owner: d.user.id,
+    members: [{ userId: d.user.id, handle: d.user.handle ?? 'ANON', xp: d.user.xp }],
+    messages: [],
+    createdAt: Date.now(),
+  };
+  d.crews.push(crew);
+  save();
+  return crew;
+}
+
+export async function joinCrew() {
+  return { ok: false, reason: 'INVITE CODES NEED A SHARED BACKEND — SEE PROFILE' };
+}
+
+export async function leaveCrew(crewId) {
+  const d = load();
+  d.crews = d.crews.filter((c) => c.id !== crewId);
+  save();
+}
+
+export async function listCrewMessages(crewId) {
+  const crew = load().crews.find((c) => c.id === crewId);
+  return crew ? crew.messages.map((m) => ({ ...m })) : [];
+}
+
+export async function sendCrewMessage(crewId, body) {
+  const d = load();
+  const crew = d.crews.find((c) => c.id === crewId);
+  if (!crew) return null;
+  const msg = {
+    id: `cm-${Date.now().toString(36)}`,
+    userId: d.user.id,
+    handle: d.user.handle ?? 'ANON',
+    body: String(body).slice(0, 300),
+    at: Date.now(),
+  };
+  crew.messages.push(msg);
+  crew.messages = crew.messages.slice(-200);
+  save();
+  return msg;
+}
+
+/* --- Cosmetics ------------------------------------------------------------- */
+
+export async function listCosmetics() {
+  return COSMETICS.map((c) => ({ ...c }));
+}
+
+export async function ownedCosmetics() {
+  return [...load().user.cosmetics];
+}
+
+/**
+ * Cosmetics are unlocks, not purchases: XP is never deducted. Spending
+ * reputation on a hat would demote a user for participating, and rank is meant
+ * to represent standing rather than a wallet.
+ */
+export async function buyCosmetic(id) {
+  const d = load();
+  const item = COSMETICS.find((c) => c.id === id);
+  if (!item) return { ok: false, reason: 'NO SUCH ITEM' };
+  if (d.user.xp < item.costXp) return { ok: false, reason: 'NOT ENOUGH XP' };
+  if (!d.user.cosmetics.includes(id)) d.user.cosmetics.push(id);
+  save();
+  return { ok: true };
+}
+
+export async function setAvatar(avatar) {
+  const d = load();
+  d.user.avatar = { ...avatar };
+  save();
+  return { ...d.user, rank: rankFor(d.user.xp) };
+}
+
+/** Mirrors the seed rows in supabase/schema.sql. */
+export const COSMETICS = [
+  { id: 'jacket-rail', name: 'Rail jacket', slot: 'jacket', costXp: 0, rarity: 'common' },
+  { id: 'jacket-hivis', name: 'Hi-vis', slot: 'jacket', costXp: 100, rarity: 'common' },
+  { id: 'jacket-leather', name: 'Leather', slot: 'jacket', costXp: 750, rarity: 'rare' },
+  { id: 'hat-beanie', name: 'Beanie', slot: 'hat', costXp: 100, rarity: 'common' },
+  { id: 'hat-cap', name: 'Conductor cap', slot: 'hat', costXp: 300, rarity: 'uncommon' },
+  { id: 'hat-hood', name: 'Hood up', slot: 'hat', costXp: 0, rarity: 'common' },
+  { id: 'glasses-dark', name: 'Dark glasses', slot: 'face', costXp: 300, rarity: 'uncommon' },
+  { id: 'patch-jaeren', name: 'Jæren patch', slot: 'patch', costXp: 750, rarity: 'uncommon' },
+  { id: 'patch-nightowl', name: 'Night owl', slot: 'patch', costXp: 1500, rarity: 'rare' },
+  { id: 'patch-legend', name: 'End of the line', slot: 'patch', costXp: 6000, rarity: 'legendary' },
+];
 
 /** Wipe local state. Offered on PROFILE so a demo can be reset cleanly. */
 export async function reset() {

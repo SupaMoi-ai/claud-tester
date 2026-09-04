@@ -146,9 +146,11 @@ async function promptHandle() {
   const current = store.get().user?.handle ?? '';
   const next = prompt('Pick a handle. No real names.', current);
   if (next == null) return;
-  const clean = next.trim().slice(0, 20);
-  if (!clean) return;
-  const user = await backend.setHandle(clean);
-  store.set({ user });
-  emit(EVENTS.TOAST, 'HANDLE UPDATED');
+  try {
+    const user = await backend.setHandle(next);
+    store.set({ user });
+    emit(EVENTS.TOAST, 'HANDLE UPDATED');
+  } catch (err) {
+    emit(EVENTS.TOAST, String(err.message ?? err).toUpperCase().slice(0, 60));
+  }
 }

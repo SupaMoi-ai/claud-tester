@@ -17,6 +17,7 @@
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { rankFor } from '../domain/xp.js';
+import { generateHandle, normaliseHandle } from '../domain/handles.js';
 
 let client = null;
 let currentUser = null;
@@ -55,7 +56,19 @@ export async function signIn() {
   const uid = userData?.user?.id;
   if (!uid) throw new Error('no session after sign-in');
 
-  return getProfile(uid);
+  const profile = await getProfile(uid);
+
+  // Issue a pseudonym on first sign-in so nobody appears as ANON. Collisions on
+  // the unique handle are possible but rare; a couple of retries is cheaper
+  // than a signup form.
+  if (!profile.handle) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { error } = await sb.from('profiles')
+        .update({ handle: generateHandle() }).eq('id', uid);
+      if (!error) return getProfile(uid);
+    }
+  }
+  return profile;
 }
 
 export async function getProfile(userId = null) {
@@ -83,8 +96,10 @@ export async function getProfile(userId = null) {
 /** Handle is the only profile field a client may write. XP is server-owned. */
 export async function setHandle(handle) {
   const sb = await getClient();
+  const clean = normaliseHandle(handle);
+  if (!clean) throw new Error('HANDLE MUST BE 2-20 LETTERS, DIGITS, _ OR -');
   const uid = (await sb.auth.getUser()).data?.user?.id;
-  const { error } = await sb.from('profiles').update({ handle }).eq('id', uid);
+  const { error } = await sb.from('profiles').update({ handle: clean }).eq('id', uid);
   if (error) throw new Error(error.message);
   return getProfile(uid);
 }
@@ -262,6 +277,116 @@ export async function sendChat(body) {
   const { data, error } = await sb.rpc('rpc_send_chat', { p_body: body });
   if (error) throw new Error(humanise(error.message));
   return data;
+}
+
+/* --- Crews ---------------------------------------------------------------- */
+
+export async function listCrews() {
+  const sb = await getClient();
+  const { data, error } = await sb
+    .from('crews')
+    .select('id, name, code, owner, created_at, crew_members(user_id, role, profiles(handle, xp))');
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    code: c.code,
+    owner: c.owner,
+    createdAt: Date.parse(c.created_at),
+    members: (c.crew_members ?? []).map((m) => ({
+      userId: m.user_id,
+      role: m.role,
+      handle: m.profiles?.handle ?? 'ANON',
+      xp: m.profiles?.xp ?? 0,
+    })),
+  }));
+}
+
+export async function createCrew(name) {
+  const sb = await getClient();
+  const { data, error } = await sb.rpc('rpc_create_crew', { p_name: name });
+  if (error) throw new Error(humanise(error.message));
+  return { id: data.id, name: data.name, code: data.code, owner: data.owner, members: [] };
+}
+
+export async function joinCrew(code) {
+  const sb = await getClient();
+  const { data, error } = await sb.rpc('rpc_join_crew', { p_code: code });
+  if (error) return { ok: false, reason: humanise(error.message) };
+  return { ok: true, crew: { id: data.id, name: data.name, code: data.code } };
+}
+
+/** Leaving is a delete of your own membership row, which RLS permits. */
+export async function leaveCrew(crewId) {
+  const sb = await getClient();
+  const uid = (await sb.auth.getUser()).data?.user?.id;
+  const { error } = await sb
+    .from('crew_members').delete().eq('crew_id', crewId).eq('user_id', uid);
+  if (error) throw new Error(error.message);
+}
+
+export async function listCrewMessages(crewId) {
+  const sb = await getClient();
+  const { data, error } = await sb
+    .from('crew_messages')
+    .select('id, user_id, body, created_at, profiles(handle)')
+    .eq('crew_id', crewId)
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) throw new Error(error.message);
+  return (data ?? [])
+    .map((m) => ({
+      id: m.id,
+      userId: m.user_id,
+      handle: m.profiles?.handle ?? 'ANON',
+      body: m.body,
+      at: Date.parse(m.created_at),
+    }))
+    .reverse();
+}
+
+export async function sendCrewMessage(crewId, body) {
+  const sb = await getClient();
+  const { data, error } = await sb.rpc('rpc_send_crew_message', {
+    p_crew: crewId, p_body: body,
+  });
+  if (error) throw new Error(humanise(error.message));
+  return data;
+}
+
+/* --- Cosmetics ------------------------------------------------------------ */
+
+export async function listCosmetics() {
+  const sb = await getClient();
+  const { data, error } = await sb
+    .from('cosmetics').select('id, name, slot, cost_xp, rarity').order('cost_xp');
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((c) => ({
+    id: c.id, name: c.name, slot: c.slot, costXp: c.cost_xp, rarity: c.rarity,
+  }));
+}
+
+export async function ownedCosmetics() {
+  const sb = await getClient();
+  const { data, error } = await sb.from('user_cosmetics').select('cosmetic_id');
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => r.cosmetic_id);
+}
+
+export async function buyCosmetic(id) {
+  const sb = await getClient();
+  const { error } = await sb.rpc('rpc_buy_cosmetic', { p_id: id });
+  if (error) return { ok: false, reason: humanise(error.message) };
+  return { ok: true };
+}
+
+/** Avatar is one of the two columns a client may write on its own profile. */
+export async function setAvatar(avatar) {
+  const sb = await getClient();
+  const uid = (await sb.auth.getUser()).data?.user?.id;
+  const { error } = await sb.from('profiles').update({ avatar }).eq('id', uid);
+  if (error) throw new Error(error.message);
+  return getProfile(uid);
 }
 
 /* --- Helpers -------------------------------------------------------------- */
