@@ -307,11 +307,11 @@
   // The control code an inspector reads off the screen. It is derived from the
   // clock, so every phone in the theatre shows the same code at the same time —
   // and it rolls over on the hour, exactly like the real thing.
-  const CODE_LETTERS = "ABCDEFGHJKLMNPRSTUVX";
+  const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   function controlCode(ts) {
     const d = new Date(ts);
     const h = hash32(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`);
-    return CODE_LETTERS[h % CODE_LETTERS.length] + (Math.floor(h / 7) % 10);
+    return CODE_CHARS[h % 32] + CODE_CHARS[Math.floor(h / 32) % 32];
   }
 
   function ticketIdString(seed) {
@@ -1206,12 +1206,15 @@
           <h2>${esc(travellerLabel(tk.counts))}, ${esc(zoneName(tk.zone))}</h2>
           <p><span data-live="idate">${esc(shortDate(ts))} ${esc(hhmm(ts))}</span><span class="code" data-live="code">${controlCode(ts)}</span></p>
         </div>
-        <canvas id="insp-canvas"></canvas>
+        <div class="inspect-art">
+          <canvas id="insp-qr" aria-label="Ticket code"></canvas>
+          <canvas id="insp-photo" aria-hidden="true"></canvas>
+        </div>
         <div class="inspect-warn">${esc(t("screenshotWarn"))}</div>
         <div class="inspect-foot"><button class="btn" data-act="inspect-close">${esc(t("close"))}</button></div>
       </div>`;
     keepAwake(true);
-    startInspectionCanvas();
+    startInspectionArt(tk);
     buzz(8);
   }
 
@@ -1223,95 +1226,236 @@
     keepAwake(false);
   }
 
-  // The moving mark is the whole point of an inspection screen: a screenshot
-  // is frozen, this is not. It is driven by the clock, so two phones side by
-  // side move in step.
-  function startInspectionCanvas() {
-    const cv = document.getElementById("insp-canvas");
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    let w = 0, h = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+  /* A ticket code that actually encodes the ticket, and a photograph that
+     washes green and back on a slow cycle. Both are live: the code carries the
+     current minute, and a still photo of the screen is caught at one point in
+     a wash it cannot reproduce. */
 
-    function size() {
-      const r = cv.getBoundingClientRect();
-      w = r.width; h = r.height;
-      cv.width = Math.round(w * dpr);
-      cv.height = Math.round(h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function qrPayload(tk, ts) {
+    const d = new Date(ts);
+    const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return [
+      "VB1", tk.ref.replace(/\s/g, ""), stamp, controlCode(ts),
+      travellerLabel(tk.counts), zoneName(tk.zone).replace(/[–—]/g, "-"),
+    ].join("|");
+  }
+
+  function paintQR(cv, text) {
+    let code;
+    try { code = window.VBQR.encode(text); } catch (e) { return; }
+    const box = cv.getBoundingClientRect();
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    // an integer module size keeps every bar crisp, which is what a scanner wants
+    const px = Math.max(2, Math.floor((box.width * dpr) / code.size));
+    const side = px * code.size;
+    cv.width = side; cv.height = side;
+    const g = cv.getContext("2d");
+    g.fillStyle = "#fff";
+    g.fillRect(0, 0, side, side);
+    g.fillStyle = "#000";
+    for (let r = 0; r < code.size; r++)
+      for (let c = 0; c < code.size; c++)
+        if (code.modules[r][c]) g.fillRect(c * px, r * px, px, px);
+  }
+
+  // A seeded ridgeline, so the landscape is the same picture every performance.
+  function seeded(seed) {
+    let x = seed >>> 0;
+    return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+  }
+
+  function ridge(steps, rough, rng) {
+    let pts = [0.5, 0.5], scale = rough;
+    while (pts.length - 1 < steps) {
+      const next = [];
+      for (let i = 0; i < pts.length - 1; i++) {
+        next.push(pts[i]);
+        next.push((pts[i] + pts[i + 1]) / 2 + (rng() - 0.5) * scale);
+      }
+      next.push(pts[pts.length - 1]);
+      pts = next;
+      scale *= 0.55;
     }
-    size();
-    const onResize = () => size();
+    return pts;
+  }
+
+  function fillRidge(g, w, h, baseY, amp, pts, grad) {
+    g.beginPath();
+    g.moveTo(0, h);
+    for (let i = 0; i < pts.length; i++) {
+      g.lineTo((i / (pts.length - 1)) * w, baseY - (pts[i] - 0.5) * amp);
+    }
+    g.lineTo(w, h);
+    g.closePath();
+    g.fillStyle = grad;
+    g.fill();
+  }
+
+  // A road running into the mountains — the kind of picture a Norwegian
+  // transport operator puts on a ticket.
+  function paintLandscape(cv, w, h) {
+    const g = cv.getContext("2d");
+    const horizon = h * 0.62;
+
+    const sky = g.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, "#6f9bc8");
+    sky.addColorStop(0.55, "#b5c3d2");
+    sky.addColorStop(1, "#f0d6ac");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, w, h);
+
+    const far = g.createLinearGradient(0, h * 0.18, 0, horizon);
+    far.addColorStop(0, "#e3a469");
+    far.addColorStop(0.34, "#8e8ea6");
+    far.addColorStop(1, "#5d6b85");
+    fillRidge(g, w, h, h * 0.46, h * 0.46, ridge(64, 1.0, seeded(0x51a7)), far);
+
+    const near = g.createLinearGradient(0, h * 0.3, 0, horizon);
+    near.addColorStop(0, "#7d7f92");
+    near.addColorStop(0.5, "#4a5a72");
+    near.addColorStop(1, "#38485e");
+    fillRidge(g, w, h, h * 0.55, h * 0.3, ridge(64, 1.0, seeded(0x2c19)), near);
+
+    const floor = g.createLinearGradient(0, horizon - h * 0.04, 0, h);
+    floor.addColorStop(0, "#5d7a4a");
+    floor.addColorStop(0.45, "#4b6a3c");
+    floor.addColorStop(1, "#38522d");
+    g.fillStyle = floor;
+    g.fillRect(0, horizon - h * 0.05, w, h - horizon + h * 0.05);
+
+    // road, in perspective to a vanishing point on the horizon
+    const vx = w * 0.5, vy = horizon - h * 0.04;
+    g.beginPath();
+    g.moveTo(vx - w * 0.012, vy);
+    g.lineTo(vx + w * 0.012, vy);
+    g.lineTo(w * 0.82, h);
+    g.lineTo(w * 0.18, h);
+    g.closePath();
+    const tar = g.createLinearGradient(0, vy, 0, h);
+    tar.addColorStop(0, "#8d8f95");
+    tar.addColorStop(1, "#55565c");
+    g.fillStyle = tar;
+    g.fill();
+
+    // centre line, dashes shortening toward the horizon
+    g.save();
+    g.clip();
+    g.strokeStyle = "rgba(245,240,225,0.85)";
+    for (let i = 0; i < 9; i++) {
+      const t0 = Math.pow(i / 9, 2.1), t1 = Math.pow((i + 0.45) / 9, 2.1);
+      g.lineWidth = Math.max(1, w * 0.006 * (0.25 + t0));
+      g.beginPath();
+      g.moveTo(vx, vy + (h - vy) * t0);
+      g.lineTo(vx, vy + (h - vy) * t1);
+      g.stroke();
+    }
+    g.restore();
+
+    // trees along the verges
+    const rng = seeded(0x7f31);
+    for (let i = 0; i < 46; i++) {
+      const side = i % 2 ? 1 : -1;
+      const t0 = Math.pow(rng(), 1.6);
+      const y = vy + (h - vy) * t0 + h * 0.01;
+      const spread = (0.02 + t0 * 0.34) * w;
+      const x = vx + side * (spread + rng() * w * 0.12);
+      const s = (0.02 + t0 * 0.1) * h;
+      if (x < -s || x > w + s) continue;
+      g.fillStyle = t0 > 0.45 ? "#27401f" : "#33512a";
+      g.beginPath();
+      g.moveTo(x, y - s);
+      g.lineTo(x + s * 0.42, y);
+      g.lineTo(x - s * 0.42, y);
+      g.closePath();
+      g.fill();
+    }
+
+    // a little haze at the treeline, the way distance reads in a photograph
+    const haze = g.createLinearGradient(0, horizon - h * 0.1, 0, horizon + h * 0.06);
+    haze.addColorStop(0, "rgba(226,214,190,0.45)");
+    haze.addColorStop(1, "rgba(226,214,190,0)");
+    g.fillStyle = haze;
+    g.fillRect(0, horizon - h * 0.1, w, h * 0.16);
+  }
+
+  // Measured off the real screen: about 3.3s — a wash in over ~1.1s, a short
+  // hold, a wash out over ~1.2s, then a rest before it starts again.
+  const PULSE_MS = 3300;
+  function pulseAt(ts) {
+    const p = (ts % PULSE_MS) / PULSE_MS;
+    const UP = 1.1 / 3.3, HOLD = 1.55 / 3.3, DOWN = 2.75 / 3.3;
+    let v;
+    if (p < UP) v = p / UP;
+    else if (p < HOLD) v = 1;
+    else if (p < DOWN) v = 1 - (p - HOLD) / (DOWN - HOLD);
+    else v = 0;
+    return v * v * (3 - 2 * v);
+  }
+
+  // Drop a file named photo.jpg beside the app and it replaces the painted
+  // landscape; without one, the app paints its own and still works offline.
+  let customPhoto = null, customPhotoTried = false;
+  function loadCustomPhoto(onReady) {
+    if (customPhotoTried) { if (customPhoto) onReady(); return; }
+    customPhotoTried = true;
+    const img = new Image();
+    img.onload = () => { customPhoto = img; onReady(); };
+    img.onerror = () => { customPhoto = null; };
+    img.src = "photo.jpg";
+  }
+
+  function drawCover(g, img, w, h) {
+    const s = Math.max(w / img.width, h / img.height);
+    const dw = img.width * s, dh = img.height * s;
+    g.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  }
+
+  function startInspectionArt(tk) {
+    const qrEl = document.getElementById("insp-qr");
+    const photoEl = document.getElementById("insp-photo");
+    if (!qrEl || !photoEl) return;
+
+    let lastMinute = "";
+    function refreshQR() {
+      const key = Math.floor(now() / 60000);
+      if (String(key) === lastMinute) return;
+      lastMinute = String(key);
+      paintQR(qrEl, qrPayload(tk, now()));
+    }
+
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    let art = null, aw = 0, ah = 0;
+    function buildPhoto() {
+      const box = photoEl.getBoundingClientRect();
+      aw = Math.max(1, Math.round(box.width * dpr));
+      ah = Math.max(1, Math.round(box.height * dpr));
+      photoEl.width = aw; photoEl.height = ah;
+      art = document.createElement("canvas");
+      art.width = aw; art.height = ah;
+      if (customPhoto) drawCover(art.getContext("2d"), customPhoto, aw, ah);
+      else paintLandscape(art, aw, ah);
+    }
+    buildPhoto();
+    loadCustomPhoto(buildPhoto);
+    refreshQR();
+
+    const onResize = () => { buildPhoto(); lastMinute = ""; refreshQR(); };
     window.addEventListener("resize", onResize);
 
-    // The brand green is read from the live palette, so the blink is exactly
-    // the green of the Valid banner on the pass behind it.
+    const g = photoEl.getContext("2d");
     const green = (getComputedStyle(root).getPropertyValue("--valid") || "#5c9800").trim();
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Blink phase comes off the clock, not off a local timer, so every phone
-    // showing a ticket blinks on the same beat.
-    function blinkAt(ts) {
-      const phase = (ts % 1000) / 1000;
-      if (calm) return 0.45 + 0.55 * (0.5 - Math.cos(phase * Math.PI * 2) / 2);
-      const RAMP = 0.05, ON = 0.56;
-      if (phase < RAMP) return phase / RAMP;
-      if (phase < ON) return 1;
-      if (phase < ON + RAMP) return 1 - (phase - ON) / RAMP;
-      return 0;
-    }
-
     function frame() {
       const ts = now();
-      const tsec = ts / 1000;
-      const blink = blinkAt(ts);
-      ctx.clearRect(0, 0, w, h);
-
-      // the panel drifts a little so a still photograph of it is wrong twice:
-      // frozen mid-blink, and parked in the wrong place
-      const side = Math.min(w - 52, h - 92, 268);
-      const driftX = Math.sin(tsec * 0.55) * Math.max(0, (w - side) / 2 - 10);
-      const driftY = Math.sin(tsec * 0.37 + 1.1) * Math.max(0, (h - side - 54) / 2 - 6);
-      const cx = w / 2 + driftX;
-      const cy = (h - 30) / 2 + driftY;
-
-      // halo under the panel, brightest at the top of the blink
-      const halo = ctx.createRadialGradient(cx, cy, side * 0.3, cx, cy, side * 0.92);
-      halo.addColorStop(0, `rgba(92,152,0,${0.20 * blink})`);
-      halo.addColorStop(1, "rgba(92,152,0,0)");
-      ctx.fillStyle = halo;
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(Math.sin(tsec * 0.22) * 0.05);
-      ctx.globalAlpha = blink;
-      ctx.fillStyle = green;
-      roundRect(ctx, -side / 2, -side / 2, side, side, side * 0.22);
-      ctx.fill();
-
-      // mark knocked out of the panel, so the whole graphic blinks as one
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = "#000";
-      ctx.font = `700 ${Math.round(side * 0.5)}px ` + getComputedStyle(root).fontFamily;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("V", 0, side * 0.06);
-      ctx.beginPath();
-      ctx.arc(0, -side * 0.26, side * 0.072, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // live seal strip — a new pattern every second, derived from the clock
-      const sec = Math.floor(ts / 1000);
-      const seal = hash32("seal" + sec);
-      const cells = 16, cw = Math.min(15, (w - 48) / cells), sx = (w - cells * cw) / 2, sy = h - 16;
-      for (let i = 0; i < cells; i++) {
-        const on = (seal >> (i % 30)) & 1;
-        ctx.fillStyle = on ? green : "rgba(17,17,19,0.10)";
-        roundRect(ctx, sx + i * cw, sy, cw - 3, 9, 2.5);
-        ctx.fill();
-      }
-
+      refreshQR();
+      const wash = pulseAt(ts) * (calm ? 0.3 : 0.46);
+      g.clearRect(0, 0, aw, ah);
+      if (art) g.drawImage(art, 0, 0);
+      g.globalAlpha = wash;
+      g.fillStyle = green;
+      g.fillRect(0, 0, aw, ah);
+      g.globalAlpha = 1;
       inspectAnim = requestAnimationFrame(frame);
     }
     frame();

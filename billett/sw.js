@@ -1,6 +1,6 @@
 /* Offline cache so the prop works with no signal in a school hall. */
 const CACHE = "vestbillett-v1";
-const ASSETS = ["./", "./index.html", "./app.css", "./app.js", "./manifest.json", "./icon.svg"];
+const ASSETS = ["./", "./index.html", "./app.css", "./app.js", "./qr.js", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

@@ -583,17 +583,46 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .inspect-head p .code { margin-left: 12px; }
-#insp-canvas { flex: 1 1 auto; width: 100%; display: block; }
+.inspect-art {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4.5%;
+  padding: 2% 16px 0;
+}
+#insp-qr {
+  width: 47%;
+  max-width: 190px;
+  aspect-ratio: 1;
+  height: auto;
+  display: block;
+  image-rendering: pixelated;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+#insp-photo {
+  width: 66%;
+  max-width: 250px;
+  aspect-ratio: 1 / 1.04;
+  height: auto;
+  display: block;
+  flex: 0 1 auto;
+  min-height: 0;
+}
 .inspect-warn {
   flex: 0 0 auto;
   text-align: center;
-  font-size: 16px;
-  line-height: 1.45;
-  color: rgba(17, 17, 19, 0.24);
-  padding: 10px 34px 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(17, 17, 19, 0.26);
+  padding: 10px 30px 0;
   pointer-events: none;
   text-wrap: balance;
 }
+
 .inspect-foot { padding: 12px 14px 16px; }
 .inspect-foot .btn {
   background: #ccd0dd;

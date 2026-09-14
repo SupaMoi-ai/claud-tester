@@ -23,7 +23,7 @@ for rehearsing cues on a laptop.
 | --- | --- |
 | Tickets | Active and expired tickets, each counting down live |
 | Ticket detail | Green *Valid* banner, clock, control code, min/sec counter, fare breakdown, receipt |
-| Inspection | Full-screen pass with a large mark that blinks once a second in the same green as the *Valid* banner, plus a per-second seal strip — a screenshot of it is visibly frozen |
+| Inspection | Full-screen pass: a scannable QR code carrying the ticket, and a photograph that washes green and back on a ~3.3 s cycle — a screenshot is caught at one point in a wash it can't reproduce |
 | Buy | Ticket type → travellers → zones → confirm → payment → an activated ticket |
 | City Bike | Docking stations with availability that drifts like a live feed |
 | More | Profile, payment methods, travel history, language, appearance, notifications |
@@ -34,10 +34,24 @@ kr 49.00, of which 12 % VAT is kr 5.25.
 The **control code** (`C8`, `T9`, …) is derived from the clock and rolls over on
 the hour, so every phone running the app shows the same code at the same time.
 
-The inspection blink is driven off the same clock rather than a local timer:
-green for the first ~0.56 s of every second, clear for the rest. Two phones held
-side by side blink together, and a photograph of the screen is caught either
-mid-blink or blank.
+The inspection screen's green wash runs off the same clock rather than a local
+timer — in over ~1.1 s, a short hold, out over ~1.2 s, then a rest — so two
+phones held side by side pulse together.
+
+The QR code is real, not decoration: `qr.js` is a byte-mode encoder (error
+correction level M, versions 1-10, verified against a reference decoder) and the
+code scans off the screen to a string like
+
+```
+VB1|1064750170|2026-09-14T13:34|DE|1 Adult|Nord-Jaeren
+```
+
+It is rebuilt every minute, so the timestamp inside it is always current.
+
+The landscape in the photo panel is painted by the app, which keeps it working
+offline. To use a real photograph instead, drop a file named `photo.jpg` next to
+`index.html` — the app picks it up automatically and falls back to the painted
+one if it isn't there.
 
 Language switches between English and Norwegian in More → Language.
 
