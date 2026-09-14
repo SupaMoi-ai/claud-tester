@@ -1243,42 +1243,68 @@
     const onResize = () => size();
     window.addEventListener("resize", onResize);
 
-    const green = "#5c9800";
+    // The brand green is read from the live palette, so the blink is exactly
+    // the green of the Valid banner on the pass behind it.
+    const green = (getComputedStyle(root).getPropertyValue("--valid") || "#5c9800").trim();
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Blink phase comes off the clock, not off a local timer, so every phone
+    // showing a ticket blinks on the same beat.
+    function blinkAt(ts) {
+      const phase = (ts % 1000) / 1000;
+      if (calm) return 0.45 + 0.55 * (0.5 - Math.cos(phase * Math.PI * 2) / 2);
+      const RAMP = 0.05, ON = 0.56;
+      if (phase < RAMP) return phase / RAMP;
+      if (phase < ON) return 1;
+      if (phase < ON + RAMP) return 1 - (phase - ON) / RAMP;
+      return 0;
+    }
+
     function frame() {
       const ts = now();
       const tsec = ts / 1000;
+      const blink = blinkAt(ts);
       ctx.clearRect(0, 0, w, h);
 
-      // drifting wash
-      const cx = w / 2 + Math.sin(tsec * 0.45) * w * 0.3;
-      const cy = h / 2 + Math.cos(tsec * 0.33) * h * 0.26;
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.62);
-      g.addColorStop(0, "rgba(92,152,0,0.20)");
-      g.addColorStop(0.55, "rgba(92,152,0,0.06)");
-      g.addColorStop(1, "rgba(92,152,0,0)");
-      ctx.fillStyle = g;
+      // the panel drifts a little so a still photograph of it is wrong twice:
+      // frozen mid-blink, and parked in the wrong place
+      const side = Math.min(w - 52, h - 92, 268);
+      const driftX = Math.sin(tsec * 0.55) * Math.max(0, (w - side) / 2 - 10);
+      const driftY = Math.sin(tsec * 0.37 + 1.1) * Math.max(0, (h - side - 54) / 2 - 6);
+      const cx = w / 2 + driftX;
+      const cy = (h - 30) / 2 + driftY;
+
+      // halo under the panel, brightest at the top of the blink
+      const halo = ctx.createRadialGradient(cx, cy, side * 0.3, cx, cy, side * 0.92);
+      halo.addColorStop(0, `rgba(92,152,0,${0.20 * blink})`);
+      halo.addColorStop(1, "rgba(92,152,0,0)");
+      ctx.fillStyle = halo;
       ctx.fillRect(0, 0, w, h);
 
-      // travelling mark
-      const px = w / 2 + Math.sin(tsec * 0.7) * Math.max(0, w / 2 - 58);
-      const py = h / 2 + Math.sin(tsec * 0.41 + 1.1) * Math.max(0, h / 2 - 64);
       ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(Math.sin(tsec * 0.25) * 0.22);
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.sin(tsec * 0.22) * 0.05);
+      ctx.globalAlpha = blink;
       ctx.fillStyle = green;
-      roundRect(ctx, -42, -42, 84, 84, 21);
+      roundRect(ctx, -side / 2, -side / 2, side, side, side * 0.22);
       ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.font = "700 42px " + getComputedStyle(root).fontFamily;
+
+      // mark knocked out of the panel, so the whole graphic blinks as one
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "#000";
+      ctx.font = `700 ${Math.round(side * 0.5)}px ` + getComputedStyle(root).fontFamily;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("V", 0, 1);
+      ctx.fillText("V", 0, side * 0.06);
+      ctx.beginPath();
+      ctx.arc(0, -side * 0.26, side * 0.072, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
 
       // live seal strip — a new pattern every second, derived from the clock
       const sec = Math.floor(ts / 1000);
       const seal = hash32("seal" + sec);
-      const cells = 16, cw = Math.min(15, (w - 48) / cells), sx = (w - cells * cw) / 2, sy = h - 30;
+      const cells = 16, cw = Math.min(15, (w - 48) / cells), sx = (w - cells * cw) / 2, sy = h - 16;
       for (let i = 0; i < cells; i++) {
         const on = (seal >> (i % 30)) & 1;
         ctx.fillStyle = on ? green : "rgba(17,17,19,0.10)";

@@ -23,7 +23,7 @@ for rehearsing cues on a laptop.
 | --- | --- |
 | Tickets | Active and expired tickets, each counting down live |
 | Ticket detail | Green *Valid* banner, clock, control code, min/sec counter, fare breakdown, receipt |
-| Inspection | Full-screen pass with a moving mark and a per-second seal strip — a screenshot of it is visibly frozen |
+| Inspection | Full-screen pass with a large mark that blinks once a second in the same green as the *Valid* banner, plus a per-second seal strip — a screenshot of it is visibly frozen |
 | Buy | Ticket type → travellers → zones → confirm → payment → an activated ticket |
 | City Bike | Docking stations with availability that drifts like a live feed |
 | More | Profile, payment methods, travel history, language, appearance, notifications |
@@ -33,6 +33,11 @@ kr 49.00, of which 12 % VAT is kr 5.25.
 
 The **control code** (`C8`, `T9`, …) is derived from the clock and rolls over on
 the hour, so every phone running the app shows the same code at the same time.
+
+The inspection blink is driven off the same clock rather than a local timer:
+green for the first ~0.56 s of every second, clear for the rest. Two phones held
+side by side blink together, and a photograph of the screen is caught either
+mid-blink or blank.
 
 Language switches between English and Norwegian in More → Language.
 

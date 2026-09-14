@@ -585,15 +585,12 @@ body {
 .inspect-head p .code { margin-left: 12px; }
 #insp-canvas { flex: 1 1 auto; width: 100%; display: block; }
 .inspect-warn {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 52%;
+  flex: 0 0 auto;
   text-align: center;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.45;
   color: rgba(17, 17, 19, 0.24);
-  padding: 0 34px;
+  padding: 10px 34px 0;
   pointer-events: none;
   text-wrap: balance;
 }
