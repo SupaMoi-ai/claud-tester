@@ -48,18 +48,17 @@ VB1|1064750170|2026-09-14T13:34|DE|1 Adult|Nord-Jaeren
 
 It is rebuilt every minute, so the timestamp inside it is always current.
 
-The photo panel shows real photographs that **shift** — each one holds for 15
-seconds, cross-fades into the next over 900 ms, and the green wash runs over the
-top. The shift is clock-driven, so two phones show the same photograph at the
-same moment.
+The photo panel shows the gull photograph with a green flash over it on a
+**1.2-second** cycle, driven by the clock so two phones flash together. Retime
+it with `PULSE_MS` in `app.js`; keep it under 3 Hz (about 330 ms), the rate that
+matters for photosensitivity.
 
-Put the photographs in `billett/photos/` and list them in `PHOTOS` in `app.js`;
-the first in the list is the one an inspector sees first. See
-`billett/photos/README.md`. Until that folder has photographs in it, the app
-paints its own landscape so nothing breaks.
+The panel can also shift between several photographs — 15 s each with a 900 ms
+cross-fade — if more are added to `PHOTOS`. With one photograph listed it simply
+stays on it.
 
-The set currently holds one photograph, `bird.jpg`. Add a second and the panel
-starts shifting between them.
+The photograph lives in `billett/photos/` and is listed in `PHOTOS` in
+`app.js`. See `billett/photos/README.md`.
 
 Language switches between English and Norwegian in More → Language.
 

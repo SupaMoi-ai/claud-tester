@@ -1258,132 +1258,14 @@
         if (code.modules[r][c]) g.fillRect(c * px, r * px, px, px);
   }
 
-  // A seeded ridgeline, so the landscape is the same picture every performance.
-  function seeded(seed) {
-    let x = seed >>> 0;
-    return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
-  }
-
-  function ridge(steps, rough, rng) {
-    let pts = [0.5, 0.5], scale = rough;
-    while (pts.length - 1 < steps) {
-      const next = [];
-      for (let i = 0; i < pts.length - 1; i++) {
-        next.push(pts[i]);
-        next.push((pts[i] + pts[i + 1]) / 2 + (rng() - 0.5) * scale);
-      }
-      next.push(pts[pts.length - 1]);
-      pts = next;
-      scale *= 0.55;
-    }
-    return pts;
-  }
-
-  function fillRidge(g, w, h, baseY, amp, pts, grad) {
-    g.beginPath();
-    g.moveTo(0, h);
-    for (let i = 0; i < pts.length; i++) {
-      g.lineTo((i / (pts.length - 1)) * w, baseY - (pts[i] - 0.5) * amp);
-    }
-    g.lineTo(w, h);
-    g.closePath();
-    g.fillStyle = grad;
-    g.fill();
-  }
-
-  // A road running into the mountains — the kind of picture a Norwegian
-  // transport operator puts on a ticket.
-  function paintLandscape(cv, w, h) {
-    const g = cv.getContext("2d");
-    const horizon = h * 0.62;
-
-    const sky = g.createLinearGradient(0, 0, 0, horizon);
-    sky.addColorStop(0, "#6f9bc8");
-    sky.addColorStop(0.55, "#b5c3d2");
-    sky.addColorStop(1, "#f0d6ac");
-    g.fillStyle = sky;
-    g.fillRect(0, 0, w, h);
-
-    const far = g.createLinearGradient(0, h * 0.18, 0, horizon);
-    far.addColorStop(0, "#e3a469");
-    far.addColorStop(0.34, "#8e8ea6");
-    far.addColorStop(1, "#5d6b85");
-    fillRidge(g, w, h, h * 0.46, h * 0.46, ridge(64, 1.0, seeded(0x51a7)), far);
-
-    const near = g.createLinearGradient(0, h * 0.3, 0, horizon);
-    near.addColorStop(0, "#7d7f92");
-    near.addColorStop(0.5, "#4a5a72");
-    near.addColorStop(1, "#38485e");
-    fillRidge(g, w, h, h * 0.55, h * 0.3, ridge(64, 1.0, seeded(0x2c19)), near);
-
-    const floor = g.createLinearGradient(0, horizon - h * 0.04, 0, h);
-    floor.addColorStop(0, "#5d7a4a");
-    floor.addColorStop(0.45, "#4b6a3c");
-    floor.addColorStop(1, "#38522d");
-    g.fillStyle = floor;
-    g.fillRect(0, horizon - h * 0.05, w, h - horizon + h * 0.05);
-
-    // road, in perspective to a vanishing point on the horizon
-    const vx = w * 0.5, vy = horizon - h * 0.04;
-    g.beginPath();
-    g.moveTo(vx - w * 0.012, vy);
-    g.lineTo(vx + w * 0.012, vy);
-    g.lineTo(w * 0.82, h);
-    g.lineTo(w * 0.18, h);
-    g.closePath();
-    const tar = g.createLinearGradient(0, vy, 0, h);
-    tar.addColorStop(0, "#8d8f95");
-    tar.addColorStop(1, "#55565c");
-    g.fillStyle = tar;
-    g.fill();
-
-    // centre line, dashes shortening toward the horizon
-    g.save();
-    g.clip();
-    g.strokeStyle = "rgba(245,240,225,0.85)";
-    for (let i = 0; i < 9; i++) {
-      const t0 = Math.pow(i / 9, 2.1), t1 = Math.pow((i + 0.45) / 9, 2.1);
-      g.lineWidth = Math.max(1, w * 0.006 * (0.25 + t0));
-      g.beginPath();
-      g.moveTo(vx, vy + (h - vy) * t0);
-      g.lineTo(vx, vy + (h - vy) * t1);
-      g.stroke();
-    }
-    g.restore();
-
-    // trees along the verges
-    const rng = seeded(0x7f31);
-    for (let i = 0; i < 46; i++) {
-      const side = i % 2 ? 1 : -1;
-      const t0 = Math.pow(rng(), 1.6);
-      const y = vy + (h - vy) * t0 + h * 0.01;
-      const spread = (0.02 + t0 * 0.34) * w;
-      const x = vx + side * (spread + rng() * w * 0.12);
-      const s = (0.02 + t0 * 0.1) * h;
-      if (x < -s || x > w + s) continue;
-      g.fillStyle = t0 > 0.45 ? "#27401f" : "#33512a";
-      g.beginPath();
-      g.moveTo(x, y - s);
-      g.lineTo(x + s * 0.42, y);
-      g.lineTo(x - s * 0.42, y);
-      g.closePath();
-      g.fill();
-    }
-
-    // a little haze at the treeline, the way distance reads in a photograph
-    const haze = g.createLinearGradient(0, horizon - h * 0.1, 0, horizon + h * 0.06);
-    haze.addColorStop(0, "rgba(226,214,190,0.45)");
-    haze.addColorStop(1, "rgba(226,214,190,0)");
-    g.fillStyle = haze;
-    g.fillRect(0, horizon - h * 0.1, w, h * 0.16);
-  }
-
-  // Measured off the real screen: about 3.3s — a wash in over ~1.1s, a short
-  // hold, a wash out over ~1.2s, then a rest before it starts again.
-  const PULSE_MS = 3300;
+  /* The green flash over the photograph. The real app measured ~3.3s; this
+     runs at 1.2s with a snappier profile, which reads as a flash rather than
+     a slow breath. Still well under 3Hz, the rate that matters for
+     photosensitivity. Change PULSE_MS alone to retime it. */
+  const PULSE_MS = 1200;
+  const UP = 0.28, HOLD = 0.46, DOWN = 0.72;  // fractions of the cycle
   function pulseAt(ts) {
     const p = (ts % PULSE_MS) / PULSE_MS;
-    const UP = 1.1 / 3.3, HOLD = 1.55 / 3.3, DOWN = 2.75 / 3.3;
     let v;
     if (p < UP) v = p / UP;
     else if (p < HOLD) v = 1;
@@ -1438,15 +1320,12 @@
     }
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    let painted = null, aw = 0, ah = 0;
+    let aw = 0, ah = 0;
     function sizePhoto() {
       const box = photoEl.getBoundingClientRect();
       aw = Math.max(1, Math.round(box.width * dpr));
       ah = Math.max(1, Math.round(box.height * dpr));
       photoEl.width = aw; photoEl.height = ah;
-      painted = document.createElement("canvas");
-      painted.width = aw; painted.height = ah;
-      paintLandscape(painted, aw, ah);
     }
     sizePhoto();
     refreshQR();
@@ -1466,7 +1345,8 @@
 
       const pics = readyPhotos();
       if (pics.length === 0) {
-        if (painted) g.drawImage(painted, 0, 0);
+        g.fillStyle = "#e6e6ea";               // only if the file fails to load
+        g.fillRect(0, 0, aw, ah);
       } else if (pics.length === 1) {
         drawCover(g, pics[0], aw, ah);
       } else {

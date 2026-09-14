@@ -7,8 +7,9 @@ Drop real photographs in this folder as `.jpg`, then list their filenames in
 const PHOTOS = ["bird.jpg", "fjord.jpg", "coast.jpg"];
 ```
 
-Currently in the list: `bird.jpg`. One photograph shows without shifting —
-the panel needs at least two before it starts cycling.
+Currently in the list: `bird.jpg`, and that is the only photograph the app
+uses. One photograph shows without shifting; the cycle only starts if a
+second is added.
 
 The first name in the list is the one an inspector sees first.
 
@@ -19,5 +20,5 @@ The first name in the list is the one an inspector sees first.
 - Roughly square works best — the panel is 1 : 1.04 and crops to fill.
 - Around 900 px on the long edge is plenty; keep each file under ~300 KB so
   the whole app still caches for offline use.
-- With the list empty the app paints its own landscape instead, so nothing
-  breaks while this folder is empty.
+- With the list empty the panel falls back to a flat grey ground, so a
+  missing file cannot break the screen.
