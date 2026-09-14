@@ -48,10 +48,15 @@ VB1|1064750170|2026-09-14T13:34|DE|1 Adult|Nord-Jaeren
 
 It is rebuilt every minute, so the timestamp inside it is always current.
 
-The landscape in the photo panel is painted by the app, which keeps it working
-offline. To use a real photograph instead, drop a file named `photo.jpg` next to
-`index.html` — the app picks it up automatically and falls back to the painted
-one if it isn't there.
+The photo panel shows real photographs that **shift** — each one holds for 15
+seconds, cross-fades into the next over 900 ms, and the green wash runs over the
+top. The shift is clock-driven, so two phones show the same photograph at the
+same moment.
+
+Put the photographs in `billett/photos/` and list them in `PHOTOS` in `app.js`;
+the first in the list is the one an inspector sees first. See
+`billett/photos/README.md`. Until that folder has photographs in it, the app
+paints its own landscape so nothing breaks.
 
 Language switches between English and Norwegian in More → Language.
 

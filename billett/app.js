@@ -1392,17 +1392,31 @@
     return v * v * (3 - 2 * v);
   }
 
-  // Drop a file named photo.jpg beside the app and it replaces the painted
-  // landscape; without one, the app paints its own and still works offline.
-  let customPhoto = null, customPhotoTried = false;
-  function loadCustomPhoto(onReady) {
-    if (customPhotoTried) { if (customPhoto) onReady(); return; }
-    customPhotoTried = true;
-    const img = new Image();
-    img.onload = () => { customPhoto = img; onReady(); };
-    img.onerror = () => { customPhoto = null; };
-    img.src = "photo.jpg";
+  /* The photo panel. The real app shows a photograph that changes, so this
+     takes a list of real image files and shifts between them on a cycle,
+     cross-fading, with the green wash running over the top.
+
+     Add photographs by dropping .jpg files into photos/ and listing their
+     names here. The first one is the one an inspector sees first. With the
+     list empty the app paints its own landscape so it still works. */
+  const PHOTOS = [];
+  const PHOTO_DIR = "photos/";
+  const SHIFT_MS = 15000;   // how long each photograph stays up
+  const FADE_MS = 900;      // cross-fade between them
+
+  let photoImgs = null;
+  function loadPhotos(onChange) {
+    if (photoImgs) return photoImgs;
+    photoImgs = [];
+    PHOTOS.forEach((name, i) => {
+      const img = new Image();
+      img.onload = () => { photoImgs[i] = img; onChange && onChange(); };
+      img.onerror = () => { photoImgs[i] = null; };
+      img.src = PHOTO_DIR + name;
+    });
+    return photoImgs;
   }
+  const readyPhotos = () => (photoImgs || []).filter(Boolean);
 
   function drawCover(g, img, w, h) {
     const s = Math.max(w / img.width, h / img.height);
@@ -1424,22 +1438,21 @@
     }
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    let art = null, aw = 0, ah = 0;
-    function buildPhoto() {
+    let painted = null, aw = 0, ah = 0;
+    function sizePhoto() {
       const box = photoEl.getBoundingClientRect();
       aw = Math.max(1, Math.round(box.width * dpr));
       ah = Math.max(1, Math.round(box.height * dpr));
       photoEl.width = aw; photoEl.height = ah;
-      art = document.createElement("canvas");
-      art.width = aw; art.height = ah;
-      if (customPhoto) drawCover(art.getContext("2d"), customPhoto, aw, ah);
-      else paintLandscape(art, aw, ah);
+      painted = document.createElement("canvas");
+      painted.width = aw; painted.height = ah;
+      paintLandscape(painted, aw, ah);
     }
-    buildPhoto();
-    loadCustomPhoto(buildPhoto);
+    sizePhoto();
     refreshQR();
+    loadPhotos();
 
-    const onResize = () => { buildPhoto(); lastMinute = ""; refreshQR(); };
+    const onResize = () => { sizePhoto(); lastMinute = ""; refreshQR(); };
     window.addEventListener("resize", onResize);
 
     const g = photoEl.getContext("2d");
@@ -1449,10 +1462,28 @@
     function frame() {
       const ts = now();
       refreshQR();
-      const wash = pulseAt(ts) * (calm ? 0.3 : 0.46);
       g.clearRect(0, 0, aw, ah);
-      if (art) g.drawImage(art, 0, 0);
-      g.globalAlpha = wash;
+
+      const pics = readyPhotos();
+      if (pics.length === 0) {
+        if (painted) g.drawImage(painted, 0, 0);
+      } else if (pics.length === 1) {
+        drawCover(g, pics[0], aw, ah);
+      } else {
+        // the shift is clock-driven, so the photograph on two phones matches
+        const slot = Math.floor(ts / SHIFT_MS);
+        const into = ts % SHIFT_MS;
+        const cur = pics[slot % pics.length];
+        const nxt = pics[(slot + 1) % pics.length];
+        drawCover(g, cur, aw, ah);
+        if (into > SHIFT_MS - FADE_MS) {
+          g.globalAlpha = (into - (SHIFT_MS - FADE_MS)) / FADE_MS;
+          drawCover(g, nxt, aw, ah);
+          g.globalAlpha = 1;
+        }
+      }
+
+      g.globalAlpha = pulseAt(ts) * (calm ? 0.3 : 0.46);
       g.fillStyle = green;
       g.fillRect(0, 0, aw, ah);
       g.globalAlpha = 1;
