@@ -7,6 +7,9 @@ Drop real photographs in this folder as `.jpg`, then list their filenames in
 const PHOTOS = ["bird.jpg", "fjord.jpg", "coast.jpg"];
 ```
 
+Currently in the list: `bird.jpg`. One photograph shows without shifting —
+the panel needs at least two before it starts cycling.
+
 The first name in the list is the one an inspector sees first.
 
 - The app shifts to the next photo every 15 seconds (`SHIFT_MS`) with a

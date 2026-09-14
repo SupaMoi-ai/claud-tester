@@ -1399,7 +1399,7 @@
      Add photographs by dropping .jpg files into photos/ and listing their
      names here. The first one is the one an inspector sees first. With the
      list empty the app paints its own landscape so it still works. */
-  const PHOTOS = [];
+  const PHOTOS = ["bird.jpg"];
   const PHOTO_DIR = "photos/";
   const SHIFT_MS = 15000;   // how long each photograph stays up
   const FADE_MS = 900;      // cross-fade between them

@@ -58,6 +58,9 @@ the first in the list is the one an inspector sees first. See
 `billett/photos/README.md`. Until that folder has photographs in it, the app
 paints its own landscape so nothing breaks.
 
+The set currently holds one photograph, `bird.jpg`. Add a second and the panel
+starts shifting between them.
+
 Language switches between English and Norwegian in More → Language.
 
 ## Stage controls
