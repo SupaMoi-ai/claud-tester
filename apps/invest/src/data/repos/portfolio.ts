@@ -10,6 +10,7 @@ import type {
   TxnType,
 } from '@/domain/types'
 import type { FxRecord, PriceRecord } from '@/domain/valuation/pricebook'
+import * as Q from './queries'
 
 /**
  * Reads the raw material the domain engine needs.
@@ -30,7 +31,7 @@ export type AccountRow = {
 }
 
 export async function listAccounts(sql: TransactionSql): Promise<AccountRow[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       id: string
       name: string
@@ -39,12 +40,7 @@ export async function listAccounts(sql: TransactionSql): Promise<AccountRow[]> {
       currency: string
       tax_wrapper: string
     }>
-  >`
-    select id, name, kind::text, provider, currency, tax_wrapper::text
-    from accounts
-    where is_active
-    order by name
-  `
+  >(Q.LIST_ACCOUNTS)
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -56,7 +52,7 @@ export async function listAccounts(sql: TransactionSql): Promise<AccountRow[]> {
 }
 
 export async function listInstruments(sql: TransactionSql): Promise<Instrument[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       id: string
       kind: string
@@ -66,12 +62,7 @@ export async function listInstruments(sql: TransactionSql): Promise<Instrument[]
       mic: string | null
       isin: string | null
     }>
-  >`
-    select id, kind::text, symbol, name, currency, mic, isin
-    from instruments
-    where is_active
-    order by symbol
-  `
+  >(Q.LIST_INSTRUMENTS)
   return rows.map((r) => ({
     id: r.id,
     kind: r.kind as InstrumentKind,
@@ -92,7 +83,7 @@ export async function listTransactions(
   sql: TransactionSql,
   opts?: { instrumentId?: string },
 ): Promise<TransactionRow[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       id: string
       account_id: string
@@ -108,16 +99,10 @@ export async function listTransactions(
       reverses_transaction_id: string | null
       note: string | null
     }>
-  >`
-    select id, account_id, instrument_id, type::text, trade_date::text,
-           quantity::text, price::text, fee::text, currency,
-           fx_rate_to_nok::text, cost_basis_confidence::text,
-           reverses_transaction_id, note
-    from transactions
-    where instrument_id is not null
-      ${opts?.instrumentId ? sql`and instrument_id = ${opts.instrumentId}` : sql``}
-    order by trade_date desc, created_at desc
-  `
+  >(
+    opts?.instrumentId ? Q.LIST_TRANSACTIONS_FOR_INSTRUMENT : Q.LIST_TRANSACTIONS,
+    opts?.instrumentId ? [opts.instrumentId] : [],
+  )
 
   return rows.map((r) => ({
     id: r.id,
@@ -138,7 +123,7 @@ export async function listTransactions(
 }
 
 export async function listCorporateActions(sql: TransactionSql): Promise<CorporateAction[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       id: string
       instrument_id: string
@@ -147,13 +132,7 @@ export async function listCorporateActions(sql: TransactionSql): Promise<Corpora
       ratio_num: string | null
       ratio_den: string | null
     }>
-  >`
-    select id, instrument_id, type::text, ex_date::text,
-           ratio_num::text, ratio_den::text
-    from corporate_actions
-    where ratio_num is not null
-    order by ex_date
-  `
+  >(Q.LIST_CORPORATE_ACTIONS)
   return rows.map((r) => ({
     id: r.id,
     instrumentId: r.instrument_id,
@@ -172,7 +151,7 @@ export async function listCorporateActions(sql: TransactionSql): Promise<Corpora
  * fetched wins.
  */
 export async function listPrices(sql: TransactionSql, asOf: string): Promise<PriceRecord[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       instrument_id: string
       as_of: string
@@ -180,13 +159,7 @@ export async function listPrices(sql: TransactionSql, asOf: string): Promise<Pri
       currency: string
       source: string
     }>
-  >`
-    select distinct on (instrument_id, as_of)
-           instrument_id, as_of::text, close::text, currency, source
-    from prices
-    where as_of <= ${asOf}::date
-    order by instrument_id, as_of, fetched_at desc
-  `
+  >(Q.LIST_PRICES, [asOf])
   return rows.map((r) => ({
     instrumentId: r.instrument_id,
     asOf: r.as_of,
@@ -197,15 +170,9 @@ export async function listPrices(sql: TransactionSql, asOf: string): Promise<Pri
 }
 
 export async function listFxRates(sql: TransactionSql, asOf: string): Promise<FxRecord[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{ base: string; quote: string; as_of: string; rate: string; source: string }>
-  >`
-    select distinct on (base, quote, as_of)
-           base, quote, as_of::text, rate::text, source
-    from fx_rates
-    where as_of <= ${asOf}::date
-    order by base, quote, as_of, fetched_at desc
-  `
+  >(Q.LIST_FX_RATES, [asOf])
   return rows.map((r) => ({
     base: r.base,
     quote: r.quote,
@@ -216,14 +183,9 @@ export async function listFxRates(sql: TransactionSql, asOf: string): Promise<Fx
 }
 
 export async function listExposures(sql: TransactionSql): Promise<Exposure[]> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{ instrument_id: string; dimension: string; tag: string; weight: string }>
-  >`
-    select distinct on (instrument_id, dimension, tag)
-           instrument_id, dimension::text, tag, weight::text
-    from instrument_exposures
-    order by instrument_id, dimension, tag, as_of desc
-  `
+  >(Q.LIST_EXPOSURES)
   return rows.map((r) => ({
     instrumentId: r.instrument_id,
     dimension: r.dimension as ExposureDimension,

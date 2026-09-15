@@ -1,6 +1,7 @@
 import 'server-only'
 import type { TransactionSql } from 'postgres'
 import { type Decimal, dec } from '@/domain/money'
+import * as Q from './queries'
 
 export type ThesisConditionKind =
   | 'PRICE_LEVEL'
@@ -39,7 +40,7 @@ export type Thesis = {
 }
 
 export async function getThesis(sql: TransactionSql, instrumentId: string): Promise<Thesis | null> {
-  const rows = await sql<
+  const rows = await sql.unsafe<
     Array<{
       id: string
       instrument_id: string | null
@@ -54,20 +55,12 @@ export async function getThesis(sql: TransactionSql, instrumentId: string): Prom
       conviction: number | null
       created_at: string
     }>
-  >`
-    select t.id, t.instrument_id, t.title, t.status::text, v.version,
-           v.why_i_own_it, v.what_i_expect, v.main_risks, v.horizon_months,
-           v.what_would_change_my_mind, v.conviction, v.created_at::text
-    from theses t
-    join thesis_versions v on v.thesis_id = t.id and v.version = t.current_version
-    where t.instrument_id = ${instrumentId}
-    limit 1
-  `
+  >(Q.GET_THESIS, [instrumentId])
 
   const row = rows[0]
   if (!row) return null
 
-  const conditionRows = await sql<
+  const conditionRows = await sql.unsafe<
     Array<{
       id: string
       kind: string
@@ -79,13 +72,7 @@ export async function getThesis(sql: TransactionSql, instrumentId: string): Prom
       status: string
       last_observed: string | null
     }>
-  >`
-    select id, kind::text, subject, operator, threshold::text, unit, note,
-           status::text, last_observed::text
-    from thesis_conditions
-    where thesis_id = ${row.id} and version = ${row.version}
-    order by id
-  `
+  >(Q.GET_THESIS_CONDITIONS, [row.id, row.version])
 
   return {
     id: row.id,
