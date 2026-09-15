@@ -18,7 +18,9 @@ export default defineConfig({
       // The calculation core is where the financial risk lives. Everything
       // else is deliberately ungated -- chasing coverage on UI is wasted time.
       include: ['src/domain/**/*.ts'],
-      exclude: ['src/domain/**/*.test.ts', 'src/domain/**/index.ts'],
+      // Only test files and pure type declarations are exempt. There are no
+      // barrel files in src/domain precisely so nothing can hide behind one.
+      exclude: ['src/domain/**/*.test.ts', 'src/domain/**/types.ts'],
       thresholds: {
         lines: 100,
         functions: 100,
