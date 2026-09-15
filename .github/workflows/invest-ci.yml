@@ -1,0 +1,52 @@
+name: invest CI
+
+# Scoped to apps/invest/** so it never interferes with the weekly ukeplan cron.
+# weekly-plan.yml has no `push:` trigger at all, so nothing here can invoke it.
+on:
+  push:
+    paths:
+      - 'apps/invest/**'
+      - '.github/workflows/invest-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/invest/**'
+      - '.github/workflows/invest-ci.yml'
+
+concurrency:
+  group: invest-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: apps/invest
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/invest/package-lock.json
+
+      - run: npm ci
+
+      - name: Lint and format
+        run: npm run check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Includes the pglite suite, which executes the real migrations against
+      # Postgres compiled to WASM, and enforces 100% line coverage on src/domain.
+      - name: Test
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build

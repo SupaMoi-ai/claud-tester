@@ -1,0 +1,84 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "**",
+      "!.next",
+      "!node_modules",
+      "!coverage",
+      "!next-env.d.ts",
+      "!tsconfig.json",
+      "!**/*.css"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "all"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "suspicious": {
+        "noExplicitAny": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**", "!src/app/api/cron/**", "!src/data/db.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@/data/db": {
+                    "importNames": ["adminDb"],
+                    "message": "adminDb() bypasses row-level security. Use withUser() instead. Only src/app/api/cron/ may import it."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/domain/**", "!src/domain/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "next": { "message": "src/domain must stay pure: no framework imports." },
+                  "postgres": { "message": "src/domain must stay pure: no I/O." },
+                  "server-only": {
+                    "message": "src/domain must stay pure and testable in isolation."
+                  },
+                  "@/data/db": {
+                    "message": "src/domain must stay pure: take a PriceBook/FxBook argument instead."
+                  },
+                  "@/lib/env": { "message": "src/domain must stay pure: no environment access." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

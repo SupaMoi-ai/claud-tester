@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+next-env.d.ts
+*.tsbuildinfo
+
+# Secrets never enter this repo. The repo is public (GitHub Pages).
+.env
+.env.*
+!.env.example
+.vercel
+.DS_Store

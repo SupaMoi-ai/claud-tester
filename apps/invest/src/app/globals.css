@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+/*
+ * Light-mode-first Scandinavian palette. Near-monochrome with a single accent;
+ * direction colours (up/down) are deliberately muted -- this is not a trading
+ * terminal and a 0.9% move on an 89 kr position should not shout.
+ *
+ * Dark mode is a later variable swap: every colour is defined once, here.
+ */
+@theme {
+  --color-canvas: oklch(0.985 0.002 250);
+  --color-surface: oklch(1 0 0);
+  --color-surface-sunken: oklch(0.968 0.003 250);
+
+  --color-ink: oklch(0.21 0.012 260);
+  --color-ink-muted: oklch(0.52 0.011 260);
+  --color-ink-faint: oklch(0.66 0.009 260);
+
+  --color-line: oklch(0.915 0.004 260);
+  --color-line-strong: oklch(0.85 0.006 260);
+
+  --color-accent: oklch(0.52 0.108 240);
+  --color-accent-soft: oklch(0.955 0.021 240);
+
+  --color-up: oklch(0.52 0.088 158);
+  --color-down: oklch(0.55 0.125 25);
+  --color-warn: oklch(0.72 0.125 75);
+  --color-warn-soft: oklch(0.968 0.032 85);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-numeric: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Deliberate type scale. Numbers get their own large sizes. */
+  --text-hero: 2.75rem;
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.03em;
+  --text-figure: 1.5rem;
+  --text-figure--line-height: 1.15;
+  --text-figure--letter-spacing: -0.02em;
+
+  --radius-card: 0.875rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Bottom tab bar + iOS home indicator */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/*
+ * Every number in this app is tabular. Columns of krone amounts that jitter as
+ * digits change are the fastest way to make a finance UI feel cheap.
+ */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'cv01' 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
