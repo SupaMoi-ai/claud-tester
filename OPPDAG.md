@@ -80,8 +80,8 @@ oppdag/src/
 
 ### The learning model
 
-`Concept` is a node in a prerequisite graph (31 seeded across matematikk, norsk
-and naturfag). `ChildMastery` tracks confidence 0–1 per concept, and
+`Concept` is a node in a prerequisite graph — 32 seeded (12 matematikk,
+9 norsk, 11 naturfag), 26 of them building on something earlier. `ChildMastery` tracks confidence 0–1 per concept, and
 `masteryEngine.ts` folds each answer in: a clean first-try answer is worth far
 more than one pulled out with a guided solution, harder variants count for more,
 and confidence decays slowly if a concept is never revisited.
