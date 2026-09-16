@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#FDF8F0"/>
+  <!-- island -->
+  <path d="M96 344 C 72 300 112 252 168 244 C 196 196 288 182 330 216 C 392 220 424 270 396 312 C 412 352 356 386 300 374 C 244 400 140 396 96 344 Z" fill="#E9F3DC"/>
+  <!-- aurora -->
+  <path d="M74 150 C 150 108 250 176 330 128 C 386 94 430 132 462 112" stroke="#84CFA6" stroke-width="26" stroke-linecap="round" fill="none" opacity="0.55"/>
+  <path d="M74 190 C 154 146 254 214 334 166 C 390 132 434 170 462 152" stroke="#8CCDEE" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <!-- Lumi, simplified: ears, head, snout -->
+  <path d="M188 214 L182 160 L226 194 Z" fill="#FDF9F3"/>
+  <path d="M324 214 L330 160 L286 194 Z" fill="#FDF9F3"/>
+  <path d="M182 232 C 182 186 330 186 330 232 C 330 280 306 306 256 306 C 206 306 182 280 182 232 Z" fill="#FDF9F3"/>
+  <ellipse cx="256" cy="272" rx="30" ry="22" fill="#FFFFFF"/>
+  <ellipse cx="256" cy="260" rx="10" ry="8" fill="#3A2E28"/>
+  <ellipse cx="220" cy="230" rx="9" ry="11" fill="#3A2E28"/>
+  <ellipse cx="292" cy="230" rx="9" ry="11" fill="#3A2E28"/>
+  <ellipse cx="200" cy="254" rx="14" ry="9" fill="#F7CFC2" opacity="0.7"/>
+  <ellipse cx="312" cy="254" rx="14" ry="9" fill="#F7CFC2" opacity="0.7"/>
+</svg>

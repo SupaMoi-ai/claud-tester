@@ -1,0 +1,19 @@
+{
+  "name": "OPPDAG — et helt univers å lære i",
+  "short_name": "OPPDAG",
+  "description": "En norsk læringsverden for nysgjerrige barn. Alt barnet lærer får verdenen deres til å vokse.",
+  "lang": "nb",
+  "dir": "ltr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FDF8F0",
+  "theme_color": "#FDF8F0",
+  "categories": ["education", "kids"],
+  "icons": [
+    { "src": "ikon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "ikon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
