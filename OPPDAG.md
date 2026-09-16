@@ -9,8 +9,22 @@ There is no subject menu, no XP counter and no streak. The reward for learning
 is that the child's own island visibly grows: they work out how far is left to
 walk, and a bridge appears over the river.
 
-**Play it:** <https://supamoi-ai.github.io/claud-tester/spill/>
-*(served from the committed build in `spill/`; see "Deploying" below)*
+**Play it locally right now** — the build in `spill/` is committed, so it needs
+no toolchain:
+
+```bash
+# from the repo root; the /claud-tester/ prefix matches the Pages base path
+mkdir -p /tmp/oppdag/claud-tester && cp -r spill /tmp/oppdag/claud-tester/
+cd /tmp/oppdag && python3 -m http.server 8099
+# → http://localhost:8099/claud-tester/spill/
+```
+
+Once this branch is merged into the default branch **and** GitHub Pages is
+enabled for the repository, the same build is served at
+`https://supamoi-ai.github.io/claud-tester/spill/`. Pages serves the default
+branch, so the URL will 404 until then — and this sandbox cannot reach
+`github.io` to confirm Pages is switched on, so treat that link as "once
+merged", not as live.
 
 ---
 
