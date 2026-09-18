@@ -99,6 +99,9 @@ export const nb = {
       'Radioen nede i havna har knitret hele morgenen. Vil du høre hva det er?',
     lumiCaughtUp: (name: string) =>
       `Vi klarte det, ${name}! Jeg har samlet noen nye rare spørsmål til deg.`,
+    /** When a character is tapped in the world. */
+    guideAside: 'Hei! Skal vi finne på noe?',
+    companionAside: 'Kiki maler og legger seg ned i gresset.',
     lockedHint: 'Her har jeg ikke vært ennå …',
     locked: 'Kommer snart',
     profileLabel: 'Meg',

@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Screen } from '../design/Screen';
 import { PrimaryButton } from '../design/PrimaryButton';
 import { SoftCard } from '../design/SoftCard';
 import { Character } from '../characters/Character';
-import { WorldMap } from '../world/WorldMap';
+import { WorldCanvas } from '../world/engine/WorldCanvas';
+import { buildLaereoyaScene } from '../world/scenes/laereoya.scene';
 import { UnlockModal } from '../adventure/UnlockModal';
-import { LOCATIONS, type WorldLocation } from '../world/worldLayout';
+import { LOCATIONS, LOCATIONS_BY_ID, type WorldLocation } from '../world/worldLayout';
 import { adventuresAt, ADVENTURES } from '../data/adventures';
 import { useActions, useGame } from '../state/store';
 import { useCopy } from '../i18n';
@@ -26,12 +27,21 @@ export function Home() {
   const { profile, unlocked, pendingUnlocks, adventures } = useGame();
   const actions = useActions();
   const [peek, setPeek] = useState<WorldLocation | null>(null);
+  /** A one-line reaction when a character is tapped. */
+  const [aside, setAside] = useState<string | null>(null);
 
   /** The one adventure Lumi is nudging towards right now. */
   const suggestion =
     ADVENTURES.find((a) => !adventures[a.id]?.completedAt) ?? null;
 
   const activeLocations = suggestion ? [suggestion.locationId] : [];
+
+  /** The scene as this child currently sees it. Rebuilt only when it changes. */
+  const scene = useMemo(
+    () => buildLaereoyaScene(unlocked, activeLocations),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [unlocked.join('|'), activeLocations.join('|')],
+  );
 
   const openLocation = (location: WorldLocation) => {
     const here = adventuresAt(location.id);
@@ -42,6 +52,25 @@ export function Home() {
     }
     setPeek(location);
     window.setTimeout(() => setPeek(null), 3400);
+  };
+
+  /**
+   * The world reports an id and nothing else. Deciding what that id *means*
+   * stays here, in React, next to the game state — the renderer never knows
+   * what an adventure is.
+   */
+  const handleTap = (id: string) => {
+    if (id.startsWith('character:')) {
+      setAside(
+        id === 'character:companion'
+          ? copy.world.companionAside
+          : copy.world.guideAside,
+      );
+      window.setTimeout(() => setAside(null), 3000);
+      return;
+    }
+    const location = LOCATIONS_BY_ID[id as keyof typeof LOCATIONS_BY_ID];
+    if (location) openLocation(location);
   };
 
   const openCount = LOCATIONS.filter((l) => unlocked.includes(l.id)).length;
@@ -85,14 +114,26 @@ export function Home() {
       </div>
 
       {/* ---- the island ---------------------------------------------- */}
-      <div className="soft-scroll relative mt-4 flex min-h-0 flex-1 items-center justify-center overflow-auto">
-        <WorldMap
-          unlocked={unlocked}
-          active={activeLocations}
-          onSelect={openLocation}
-        />
+      <div className="relative mt-4 min-h-0 flex-1 overflow-hidden rounded-xl">
+        <WorldCanvas scene={scene} onTap={handleTap} />
 
-        {/* Lumi's aside when a closed place is tapped */}
+        {/* Lumi's aside when a character is tapped */}
+        <AnimatePresence>
+          {aside && (
+            <motion.div
+              initial={{ opacity: 0, y: 14, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.97 }}
+              className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-full max-w-md px-4"
+            >
+              <div className="rounded-lg bg-snow/95 px-5 py-4 text-center shadow-lifted">
+                <p className="font-display text-body font-semibold text-ink">{aside}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* …and when a closed place is tapped */}
         <AnimatePresence>
           {peek && (
             <motion.div
