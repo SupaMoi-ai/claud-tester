@@ -1,15 +1,17 @@
-import { Brain, Sun } from 'lucide-react';
+import { Brain, ChartNoAxesColumn, CircleUser, Sun } from 'lucide-react';
 import { copy } from '../copy';
 import type { TabId } from '../domain/types';
 import { cn } from '../lib/cn';
 
 /**
- * Two tabs in Milestone 1. Calendar, Patterns and Me arrive with the screens
- * they lead to — a tab never points at something that is not built.
+ * Calendar arrives with the screen it leads to — a tab never points at
+ * something that is not built.
  */
 const TABS: Array<{ id: TabId; label: string; Icon: typeof Sun }> = [
   { id: 'today', label: copy.tabs.today, Icon: Sun },
   { id: 'brain', label: copy.tabs.brain, Icon: Brain },
+  { id: 'patterns', label: copy.tabs.patterns, Icon: ChartNoAxesColumn },
+  { id: 'me', label: copy.tabs.me, Icon: CircleUser },
 ];
 
 export function TabBar({
@@ -22,7 +24,7 @@ export function TabBar({
   return (
     <nav
       aria-label="Main"
-      className="safe-bottom z-30 shrink-0 border-t border-line bg-surface/95 px-6 pt-1 backdrop-blur"
+      className="safe-bottom z-30 shrink-0 border-t border-line bg-surface/95 px-2 pt-1 backdrop-blur"
     >
       <ul className="flex items-stretch justify-around">
         {TABS.map(({ id, label, Icon }) => {

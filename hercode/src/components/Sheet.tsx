@@ -41,6 +41,10 @@ export function Sheet({
       <Drawer.Portal container={container}>
         <Drawer.Overlay className="absolute inset-0 z-40 bg-ink/25" />
         <Drawer.Content
+          // Without a subtitle there is no description to point at, and
+          // repeating the title as one tells a screen reader nothing. The key
+          // is only present in that case, so it overrides the default wiring.
+          {...(subtitle ? {} : { 'aria-describedby': undefined })}
           className={cn(
             'absolute inset-x-0 bottom-0 z-50 flex flex-col rounded-t-[28px] bg-surface shadow-lift outline-none',
             full ? 'top-0 rounded-t-none' : 'max-h-[88%]',
@@ -67,9 +71,7 @@ export function Sheet({
                 <Drawer.Description className="mt-1 text-[14px] text-muted">
                   {subtitle}
                 </Drawer.Description>
-              ) : (
-                <Drawer.Description className="sr-only">{title}</Drawer.Description>
-              )}
+              ) : null}
             </div>
             {dismissible ? (
               <button

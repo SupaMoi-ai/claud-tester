@@ -234,3 +234,6 @@ export interface Profile {
 }
 
 export type TabId = 'today' | 'brain' | 'calendar' | 'patterns' | 'me';
+
+/** The stack inside the Me tab. */
+export type MeRoute = 'root' | 'partner' | 'brocode' | 'decisions' | 'privacy';

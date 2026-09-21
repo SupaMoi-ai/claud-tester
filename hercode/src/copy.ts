@@ -44,6 +44,8 @@ export const copy = {
   tabs: {
     today: 'Today',
     brain: 'Brain',
+    patterns: 'Patterns',
+    me: 'Me',
   },
 
   onboarding: {
@@ -214,5 +216,180 @@ export const copy = {
     keepSteps: 'Keep these steps',
     askSomethingElse: 'Ask something else',
     noTasks: 'Nothing is waiting on you right now.',
+  },
+
+  patterns: {
+    title: 'Patterns',
+    intro: 'Based on your check-ins and what you have finished.',
+    noticed: 'HerCode noticed a possible pattern.',
+    why: 'Why am I seeing this?',
+    hideWhy: 'Hide the data',
+    sampleSize: (n: number) => `Drawn from ${n} entries`,
+    notEnoughTitle: 'Not enough data yet',
+    notEnoughBody: 'A few more days of check-ins and this one can appear.',
+
+    cycleOffTitle: 'Your cycle is not part of this',
+    cycleOffBody:
+      'Cycle data is one signal among sleep, stress, mood, workload and energy. You can include it whenever you want to, and turn it off again.',
+    cycleOffCta: 'Include my cycle',
+
+    /** Sentences are templates so the numbers come from real events. */
+    text: {
+      callsBeforeNoon: 'You tend to complete phone calls more often before 12:00.',
+      capacityAfterSocial: (low: number, total: number) =>
+        `You reported low capacity on ${low} of the last ${total} days after two consecutive social evenings.`,
+      energyAroundCycle:
+        'Your average energy has been higher around this part of your cycle during your last three cycles.',
+      energyAroundCycleLevel:
+        'Your average energy around this part of your cycle has been about the same as at other times.',
+      steppedHousehold:
+        'You usually finish household tasks more consistently when they are broken into steps under 10 minutes.',
+    },
+
+    evidence: {
+      before12: 'Finished before 12:00',
+      after12: 'Finished after 12:00',
+      ofCompleted: (n: number, total: number) => `${n} of ${total}`,
+      recentCall: 'Recent call',
+      dayAfterTwo: 'Day after two social evenings',
+      lowCapacity: 'Low capacity',
+      normalOrBetter: 'Normal or better',
+      cycleDays: (from: number, to: number) => `Cycle days ${from}-${to}`,
+      averageEnergy: (value: string) => `${value} of 5`,
+      thisPartOfCycle: 'Where you are now',
+      aroundNow: (from: number, to: number) => `Around cycle day ${from}-${to}`,
+      otherDays: 'Other days in your cycle',
+      entries: (n: number) => `${n} check-ins`,
+      withSmallSteps: 'Broken into small steps',
+      withoutSmallSteps: 'Not broken into steps',
+      finishedRate: (done: number, total: number) => `${done} of ${total} finished`,
+    },
+
+    chart: {
+      calls: 'calls',
+      energy: 'average energy',
+      household: 'finished',
+      days: 'days',
+    },
+  },
+
+  me: {
+    title: 'Me',
+    partner: 'Partner & BroCode',
+    partnerHint: 'Choose what your partner can see.',
+    decisions: 'Decision load',
+    decisionsHint: 'Who decides what, so you are not asked every time.',
+    privacy: 'Privacy overview',
+    privacyHint: 'Everything is private until you share it.',
+    reset: 'Reset demo data',
+    resetHint: 'Puts Mia back the way she started.',
+    resetConfirmTitle: 'Reset the demo?',
+    resetConfirmBody:
+      'This clears everything you changed in this session and loads the original demo data again.',
+    resetConfirm: 'Reset',
+  },
+
+  partner: {
+    title: 'Partner & BroCode',
+    connected: (name: string) => `Connected to ${name}`,
+    notConnected: 'No partner connected',
+    connectCta: 'Connect Jonas',
+    disconnectCta: 'Disconnect',
+
+    sharingTitle: 'What can be shared',
+    sharingHint: 'Off by default. Turn on only what you want your partner to see.',
+    categories: {
+      appointment: 'Appointments',
+      household: 'Household jobs',
+      shopping: 'Shopping',
+      family: 'Family tasks',
+    },
+
+    signalTitle: "Today's signal",
+    signalHint: 'A simple state your partner can see. It clears at the end of the day.',
+    signalNone: 'No signal',
+
+    cycleTitle: 'Exact cycle detail',
+    cycleHint: 'Off. Your cycle stays private unless you turn this on.',
+    cycleOn: 'On. Your partner can see which cycle day you are on.',
+    cycleConfirmTitle: 'Share your exact cycle day?',
+    cycleConfirmBody:
+      'Your partner will see which day of your cycle you are on. Symptoms, mood and notes stay private either way. You can turn this off again at any time.',
+    cycleConfirmYes: 'Yes, share the cycle day',
+
+    previewTitle: 'This is what your partner can currently see',
+    openBroCode: 'Open BroCode preview',
+  },
+
+  brocode: {
+    name: 'BroCode',
+    tagline: (name: string) => `${name}'s companion app`,
+    sharedTitle: (name: string) => `${name} has shared`,
+    nothingShared: (name: string) => `${name} has not shared anything today.`,
+    nothingSharedHint: 'That is the default. Nothing reaches you unless she chooses it.',
+    takeOverTitle: 'Things you can take over',
+    takeOverEmpty: 'Nothing is shared with you right now.',
+    helpfulTitle: 'Helpful today',
+    decisionsTitle: 'Who decides what',
+    cycleDay: (day: number) => `Cycle day ${day}`,
+    manageSharing: 'Manage sharing',
+
+    helpful: {
+      default: 'Try solving one practical thing without asking her to manage the process.',
+      'low-capacity':
+        'Try solving one practical thing without asking her to manage the process.',
+      'need-quiet': 'Keep this evening low-key. A quiet room does more than a conversation.',
+      'could-use-affection': 'Sit next to her for a while. Nothing needs solving.',
+      'mentally-overloaded': 'Take one decision off her list and tell her it is handled.',
+      'feeling-social': 'A good evening to suggest doing something together.',
+      'need-practical-help': 'Pick one job below and do it without checking in first.',
+      'want-to-talk': 'Make some space to listen this evening.',
+    },
+  },
+
+  signals: {
+    'low-capacity': 'Low capacity',
+    'need-quiet': 'Need quiet',
+    'could-use-affection': 'Could use affection',
+    'mentally-overloaded': 'Mentally overloaded',
+    'feeling-social': 'Feeling social',
+    'need-practical-help': 'Need practical help',
+    'want-to-talk': 'Want to talk',
+  },
+
+  decisions: {
+    title: 'Decision load',
+    hint: 'Set this once, so the same question stops coming back.',
+    rules: {
+      'partner-decides': 'Partner can decide',
+      'partner-handles': 'Partner can handle',
+      'partner-takes-over': 'Partner can take over',
+      'ask-me-first': 'Ask me first',
+      'always-ask': 'Always ask',
+    },
+    takeOver: {
+      'partner-decides': (topic: string) => `Decide ${topic.toLowerCase()}`,
+      'partner-handles': (topic: string) => `Handle ${topic.toLowerCase()}`,
+      'partner-takes-over': (topic: string) => `Take over ${topic.toLowerCase()}`,
+    },
+    fromRule: 'Your decision-load setting',
+    fromTask: 'Shared with your partner',
+  },
+
+  privacy: {
+    title: 'Privacy overview',
+    intro: 'Everything is private by default. You choose what leaves this app.',
+    privateTitle: 'Private',
+    privateBody:
+      'Notes, exact symptoms, mood logs, cycle details and anything in your Brain. Never shared.',
+    sharedTitle: 'Shared',
+    sharedBody:
+      'Appointments, household jobs, shopping and family tasks, one category at a time, only when you turn them on.',
+    signalTitle: 'Partner signal',
+    signalBody:
+      'A single simplified state you pick yourself. It clears at the end of the day.',
+    liveTitle: 'Live right now',
+    nothingLive: 'Nothing is being shared.',
+    manage: 'Manage sharing',
   },
 } as const;

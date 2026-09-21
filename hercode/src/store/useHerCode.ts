@@ -11,7 +11,9 @@ import type {
   DecisionRuleValue,
   HistoryEvent,
   HistoryEventType,
+  CycleConsent,
   ISODate,
+  MeRoute,
   NotificationLevel,
   PartnerSignal,
   Profile,
@@ -43,6 +45,8 @@ export interface AppState {
 
 export interface UiState {
   activeTab: TabId;
+  /** Where she is inside the Me tab. */
+  meRoute: MeRoute;
   /** The day the check-in sheet has already been offered for. */
   checkInSeenFor: ISODate | null;
 }
@@ -78,6 +82,9 @@ export interface Actions {
   setNotificationLevel: (level: NotificationLevel) => void;
 
   setActiveTab: (tab: TabId) => void;
+  setMeRoute: (route: MeRoute) => void;
+  setPartnerConnected: (connected: boolean) => void;
+  setCycleConsent: (consent: CycleConsent) => void;
   resetDemoData: () => void;
 }
 
@@ -103,7 +110,11 @@ function freshState(): AppState {
   };
 }
 
-const freshUi = (): UiState => ({ activeTab: 'today', checkInSeenFor: null });
+const freshUi = (): UiState => ({
+  activeTab: 'today',
+  meRoute: 'root',
+  checkInSeenFor: null,
+});
 
 let localEventCounter = 0;
 
@@ -279,7 +290,19 @@ export const useHerCode = create<Store>()(
 
       setNotificationLevel: (level) => set({ notifications: { level } }),
 
-      setActiveTab: (tab) => set((s) => ({ ui: { ...s.ui, activeTab: tab } })),
+      setActiveTab: (tab) =>
+        // Leaving the Me tab drops you back at its root next time.
+        set((s) => ({
+          ui: { ...s.ui, activeTab: tab, meRoute: tab === 'me' ? s.ui.meRoute : 'root' },
+        })),
+
+      setMeRoute: (route) => set((s) => ({ ui: { ...s.ui, meRoute: route } })),
+
+      setPartnerConnected: (connected) =>
+        set((s) => ({ profile: { ...s.profile, partnerConnected: connected } })),
+
+      setCycleConsent: (consent) =>
+        set((s) => ({ profile: { ...s.profile, cycleConsent: consent } })),
 
       resetDemoData: () => set({ ...freshState(), ui: freshUi() }),
     }),

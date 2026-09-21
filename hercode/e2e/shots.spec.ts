@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 /**
- * Walks the Milestone 1 demo path and saves a PNG at each stop.
+ * Walks the demo path and saves a PNG at each stop.
  * These are screenshots for looking at, not visual assertions.
  */
 
@@ -14,7 +14,7 @@ async function shot(page: Page, name: string): Promise<void> {
 
 test.describe.configure({ mode: 'serial' });
 
-test('walks every Milestone 1 screen', async ({ page }) => {
+test('walks every screen', async ({ page }) => {
   await page.goto('/');
 
   // 1. Onboarding, step 1.
@@ -116,8 +116,63 @@ test('walks every Milestone 1 screen', async ({ page }) => {
   await page.getByRole('button', { name: 'Looks right' }).click();
   await shot(page, '21-brain-sections');
 
-  // 10. State survives a reload.
+  // 10. Patterns, computed from the seeded history.
+  await page.getByRole('button', { name: 'Patterns', exact: true }).click();
+  await expect(page.getByText('HerCode noticed a possible pattern.').first()).toBeVisible();
+  await shot(page, '22-patterns');
+
+  await page.getByRole('button', { name: 'Why am I seeing this?' }).first().click();
+  await shot(page, '23-patterns-evidence');
+  await page.getByRole('button', { name: 'Hide the data' }).click();
+
+  await page.getByRole('button', { name: /Why am I seeing this/ }).nth(1).click();
+  await shot(page, '24-patterns-evidence-calls');
+
+  // 11. Me.
+  await page.getByRole('button', { name: 'Me', exact: true }).click();
+  await shot(page, '25-me');
+
+  // 12. BroCode before she has shared anything.
+  await page.getByRole('button', { name: /Partner & BroCode/ }).click();
+  await shot(page, '26-partner-setup');
+
+  await page.getByRole('button', { name: 'Open BroCode preview' }).click();
+  await expect(page.getByText('Mia has not shared anything today.')).toBeVisible();
+  await shot(page, '27-brocode-empty');
+
+  // 13. One toggle, and the preview fills in.
+  await page.getByRole('button', { name: 'Manage sharing' }).click();
+  await page.getByRole('switch', { name: /Household jobs/ }).click();
+  await page.getByRole('button', { name: /^Low capacity/ }).click();
+  await shot(page, '28-partner-shared');
+
+  await page.getByRole('button', { name: 'Open BroCode preview' }).click();
+  await expect(page.getByText('Things you can take over')).toBeVisible();
+  await shot(page, '29-brocode-shared');
+
+  // 14. The cycle toggle asks first.
+  await page.getByRole('button', { name: 'Manage sharing' }).click();
+  await page.getByRole('switch', { name: /Exact cycle detail/ }).click();
+  await expect(page.getByText('Share your exact cycle day?')).toBeVisible();
+  await shot(page, '30-cycle-confirm');
+  await page.getByRole('button', { name: 'Cancel' }).click();
+
+  // 15. Decision load.
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: /Decision load/ }).click();
+  await shot(page, '31-decision-load');
+  // Rows are collapsed to the rule she picked; open one and change it.
+  await page.getByRole('button', { name: /^Cleaning/ }).click();
+  await page.getByRole('button', { name: 'Ask me first', exact: true }).click();
+  await shot(page, '32-decision-load-edited');
+
+  // 16. Privacy overview.
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: /Privacy overview/ }).click();
+  await shot(page, '33-privacy-overview');
+
+  // 17. State survives a reload.
   await page.reload();
   await expect(page.getByRole('button', { name: 'Brain', exact: true })).toBeVisible();
-  await shot(page, '22-after-reload');
+  await shot(page, '34-after-reload');
 });

@@ -102,9 +102,13 @@ energyAroundCyclePhase(input: InsightInput): InsightResult
 steppedHouseholdCompletion(input: InsightInput): InsightResult
 buildInsights(input: InsightInput): InsightResult[]
 
-projectForPartner(state: Readonly<AppState>): PartnerProjection
-// the ONLY source for the BroCode preview; reads a strict allowlist of fields,
-// and privacy.test.ts asserts no private / cycle / health / mood / note value leaks
+projectForPartner(state: Readonly<PartnerReadableState>, today: ISODate): PartnerProjection
+// The ONLY source for the BroCode preview. PartnerReadableState IS the allowlist:
+// the function cannot read check-ins, reviews, moods, notes or Brain items because
+// they are not in the shape it accepts. AppState satisfies it structurally, so
+// callers still just hand it the store. privacy.test.ts proves nothing leaks.
+// `today` is a parameter rather than a clock read, so the projection stays pure
+// and "a signal from yesterday is ignored" is testable.
 
 askAI(intent: AIIntent, context: AIContext): Promise<AIResponse>
 setAIDelay(ms: number): void          // tests set 0; app uses 600 + seeded * 300
@@ -112,19 +116,36 @@ setAIDelay(ms: number): void          // tests set 0; app uses 600 + seeded * 30
 
 ## Milestones
 
-**M1 Core loop** — app shell, design tokens, skippable onboarding, Today, morning
+**M1 Core loop — done.** app shell, design tokens, skippable onboarding, Today, morning
 check-in, "I'm overwhelmed" sheet, Brain capture, AI task breakdown, floating AI helper.
 Domain: `types`, `capacity`, `date`, `buildDayPlan`. Mock: seeded RNG, 90-day history,
 Mia's seed with "Call insurance" at `postponeCount: 3`. Tests: copy banned words,
 `buildDayPlan` across all four levels, seed determinism.
 
-**M2 Differentiators** — Patterns (four computed insights with "Why am I seeing this?"),
-Partner privacy setup with live preview, BroCode preview, Decision load. Adds
-`insights.ts`, `projectForPartner.ts`, `privacy.test.ts`, `insights.test.ts`, and the
-Calendar/Patterns/Me tabs.
+**M2 Differentiators — done.** Patterns (four computed insights with "Why am I
+seeing this?"), Partner privacy setup with a pinned live preview, BroCode preview,
+Decision load, Privacy overview. Added `insights.ts`, `projectForPartner.ts`,
+`MiniChart.tsx`, `Toggle.tsx`, `insights.test.ts`, `privacy.test.ts`, and the
+Patterns and Me tabs. 45 tests.
 
-**M3 Completeness** — Calendar agenda with "Plan around this", Cycle, Daily review,
-Notification settings, polish.
+Five things ended up different from the M2 sketch, and M3 should start from these:
+
+- `projectForPartner` takes `(state, today)`, as above.
+- The cycle insight compares a **±3-day window around today's cycle day** against
+  the rest of the cycle, not fixed 7-day blocks. Blocks split the planted 17-24
+  window across two of them, so the chart contradicted its own sentence. It says
+  "about the same" instead of "higher" when the window is not higher, so the copy
+  cannot overclaim.
+- `ChartSpec` has **no `line` variant**. Nothing produced one once the cycle chart
+  became a bar comparison. Reintroduce it if the M3 Cycle timeline needs it.
+- BroCode gates all content on `hasSharedToday`, so the default really is an empty
+  screen. Standing decision-load rules would otherwise be noise with nothing shared.
+- The floating AI helper appears on Today and Brain only. On Patterns it covered
+  the cards and its prompts were Today-shaped.
+
+**M3 Completeness — next.** Calendar agenda with "Plan around this", Cycle, Daily
+review, Notification settings, polish. The tab bar grows to its final five when
+Calendar lands; Cycle and Notifications join the Me list then.
 
 ## End-of-milestone checklist
 
