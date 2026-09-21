@@ -131,6 +131,34 @@ export class SceneRenderer {
     return path ? (this.textures.get(path) ?? null) : null;
   }
 
+  /**
+   * Warns when a dropped-in illustration has a different shape from the slot
+   * it is filling.
+   *
+   * Stretching art to fit is how a hand-painted world starts looking subtly
+   * wrong in a way nobody can name — so this reports the mismatch with the
+   * numbers needed to fix it, and the fix is normally to change the scene to
+   * suit the art rather than the other way round. Dev-only; the scene renders
+   * either way.
+   */
+  private checkFit(path: string | null, texture: Texture | null, w: number, h: number) {
+    if (!import.meta.env.DEV || !path || !texture) return;
+    const actual = texture.width / texture.height;
+    const expected = w / h;
+    if (!isFinite(actual) || !isFinite(expected)) return;
+    const drift = Math.abs(actual - expected) / expected;
+    if (drift > 0.02) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[oppdag] ${path} is ${texture.width}×${texture.height} ` +
+          `(aspect ${actual.toFixed(3)}) but the scene gives it ${w}×${h} ` +
+          `(aspect ${expected.toFixed(3)}). It will be stretched by ` +
+          `${Math.round(drift * 100)}%. Change the slot size in the scene ` +
+          `config to match the artwork.`,
+      );
+    }
+  }
+
   private placeholder(
     width: number,
     height: number,
@@ -168,6 +196,7 @@ export class SceneRenderer {
 
   private addLayer(layer: WorldLayer) {
     const texture = this.textureFor(layer.asset);
+    this.checkFit(layer.asset, texture, layer.size.width, layer.size.height);
     const wrapper = new Container();
     wrapper.label = layer.id;
 
@@ -228,6 +257,7 @@ export class SceneRenderer {
 
   private addInteractable(item: Interactable) {
     const texture = this.textureFor(item.asset);
+    this.checkFit(item.asset, texture, item.size.width, item.size.height);
     const wrapper = new Container();
     wrapper.label = item.id;
 

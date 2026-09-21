@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
-    "qa": "node scripts/qa.mjs"
+    "qa": "node scripts/qa.mjs",
+    "assets": "node scripts/assets.mjs",
+    "gate": "node scripts/gate.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fredoka": "^5.3.0",
