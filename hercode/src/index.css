@@ -1,0 +1,104 @@
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --hc-bg: #faf7f2;
+  --hc-surface: #ffffff;
+  --hc-ink: #2b2a28;
+  --hc-muted: #8a857d;
+  --hc-line: #ede7dd;
+  --hc-sage: #b9cbb8;
+  --hc-dusty: #b7c9d9;
+  --hc-sand: #e8dcc8;
+  --hc-apricot: #f0cdb6;
+  --hc-lavender: #cfc8e0;
+  --hc-radius-card: 24px;
+  --hc-motion: 200ms;
+  color-scheme: light;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--hc-bg);
+    color: var(--hc-ink);
+    font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Fraunces Variable', Fraunces, Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Every interactive element clears the 48px touch target. */
+  button,
+  [role='button'],
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--hc-dusty);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer utilities {
+  .tap {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
