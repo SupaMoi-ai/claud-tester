@@ -1,0 +1,2217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#e9e0cd" />
+<meta name="color-scheme" content="light" />
+<meta name="description" content="REDOUBT — a field archive of bunkers, tunnels, forts and underground works. Satellite hides them; relief reveals them." />
+<title>REDOUBT</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='8' fill='%23e9e0cd'/><path d='M12 44 L20 22 L44 22 L52 44 Z' fill='none' stroke='%238f3f2a' stroke-width='4'/><rect x='27' y='32' width='10' height='12' fill='%238f3f2a'/></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<style>
+  :root {
+    color-scheme: light only;
+    --paper:      #e9e0cd;
+    --paper-2:    #ded2b9;
+    --paper-3:    #cfc0a1;
+    --ink:        #26211a;
+    --ink-2:      #5f564a;
+    --ink-3:      #8b8072;
+    --oxide:      #8f3f2a;
+    --olive:      #4f5a3f;
+    --brass:      #a8823c;
+    --plum:       #6d4a55;
+    --slate:      #3f565c;
+    --clay:       #7a6a4a;
+    --redact:     #1d1913;
+    --line:       rgba(38,33,26,0.22);
+    --line-soft:  rgba(38,33,26,0.11);
+    --shadow:     0 2px 6px rgba(38,33,26,0.13), 0 10px 26px rgba(38,33,26,0.13);
+    --serif: 'Spectral', Georgia, 'Times New Roman', serif;
+    --mono:  'DM Mono', ui-monospace, 'Courier New', monospace;
+    --sans:  'DM Sans', system-ui, -apple-system, sans-serif;
+    --nav-h: 56px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    overscroll-behavior: none;
+  }
+  body { position: fixed; inset: 0; overflow: hidden; }
+
+  /* Paper grain, applied to UI chrome only — never over the map itself,
+     where it would read as tile noise and hide the relief we're looking for. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.40 0 0 0 0 0.32 0 0 0 0.42 0'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  }
+
+  /* ---------- typography primitives ---------- */
+  .label {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .serif { font-family: var(--serif); font-weight: 600; letter-spacing: 0.01em; }
+  .coord { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-2); }
+
+  /* A rubber-stamped box: slightly rotated, ragged double rule. */
+  .stamp {
+    display: inline-block;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border: 1.5px solid currentColor;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+    border-radius: 2px;
+    transform: rotate(-1.6deg);
+    opacity: 0.92;
+  }
+  .stamp.oxide { color: var(--oxide); }
+  .stamp.olive { color: var(--olive); }
+  .stamp.brass { color: var(--brass); }
+  .stamp.ink   { color: var(--ink-2); }
+
+  /* ---------- map ---------- */
+  #map { position: absolute; inset: 0; background: var(--paper-3); }
+  .maplibregl-ctrl-attrib {
+    font-family: var(--mono) !important;
+    font-size: 9px !important;
+    background: rgba(233,224,205,0.82) !important;
+    color: var(--ink-2) !important;
+  }
+  .maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
+  .maplibregl-ctrl-bottom-right { bottom: calc(var(--nav-h) + var(--safe-b)) !important; }
+  .maplibregl-ctrl-bottom-left  { display: none; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: calc(var(--safe-t) + 8px) 10px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(to bottom, rgba(233,224,205,0.97) 62%, rgba(233,224,205,0));
+    z-index: 20;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: 0.13em;
+    color: var(--ink);
+    padding-left: 2px;
+    flex: 0 0 auto;
+  }
+  .brand em { font-style: normal; color: var(--oxide); }
+  .search-wrap { flex: 1 1 auto; position: relative; min-width: 0; }
+  .search {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 9px 10px 9px 28px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: rgba(255,253,247,0.92);
+    color: var(--ink);
+  }
+  .search::placeholder { color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; }
+  .search:focus { outline: none; border-color: var(--oxide); }
+  .search-wrap svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); opacity: 0.45; }
+
+  .icon-btn {
+    flex: 0 0 auto;
+    width: 38px; height: 36px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: rgba(255,253,247,0.92);
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .icon-btn:active { background: var(--paper-2); }
+  .icon-btn.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .icon-btn .dot {
+    position: absolute; margin: -18px 0 0 18px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--oxide);
+  }
+
+  /* right-hand map tools */
+  .maptools {
+    position: absolute;
+    right: 10px;
+    top: calc(var(--safe-t) + 60px);
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 15;
+  }
+
+  /* ---------- relief dock ---------- */
+  .dock {
+    position: absolute;
+    left: 10px; right: 10px;
+    bottom: calc(var(--nav-h) + var(--safe-b) + 26px);
+    z-index: 15;
+    background: rgba(233,224,205,0.94);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    max-width: 460px;
+  }
+  .dock-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 4px;
+    cursor: pointer;
+  }
+  .dock-head .label { flex: 1 1 auto; color: var(--ink-2); }
+  .dock-val { font-family: var(--mono); font-size: 11px; color: var(--oxide); letter-spacing: 0.08em; }
+  .chev { transition: transform 0.18s ease; opacity: 0.5; }
+  .dock.open .chev { transform: rotate(180deg); }
+  /* The reveal slider is the whole point of the app, so it stays out where a
+     thumb can reach it; everything that tunes it folds away. */
+  .dock-always { padding: 0 10px 9px; }
+  .dock-body { display: none; padding: 2px 10px 10px; border-top: 1px solid var(--line-soft); margin-top: 2px; }
+  .dock.open .dock-body { display: block; }
+
+  .slider-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; }
+  .slider-row .label { flex: 0 0 52px; }
+  input[type=range] {
+    flex: 1 1 auto;
+    -webkit-appearance: none; appearance: none;
+    height: 20px; background: transparent; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 2px; background: var(--ink-3); border-radius: 0;
+  }
+  input[type=range]::-moz-range-track { height: 2px; background: var(--ink-3); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 15px; height: 15px; margin-top: -6.5px;
+    background: var(--oxide);
+    border: 2px solid var(--paper);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(38,33,26,0.4);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 15px; height: 15px;
+    background: var(--oxide); border: 2px solid var(--paper);
+    border-radius: 50%;
+  }
+  .slider-num { flex: 0 0 34px; text-align: right; font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+
+  .dock-btns { display: flex; gap: 6px; padding-top: 8px; flex-wrap: wrap; }
+  .tog {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-size: 10px;
+    padding: 6px 9px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .tog.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tog:disabled { opacity: 0.4; cursor: default; }
+
+  .dock-note {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    padding-top: 9px;
+    margin-top: 8px;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  /* layer diagnostics */
+  .layer-status {
+    display: none;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 7px 8px;
+    border: 1px solid var(--oxide);
+    border-radius: 2px;
+    background: rgba(143,63,42,0.07);
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--oxide);
+    letter-spacing: 0.03em;
+  }
+  .layer-status.show { display: flex; }
+
+  /* ---------- bottom nav ---------- */
+  .nav {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: calc(var(--nav-h) + var(--safe-b));
+    padding-bottom: var(--safe-b);
+    display: flex;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    /* above the backdrop and the sheets: a sheet covering the nav would leave
+       it visible but dead, which reads as the app having frozen */
+    z-index: 40;
+  }
+  .nav button {
+    flex: 1 1 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px;
+    border: none; background: transparent;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 9px;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-top: 2px solid transparent;
+    margin-top: -1px;
+  }
+  .nav button.on { color: var(--ink); border-top-color: var(--oxide); }
+  .nav button svg { opacity: 0.75; }
+  .nav button.on svg { opacity: 1; }
+
+  /* ---------- sheets ---------- */
+  .backdrop {
+    position: absolute; inset: 0;
+    background: rgba(29,25,19,0.42);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s ease;
+    z-index: 30;
+  }
+  .backdrop.show { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: calc(var(--nav-h) + var(--safe-b));
+    max-height: 82%;
+    display: flex; flex-direction: column;
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 -8px 30px rgba(38,33,26,0.28);
+    transform: translateY(101%);
+    transition: transform 0.26s cubic-bezier(0.22,0.7,0.3,1);
+    z-index: 35;
+    overflow: hidden;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet-head {
+    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+  }
+  .sheet-title { font-family: var(--serif); font-weight: 600; font-size: 17px; flex: 1 1 auto; line-height: 1.25; }
+  .sheet-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 14px 24px; flex: 1 1 auto; }
+  .grip { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 34px; height: 3px; border-radius: 2px; background: var(--paper-3); }
+  .x-btn { flex: 0 0 auto; width: 30px; height: 30px; display: grid; place-items: center; border: none; background: transparent; color: var(--ink-2); cursor: pointer; font-size: 20px; line-height: 1; }
+
+  /* ---------- site cards ---------- */
+  .card {
+    display: flex; gap: 11px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line-soft);
+    cursor: pointer;
+    align-items: flex-start;
+  }
+  .card:last-child { border-bottom: none; }
+  .card-badge { flex: 0 0 34px; height: 34px; display: grid; place-items: center; }
+  .card-main { flex: 1 1 auto; min-width: 0; }
+  .card-title { font-family: var(--serif); font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .card-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
+  .card-dist { flex: 0 0 auto; font-family: var(--mono); font-size: 10px; color: var(--ink-3); padding-top: 3px; }
+
+  /* redacted entry — the gate is meant to be seen, not hidden */
+  .card.redacted { cursor: default; }
+  .card.redacted .card-badge { opacity: 0.35; }
+  .redact-bar {
+    display: inline-block;
+    background: var(--redact);
+    color: transparent;
+    border-radius: 1px;
+    user-select: none;
+    transform: rotate(-0.4deg);
+    padding: 0 4px;
+  }
+  .card.redacted .card-meta .strike { text-decoration: line-through; opacity: 0.55; }
+
+  /* ---------- detail sheet ---------- */
+  .photo-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin: 0 -14px 12px; padding-left: 14px; padding-right: 14px; }
+  .photo-strip img, .photo-strip .ph-empty {
+    flex: 0 0 auto;
+    width: 160px; height: 118px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--paper-2);
+    /* duotone: crush to luminance, then push into oxide/paper */
+    filter: grayscale(1) contrast(1.08) sepia(0.55) saturate(1.5) hue-rotate(-12deg) brightness(0.98);
+  }
+  .ph-empty { display: grid; place-items: center; filter: none !important; }
+
+  .kv { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line-soft); align-items: baseline; }
+  .kv .label { flex: 0 0 96px; }
+  .kv .v { flex: 1 1 auto; font-size: 14px; line-height: 1.5; }
+  .prose { font-size: 14.5px; line-height: 1.62; color: var(--ink); margin: 10px 0 14px; }
+  .prose p + p { margin-top: 0.7em; }
+
+  .tagrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .hazard {
+    font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 7px; border: 1px solid var(--oxide); color: var(--oxide);
+    border-radius: 2px; background: rgba(143,63,42,0.06);
+  }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+  .btn {
+    font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.14em; font-size: 10.5px;
+    padding: 11px 14px; border: 1px solid var(--ink); border-radius: 2px;
+    background: transparent; color: var(--ink); cursor: pointer; flex: 1 1 auto;
+  }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.danger { border-color: var(--oxide); color: var(--oxide); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+
+  .section-rule {
+    display: flex; align-items: center; gap: 9px;
+    margin: 20px 0 8px;
+  }
+  .section-rule::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--line); }
+
+  /* ---------- forms ---------- */
+  .field { margin-bottom: 13px; }
+  .field .label { display: block; margin-bottom: 5px; }
+  .input, textarea.input, select.input {
+    width: 100%;
+    font-family: var(--sans); font-size: 15px;
+    padding: 10px;
+    border: 1px solid var(--line); border-radius: 2px;
+    background: rgba(255,253,247,0.85); color: var(--ink);
+  }
+  select.input { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; }
+  textarea.input { min-height: 90px; resize: vertical; line-height: 1.55; }
+  .input:focus { outline: none; border-color: var(--oxide); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.11em;
+    padding: 7px 9px; border: 1px solid var(--line); border-radius: 2px;
+    background: transparent; color: var(--ink-2); cursor: pointer;
+  }
+  .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .hint { font-family: var(--mono); font-size: 9.5px; line-height: 1.5; color: var(--ink-3); margin-top: 5px; letter-spacing: 0.03em; }
+
+  /* ---------- pins ---------- */
+  .pin { cursor: pointer; will-change: transform; }
+  .pin svg { display: block; filter: drop-shadow(0 2px 3px rgba(29,25,19,0.45)); }
+  .pin.sel svg { filter: drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 3px 6px rgba(29,25,19,0.6)); }
+  .pin.sel { z-index: 5; }
+  .pin.dim { opacity: 0.3; }
+
+  /* crosshair drop mode */
+  .crosshair {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 16; pointer-events: none; display: none;
+  }
+  .crosshair.show { display: block; }
+  .drop-bar {
+    position: absolute; left: 10px; right: 10px;
+    bottom: calc(var(--nav-h) + var(--safe-b) + 26px);
+    z-index: 18;
+    display: none;
+    gap: 8px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    padding: 10px;
+    box-shadow: var(--shadow);
+    max-width: 460px;
+  }
+  .drop-bar.show { display: block; }
+
+  /* ---------- clearance card ---------- */
+  .clearance {
+    position: relative;
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    padding: 16px 14px 14px;
+    background: var(--paper-2);
+    overflow: hidden;
+  }
+  .clearance::before {
+    content: '';
+    position: absolute; inset: 4px;
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .tier-name {
+    font-family: var(--serif); font-weight: 600; font-size: 30px;
+    letter-spacing: 0.06em; line-height: 1; margin: 7px 0 3px;
+  }
+  .tier-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-2); }
+  .req { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
+  .req .tick { font-family: var(--mono); font-size: 12px; flex: 0 0 18px; color: var(--ink-3); }
+  .req.met .tick { color: var(--olive); }
+  .req.met { color: var(--ink-2); }
+  .req .n { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: auto; letter-spacing: 0.05em; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 14px; }
+  .stat { background: var(--paper); padding: 11px 10px; }
+  .stat .n { font-family: var(--serif); font-size: 23px; font-weight: 600; line-height: 1.1; }
+  .stat .label { margin-top: 3px; }
+
+  .locked-panel {
+    border: 1px dashed var(--line);
+    border-radius: 3px;
+    padding: 16px 14px;
+    text-align: center;
+    background: rgba(207,192,161,0.2);
+  }
+
+  /* ---------- notice / modal ---------- */
+  .modal {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+    background: rgba(29,25,19,0.55);
+    z-index: 50;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    position: relative;
+    width: 100%; max-width: 420px; max-height: 86%;
+    overflow-y: auto;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    padding: 20px 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .toast {
+    position: absolute;
+    left: 50%; transform: translateX(-50%) translateY(14px);
+    bottom: calc(var(--nav-h) + var(--safe-b) + 18px);
+    background: var(--ink); color: var(--paper);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    padding: 10px 14px; border-radius: 2px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; max-width: 86%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty { text-align: center; padding: 34px 16px; color: var(--ink-3); }
+  .empty .serif { font-size: 16px; color: var(--ink-2); display: block; margin-bottom: 6px; }
+
+  #share-canvas { width: 100%; height: auto; border: 1px solid var(--line); display: block; }
+
+  @media (min-width: 620px) {
+    .dock, .drop-bar { left: 14px; right: auto; width: 400px; }
+    .sheet { left: 50%; transform: translate(-50%, 101%); width: 560px; border-radius: 4px 4px 0 0; }
+    .sheet.open { transform: translate(-50%, 0); }
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- crosshair for precise pin placement -->
+<div class="crosshair" id="crosshair">
+  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="20" stroke="#8f3f2a" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <path d="M32 2v18M32 44v18M2 32h18M44 32h18" stroke="#8f3f2a" stroke-width="1.5"/>
+    <circle cx="32" cy="32" r="2.5" fill="#8f3f2a"/>
+  </svg>
+</div>
+
+<header class="topbar">
+  <div class="brand">RE<em>D</em>OUBT</div>
+  <div class="search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+      <circle cx="10.5" cy="10.5" r="7"/><path d="M16 16l5 5"/>
+    </svg>
+    <input class="search" id="search" type="search" placeholder="Search the archive" autocomplete="off" />
+  </div>
+  <button class="icon-btn" id="btn-filter" aria-label="Filters">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 5h18M6 12h12M10 19h4"/>
+    </svg>
+    <span class="dot" id="filter-dot" style="display:none"></span>
+  </button>
+</header>
+
+<div class="maptools">
+  <button class="icon-btn" id="btn-locate" aria-label="Near me">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="7"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+  <button class="icon-btn" id="btn-labels" aria-label="Place labels">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M4 7h16M4 12h10M4 17h13"/>
+    </svg>
+  </button>
+</div>
+
+<section class="dock grain" id="dock">
+  <div class="dock-head" id="dock-head">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8f3f2a" stroke-width="1.8">
+      <path d="M2 18l6-9 4 5 3-4 7 8z"/><path d="M2 21h20" opacity="0.45"/>
+    </svg>
+    <span class="label">Relief reveal</span>
+    <span class="dock-val" id="dock-val">0%</span>
+    <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 9l7 7 7-7"/></svg>
+  </div>
+  <div class="dock-always">
+    <div class="slider-row">
+      <span class="label">Reveal</span>
+      <input type="range" id="sl-reveal" min="0" max="100" value="0" />
+      <span class="slider-num" id="num-reveal">0%</span>
+    </div>
+  </div>
+  <div class="dock-body">
+    <div class="slider-row">
+      <span class="label">Light</span>
+      <input type="range" id="sl-light" min="0" max="355" step="5" value="315" />
+      <span class="slider-num" id="num-light">315°</span>
+    </div>
+    <div class="slider-row">
+      <span class="label">Depth</span>
+      <input type="range" id="sl-depth" min="10" max="100" value="55" />
+      <span class="slider-num" id="num-depth">0.55</span>
+    </div>
+    <div class="dock-btns">
+      <button class="tog" id="tog-3d">3D</button>
+      <button class="tog" id="tog-snap">Snap 50%</button>
+      <select class="tog" id="sel-method" style="flex:1 1 auto">
+        <option value="igor">Soft (Igor)</option>
+        <option value="multidirectional">Multi-directional</option>
+        <option value="standard">Standard</option>
+        <option value="combined">Combined</option>
+      </select>
+    </div>
+    <div class="dock-btns">
+      <select class="tog" id="sel-source" style="flex:1 1 auto"></select>
+    </div>
+    <p class="dock-note" id="dock-note"></p>
+    <div class="layer-status" id="layer-status">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:0 0 12px;margin-top:1px">
+        <path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9.5"/>
+      </svg>
+      <span id="layer-status-text"></span>
+    </div>
+  </div>
+</section>
+
+<div class="drop-bar" id="drop-bar">
+  <div class="label" style="margin-bottom:6px">Place the marker &mdash; pan the map under the crosshair</div>
+  <div class="coord" id="drop-coord" style="margin-bottom:9px">&mdash;</div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" id="drop-cancel">Cancel</button>
+    <button class="btn primary" id="drop-confirm">Mark this spot</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button id="nav-map" class="on">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3L3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3zM9 3v15M15 6v15"/></svg>
+    Map
+  </button>
+  <button id="nav-archive">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18v13H3zM3 7l1.5-3h15L21 7M9 12h6"/></svg>
+    Archive
+  </button>
+  <button id="nav-drop">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><path d="M12 8v5M9.5 10.5h5"/></svg>
+    Mark
+  </button>
+  <button id="nav-profile">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4zM8 9h8M8 13h8M8 17h4"/></svg>
+    Clearance
+  </button>
+</nav>
+
+<div class="backdrop" id="backdrop"></div>
+
+<!-- Archive / list sheet -->
+<section class="sheet grain" id="sheet-list">
+  <div class="sheet-head">
+    <div class="grip"></div>
+    <div class="sheet-title" id="list-title">Archive</div>
+    <span class="label" id="list-count"></span>
+    <button class="x-btn" data-close="sheet-list">&times;</button>
+  </div>
+  <div class="sheet-body" id="list-body"></div>
+</section>
+
+<!-- Site detail sheet -->
+<section class="sheet grain" id="sheet-site">
+  <div class="sheet-head">
+    <div class="grip"></div>
+    <div class="sheet-title" id="site-title">&mdash;</div>
+    <button class="x-btn" data-close="sheet-site">&times;</button>
+  </div>
+  <div class="sheet-body" id="site-body"></div>
+</section>
+
+<!-- Clearance sheet -->
+<section class="sheet grain" id="sheet-profile">
+  <div class="sheet-head">
+    <div class="grip"></div>
+    <div class="sheet-title">Clearance</div>
+    <button class="x-btn" data-close="sheet-profile">&times;</button>
+  </div>
+  <div class="sheet-body" id="profile-body"></div>
+</section>
+
+<!-- Filter sheet -->
+<section class="sheet grain" id="sheet-filter">
+  <div class="sheet-head">
+    <div class="grip"></div>
+    <div class="sheet-title">Filters</div>
+    <button class="x-btn" data-close="sheet-filter">&times;</button>
+  </div>
+  <div class="sheet-body" id="filter-body"></div>
+</section>
+
+<!-- Site form sheet -->
+<section class="sheet grain" id="sheet-form">
+  <div class="sheet-head">
+    <div class="grip"></div>
+    <div class="sheet-title" id="form-title">New entry</div>
+    <button class="x-btn" data-close="sheet-form">&times;</button>
+  </div>
+  <div class="sheet-body" id="form-body"></div>
+</section>
+
+<!-- First-run notice -->
+<div class="modal" id="modal-notice">
+  <div class="modal-card grain">
+    <div class="label">Field notice</div>
+    <h2 class="serif" style="font-size:22px;margin:8px 0 12px;line-height:1.25">Read before you go</h2>
+    <div class="prose" style="margin-top:0">
+      <p>These are real places and several of them can kill you. Underground works collapse, flood, and hold air that will not keep you conscious. Ground around WWI and WWII positions still carries unexploded ordnance.</p>
+      <p>Many sites sit on private or restricted land. An entry in this archive is a record that something exists &mdash; it is not permission to enter it.</p>
+      <p>Check the hazard stamps on a site before you travel, tell someone where you are going, and do not go underground alone.</p>
+    </div>
+    <button class="btn primary" id="notice-ok" style="width:100%">Understood</button>
+  </div>
+</div>
+
+<!-- Share card -->
+<div class="modal" id="modal-share">
+  <div class="modal-card grain">
+    <div class="label">Export find</div>
+    <h2 class="serif" style="font-size:19px;margin:6px 0 12px">Field card</h2>
+    <canvas id="share-canvas" width="1080" height="1350"></canvas>
+    <div class="btn-row">
+      <button class="btn" id="share-close">Close</button>
+      <button class="btn primary" id="share-save">Save / share</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================================
+   REDOUBT — field archive of bunkers, tunnels, forts and underground works.
+   Single file, no build step. Data is local-first (IndexedDB) behind a Store
+   interface a networked backend can replace without touching the UI.
+   ========================================================================== */
+
+// ---- CONFIG ----------------------------------------------------------------
+const BACKEND = 'local';            // 'local' | 'supabase'  (see redoubt-schema.sql)
+const SB_URL  = '';                 // fill in when provisioning Supabase
+const SB_KEY  = '';
+
+const SAT_TILES = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+const LABEL_TILES = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
+
+/* Relief-source registry.
+   Each entry is a raster-dem source. `bbox` of null means global; an entry with
+   a bbox is only offered when the viewport centre falls inside it, so regional
+   LiDAR can be added later as a config entry rather than a rewrite.
+   To add one, uncomment the template below and validate the endpoint from a
+   real browser — tile hosts are not reachable from every build sandbox. */
+const RELIEF_SOURCES = [
+  {
+    id: 'terrarium',
+    name: 'Global · Terrarium 30 m',
+    tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+    encoding: 'terrarium',
+    tileSize: 256,
+    maxzoom: 15,
+    bbox: null,
+    attribution: 'Elevation: AWS Terrain Tiles (SRTM / NED / others)',
+    note: 'Global, ~30 m ground sample. Reveals ramparts, ditches, spoil heaps and large emplacements through tree cover. It will not resolve a single bunker — that needs 0.5–1 m LiDAR, which only exists region by region.'
+  }
+  /* , {
+    id: 'ahn',
+    name: 'Netherlands · AHN 0.5 m',
+    tiles: ['<regional DTM tile or WMS-as-raster endpoint>'],
+    encoding: 'terrarium',        // or 'mapbox' — must match the source's encoding
+    tileSize: 256, maxzoom: 18,
+    bbox: [3.2, 50.7, 7.3, 53.6], // [w, s, e, n]
+    attribution: 'AHN — Actueel Hoogtebestand Nederland',
+    note: 'Sub-metre LiDAR DTM. Individual bunkers, revetments and trench lines are legible.'
+  } */
+];
+
+const CLEARANCES = ['FIELD', 'VETERAN', 'ELITE'];
+
+const CATEGORIES = {
+  bunker:  { name: 'Bunker',        color: '#8f3f2a', rot: -3,   glyph: 'M-7 6 H7 L4.5 -4 H-4.5 Z M-3 1.5 H3' },
+  tunnel:  { name: 'Tunnel',        color: '#4f5a3f', rot: 2,    glyph: 'M-6.5 6.5 V0 A6.5 6.5 0 0 1 6.5 0 V6.5 M0 6.5 V-1' },
+  fort:    { name: 'Fort',          color: '#a8823c', rot: -1.5, glyph: 'M0 -7.5 L2.2 -2.2 L7.5 0 L2.2 2.2 L0 7.5 L-2.2 2.2 L-7.5 0 L-2.2 -2.2 Z' },
+  silo:    { name: 'Missile silo',  color: '#6d4a55', rot: 3,    glyph: 'M-5 6.5 V-1.5 A5 5 0 0 1 5 -1.5 V6.5 Z M-5 2 H5' },
+  shelter: { name: 'Air-raid shelter', color: '#3f565c', rot: -2.5, glyph: 'M-7 0 L0 -6.5 L7 0 M0 -1.5 V6 M-3 3 L0 6 L3 6' },
+  mine:    { name: 'Mine / quarry', color: '#7a6a4a', rot: 1.5,  glyph: 'M-6.5 6.5 L0 -6.5 L6.5 6.5 M-3.6 1 H3.6 M0 -6.5 V6.5' }
+};
+
+const ERAS = ['WWI', 'WWII', 'Cold War', 'Other'];
+
+const HAZARDS = {
+  unstable:  'Unstable structure',
+  flooding:  'Flooding',
+  air:       'Poor air / low O₂',
+  uxo:       'Unexploded ordnance',
+  vertical:  'Vertical drop',
+  private:   'Private land',
+  dark:      'No light'
+};
+
+const ACCESS = {
+  public:     'Open to the public',
+  permissive: 'Accessible, no formal permission',
+  private:    'Private land — permission required',
+  restricted: 'Restricted / sealed'
+};
+
+// ---- SEED ARCHIVE ----------------------------------------------------------
+/* Publicly documented sites, bundled so the map is never empty and the filters,
+   categories and clearance gate have something real to act on.
+   Coordinates are archival references taken from public records, good to roughly
+   the site rather than the doorway. They are not survey-grade — correct them
+   from the ground. Seed entries carry origin:'seed' and never credit a user or
+   count toward clearance. */
+const SEED = [
+["Batterie Todt","bunker","WWII","FR",50.8489,1.6047,"Coastal artillery battery on the Pas-de-Calais, built to shell the Kent coast. One of four casemates survives with its 380 mm gun emplacement intact.","public",["unstable"],true,null],
+["La Coupole","bunker","WWII","FR",50.6819,2.2447,"A five-metre concrete dome over a chalk quarry, built as a V-2 launch and storage complex and never completed. The tunnel network beneath it runs for hundreds of metres.","public",[],true,null],
+["Blockhaus d'Éperlecques","bunker","WWII","FR",50.8386,2.1836,"Vast V-2 assembly bunker abandoned after repeated bombing. The surviving north wall carries visible blast damage.","public",["unstable"],true,null],
+["Fort Douaumont","fort","WWI","FR",49.2208,5.4408,"The largest of the Verdun forts, taken and retaken through 1916. Galleries, casemates and a retractable 155 mm turret survive under the shell-cratered hill.","public",["uxo","dark","flooding"],true,null],
+["Fort de Vaux","fort","WWI","FR",49.2003,5.4664,"Smaller Verdun fort, scene of a week-long underground fight in June 1916. The corridors still show the barricade lines.","public",["uxo","dark"],true,null],
+["Ouvrage Hackenberg","fort","WWII","FR",49.3436,6.3567,"The largest Maginot Line ouvrage — ten kilometres of gallery, an underground electric railway, barracks and power plant beneath the hillside.","public",["dark"],true,null],
+["Ouvrage du Schoenenbourg","fort","WWII","FR",48.9633,7.8817,"Maginot artillery work in northern Alsace, the most heavily shelled of the line and largely intact below ground.","public",["dark","flooding"],true,null],
+["Carrière Wellington","tunnel","WWI","FR",50.2828,2.7822,"Medieval chalk quarries extended by New Zealand tunnellers into a subterranean barracks for 24,000 men before the 1917 Battle of Arras.","public",["dark"],true,null],
+["Grange Subway, Vimy Ridge","tunnel","WWI","FR",50.3794,2.7736,"Preserved section of the tunnel system dug beneath Vimy Ridge, opening into the front-line trench system above.","public",["uxo","dark"],true,null],
+["Fort Breendonk","fort","WWII","BE",51.0572,4.3417,"A 1906 fort of the Antwerp ring, used as a transit camp under German occupation and preserved largely unaltered.","public",[],true,null],
+["Atlantikwall Raversyde","bunker","WWII","BE",51.2119,2.8519,"Two kilometres of preserved dune defences holding both a WWI German battery and a WWII Atlantic Wall position, linked by original trenches.","public",[],true,null],
+["Hill 60","tunnel","WWI","BE",50.8253,2.9281,"Contested spoil heap south-east of Ieper, undermined repeatedly by both sides. The cratered ground and concrete shelters are left as they were.","public",["uxo"],true,null],
+["Bayernwald","shelter","WWI","BE",50.8069,2.8386,"Reconstructed German trench sector on the Wijtschate ridge with two original concrete shelters and the heads of two mine shafts.","permissive",["uxo"],true,null],
+["Fort Eben-Emael","fort","WWII","BE",50.7975,5.6764,"Belgium's strongest 1930s fort, taken in 1940 by glider-borne troops landing on its roof. Five kilometres of gallery survive beneath the plateau.","public",["dark"],true,null],
+["Fort de Loncin","fort","WWI","BE",50.6606,5.5122,"Liège fort destroyed in August 1914 when a shell reached the magazine. Left as a ruin and a war grave, with the blast-thrown concrete in place.","public",["unstable"],true,null],
+["Churchill War Rooms","shelter","WWII","GB",51.5021,-0.1291,"The reinforced basement command centre beneath Whitehall, sealed in 1945 and reopened with its fittings as they were left.","public",[],true,null],
+["Kelvedon Hatch","bunker","Cold War","GB",51.6764,0.2664,"Three-storey regional government bunker under an Essex field, entered through a bungalow built to disguise the shaft.","public",[],true,null],
+["Hack Green","bunker","Cold War","GB",53.0225,-2.5175,"Former radar station rebuilt as a regional seat of government, declassified in 1993 with its plant and communications rooms intact.","public",[],true,null],
+["Drop Redoubt, Western Heights","fort","Other","GB",51.1222,1.3050,"One of two Napoleonic redoubts on the heights above Dover, linked to the town by the Grand Shaft triple staircase.","permissive",["vertical","unstable"],true,null],
+["Fan Bay Deep Shelter","shelter","WWII","GB",51.1450,1.3800,"Tunnels cut 23 metres into the chalk behind a gun battery on the cliffs, backfilled in the 1970s and dug out again in 2014.","public",["dark","vertical"],true,null],
+["Big Pit, Blaenavon","mine","Other","GB",51.7728,-3.1103,"Working coal mine until 1980, now descending visitors 90 metres down the original shaft into the roadways.","public",["dark"],true,null],
+["Diefenbunker","bunker","Cold War","CA",45.3517,-76.0453,"Four-storey blast-hardened complex built outside Ottawa to hold the Canadian government, entered by a long tunnel rather than a door.","public",[],true,null],
+["Bunker-42, Taganka","bunker","Cold War","RU",55.7417,37.6494,"Command bunker 65 metres beneath Taganka, reached through a disguised street-level building and a set of blast doors.","public",[],true,null],
+["Bunk'Art 1","bunker","Cold War","AL",41.3453,19.8547,"Five-storey anti-nuclear bunker on the edge of Tirana, one of several hundred thousand built across Albania and unused until it opened as a museum.","public",[],true,null],
+["Humboldthain Flak Tower","bunker","WWII","DE",52.5464,13.3856,"Surviving gun tower of the Berlin flak system, partly demolished and partly buried under rubble, with the inner levels accessible on guided descent.","public",["unstable","dark"],true,null],
+["Titan Missile Museum","silo","Cold War","US",31.9028,-110.9994,"The only Titan II complex left intact, silo and launch control centre preserved with a training missile still in the tube.","public",[],true,null],
+["Delta-09 Launch Facility","silo","Cold War","US",43.8836,-102.0289,"Minuteman II silo on the South Dakota plains, its 80-tonne closure door left half open under a glass cover.","public",[],true,null],
+["Nike Missile Site SF-88","silo","Cold War","US",37.8253,-122.5297,"Restored Nike Hercules site in the Marin Headlands with a working missile elevator raising rounds from the magazine.","public",[],true,null],
+["Wieliczka Salt Mine","mine","Other","PL",49.9831,20.0547,"Salt workings running since the 13th century — nine levels, 300 km of galleries, and chambers carved entirely out of rock salt.","public",["dark"],true,null],
+["Osówka, Project Riese","tunnel","WWII","PL",50.6339,16.3778,"One of seven unfinished tunnel complexes driven into the Owl Mountains by forced labour. Purpose never established.","public",["dark","flooding","unstable"],true,"VETERAN"],
+["Željava Air Base","tunnel","Cold War","HR",44.8317,15.7647,"Underground fighter base inside Plješevica mountain, built for a squadron and its fuel, and mined by its own garrison in 1992.","restricted",["uxo","unstable","dark","private"],false,"VETERAN"],
+["Objekt 825 GTS","tunnel","Cold War","UA",44.4997,33.5972,"Submarine repair and armament works cut through the rock at Balaklava, with a flooded canal running clean through the hill.","public",["flooding","dark"],true,"VETERAN"],
+["Project Greek Island","shelter","Cold War","US",37.7861,-80.3036,"Congressional relocation bunker built under a resort wing, its existence public only since 1992.","public",[],true,"ELITE"],
+["Flakturm Augarten","bunker","WWII","AT",48.2264,16.3789,"Flak tower pair in a Vienna park, structurally too dangerous to enter and too solid to demolish. Sealed.","restricted",["unstable","private"],false,"ELITE"]
+].map((r, i) => ({
+  id: 'seed-' + (i + 1),
+  title: r[0], category: r[1], era: r[2], country: r[3],
+  lat: r[4], lng: r[5], description: r[6],
+  access: r[7], hazards: r[8], verified: r[9],
+  min_clearance: r[10],
+  photos: [], discovered_by: null, discovered_at: null,
+  origin: 'seed', created_at: 0, updated_at: 0
+}));
+
+// ---- small helpers ---------------------------------------------------------
+const $  = (id) => document.getElementById(id);
+const el = (sel) => document.querySelector(sel);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+function fmtCoord(lat, lng) {
+  const h = (v, pos, neg) => `${Math.abs(v).toFixed(5)}° ${v >= 0 ? pos : neg}`;
+  return `${h(lat, 'N', 'S')}  ${h(lng, 'E', 'W')}`;
+}
+
+function haversine(a, b, c, d) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (c - a) * r, dLng = (d - b) * r;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+function fmtDist(m) {
+  if (m == null) return '';
+  if (m < 1000) return Math.round(m) + ' m';
+  if (m < 100000) return (m / 1000).toFixed(1) + ' km';
+  return Math.round(m / 1000) + ' km';
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- STORE -----------------------------------------------------------------
+/* One interface, two implementations. Every method is async so the local
+   version never bakes in assumptions a networked one cannot meet. */
+
+const DB_NAME = 'redoubt', DB_VER = 1;
+const STORES = ['sites', 'visits', 'comments', 'photos', 'meta'];
+let _db = null;
+
+function openDB() {
+  if (_db) return Promise.resolve(_db);
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      STORES.forEach((s) => { if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' }); });
+    };
+    req.onsuccess = () => { _db = req.result; res(_db); };
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function txn(store, mode, fn) {
+  return openDB().then((db) => new Promise((res, rej) => {
+    const t = db.transaction(store, mode);
+    let out;
+    try { out = fn(t.objectStore(store)); } catch (e) { rej(e); return; }
+    t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error);
+  }));
+}
+
+const LocalStore = {
+  kind: 'local',
+  async listSites()              { return (await txn('sites', 'readonly', (s) => s.getAll())) || []; },
+  async getSite(id)              { return await txn('sites', 'readonly', (s) => s.get(id)); },
+  async putSite(site)            { await txn('sites', 'readwrite', (s) => s.put(site)); return site; },
+  async deleteSite(id) {
+    await txn('sites', 'readwrite', (s) => s.delete(id));
+    const [cs, vs] = await Promise.all([this.listComments(id), this.listVisits({ siteId: id })]);
+    await Promise.all([
+      ...cs.map((c) => txn('comments', 'readwrite', (s) => s.delete(c.id))),
+      ...vs.map((v) => txn('visits', 'readwrite', (s) => s.delete(v.id)))
+    ]);
+  },
+  async listComments(siteId) {
+    const all = (await txn('comments', 'readonly', (s) => s.getAll())) || [];
+    return all.filter((c) => c.site_id === siteId).sort((a, b) => a.created_at - b.created_at);
+  },
+  async addComment(c)            { await txn('comments', 'readwrite', (s) => s.put(c)); return c; },
+  async deleteComment(id)        { await txn('comments', 'readwrite', (s) => s.delete(id)); },
+  async listVisits(f = {}) {
+    const all = (await txn('visits', 'readonly', (s) => s.getAll())) || [];
+    return all
+      .filter((v) => (!f.siteId || v.site_id === f.siteId))
+      .sort((a, b) => a.visited_at - b.visited_at);
+  },
+  async addVisit(v)              { await txn('visits', 'readwrite', (s) => s.put(v)); return v; },
+  async deleteVisit(id)          { await txn('visits', 'readwrite', (s) => s.delete(id)); },
+  async getProfile() {
+    return (await txn('meta', 'readonly', (s) => s.get('profile'))) || null;
+  },
+  async putProfile(p)            { await txn('meta', 'readwrite', (s) => s.put(Object.assign({ id: 'profile' }, p))); return p; },
+  async putPhoto(blob) {
+    const rec = { id: uid(), blob, created_at: Date.now() };
+    await txn('photos', 'readwrite', (s) => s.put(rec));
+    return rec.id;
+  },
+  async getPhotoBlob(id)         { const r = await txn('photos', 'readonly', (s) => s.get(id)); return r ? r.blob : null; },
+  async deletePhoto(id)          { await txn('photos', 'readwrite', (s) => s.delete(id)); },
+
+  // Multi-user surface. Structurally inert with a single local profile — these
+  // exist so the networked implementation lights the feature up unchanged
+  // rather than requiring the UI to grow a new code path.
+  async listExplorers()          { return []; },
+  async follow()                 { throw new Error('offline'); },
+  async unfollow()               { throw new Error('offline'); },
+  get social()                   { return false; }
+};
+
+/* Networked implementation. Provision with redoubt-schema.sql, drop the URL and
+   anon key into the config above, flip BACKEND to 'supabase', and add the
+   supabase-js CDN script to <head>. Signatures are identical to LocalStore, so
+   nothing in the UI changes. */
+const SupabaseStore = {
+  kind: 'supabase',
+  get social() { return true; },
+  _notReady() { throw new Error('Supabase backend is configured but not implemented yet — see redoubt-schema.sql'); },
+  async listSites() { this._notReady(); },
+  async getSite() { this._notReady(); },
+  async putSite() { this._notReady(); },
+  async deleteSite() { this._notReady(); },
+  async listComments() { this._notReady(); },
+  async addComment() { this._notReady(); },
+  async deleteComment() { this._notReady(); },
+  async listVisits() { this._notReady(); },
+  async addVisit() { this._notReady(); },
+  async deleteVisit() { this._notReady(); },
+  async getProfile() { this._notReady(); },
+  async putProfile() { this._notReady(); },
+  async putPhoto() { this._notReady(); },
+  async getPhotoBlob() { this._notReady(); },
+  async deletePhoto() { this._notReady(); },
+  async listExplorers() { this._notReady(); },
+  async follow() { this._notReady(); },
+  async unfollow() { this._notReady(); }
+};
+
+const Store = BACKEND === 'supabase' ? SupabaseStore : LocalStore;
+
+// ---- APP STATE -------------------------------------------------------------
+const state = {
+  sites: [],
+  markers: new Map(),       // site id -> maplibregl.Marker
+  photoURLs: new Map(),     // photo id -> object URL
+  profile: null,
+  here: null,               // [lng, lat] from geolocation
+  selectedId: null,
+  dropping: false,
+  reveal: 0,
+  terrain3d: false,
+  labels: false,
+  reliefId: RELIEF_SOURCES[0].id,
+  light: 315,
+  method: 'igor',
+  filters: { q: '', categories: [], eras: [], countries: [], verified: false, access: [] },
+  layerErrors: {}
+};
+
+// ---- MAP -------------------------------------------------------------------
+let map = null;
+let hereMarker = null;
+
+function reliefSource(id) {
+  return RELIEF_SOURCES.find((r) => r.id === id) || RELIEF_SOURCES[0];
+}
+
+function demSourceSpec(rs) {
+  return {
+    type: 'raster-dem',
+    tiles: rs.tiles,
+    tileSize: rs.tileSize,
+    maxzoom: rs.maxzoom,
+    encoding: rs.encoding,
+    attribution: rs.attribution
+  };
+}
+
+/* Shared so the initial style and a later source swap cannot drift apart.
+   `igor` softens the harsh shadows that bury shallow features; `multidirectional`
+   lights from several azimuths at once, which is how you pick up an earthwork
+   that happens to run along the light. */
+function reliefPaint() {
+  return {
+    'hillshade-exaggeration': 0.55,
+    'hillshade-shadow-color': '#3b3226',
+    'hillshade-highlight-color': '#ece0c6',
+    'hillshade-accent-color': '#8a7a5e',
+    'hillshade-illumination-direction': state.light,
+    'hillshade-illumination-altitude': 32,
+    'hillshade-illumination-anchor': 'viewport',
+    'hillshade-method': state.method
+  };
+}
+
+function buildStyle() {
+  const rs = reliefSource(state.reliefId);
+  return {
+    version: 8,
+    sources: {
+      sat: { type: 'raster', tiles: [SAT_TILES], tileSize: 256, maxzoom: 19,
+             attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' },
+      dem: demSourceSpec(rs),
+      places: { type: 'raster', tiles: [LABEL_TILES], tileSize: 256, maxzoom: 19, attribution: '&copy; Esri' }
+    },
+    layers: [
+      { id: 'paper', type: 'background', paint: { 'background-color': '#cfc0a1' } },
+      { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 1 } },
+      { id: 'relief', type: 'hillshade', source: 'dem', paint: reliefPaint(), layout: { visibility: 'none' } },
+      { id: 'places', type: 'raster', source: 'places', paint: { 'raster-opacity': 0.85 }, layout: { visibility: 'none' } }
+    ]
+  };
+}
+
+function initMap() {
+  map = new maplibregl.Map({
+    container: 'map',
+    style: buildStyle(),
+    center: [2.8519, 51.0],       // North Sea coast — dense in every category
+    zoom: 6.4,
+    maxZoom: 18,
+    attributionControl: { compact: true },
+    dragRotate: true,
+    pitchWithRotate: true
+  });
+
+  map.touchZoomRotate.enableRotation();
+
+  // Layer diagnostics. Tile hosts can be blocked by a network policy, a proxy,
+  // or simply go down; without this the map just sits there looking empty.
+  map.on('error', (e) => {
+    const sid = e && e.sourceId;
+    if (!sid) return;
+    state.layerErrors[sid] = (state.layerErrors[sid] || 0) + 1;
+    renderLayerStatus();
+  });
+  map.on('sourcedata', (e) => {
+    if (e.sourceId && e.isSourceLoaded && state.layerErrors[e.sourceId]) {
+      delete state.layerErrors[e.sourceId];
+      renderLayerStatus();
+    }
+  });
+
+  map.on('load', () => {
+    applyReveal(state.reveal);
+    renderMarkers();
+  });
+
+  map.on('move', () => {
+    if (state.dropping) {
+      const c = map.getCenter();
+      $('drop-coord').textContent = fmtCoord(c.lat, c.lng);
+    }
+  });
+
+  map.on('moveend', () => { refreshSourceOptions(); });
+}
+
+const SOURCE_LABELS = { sat: 'satellite imagery', dem: 'relief / elevation', places: 'place labels' };
+
+function renderLayerStatus() {
+  const bad = Object.keys(state.layerErrors).filter((k) => state.layerErrors[k] >= 3);
+  const box = $('layer-status');
+  if (!bad.length) { box.classList.remove('show'); return; }
+  $('layer-status-text').textContent =
+    bad.map((k) => (SOURCE_LABELS[k] || k) + ' unreachable').join(' · ') +
+    ' — tiles are being refused or timing out. The rest of the archive still works offline.';
+  box.classList.add('show');
+}
+
+/* Crossfade rather than toggle: holding imagery and relief in superposition is
+   the moment that actually shows you something, and a toggle throws it away. */
+function applyReveal(t) {
+  state.reveal = t;
+  $('dock-val').textContent = Math.round(t) + '%';
+  $('num-reveal').textContent = Math.round(t) + '%';
+  if (!map || !map.isStyleLoaded()) return;
+  const f = t / 100;
+  map.setPaintProperty('sat', 'raster-opacity', 1 - f * 0.92);
+  map.setLayoutProperty('relief', 'visibility', f > 0.01 ? 'visible' : 'none');
+  map.setPaintProperty('relief', 'hillshade-exaggeration', ($('sl-depth').value / 100) * Math.max(f, 0.001));
+}
+
+function applyLight(deg) {
+  state.light = +deg;
+  $('num-light').textContent = deg + '°';
+  if (map && map.getLayer('relief')) map.setPaintProperty('relief', 'hillshade-illumination-direction', +deg);
+}
+
+function applyMethod(m) {
+  state.method = m;
+  // multidirectional lights from several azimuths, so the dial has nothing to do
+  const dialIdle = m === 'multidirectional';
+  $('sl-light').disabled = dialIdle;
+  $('sl-light').style.opacity = dialIdle ? 0.35 : 1;
+  if (map && map.getLayer('relief')) map.setPaintProperty('relief', 'hillshade-method', m);
+}
+
+function applyDepth(v) {
+  $('num-depth').textContent = (v / 100).toFixed(2);
+  applyReveal(state.reveal);
+}
+
+function setTerrain3D(on) {
+  if (!map) return;
+  state.terrain3d = on;
+  try {
+    map.setTerrain(on ? { source: 'dem', exaggeration: 1.25 } : null);
+    map.easeTo({ pitch: on ? 58 : 0, duration: 600 });
+  } catch (err) {
+    state.terrain3d = false;
+    $('tog-3d').classList.remove('on');
+    showToast('3D relief not available on this device');
+  }
+  $('tog-3d').classList.toggle('on', state.terrain3d);
+}
+
+function setReliefSource(id) {
+  if (!map || id === state.reliefId) return;
+  const was3d = state.terrain3d;
+  if (was3d) { try { map.setTerrain(null); } catch (e) { /* already clear */ } }
+  state.reliefId = id;
+  delete state.layerErrors.dem;
+  renderLayerStatus();
+  if (map.getLayer('relief')) map.removeLayer('relief');
+  if (map.getSource('dem')) map.removeSource('dem');
+  map.addSource('dem', demSourceSpec(reliefSource(id)));
+  map.addLayer({ id: 'relief', type: 'hillshade', source: 'dem', paint: reliefPaint(), layout: { visibility: 'none' } }, 'places');
+  applyReveal(state.reveal);
+  if (was3d) setTerrain3D(true);
+  $('dock-note').textContent = reliefSource(id).note;
+}
+
+/* Regional sources are only offered where they have coverage. */
+function refreshSourceOptions() {
+  const sel = $('sel-source');
+  const c = map ? map.getCenter() : { lat: 51, lng: 2.8 };
+  const avail = RELIEF_SOURCES.filter((r) =>
+    !r.bbox || (c.lng >= r.bbox[0] && c.lat >= r.bbox[1] && c.lng <= r.bbox[2] && c.lat <= r.bbox[3]));
+  const sig = avail.map((r) => r.id).join(',');
+  if (sel.dataset.sig === sig) return;
+  sel.dataset.sig = sig;
+  sel.innerHTML = avail.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  if (!avail.some((r) => r.id === state.reliefId)) setReliefSource(avail[0].id);
+  sel.value = state.reliefId;
+}
+
+// ---- PINS ------------------------------------------------------------------
+function pinSVG(cat) {
+  const c = CATEGORIES[cat] || CATEGORIES.bunker;
+  return `<svg width="32" height="42" viewBox="0 0 32 42" aria-hidden="true">
+    <path d="M16 30 L16 41" stroke="#1d1913" stroke-width="1.6" opacity="0.7"/>
+    <g transform="rotate(${c.rot} 16 16)">
+      <path d="M16 1.6 L26.5 5.4 L30.4 16 L26.5 26.6 L16 30.4 L5.5 26.6 L1.6 16 L5.5 5.4 Z"
+            fill="${c.color}" stroke="#e9e0cd" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M16 4.6 L24.4 7.6 L27.4 16 L24.4 24.4 L16 27.4 L7.6 24.4 L4.6 16 L7.6 7.6 Z"
+            fill="none" stroke="#e9e0cd" stroke-width="0.9" opacity="0.6"/>
+      <g transform="translate(16 16)" fill="none" stroke="#e9e0cd" stroke-width="1.7"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="${c.glyph}"/>
+      </g>
+    </g>
+  </svg>`;
+}
+
+function clearanceRank(c) { return Math.max(0, CLEARANCES.indexOf(c || 'FIELD')); }
+
+function isLocked(site) {
+  if (!site.min_clearance) return false;
+  return clearanceRank(currentTier()) < clearanceRank(site.min_clearance);
+}
+
+function renderMarkers() {
+  if (!map) return;
+  const visible = filteredSites();
+  const want = new Set(visible.map((s) => s.id));
+
+  state.markers.forEach((mk, id) => {
+    if (!want.has(id)) { mk.remove(); state.markers.delete(id); }
+  });
+
+  visible.forEach((site) => {
+    let mk = state.markers.get(site.id);
+    if (!mk) {
+      const node = document.createElement('div');
+      node.className = 'pin';
+      node.innerHTML = pinSVG(site.category);
+      node.addEventListener('click', (ev) => { ev.stopPropagation(); selectSite(site.id); });
+      mk = new maplibregl.Marker({ element: node, anchor: 'bottom' })
+        .setLngLat([site.lng, site.lat])
+        .addTo(map);
+      state.markers.set(site.id, mk);
+    }
+    const node = mk.getElement();
+    node.classList.toggle('sel', state.selectedId === site.id);
+    node.classList.toggle('dim', isLocked(site));
+    node.title = isLocked(site) ? 'Restricted entry' : site.title;
+  });
+}
+
+function selectSite(id) {
+  const site = state.sites.find((s) => s.id === id);
+  if (!site) return;
+  state.selectedId = id;
+  renderMarkers();
+  if (isLocked(site)) {
+    showToast(`${site.min_clearance} clearance required`);
+    openSheet('sheet-profile');
+    renderProfile();
+    return;
+  }
+  map.easeTo({ center: [site.lng, site.lat], duration: 600, offset: [0, -110] });
+  openSite(site);
+}
+
+// ---- FILTERING -------------------------------------------------------------
+function filteredSites() {
+  const f = state.filters;
+  const q = f.q.trim().toLowerCase();
+  return state.sites.filter((s) => {
+    if (f.categories.length && !f.categories.includes(s.category)) return false;
+    if (f.eras.length && !f.eras.includes(s.era)) return false;
+    if (f.countries.length && !f.countries.includes(s.country)) return false;
+    if (f.access.length && !f.access.includes(s.access)) return false;
+    if (f.verified && !s.verified) return false;
+    if (q) {
+      const hay = `${s.title} ${s.description} ${s.country} ${s.era} ${CATEGORIES[s.category] ? CATEGORIES[s.category].name : ''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function activeFilterCount() {
+  const f = state.filters;
+  return f.categories.length + f.eras.length + f.countries.length + f.access.length + (f.verified ? 1 : 0);
+}
+
+function sortedForList() {
+  const list = filteredSites().slice();
+  if (state.here) {
+    list.forEach((s) => { s._d = haversine(state.here[1], state.here[0], s.lat, s.lng); });
+    list.sort((a, b) => a._d - b._d);
+  } else {
+    list.sort((a, b) => a.title.localeCompare(b.title));
+  }
+  return list;
+}
+
+// ---- SHEETS ----------------------------------------------------------------
+const SHEETS = ['sheet-list', 'sheet-site', 'sheet-profile', 'sheet-filter', 'sheet-form'];
+
+function openSheet(id) {
+  SHEETS.forEach((s) => { if (s !== id) $(s).classList.remove('open'); });
+  $(id).classList.add('open');
+  $('backdrop').classList.add('show');
+}
+
+function closeSheets() {
+  SHEETS.forEach((s) => $(s).classList.remove('open'));
+  $('backdrop').classList.remove('show');
+  setNav('nav-map');
+}
+
+function setNav(id) {
+  ['nav-map', 'nav-archive', 'nav-drop', 'nav-profile'].forEach((n) => $(n).classList.toggle('on', n === id));
+}
+
+// ---- LIST ------------------------------------------------------------------
+function badgeHTML(cat) {
+  const c = CATEGORIES[cat] || CATEGORIES.bunker;
+  return `<svg width="30" height="30" viewBox="0 0 32 32">
+    <g transform="rotate(${c.rot} 16 16)">
+      <path d="M16 1.6 L26.5 5.4 L30.4 16 L26.5 26.6 L16 30.4 L5.5 26.6 L1.6 16 L5.5 5.4 Z" fill="${c.color}"/>
+      <g transform="translate(16 16)" fill="none" stroke="#e9e0cd" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="${c.glyph}"/>
+      </g>
+    </g></svg>`;
+}
+
+function cardHTML(site) {
+  const cat = CATEGORIES[site.category] || {};
+  const dist = site._d != null ? fmtDist(site._d) : '';
+  if (isLocked(site)) {
+    const block = '█'.repeat(Math.max(6, Math.min(18, site.title.length)));
+    return `<div class="card redacted">
+      <div class="card-badge">${badgeHTML(site.category)}</div>
+      <div class="card-main">
+        <div class="card-title"><span class="redact-bar">${block}</span></div>
+        <div class="card-meta">${esc(cat.name || '')} · ${esc(site.era)} · <span class="strike">${esc(site.country)}</span> · ${esc(site.min_clearance)} only</div>
+      </div>
+      <div class="card-dist">&#128274;</div>
+    </div>`;
+  }
+  return `<div class="card" data-site="${esc(site.id)}">
+    <div class="card-badge">${badgeHTML(site.category)}</div>
+    <div class="card-main">
+      <div class="card-title">${esc(site.title)}</div>
+      <div class="card-meta">${esc(cat.name || '')} · ${esc(site.era)} · ${esc(site.country)}${site.verified ? ' · Verified' : ''}${site.origin === 'seed' ? ' · Archive ref' : ''}</div>
+    </div>
+    <div class="card-dist">${esc(dist)}</div>
+  </div>`;
+}
+
+function renderList() {
+  const list = sortedForList();
+  $('list-count').textContent = `${list.length} / ${state.sites.length}`;
+  $('list-title').textContent = state.filters.q ? 'Search' : (state.here ? 'Nearest first' : 'Archive');
+  $('list-body').innerHTML = list.length
+    ? list.map(cardHTML).join('')
+    : `<div class="empty"><span class="serif">Nothing matches</span><span class="label">Adjust the filters or clear the search</span></div>`;
+  $('list-body').querySelectorAll('.card[data-site]').forEach((c) => {
+    c.addEventListener('click', () => { selectSite(c.dataset.site); });
+  });
+  $('filter-dot').style.display = activeFilterCount() ? 'block' : 'none';
+}
+
+// ---- PHOTOS ----------------------------------------------------------------
+async function photoURL(id) {
+  if (state.photoURLs.has(id)) return state.photoURLs.get(id);
+  const blob = await Store.getPhotoBlob(id);
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  state.photoURLs.set(id, url);
+  return url;
+}
+
+async function downscale(file, max = 1600, quality = 0.82) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * scale));
+  const h = Math.max(1, Math.round(bmp.height * scale));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(bmp, 0, 0, w, h);
+  if (bmp.close) bmp.close();
+  return await new Promise((res) => c.toBlob(res, 'image/jpeg', quality));
+}
+
+// ---- SITE DETAIL -----------------------------------------------------------
+async function openSite(site) {
+  $('site-title').textContent = site.title;
+  openSheet('sheet-site');
+  setNav('nav-map');
+  await renderSiteBody(site);
+}
+
+async function renderSiteBody(site) {
+  const cat = CATEGORIES[site.category] || {};
+  const [comments, visits] = await Promise.all([
+    Store.listComments(site.id),
+    Store.listVisits({ siteId: site.id })
+  ]);
+  const urls = [];
+  for (const pid of (site.photos || [])) {
+    const u = await photoURL(pid);
+    if (u) urls.push(u);
+  }
+  const dist = state.here ? fmtDist(haversine(state.here[1], state.here[0], site.lat, site.lng)) : null;
+
+  const stamps = [
+    site.verified
+      ? '<span class="stamp olive">Verified</span>'
+      : '<span class="stamp ink">Unverified</span>',
+    site.origin === 'seed' ? '<span class="stamp brass">Archive reference</span>' : '',
+    site.min_clearance ? `<span class="stamp oxide">${esc(site.min_clearance)}</span>` : ''
+  ].join(' ');
+
+  $('site-body').innerHTML = `
+    ${urls.length
+      ? `<div class="photo-strip">${urls.map((u) => `<img src="${u}" alt="">`).join('')}</div>`
+      : `<div class="photo-strip"><div class="ph-empty"><span class="label">No photographs filed</span></div></div>`}
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${stamps}</div>
+
+    <div class="prose">${esc(site.description).split('\n').filter(Boolean).map((p) => `<p>${p}</p>`).join('')}</div>
+
+    ${(site.hazards && site.hazards.length)
+      ? `<div class="label">Hazards on record</div>
+         <div class="tagrow">${site.hazards.map((h) => `<span class="hazard">${esc(HAZARDS[h] || h)}</span>`).join('')}</div>`
+      : ''}
+
+    <div class="section-rule"><span class="label">Record</span></div>
+    <div class="kv"><span class="label">Category</span><span class="v">${esc(cat.name || site.category)}</span></div>
+    <div class="kv"><span class="label">Era</span><span class="v">${esc(site.era)}</span></div>
+    <div class="kv"><span class="label">Country</span><span class="v">${esc(site.country)}</span></div>
+    <div class="kv"><span class="label">Coordinates</span><span class="v coord">${fmtCoord(site.lat, site.lng)}</span></div>
+    ${dist ? `<div class="kv"><span class="label">From you</span><span class="v">${esc(dist)}</span></div>` : ''}
+    <div class="kv"><span class="label">Access</span><span class="v">${esc(ACCESS[site.access] || '—')}</span></div>
+    <div class="kv"><span class="label">Filed by</span><span class="v">${site.discovered_by ? esc(site.discovered_by) : 'Archive'}${site.discovered_at ? ' · ' + new Date(site.discovered_at).toISOString().slice(0, 10) : ''}</span></div>
+    ${site.origin === 'seed'
+      ? `<p class="hint">Archive references are approximate — good to the site, not the doorway. Correct the position from the ground and it becomes a better record.</p>`
+      : ''}
+
+    <div class="btn-row">
+      <button class="btn primary" id="btn-visit">Log a visit</button>
+      <button class="btn" id="btn-share">Export card</button>
+    </div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn" id="btn-route">Copy coordinates</button>
+      ${site.origin === 'user' ? `<button class="btn" id="btn-edit">Edit</button>` : ''}
+    </div>
+    ${site.origin === 'user' ? `<div class="btn-row" style="margin-top:0"><button class="btn danger" id="btn-del">Delete entry</button></div>` : ''}
+
+    <div class="section-rule"><span class="label">Visits · ${visits.length}</span></div>
+    ${visits.length
+      ? visits.slice().reverse().map((v) => `
+        <div class="kv" style="align-items:flex-start">
+          <span class="label">${new Date(v.visited_at).toISOString().slice(0, 10)}</span>
+          <span class="v">${v.note ? esc(v.note) : '<span style="color:var(--ink-3)">Logged, no note</span>'}</span>
+        </div>`).join('')
+      : `<p class="hint">No visits logged yet.</p>`}
+
+    <div class="section-rule"><span class="label">Field notes · ${comments.length}</span></div>
+    ${comments.map((c) => `
+      <div style="padding:9px 0;border-bottom:1px solid var(--line-soft)">
+        <div class="label">${esc(c.author)} · ${new Date(c.created_at).toISOString().slice(0, 10)}</div>
+        <div style="font-size:14px;line-height:1.55;margin-top:4px">${esc(c.body)}</div>
+      </div>`).join('')}
+    <div class="field" style="margin-top:12px">
+      <textarea class="input" id="note-input" placeholder="Add a field note" style="min-height:68px"></textarea>
+      <div class="btn-row" style="margin-top:8px"><button class="btn" id="btn-note">File note</button></div>
+    </div>
+  `;
+
+  const on = (id, fn) => { const b = $(id); if (b) b.addEventListener('click', fn); };
+  on('btn-visit', () => logVisit(site));
+  on('btn-share', () => openShare(site));
+  on('btn-route', async () => {
+    const txt = `${site.lat.toFixed(5)}, ${site.lng.toFixed(5)}`;
+    try { await navigator.clipboard.writeText(txt); showToast('Coordinates copied'); }
+    catch (e) { showToast(txt); }
+  });
+  on('btn-edit', () => openForm(site));
+  on('btn-del', async () => {
+    if (!confirm(`Delete "${site.title}" and its notes? This cannot be undone.`)) return;
+    for (const pid of (site.photos || [])) await Store.deletePhoto(pid);
+    await Store.deleteSite(site.id);
+    closeSheets();
+    await reload();
+    showToast('Entry deleted');
+  });
+  on('btn-note', async () => {
+    const body = $('note-input').value.trim();
+    if (!body) return;
+    await Store.addComment({
+      id: uid(), site_id: site.id, author: state.profile.handle,
+      body, created_at: Date.now()
+    });
+    await renderSiteBody(site);
+    showToast('Note filed');
+  });
+}
+
+async function logVisit(site) {
+  const note = prompt('Field note for this visit (optional)', '');
+  if (note === null) return;
+  await Store.addVisit({
+    id: uid(), site_id: site.id, visited_at: Date.now(),
+    note: note.trim(), photos: []
+  });
+  await reload();
+  await renderSiteBody(site);
+  showToast('Visit logged');
+}
+
+// ---- DROP / FORM -----------------------------------------------------------
+function startDrop() {
+  state.dropping = true;
+  closeSheets();
+  setNav('nav-drop');
+  $('crosshair').classList.add('show');
+  $('drop-bar').classList.add('show');
+  $('dock').style.display = 'none';
+  const c = map.getCenter();
+  $('drop-coord').textContent = fmtCoord(c.lat, c.lng);
+}
+
+function cancelDrop() {
+  state.dropping = false;
+  $('crosshair').classList.remove('show');
+  $('drop-bar').classList.remove('show');
+  $('dock').style.display = '';
+  setNav('nav-map');
+}
+
+let formState = null;
+
+function openForm(site, latlng) {
+  const isNew = !site;
+  formState = {
+    id: isNew ? uid() : site.id,
+    lat: isNew ? latlng.lat : site.lat,
+    lng: isNew ? latlng.lng : site.lng,
+    hazards: isNew ? [] : (site.hazards || []).slice(),
+    photos: isNew ? [] : (site.photos || []).slice(),
+    existing: site || null
+  };
+  $('form-title').textContent = isNew ? 'New entry' : 'Edit entry';
+  $('form-body').innerHTML = `
+    <div class="field">
+      <span class="label">Title</span>
+      <input class="input" id="f-title" value="${isNew ? '' : esc(site.title)}" placeholder="What is it called?" />
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="field" style="flex:1">
+        <span class="label">Category</span>
+        <select class="input" id="f-cat">
+          ${Object.keys(CATEGORIES).map((k) => `<option value="${k}"${!isNew && site.category === k ? ' selected' : ''}>${esc(CATEGORIES[k].name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="flex:1">
+        <span class="label">Era</span>
+        <select class="input" id="f-era">
+          ${ERAS.map((e) => `<option${!isNew && site.era === e ? ' selected' : ''}>${esc(e)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="field" style="flex:0 0 96px">
+        <span class="label">Country</span>
+        <input class="input" id="f-country" maxlength="3" value="${isNew ? '' : esc(site.country)}" placeholder="BE" style="text-transform:uppercase" />
+      </div>
+      <div class="field" style="flex:1">
+        <span class="label">Access</span>
+        <select class="input" id="f-access">
+          ${Object.keys(ACCESS).map((k) => `<option value="${k}"${!isNew && site.access === k ? ' selected' : ''}>${esc(ACCESS[k])}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Coordinates</span>
+      <div class="coord" id="f-coord" style="padding:8px 0">${fmtCoord(formState.lat, formState.lng)}</div>
+      <div class="hint">Taken from the crosshair. Reopen the marker tool to reposition.</div>
+    </div>
+    <div class="field">
+      <span class="label">Description</span>
+      <textarea class="input" id="f-desc" placeholder="What is there, what state is it in, what should someone know before going?">${isNew ? '' : esc(site.description)}</textarea>
+    </div>
+    <div class="field">
+      <span class="label">Hazards</span>
+      <div class="chips" id="f-hazards">
+        ${Object.keys(HAZARDS).map((k) => `<button type="button" class="chip${formState.hazards.includes(k) ? ' on' : ''}" data-h="${k}">${esc(HAZARDS[k])}</button>`).join('')}
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Photographs</span>
+      <input type="file" id="f-photos" accept="image/*" multiple style="font-family:var(--mono);font-size:11px" />
+      <div class="hint">Downscaled to 1600 px before filing. Stored on this device only.</div>
+      <div id="f-photo-list" class="tagrow"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="f-cancel">Cancel</button>
+      <button class="btn primary" id="f-save">${isNew ? 'File entry' : 'Save changes'}</button>
+    </div>
+    <p class="hint">Entries you file are marked unverified until someone else confirms them. Seeded archive references never count toward your clearance.</p>
+  `;
+
+  $('f-hazards').querySelectorAll('.chip').forEach((b) => {
+    b.addEventListener('click', () => {
+      const k = b.dataset.h;
+      const i = formState.hazards.indexOf(k);
+      if (i > -1) formState.hazards.splice(i, 1); else formState.hazards.push(k);
+      b.classList.toggle('on');
+    });
+  });
+
+  renderFormPhotos();
+
+  $('f-photos').addEventListener('change', async (ev) => {
+    const files = Array.from(ev.target.files || []);
+    if (!files.length) return;
+    showToast('Filing photographs…');
+    for (const f of files) {
+      try {
+        const blob = await downscale(f);
+        const pid = await Store.putPhoto(blob);
+        formState.photos.push(pid);
+      } catch (err) {
+        showToast('Could not read one image');
+      }
+    }
+    ev.target.value = '';
+    renderFormPhotos();
+  });
+
+  $('f-cancel').addEventListener('click', () => { closeSheets(); });
+  $('f-save').addEventListener('click', saveForm);
+
+  openSheet('sheet-form');
+}
+
+function renderFormPhotos() {
+  const box = $('f-photo-list');
+  if (!box) return;
+  box.innerHTML = formState.photos.length
+    ? formState.photos.map((p, i) => `<span class="hazard" data-rm="${i}" style="cursor:pointer">Photo ${i + 1} &times;</span>`).join('')
+    : '';
+  box.querySelectorAll('[data-rm]').forEach((s) => s.addEventListener('click', async () => {
+    const i = +s.dataset.rm;
+    const pid = formState.photos[i];
+    formState.photos.splice(i, 1);
+    await Store.deletePhoto(pid);
+    renderFormPhotos();
+  }));
+}
+
+async function saveForm() {
+  const title = $('f-title').value.trim();
+  const desc = $('f-desc').value.trim();
+  if (!title) { showToast('An entry needs a title'); return; }
+  const prev = formState.existing;
+  const site = {
+    id: formState.id,
+    title,
+    category: $('f-cat').value,
+    era: $('f-era').value,
+    country: ($('f-country').value.trim() || '??').toUpperCase(),
+    lat: formState.lat,
+    lng: formState.lng,
+    description: desc,
+    access: $('f-access').value,
+    hazards: formState.hazards.slice(),
+    photos: formState.photos.slice(),
+    verified: prev ? prev.verified : false,
+    min_clearance: prev ? prev.min_clearance : null,
+    origin: 'user',
+    discovered_by: prev ? prev.discovered_by : state.profile.handle,
+    discovered_at: prev ? prev.discovered_at : Date.now(),
+    created_at: prev ? prev.created_at : Date.now(),
+    updated_at: Date.now()
+  };
+  await Store.putSite(site);
+  closeSheets();
+  await reload();
+  showToast(prev ? 'Entry updated' : 'Entry filed');
+  selectSite(site.id);
+}
+
+// ---- CLEARANCE -------------------------------------------------------------
+/* Access, not score. Tiers are entry requirements you meet, and sites above
+   your tier stay visible as redacted entries — being shown that something is
+   withheld is the whole mechanic. Hiding them would just be a shorter list. */
+const TIER_REQS = {
+  VETERAN: [
+    { key: 'visits', need: 3, text: 'visits logged' },
+    { key: 'photos', need: 2, text: 'photographs filed' }
+  ],
+  ELITE: [
+    { key: 'visits', need: 10, text: 'visits logged' },
+    { key: 'sites', need: 3, text: 'entries filed' },
+    { key: 'distance', need: 25000, text: 'ground covered', fmt: fmtDist }
+  ]
+};
+
+function computeStats() {
+  const visits = state.visits || [];
+  const mine = state.sites.filter((s) => s.origin === 'user');
+  const photos = mine.reduce((n, s) => n + (s.photos ? s.photos.length : 0), 0);
+
+  let distance = 0;
+  let last = null;
+  for (const v of visits) {
+    const s = state.sites.find((x) => x.id === v.site_id);
+    if (!s) continue;
+    if (last && (last.lat !== s.lat || last.lng !== s.lng)) {
+      distance += haversine(last.lat, last.lng, s.lat, s.lng);
+    }
+    last = s;
+  }
+
+  const cells = new Set();
+  visits.forEach((v) => {
+    const s = state.sites.find((x) => x.id === v.site_id);
+    if (s) cells.add(`${Math.floor(s.lat * 10)}:${Math.floor(s.lng * 10)}`);
+  });
+
+  state.stats = {
+    visits: visits.length,
+    sites: mine.length,
+    photos,
+    distance,
+    cells: cells.size,
+    countries: new Set(visits.map((v) => {
+      const s = state.sites.find((x) => x.id === v.site_id);
+      return s && s.country;
+    }).filter(Boolean)).size
+  };
+}
+
+function meets(tier) {
+  const st = state.stats || {};
+  return (TIER_REQS[tier] || []).every((r) => (st[r.key] || 0) >= r.need);
+}
+
+function currentTier() {
+  if (meets('ELITE')) return 'ELITE';
+  if (meets('VETERAN')) return 'VETERAN';
+  return 'FIELD';
+}
+
+function nextTier() {
+  const t = currentTier();
+  return t === 'FIELD' ? 'VETERAN' : (t === 'VETERAN' ? 'ELITE' : null);
+}
+
+function renderProfile() {
+  const st = state.stats || {};
+  const tier = currentTier();
+  const next = nextTier();
+  const lockedCount = state.sites.filter(isLocked).length;
+
+  $('profile-body').innerHTML = `
+    <div class="clearance">
+      <div class="label">Archive clearance</div>
+      <div class="tier-name">${esc(tier)}</div>
+      <div class="tier-sub">${esc(state.profile ? state.profile.handle : '—')}</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="n">${st.visits || 0}</div><div class="label">Visits logged</div></div>
+      <div class="stat"><div class="n">${st.sites || 0}</div><div class="label">Entries filed</div></div>
+      <div class="stat"><div class="n">${fmtDist(st.distance || 0) || '0 m'}</div><div class="label">Ground covered</div></div>
+      <div class="stat"><div class="n">${st.cells || 0}</div><div class="label">Sectors entered</div></div>
+    </div>
+
+    ${next ? `
+      <div class="section-rule"><span class="label">Entry requirements · ${esc(next)}</span></div>
+      ${TIER_REQS[next].map((r) => {
+        const have = st[r.key] || 0;
+        const ok = have >= r.need;
+        const f = r.fmt || ((v) => v);
+        return `<div class="req${ok ? ' met' : ''}">
+          <span class="tick">${ok ? '✓' : '○'}</span>
+          <span>${esc(f(r.need))} ${esc(r.text)}</span>
+          <span class="n">${esc(String(f(have)))}</span>
+        </div>`;
+      }).join('')}
+      <p class="hint">${lockedCount ? `${lockedCount} entr${lockedCount === 1 ? 'y is' : 'ies are'} withheld at your clearance.` : 'Nothing in the archive is withheld from you right now.'}</p>
+    ` : `
+      <div class="section-rule"><span class="label">Full archive access</span></div>
+      <p class="hint">Every entry on file is open to you.</p>
+    `}
+
+    <div class="section-rule"><span class="label">Explorers</span></div>
+    <div class="locked-panel">
+      <div class="label" style="margin-bottom:6px">Requires network archive</div>
+      <div style="font-size:13.5px;line-height:1.55;color:var(--ink-2)">
+        Following other explorers and reading their finds needs a shared archive.
+        This build keeps everything on your device, so there is no one else here yet.
+      </div>
+    </div>
+
+    <div class="section-rule"><span class="label">Handle</span></div>
+    <div class="field">
+      <input class="input" id="p-handle" value="${esc(state.profile ? state.profile.handle : '')}" />
+      <div class="btn-row"><button class="btn" id="p-save">Save handle</button></div>
+    </div>
+
+    <div class="section-rule"><span class="label">Storage</span></div>
+    <p class="hint">Entries, visits, notes and photographs live in this browser only (IndexedDB). Clearing site data erases them. Nothing is uploaded.</p>
+    <div class="btn-row"><button class="btn" id="p-export">Export archive (JSON)</button></div>
+  `;
+
+  $('p-save').addEventListener('click', async () => {
+    const h = $('p-handle').value.trim() || 'Explorer';
+    state.profile.handle = h;
+    await Store.putProfile(state.profile);
+    showToast('Handle saved');
+    renderProfile();
+  });
+  $('p-export').addEventListener('click', exportArchive);
+}
+
+async function exportArchive() {
+  const visits = await Store.listVisits({});
+  const sites = state.sites.filter((s) => s.origin === 'user');
+  const comments = [];
+  for (const s of state.sites) comments.push(...(await Store.listComments(s.id)));
+  const payload = { exported_at: new Date().toISOString(), profile: state.profile, sites, visits, comments };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'redoubt-archive.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  showToast('Archive exported');
+}
+
+// ---- FILTERS ---------------------------------------------------------------
+function renderFilters() {
+  const f = state.filters;
+  const countries = Array.from(new Set(state.sites.map((s) => s.country))).sort();
+  const group = (title, items, sel, attr) => `
+    <div class="field">
+      <span class="label">${title}</span>
+      <div class="chips" data-group="${attr}">
+        ${items.map((it) => `<button type="button" class="chip${sel.includes(it.v) ? ' on' : ''}" data-v="${esc(it.v)}">${esc(it.t)}</button>`).join('')}
+      </div>
+    </div>`;
+
+  $('filter-body').innerHTML = `
+    ${group('Category', Object.keys(CATEGORIES).map((k) => ({ v: k, t: CATEGORIES[k].name })), f.categories, 'categories')}
+    ${group('Era', ERAS.map((e) => ({ v: e, t: e })), f.eras, 'eras')}
+    ${group('Access', Object.keys(ACCESS).map((k) => ({ v: k, t: ACCESS[k] })), f.access, 'access')}
+    ${group('Country', countries.map((c) => ({ v: c, t: c })), f.countries, 'countries')}
+    <div class="field">
+      <span class="label">Status</span>
+      <div class="chips">
+        <button type="button" class="chip${f.verified ? ' on' : ''}" id="f-verified">Verified only</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="f-clear">Clear all</button>
+      <button class="btn primary" id="f-apply">Show ${filteredSites().length} entries</button>
+    </div>
+  `;
+
+  $('filter-body').querySelectorAll('.chips[data-group]').forEach((box) => {
+    const key = box.dataset.group;
+    box.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+      const v = b.dataset.v;
+      const arr = state.filters[key];
+      const i = arr.indexOf(v);
+      if (i > -1) arr.splice(i, 1); else arr.push(v);
+      b.classList.toggle('on');
+      renderMarkers();
+      $('f-apply').textContent = `Show ${filteredSites().length} entries`;
+    }));
+  });
+  $('f-verified').addEventListener('click', () => {
+    state.filters.verified = !state.filters.verified;
+    $('f-verified').classList.toggle('on');
+    renderMarkers();
+    $('f-apply').textContent = `Show ${filteredSites().length} entries`;
+  });
+  $('f-clear').addEventListener('click', () => {
+    state.filters = { q: state.filters.q, categories: [], eras: [], countries: [], verified: false, access: [] };
+    renderFilters(); renderMarkers(); renderList();
+  });
+  $('f-apply').addEventListener('click', () => {
+    renderList();
+    openSheet('sheet-list');
+    setNav('nav-archive');
+  });
+}
+
+// ---- SHARE CARD ------------------------------------------------------------
+/* CSS filters do not survive toBlob, so the duotone is reimplemented here
+   against the pixel buffer. */
+function duotone(ctx, x, y, w, h) {
+  const img = ctx.getImageData(x, y, w, h);
+  const d = img.data;
+  const dark = [43, 36, 27], light = [233, 224, 205];
+  for (let i = 0; i < d.length; i += 4) {
+    const l = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+    const t = Math.min(1, Math.max(0, (l - 0.04) * 1.12));
+    d[i]     = dark[0] + (light[0] - dark[0]) * t;
+    d[i + 1] = dark[1] + (light[1] - dark[1]) * t;
+    d[i + 2] = dark[2] + (light[2] - dark[2]) * t;
+  }
+  ctx.putImageData(img, x, y);
+}
+
+function wrapText(ctx, text, maxW) {
+  const words = String(text).split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+let shareSite = null;
+
+async function openShare(site) {
+  shareSite = site;
+  $('modal-share').classList.add('show');
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) { /* fonts optional */ }
+  await drawShareCard(site);
+}
+
+async function drawShareCard(site) {
+  const cv = $('share-canvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cat = CATEGORIES[site.category] || CATEGORIES.bunker;
+
+  ctx.fillStyle = '#e9e0cd';
+  ctx.fillRect(0, 0, W, H);
+
+  /* The text block is laid out from the bottom up, and the photo panel takes
+     whatever is left — otherwise a one-line title leaves a dead band. */
+  const metaY = H - 96;
+  const coordY = metaY - 46;
+  ctx.font = '600 66px Spectral, Georgia, serif';
+  const lines = wrapText(ctx, site.title, W - 144).slice(0, 3);
+  const titleBaseline = coordY - 60;
+  const titleTop = titleBaseline - (lines.length - 1) * 74;
+  const stampTop = titleTop - 96;
+
+  const py = 96;
+  const ph = stampTop - 44 - py;
+  ctx.fillStyle = '#cfc0a1';
+  ctx.fillRect(72, py, W - 144, ph);
+  const pid = (site.photos || [])[0];
+  const url = pid ? await photoURL(pid) : null;
+  if (url) {
+    const img = new Image();
+    img.src = url;
+    try { await img.decode(); } catch (e) { /* fall through to the blank panel */ }
+    if (img.naturalWidth) {
+      const pw = W - 144;
+      const scale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
+      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(72, py, pw, ph); ctx.clip();
+      ctx.drawImage(img, 72 + (pw - dw) / 2, py + (ph - dh) / 2, dw, dh);
+      ctx.restore();
+      duotone(ctx, 72, py, pw, ph);
+    }
+  } else {
+    ctx.fillStyle = '#8b8072';
+    ctx.font = '500 26px "DM Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO PHOTOGRAPH ON FILE', W / 2, py + ph / 2);
+    ctx.textAlign = 'left';
+  }
+  ctx.strokeStyle = '#26211a';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(72, py, W - 144, ph);
+
+  // header
+  ctx.fillStyle = '#26211a';
+  ctx.font = '600 40px Spectral, Georgia, serif';
+  ctx.fillText('REDOUBT', 72, 66);
+  ctx.font = '500 20px "DM Mono", monospace';
+  ctx.fillStyle = '#8b8072';
+  ctx.textAlign = 'right';
+  ctx.fillText(String(site.era).toUpperCase(), W - 72, 64);
+  ctx.textAlign = 'left';
+
+  // category stamp
+  ctx.strokeStyle = cat.color;
+  ctx.lineWidth = 3;
+  ctx.font = '500 22px "DM Mono", monospace';
+  const stampTxt = String(cat.name).toUpperCase();
+  const sw = ctx.measureText(stampTxt).width + 34;
+  ctx.save();
+  ctx.translate(72, stampTop);
+  ctx.rotate(-0.028);
+  ctx.strokeRect(0, 0, sw, 46);
+  ctx.fillStyle = cat.color;
+  ctx.fillText(stampTxt, 17, 31);
+  ctx.restore();
+
+  // title
+  ctx.fillStyle = '#26211a';
+  ctx.font = '600 66px Spectral, Georgia, serif';
+  lines.forEach((ln, i) => ctx.fillText(ln, 72, titleTop + i * 74));
+
+  // coordinates + provenance
+  ctx.font = '400 28px "DM Mono", monospace';
+  ctx.fillStyle = '#5f564a';
+  ctx.fillText(fmtCoord(site.lat, site.lng), 72, coordY);
+  ctx.font = '500 22px "DM Mono", monospace';
+  ctx.fillStyle = '#8b8072';
+  ctx.fillText(`${String(site.country).toUpperCase()}  ·  ${site.verified ? 'VERIFIED' : 'UNVERIFIED'}  ·  ${site.discovered_by ? String(site.discovered_by).toUpperCase() : 'ARCHIVE'}`, 72, metaY);
+
+  // frame
+  ctx.strokeStyle = 'rgba(38,33,26,0.35)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(28, 28, W - 56, H - 56);
+}
+
+async function saveShareCard() {
+  const cv = $('share-canvas');
+  const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+  if (!blob) { showToast('Could not render the card'); return; }
+  const name = (shareSite ? shareSite.title : 'redoubt').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.png';
+  const file = new File([blob], name, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: shareSite.title }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  showToast('Card saved');
+}
+
+// ---- BOOT ------------------------------------------------------------------
+async function seedIfNeeded() {
+  if (Store.kind !== 'local') return;   // a shared archive is seeded server-side
+  const flag = await txn('meta', 'readonly', (s) => s.get('seeded'));
+  if (flag) return;
+  for (const s of SEED) await Store.putSite(s);
+  await txn('meta', 'readwrite', (s) => s.put({ id: 'seeded', at: Date.now(), count: SEED.length }));
+}
+
+async function reload() {
+  state.sites = await Store.listSites();
+  state.visits = await Store.listVisits({});
+  computeStats();
+  renderMarkers();
+  renderList();
+}
+
+function wireUI() {
+  // nav
+  $('nav-map').addEventListener('click', () => { cancelDrop(); closeSheets(); });
+  $('nav-archive').addEventListener('click', () => { cancelDrop(); renderList(); openSheet('sheet-list'); setNav('nav-archive'); });
+  $('nav-drop').addEventListener('click', () => { state.dropping ? cancelDrop() : startDrop(); });
+  $('nav-profile').addEventListener('click', () => { cancelDrop(); renderProfile(); openSheet('sheet-profile'); setNav('nav-profile'); });
+
+  $('backdrop').addEventListener('click', closeSheets);
+  document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeSheets));
+
+  // dock
+  $('dock-head').addEventListener('click', () => $('dock').classList.toggle('open'));
+  $('sl-reveal').addEventListener('input', (e) => applyReveal(+e.target.value));
+  $('sl-light').addEventListener('input', (e) => applyLight(+e.target.value));
+  $('sl-depth').addEventListener('input', (e) => applyDepth(+e.target.value));
+  $('tog-3d').addEventListener('click', () => setTerrain3D(!state.terrain3d));
+  $('tog-snap').addEventListener('click', () => {
+    const next = state.reveal >= 99 ? 0 : (state.reveal >= 49 ? 100 : 50);
+    $('sl-reveal').value = next;
+    applyReveal(next);
+  });
+  $('sel-source').addEventListener('change', (e) => setReliefSource(e.target.value));
+  $('sel-method').addEventListener('change', (e) => applyMethod(e.target.value));
+
+  // map tools
+  $('btn-labels').addEventListener('click', () => {
+    state.labels = !state.labels;
+    $('btn-labels').classList.toggle('on', state.labels);
+    if (map.getLayer('places')) map.setLayoutProperty('places', 'visibility', state.labels ? 'visible' : 'none');
+  });
+  $('btn-locate').addEventListener('click', locate);
+
+  // search + filters
+  $('search').addEventListener('input', (e) => {
+    state.filters.q = e.target.value;
+    renderMarkers();
+    renderList();
+    if (e.target.value.trim()) { openSheet('sheet-list'); setNav('nav-archive'); }
+  });
+  $('btn-filter').addEventListener('click', () => { renderFilters(); openSheet('sheet-filter'); });
+
+  // drop bar
+  $('drop-cancel').addEventListener('click', cancelDrop);
+  $('drop-confirm').addEventListener('click', () => {
+    const c = map.getCenter();
+    cancelDrop();
+    openForm(null, { lat: c.lat, lng: c.lng });
+  });
+
+  // modals
+  $('notice-ok').addEventListener('click', async () => {
+    $('modal-notice').classList.remove('show');
+    state.profile.notice_ack = true;
+    await Store.putProfile(state.profile);
+  });
+  $('share-close').addEventListener('click', () => $('modal-share').classList.remove('show'));
+  $('share-save').addEventListener('click', saveShareCard);
+
+  $('dock-note').textContent = reliefSource(state.reliefId).note;
+  $('sel-method').value = state.method;
+  applyMethod(state.method);
+  refreshSourceOptions();
+}
+
+function locate() {
+  if (!navigator.geolocation) { showToast('No geolocation on this device'); return; }
+  showToast('Locating…');
+  navigator.geolocation.getCurrentPosition((pos) => {
+    state.here = [pos.coords.longitude, pos.coords.latitude];
+    map.easeTo({ center: state.here, zoom: Math.max(map.getZoom(), 12), duration: 900 });
+    if (hereMarker) hereMarker.remove();
+    const n = document.createElement('div');
+    n.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="#8f3f2a" stroke-width="2"/>
+      <circle cx="10" cy="10" r="3" fill="#8f3f2a"/></svg>`;
+    hereMarker = new maplibregl.Marker({ element: n }).setLngLat(state.here).addTo(map);
+    renderList();
+    showToast('Position fixed — archive sorted by distance');
+  }, () => {
+    showToast('Location unavailable');
+  }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+}
+
+async function boot() {
+  if (typeof maplibregl === 'undefined') {
+    state.layerErrors.sat = 99;
+    document.body.insertAdjacentHTML('afterbegin',
+      `<div style="position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;z-index:5">
+         <div><div class="label">Map library unavailable</div>
+         <p style="max-width:320px;margin-top:8px;line-height:1.6;font-size:14px">
+         MapLibre could not be loaded from the CDN. The archive below still works.</p></div></div>`);
+  } else {
+    initMap();
+  }
+
+  let profile = await Store.getProfile();
+  if (!profile) {
+    profile = { id: 'profile', handle: 'Explorer', created_at: Date.now(), notice_ack: false };
+    await Store.putProfile(profile);
+  }
+  state.profile = profile;
+
+  await seedIfNeeded();
+  await reload();
+  wireUI();
+
+  if (!profile.notice_ack) $('modal-notice').classList.add('show');
+  // test/debug handle — the app never reads from it
+  window.__redoubt = { state, Store, filteredSites, currentTier, drawShareCard, reload, get map() { return map; } };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  boot().catch((err) => {
+    console.error(err);
+    showToast('Startup failed: ' + err.message);
+  });
+});
+</script>
+</body>
+</html>
