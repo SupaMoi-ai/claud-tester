@@ -765,14 +765,27 @@ const SAT_TILES = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Im
 const LABEL_TILES = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
 
 /* Relief-source registry.
-   Each entry is a raster-dem source. `bbox` of null means global; an entry with
-   a bbox is only offered when the viewport centre falls inside it, so regional
-   LiDAR can be added later as a config entry rather than a rewrite.
-   To add one, uncomment the template below and validate the endpoint from a
-   real browser — tile hosts are not reachable from every build sandbox. */
+
+   Two kinds of source, because national elevation portals and global DEM tiles
+   are not the same animal:
+
+     kind:'dem'    RGB-encoded elevation tiles (terrarium / mapbox). MapLibre
+                   shades these itself, so the light dial, the hillshade method
+                   and 3D terrain all work.
+     kind:'raster' A hillshade someone else already rendered, usually WMS. The
+                   lighting is baked into the picture, so the dial and 3D have
+                   nothing to act on — the UI disables them and says why.
+
+   `bbox` of null means global. An entry with a bbox is only offered when the
+   viewport centre falls inside it. Entries flagged `unverified` are probed in
+   the browser before being offered, because several national geoportals are
+   unreachable from build sandboxes and a URL nobody has exercised is a guess.
+   Paste a confirmed endpoint into the dock's custom-source field to try one
+   without editing this file. */
 const RELIEF_SOURCES = [
   {
     id: 'terrarium',
+    kind: 'dem',
     name: 'Global · Terrarium 30 m',
     tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
     encoding: 'terrarium',
@@ -780,19 +793,47 @@ const RELIEF_SOURCES = [
     maxzoom: 15,
     bbox: null,
     attribution: 'Elevation: AWS Terrain Tiles (SRTM / NED / others)',
-    note: 'Global, ~30 m ground sample. Reveals ramparts, ditches, spoil heaps and large emplacements through tree cover. It will not resolve a single bunker — that needs 0.5–1 m LiDAR, which only exists region by region.'
+    note: 'Global, ~30 m ground sample. In Rogaland that is enough for the Jæren moraine ridges, gun positions cut into hillsides and quarry benches — not for a single bunker. Sub-metre LiDAR is the next row down.'
+  },
+  {
+    id: 'kv-dtm',
+    kind: 'raster',
+    name: 'Rogaland · Kartverket DTM',
+    unverified: true,
+    // WMS as a raster source: MapLibre substitutes the tile extent into
+    // {bbox-epsg-3857}. Layer name is the part most likely to need correcting —
+    // check the service's GetCapabilities.
+    tiles: ['https://wms.geonorge.no/skwms1/wms.hoyde-dtm-nhm-25833?service=WMS&version=1.3.0&request=GetMap' +
+            '&layers=NHM_DTM_25833:skyggerelieff&styles=&format=image/png&transparent=true' +
+            '&crs=EPSG:3857&width=256&height=256&bbox={bbox-epsg-3857}'],
+    probe: 'https://wms.geonorge.no/skwms1/wms.hoyde-dtm-nhm-25833?service=WMS&version=1.3.0&request=GetMap' +
+           '&layers=NHM_DTM_25833:skyggerelieff&styles=&format=image/png&transparent=true' +
+           '&crs=EPSG:3857&width=64&height=64&bbox=600000,8100000,640000,8140000',
+    tileSize: 256,
+    maxzoom: 19,
+    bbox: [4.5, 58.1, 7.4, 59.6],
+    attribution: 'Høydedata © Kartverket (CC BY 4.0)',
+    note: 'Kartverket national LiDAR terrain model, sub-metre over most of Rogaland. This is the layer that shows individual Atlantic Wall works under the heather on Jæren. Pre-rendered, so the light dial and 3D are inert while it is selected.'
+  },
+  {
+    id: 'kv-topo',
+    kind: 'raster',
+    name: 'Norway · Kartverket topo (grey)',
+    unverified: true,
+    tiles: ['https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/{z}/{y}/{x}.png'],
+    probe: 'https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/10/300/540.png',
+    tileSize: 256,
+    maxzoom: 18,
+    bbox: [4.0, 57.8, 31.5, 71.5],
+    attribution: '© Kartverket',
+    note: 'Not a relief layer — Kartverket’s grey topographic map. Useful as a sanity check for names, tracks and contours when the hillshade shows you something and you want to know what it already is.'
   }
-  /* , {
-    id: 'ahn',
-    name: 'Netherlands · AHN 0.5 m',
-    tiles: ['<regional DTM tile or WMS-as-raster endpoint>'],
-    encoding: 'terrarium',        // or 'mapbox' — must match the source's encoding
-    tileSize: 256, maxzoom: 18,
-    bbox: [3.2, 50.7, 7.3, 53.6], // [w, s, e, n]
-    attribution: 'AHN — Actueel Hoogtebestand Nederland',
-    note: 'Sub-metre LiDAR DTM. Individual bunkers, revetments and trench lines are legible.'
-  } */
 ];
+
+/* Rogaland. The launch region: Festung Norwegen left the Jæren coast and the
+   Stavanger approaches dense with Atlantic Wall works, and Kartverket publishes
+   the LiDAR to find them with. */
+const HOME_VIEW = { center: [5.62, 58.83], zoom: 9.1 };
 
 const CLEARANCES = ['FIELD', 'VETERAN', 'ELITE'];
 
@@ -832,6 +873,26 @@ const ACCESS = {
    from the ground. Seed entries carry origin:'seed' and never credit a user or
    count toward clearance. */
 const SEED = [
+// --- Rogaland, the launch region -------------------------------------------
+["Vigdelfortet","bunker","WWII","NO",58.8636,5.5619,"Atlantic Wall battery on the Sola coast, holding gun positions, bunkers and trench lines in the dunes above Vigdelstranda. Open as a coastal heritage area.","public",["unstable"],true,null],
+["Fjøløy fort","fort","WWII","NO",59.0956,5.5344,"Coastal fort covering the northern approach to Stavanger, built by German forces and kept in Norwegian service through the Cold War. Gun emplacements and magazines remain in the open.","public",["vertical"],true,null],
+["Tungenes fyr","bunker","WWII","NO",59.0289,5.5817,"Lighthouse on the Randaberg headland with German coastal positions cut into the rock around it, covering the Boknafjord entrance.","public",[],true,null],
+["Obrestad fyr","bunker","WWII","NO",58.6603,5.5558,"Jæren lighthouse ringed by Atlantic Wall works — command bunker, shelters and gun positions dug into the low cliff behind the beach.","public",[],true,null],
+["Kvassheim fyr","bunker","WWII","NO",58.5256,5.6489,"Former lighthouse station on the open Jæren shore with German positions in the dunes, on one of the most heavily fortified stretches of the Norwegian coast.","public",[],true,null],
+["Orrestranda","bunker","WWII","NO",58.7364,5.5172,"Beach defences along the Klepp dunes — bunkers, shelters and the remains of obstacle lines, much of it half-buried and shifting with the sand.","permissive",["unstable"],true,null],
+["Sele og Hellestø","bunker","WWII","NO",58.8306,5.5528,"Anti-tank obstacle line — concrete 'teeth' running through the dunes — with associated positions covering the beach landing ground south of Sola.","permissive",[],true,null],
+["Sola flystasjon","bunker","WWII","NO",58.8797,5.6353,"Taken on the first day of the 1940 invasion and rebuilt into the main Luftwaffe base in southern Norway. Dispersal pens, shelters and bunkers survive around an active airport.","restricted",["private"],true,"VETERAN"],
+["Rott","fort","WWII","NO",58.9203,5.4589,"Small island off Sola fortified as an outer strongpoint for the Stavanger approaches, with batteries and shelters across its low ground.","permissive",["unstable"],false,null],
+["Utsira","bunker","WWII","NO",59.3072,4.8756,"Norway's westernmost inhabited island, held as a radar and observation station with bunkers and positions along its exposed edges.","public",[],true,null],
+["Eigerøya","bunker","WWII","NO",58.4325,5.8564,"Coastal positions on the island guarding Egersund harbour, scattered through heath and rock along the seaward side.","permissive",["vertical"],true,null],
+["Krossberg","bunker","WWII","NO",58.9614,5.6119,"Battery position on the rock above the Stavanger shoreline at Kvernevik, covering the Hafrsfjord approach.","public",[],true,null],
+["Ferkingstad og Skudeneshavn","bunker","WWII","NO",59.1500,5.2333,"Atlantic Wall positions along the southern tip of Karmøy, watching the shipping lane into Karmsundet.","permissive",[],false,null],
+["Feistein fyr","bunker","WWII","NO",58.8250,5.5300,"Island lighthouse off the Klepp coast with wartime remains; landing depends entirely on the sea state.","restricted",["vertical","private"],false,null],
+["Visnes gruver","mine","Other","NO",59.3489,5.2078,"Copper workings on Karmøy that supplied a large share of Europe's copper in the 19th century, including the metal for the Statue of Liberty. Shafts, adits and industrial ruins remain.","public",["vertical","dark","unstable"],true,null],
+["Helleren i Jøssingfjord","shelter","Other","NO",58.3167,6.3653,"Two wooden houses standing under an enormous rock overhang that keeps them dry without roofs. The fjord itself is better known for the 1940 Altmark incident.","public",[],true,null],
+["Titania, Tellnes","mine","Other","NO",58.3181,6.4236,"Europe's largest ilmenite operation, an open pit cut deep into the Sokndal hills with a working underground network beneath it.","restricted",["private","vertical"],true,"VETERAN"],
+
+// --- wider archive ----------------------------------------------------------
 ["Batterie Todt","bunker","WWII","FR",50.8489,1.6047,"Coastal artillery battery on the Pas-de-Calais, built to shell the Kent coast. One of four casemates survives with its 380 mm gun emplacement intact.","public",["unstable"],true,null],
 ["La Coupole","bunker","WWII","FR",50.6819,2.2447,"A five-metre concrete dome over a chalk quarry, built as a V-2 launch and storage complex and never completed. The tunnel network beneath it runs for hundreds of metres.","public",[],true,null],
 ["Blockhaus d'Éperlecques","bunker","WWII","FR",50.8386,2.1836,"Vast V-2 assembly bunker abandoned after repeated bombing. The surviving north wall carries visible blast damage.","public",["unstable"],true,null],
@@ -866,8 +927,13 @@ const SEED = [
 ["Objekt 825 GTS","tunnel","Cold War","UA",44.4997,33.5972,"Submarine repair and armament works cut through the rock at Balaklava, with a flooded canal running clean through the hill.","public",["flooding","dark"],true,"VETERAN"],
 ["Project Greek Island","shelter","Cold War","US",37.7861,-80.3036,"Congressional relocation bunker built under a resort wing, its existence public only since 1992.","public",[],true,"ELITE"],
 ["Flakturm Augarten","bunker","WWII","AT",48.2264,16.3789,"Flak tower pair in a Vienna park, structurally too dangerous to enter and too solid to demolish. Sealed.","restricted",["unstable","private"],false,"ELITE"]
-].map((r, i) => ({
-  id: 'seed-' + (i + 1),
+].map((r) => ({
+  // Slug rather than index: adding entries later must not renumber the existing
+  // ones, or an installed browser ends up with duplicates or silent misses.
+  id: 'seed-' + r[0].toLowerCase()
+        .replace(/[æå]/g, 'a').replace(/ø/g, 'o')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
   title: r[0], category: r[1], era: r[2], country: r[3],
   lat: r[4], lng: r[5], description: r[6],
   access: r[7], hazards: r[8], verified: r[9],
@@ -1034,6 +1100,8 @@ const state = {
   terrain3d: false,
   labels: false,
   reliefId: RELIEF_SOURCES[0].id,
+  sourceStatus: {},         // relief source id -> 'checking' | 'ok' | 'dead'
+  customSource: null,
   light: 315,
   method: 'igor',
   filters: { q: '', categories: [], eras: [], countries: [], verified: false, access: [] },
@@ -1045,10 +1113,20 @@ let map = null;
 let hereMarker = null;
 
 function reliefSource(id) {
+  if (id === 'custom' && state.customSource) return state.customSource;
   return RELIEF_SOURCES.find((r) => r.id === id) || RELIEF_SOURCES[0];
 }
 
 function demSourceSpec(rs) {
+  if (rs.kind === 'raster') {
+    return {
+      type: 'raster',
+      tiles: rs.tiles,
+      tileSize: rs.tileSize || 256,
+      maxzoom: rs.maxzoom || 19,
+      attribution: rs.attribution
+    };
+  }
   return {
     type: 'raster-dem',
     tiles: rs.tiles,
@@ -1057,6 +1135,43 @@ function demSourceSpec(rs) {
     encoding: rs.encoding,
     attribution: rs.attribution
   };
+}
+
+/* A pre-rendered hillshade is a picture of a light direction that was chosen by
+   whoever made it, so the controls that re-light a DEM have nothing to bite on. */
+function reliefLayerSpec(rs) {
+  if (rs.kind === 'raster') {
+    return { id: 'relief', type: 'raster', source: 'dem',
+             paint: { 'raster-opacity': 0 }, layout: { visibility: 'none' } };
+  }
+  return { id: 'relief', type: 'hillshade', source: 'dem',
+           paint: reliefPaint(), layout: { visibility: 'none' } };
+}
+
+/* Tile servers do not answer CORS preflights consistently, but an <img> load
+   tells us what we need: does this endpoint return a picture or not. */
+function probeTile(url, ms = 9000) {
+  return new Promise((res) => {
+    let done = false;
+    const finish = (ok) => { if (!done) { done = true; res(ok); } };
+    const img = new Image();
+    img.onload = () => finish(img.naturalWidth > 0);
+    img.onerror = () => finish(false);
+    img.src = url;
+    setTimeout(() => finish(false), ms);
+  });
+}
+
+/* Unverified entries stay out of the picker until they answer. */
+async function verifySource(rs) {
+  if (!rs.unverified) { state.sourceStatus[rs.id] = 'ok'; return true; }
+  if (state.sourceStatus[rs.id] === 'ok' || state.sourceStatus[rs.id] === 'dead') {
+    return state.sourceStatus[rs.id] === 'ok';
+  }
+  state.sourceStatus[rs.id] = 'checking';
+  const ok = await probeTile(rs.probe || (rs.tiles[0] || '').replace('{bbox-epsg-3857}', '600000,8100000,640000,8140000'));
+  state.sourceStatus[rs.id] = ok ? 'ok' : 'dead';
+  return ok;
 }
 
 /* Shared so the initial style and a later source swap cannot drift apart.
@@ -1089,7 +1204,7 @@ function buildStyle() {
     layers: [
       { id: 'paper', type: 'background', paint: { 'background-color': '#cfc0a1' } },
       { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 1 } },
-      { id: 'relief', type: 'hillshade', source: 'dem', paint: reliefPaint(), layout: { visibility: 'none' } },
+      reliefLayerSpec(rs),
       { id: 'places', type: 'raster', source: 'places', paint: { 'raster-opacity': 0.85 }, layout: { visibility: 'none' } }
     ]
   };
@@ -1099,8 +1214,8 @@ function initMap() {
   map = new maplibregl.Map({
     container: 'map',
     style: buildStyle(),
-    center: [2.8519, 51.0],       // North Sea coast — dense in every category
-    zoom: 6.4,
+    center: HOME_VIEW.center,
+    zoom: HOME_VIEW.zoom,
     maxZoom: 18,
     attributionControl: { compact: true },
     dragRotate: true,
@@ -1161,22 +1276,45 @@ function applyReveal(t) {
   const f = t / 100;
   map.setPaintProperty('sat', 'raster-opacity', 1 - f * 0.92);
   map.setLayoutProperty('relief', 'visibility', f > 0.01 ? 'visible' : 'none');
-  map.setPaintProperty('relief', 'hillshade-exaggeration', ($('sl-depth').value / 100) * Math.max(f, 0.001));
+  if (reliefSource(state.reliefId).kind === 'raster') {
+    map.setPaintProperty('relief', 'raster-opacity', f);
+  } else {
+    map.setPaintProperty('relief', 'hillshade-exaggeration', ($('sl-depth').value / 100) * Math.max(f, 0.001));
+  }
+}
+
+/* The dial, the method and 3D only mean something over a DEM we shade ourselves. */
+function updateReliefControls() {
+  const rs = reliefSource(state.reliefId);
+  const baked = rs.kind === 'raster';
+  ['sl-light', 'sl-depth', 'sel-method'].forEach((id) => {
+    const e = $(id);
+    if (!e) return;
+    e.disabled = baked || (id === 'sl-light' && state.method === 'multidirectional');
+    e.style.opacity = e.disabled ? 0.35 : 1;
+  });
+  const t3 = $('tog-3d');
+  t3.disabled = baked;
+  if (baked && state.terrain3d) setTerrain3D(false);
+  $('dock-note').textContent = rs.note +
+    (baked ? ' The reveal slider still works; the lighting controls do not.' : '');
+}
+
+// Only a hillshade layer carries these; a pre-rendered overlay would throw.
+function shadingLive() {
+  return map && map.getLayer('relief') && reliefSource(state.reliefId).kind !== 'raster';
 }
 
 function applyLight(deg) {
   state.light = +deg;
   $('num-light').textContent = deg + '°';
-  if (map && map.getLayer('relief')) map.setPaintProperty('relief', 'hillshade-illumination-direction', +deg);
+  if (shadingLive()) map.setPaintProperty('relief', 'hillshade-illumination-direction', +deg);
 }
 
 function applyMethod(m) {
   state.method = m;
-  // multidirectional lights from several azimuths, so the dial has nothing to do
-  const dialIdle = m === 'multidirectional';
-  $('sl-light').disabled = dialIdle;
-  $('sl-light').style.opacity = dialIdle ? 0.35 : 1;
-  if (map && map.getLayer('relief')) map.setPaintProperty('relief', 'hillshade-method', m);
+  if (shadingLive()) map.setPaintProperty('relief', 'hillshade-method', m);
+  updateReliefControls();   // multidirectional lights from every azimuth, so the dial idles
 }
 
 function applyDepth(v) {
@@ -1200,6 +1338,7 @@ function setTerrain3D(on) {
 
 function setReliefSource(id) {
   if (!map || id === state.reliefId) return;
+  const rs = reliefSource(id);
   const was3d = state.terrain3d;
   if (was3d) { try { map.setTerrain(null); } catch (e) { /* already clear */ } }
   state.reliefId = id;
@@ -1207,25 +1346,86 @@ function setReliefSource(id) {
   renderLayerStatus();
   if (map.getLayer('relief')) map.removeLayer('relief');
   if (map.getSource('dem')) map.removeSource('dem');
-  map.addSource('dem', demSourceSpec(reliefSource(id)));
-  map.addLayer({ id: 'relief', type: 'hillshade', source: 'dem', paint: reliefPaint(), layout: { visibility: 'none' } }, 'places');
+  map.addSource('dem', demSourceSpec(rs));
+  map.addLayer(reliefLayerSpec(rs), 'places');
   applyReveal(state.reveal);
-  if (was3d) setTerrain3D(true);
-  $('dock-note').textContent = reliefSource(id).note;
+  if (was3d && rs.kind !== 'raster') setTerrain3D(true);
+  updateReliefControls();
+  const sel = $('sel-source');
+  if (sel) sel.value = id;
 }
 
-/* Regional sources are only offered where they have coverage. */
-function refreshSourceOptions() {
+/* Regional sources are only offered where they cover, and unverified ones only
+   once they have actually answered. */
+async function refreshSourceOptions() {
   const sel = $('sel-source');
-  const c = map ? map.getCenter() : { lat: 51, lng: 2.8 };
-  const avail = RELIEF_SOURCES.filter((r) =>
+  if (!sel) return;
+  const c = map ? map.getCenter() : { lat: HOME_VIEW.center[1], lng: HOME_VIEW.center[0] };
+  const inView = RELIEF_SOURCES.filter((r) =>
     !r.bbox || (c.lng >= r.bbox[0] && c.lat >= r.bbox[1] && c.lng <= r.bbox[2] && c.lat <= r.bbox[3]));
-  const sig = avail.map((r) => r.id).join(',');
+
+  const sig = inView.map((r) => r.id + (state.sourceStatus[r.id] || '')).join(',') + '|' + (state.customSource ? 'c' : '');
   if (sel.dataset.sig === sig) return;
   sel.dataset.sig = sig;
-  sel.innerHTML = avail.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
-  if (!avail.some((r) => r.id === state.reliefId)) setReliefSource(avail[0].id);
+
+  const label = (r) => {
+    const st = state.sourceStatus[r.id];
+    if (!r.unverified || st === 'ok') return r.name;
+    if (st === 'checking') return r.name + ' — checking…';
+    if (st === 'dead') return r.name + ' — no response';
+    return r.name + ' — unchecked';
+  };
+  sel.innerHTML =
+    inView.map((r) => {
+      const dead = r.unverified && state.sourceStatus[r.id] !== 'ok';
+      return `<option value="${esc(r.id)}"${dead ? ' disabled' : ''}>${esc(label(r))}</option>`;
+    }).join('') +
+    (state.customSource ? `<option value="custom">Custom · pasted endpoint</option>` : '') +
+    `<option value="__add">Add a source by URL…</option>`;
   sel.value = state.reliefId;
+
+  // probe anything still unknown, then re-render the picker with the verdict
+  const pending = inView.filter((r) => r.unverified && !state.sourceStatus[r.id]);
+  if (pending.length) {
+    await Promise.all(pending.map(verifySource));
+    sel.dataset.sig = '';
+    refreshSourceOptions();
+  }
+}
+
+/* Endpoints I cannot reach from a build sandbox can still be confirmed here, in
+   the browser, where they are reachable. Paste one and it is live immediately. */
+function addCustomSource() {
+  const url = prompt(
+    'Relief tile URL.\n\n' +
+    'XYZ tiles:  https://host/{z}/{x}/{y}.png\n' +
+    'WMS:        https://host/wms?...&bbox={bbox-epsg-3857}&width=256&height=256\n\n' +
+    'Pre-rendered hillshade is treated as an image overlay. Append  #dem  to the ' +
+    'URL if it serves terrarium-encoded elevation tiles instead.',
+    state.customSource ? state.customSource.tiles[0] : '');
+  if (!url) { $('sel-source').value = state.reliefId; return; }
+
+  const isDem = /#dem$/.test(url.trim());
+  const clean = url.trim().replace(/#dem$/, '');
+  state.customSource = {
+    id: 'custom',
+    kind: isDem ? 'dem' : 'raster',
+    name: 'Custom · pasted endpoint',
+    tiles: [clean],
+    encoding: 'terrarium',
+    tileSize: 256,
+    maxzoom: 19,
+    bbox: null,
+    attribution: 'Custom relief source',
+    note: isDem
+      ? 'Custom terrarium-encoded DEM, shaded here, so the lighting controls apply.'
+      : 'Custom pre-rendered overlay, with whatever lighting the server baked in.'
+  };
+  state.sourceStatus.custom = 'ok';
+  $('sel-source').dataset.sig = '';
+  refreshSourceOptions();
+  setReliefSource('custom');
+  showToast('Custom source added');
 }
 
 // ---- PINS ------------------------------------------------------------------
@@ -2079,12 +2279,19 @@ async function saveShareCard() {
 }
 
 // ---- BOOT ------------------------------------------------------------------
-async function seedIfNeeded() {
+/* Insert seed entries that aren't on file yet, keyed by stable id. Idempotent,
+   and it means a new launch region reaches browsers that were seeded before it
+   existed — a one-shot "already seeded" flag would lock them out. Entries the
+   user has already edited are left alone. */
+async function syncSeed() {
   if (Store.kind !== 'local') return;   // a shared archive is seeded server-side
-  const flag = await txn('meta', 'readonly', (s) => s.get('seeded'));
-  if (flag) return;
-  for (const s of SEED) await Store.putSite(s);
-  await txn('meta', 'readwrite', (s) => s.put({ id: 'seeded', at: Date.now(), count: SEED.length }));
+  const have = new Set((await Store.listSites()).map((s) => s.id));
+  const missing = SEED.filter((s) => !have.has(s.id));
+  for (const s of missing) await Store.putSite(s);
+  if (missing.length) {
+    await txn('meta', 'readwrite', (s) => s.put({ id: 'seeded', at: Date.now(), count: SEED.length }));
+  }
+  return missing.length;
 }
 
 async function reload() {
@@ -2116,7 +2323,10 @@ function wireUI() {
     $('sl-reveal').value = next;
     applyReveal(next);
   });
-  $('sel-source').addEventListener('change', (e) => setReliefSource(e.target.value));
+  $('sel-source').addEventListener('change', (e) => {
+    if (e.target.value === '__add') addCustomSource();
+    else setReliefSource(e.target.value);
+  });
   $('sel-method').addEventListener('change', (e) => applyMethod(e.target.value));
 
   // map tools
@@ -2153,9 +2363,9 @@ function wireUI() {
   $('share-close').addEventListener('click', () => $('modal-share').classList.remove('show'));
   $('share-save').addEventListener('click', saveShareCard);
 
-  $('dock-note').textContent = reliefSource(state.reliefId).note;
   $('sel-method').value = state.method;
   applyMethod(state.method);
+  updateReliefControls();
   refreshSourceOptions();
 }
 
@@ -2197,7 +2407,7 @@ async function boot() {
   }
   state.profile = profile;
 
-  await seedIfNeeded();
+  await syncSeed();
   await reload();
   wireUI();
 

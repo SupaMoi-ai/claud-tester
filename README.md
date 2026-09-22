@@ -31,45 +31,77 @@ it is lit along its own axis.
 Everything else — the archive, pins, visit logs, clearance tiers, share cards —
 hangs off that one move.
 
+### Launch region: Rogaland
+
+The map opens on the Jæren coast at Sola. Rogaland is the launch region for two
+reasons: Festung Norwegen left the coast from Randaberg down to Egersund dense
+with Atlantic Wall works, and Kartverket publishes national LiDAR to find them
+with.
+
+17 of the seeded entries are Rogaland sites — Vigdelfortet, Fjøløy fort, the
+Jæren lighthouse batteries at Obrestad and Kvassheim, the anti-tank teeth at
+Sele and Hellestø, Sola flystasjon, Rott, Utsira, the Visnes copper mines on
+Karmøy, Helleren under its rock overhang in Jøssingfjord. The rest of the
+archive (France, Belgium, UK, US, Poland and others) is still there — filter by
+country to put it aside.
+
 ### What the relief layer can and cannot do
 
-The default source is **AWS Terrain Tiles** (Terrarium encoding): global, free,
-no API key. It is roughly **30 m** ground sample. That is enough to pick out
-fort ramparts, ditches, Maginot surface works, spoil heaps and quarry terraces
-under tree cover.
+Two kinds of relief source, because a global DEM and a national geoportal are
+not the same thing:
 
-**It will not resolve an individual bunker.** That needs 0.5–1 m LiDAR DTM,
-which only exists region by region. The app says so in the relief dock rather
-than letting you assume otherwise.
+| kind | what it is | lighting controls |
+| --- | --- | --- |
+| `dem` | RGB-encoded elevation tiles (terrarium/mapbox) — MapLibre shades them | light dial, method and 3D all work |
+| `raster` | a hillshade someone already rendered, usually WMS | inert — the lighting is baked into the picture |
 
-Lighting is tunable because it matters: `Soft (Igor)` is the default (it keeps
-shallow features out of crushed shadow), and `Multi-directional` lights from
-several azimuths at once, which is the standard way to catch an earthwork
-regardless of which way it runs.
+The working default is **AWS Terrain Tiles** (Terrarium, `dem`): global, free,
+no API key. At roughly **30 m** it gets the Jæren moraine ridges, gun positions
+cut into hillsides and quarry benches — **not** an individual bunker. That needs
+sub-metre LiDAR.
 
-### Adding a regional LiDAR source
+**Kartverket's national DTM** is the Rogaland entry that does resolve single
+works under the heather. It is pre-rendered WMS, so it is a `raster` source and
+the light dial goes inert while it is selected — the app disables those controls
+and says why rather than leaving them looking broken.
 
-Relief sources live in a registry near the top of the script:
+#### The Kartverket endpoint is unverified
 
-```js
-const RELIEF_SOURCES = [
-  { id:'terrarium', name:'Global · Terrarium 30 m', tiles:[...], encoding:'terrarium',
-    tileSize:256, maxzoom:15, bbox:null, attribution:'...', note:'...' }
-];
+Every Norwegian geoportal is blocked from the sandbox this was built in, so the
+WMS URL in `RELIEF_SOURCES` is **written from the service's documented shape,
+not confirmed against a live response** — the layer name (`skyggerelieff`) is
+the part most likely to be wrong. Check it against the service's
+`GetCapabilities`.
+
+Rather than shipping that as a silent guess, the app **probes unverified
+sources in your browser before offering them**. Until one answers it shows in
+the picker as `— checking…` then `— no response`, disabled, and the map stays on
+the verified global DEM. Nothing breaks if the URL is wrong; you just do not get
+the layer.
+
+#### Wiring in a confirmed endpoint
+
+Pick **Add a source by URL…** in the relief dock and paste it. No code edit, and
+you find out immediately whether it renders:
+
+```
+XYZ tiles:  https://host/{z}/{x}/{y}.png
+WMS:        https://host/wms?...&crs=EPSG:3857&width=256&height=256&bbox={bbox-epsg-3857}
 ```
 
-Add an entry with a `bbox` of `[west, south, east, north]` and it is offered
-automatically whenever the viewport centre falls inside that box. A commented
-template for the Netherlands (AHN) is in the file. Two things to get right:
+Append `#dem` if the endpoint serves terrarium-encoded elevation rather than a
+rendered image — that routes it through the hillshade layer so the light dial
+works on it.
 
-- `encoding` must match the source (`terrarium` or `mapbox`) or the hillshade
-  comes out as noise.
-- Validate the endpoint **from a browser**. Several national geoportals are
-  unreachable from CI sandboxes and from some corporate networks, so a failure
-  there tells you nothing about whether it works for users.
+Once a URL is confirmed, promote it into `RELIEF_SOURCES` with a `bbox` of
+`[west, south, east, north]` and drop the `unverified` flag. It is then offered
+automatically whenever the viewport centre falls inside that box.
 
-If a tile source does go down, the dock shows a layer-status line naming it
-rather than leaving you staring at an empty map.
+#### Lighting
+
+`Soft (Igor)` is the default — it keeps shallow features out of crushed shadow.
+`Multi-directional` lights from several azimuths at once, which is how you catch
+an earthwork regardless of which way it runs. Both only apply to `dem` sources.
 
 ### Storage, and switching to a real backend
 
@@ -101,10 +133,18 @@ clearance or credit you as the finder.
 
 ### The seed archive
 
-34 publicly documented sites across 12 countries, bundled so the map is never
-empty and the filters have something real to act on. Coordinates are archival
-references — good to the site, not to the doorway, and not survey-grade. The
-site sheet says so and invites correction from the ground.
+51 publicly documented sites — 17 in Rogaland, the rest across Europe and North
+America — bundled so the map is never empty and the filters have something real
+to act on.
+
+**Coordinates are archival references, not survey data.** They are good to the
+site rather than the doorway, and for smaller bunker positions they may be out
+by a few hundred metres. The site sheet says so on every seeded entry and
+invites correction from the ground; that is the point of the thing.
+
+Seed entries use stable slug ids (`seed-vigdelfortet`), and missing ones are
+inserted on load. Adding a region later reaches browsers that were seeded before
+it existed, instead of being locked out by a one-shot "already seeded" flag.
 
 ### Safety
 
@@ -117,7 +157,8 @@ permission to enter it.
 ### Attribution
 
 Imagery © Esri, Maxar, Earthstar Geographics. Elevation from AWS Terrain Tiles
-(SRTM / NED and others). Map rendering by MapLibre GL JS (BSD-3-Clause), pinned
+(SRTM / NED and others). Norwegian terrain and topographic data © Kartverket
+(CC BY 4.0) where those layers are enabled. Map rendering by MapLibre GL JS (BSD-3-Clause), pinned
 to `@5` — note that MapLibre 6 ships ESM-only and has no UMD build, so the
 plain `<script src>` global this file relies on does not exist there.
 
