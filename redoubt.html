@@ -434,6 +434,20 @@
   .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .hint { font-family: var(--mono); font-size: 9.5px; line-height: 1.5; color: var(--ink-3); margin-top: 5px; letter-spacing: 0.03em; }
 
+  /* discovered layers: the machine name is what gets requested, the title is
+     what tells you which one you want */
+  .layer-row {
+    display: block; width: 100%; text-align: left;
+    margin-bottom: 5px; padding: 8px 10px; letter-spacing: 0.06em;
+  }
+  .layer-row .ln { display: block; font-size: 11px; }
+  .layer-row .lt {
+    display: block; margin-top: 3px;
+    font-family: var(--sans); font-size: 11.5px; letter-spacing: 0;
+    text-transform: none; color: var(--ink-3);
+  }
+  .layer-row.on .lt, .layer-row:active .lt { color: var(--paper-2); }
+
   /* ---------- pins ---------- */
   .pin { cursor: pointer; will-change: transform; }
   .pin svg { display: block; filter: drop-shadow(0 2px 3px rgba(29,25,19,0.45)); }
@@ -734,6 +748,30 @@
   </div>
 </div>
 
+<!-- Relief source discovery -->
+<div class="modal" id="modal-source">
+  <div class="modal-card grain">
+    <div class="label">Relief source</div>
+    <h2 class="serif" style="font-size:19px;margin:6px 0 12px">Add a source</h2>
+    <div class="field">
+      <span class="label">Service or tile URL</span>
+      <input class="input" id="src-url" placeholder="https://…" autocomplete="off" spellcheck="false" style="font-family:var(--mono);font-size:12px" />
+      <div class="hint">
+        Paste a <strong>service base URL</strong> and the layers are read from it —
+        a WMS endpoint, or an ArcGIS <code>/ImageServer</code>.
+        A ready-made tile template containing <code>{z}</code> or
+        <code>{bbox-epsg-3857}</code> is used as-is.
+      </div>
+      <p class="hint" id="src-note" style="display:none"></p>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="src-cancel">Cancel</button>
+      <button class="btn primary" id="src-go">Read layers</button>
+    </div>
+    <div id="src-result"></div>
+  </div>
+</div>
+
 <!-- Share card -->
 <div class="modal" id="modal-share">
   <div class="modal-card grain">
@@ -795,25 +833,27 @@ const RELIEF_SOURCES = [
     attribution: 'Elevation: AWS Terrain Tiles (SRTM / NED / others)',
     note: 'Global, ~30 m ground sample. In Rogaland that is enough for the Jæren moraine ridges, gun positions cut into hillsides and quarry benches — not for a single bunker. Sub-metre LiDAR is the next row down.'
   },
+  /* Kartverket. Selecting one of these opens the discovery panel pointed at the
+     service, so the layer comes from the service's own capabilities rather than
+     from a guess here — the previous guess named a retired endpoint and an
+     ArcGIS raster function as if it were a WMS layer, and resolved to nothing. */
   {
     id: 'kv-dtm',
-    kind: 'raster',
-    name: 'Rogaland · Kartverket DTM',
-    unverified: true,
-    // WMS as a raster source: MapLibre substitutes the tile extent into
-    // {bbox-epsg-3857}. Layer name is the part most likely to need correcting —
-    // check the service's GetCapabilities.
-    tiles: ['https://wms.geonorge.no/skwms1/wms.hoyde-dtm-nhm-25833?service=WMS&version=1.3.0&request=GetMap' +
-            '&layers=NHM_DTM_25833:skyggerelieff&styles=&format=image/png&transparent=true' +
-            '&crs=EPSG:3857&width=256&height=256&bbox={bbox-epsg-3857}'],
-    probe: 'https://wms.geonorge.no/skwms1/wms.hoyde-dtm-nhm-25833?service=WMS&version=1.3.0&request=GetMap' +
-           '&layers=NHM_DTM_25833:skyggerelieff&styles=&format=image/png&transparent=true' +
-           '&crs=EPSG:3857&width=64&height=64&bbox=600000,8100000,640000,8140000',
-    tileSize: 256,
-    maxzoom: 19,
+    kind: 'discover',
+    name: 'Rogaland · Kartverket terrengmodell',
+    service: 'https://wms.geonorge.no/skwms1/wms.terrengmodell',
     bbox: [4.5, 58.1, 7.4, 59.6],
     attribution: 'Høydedata © Kartverket (CC BY 4.0)',
-    note: 'Kartverket national LiDAR terrain model, sub-metre over most of Rogaland. This is the layer that shows individual Atlantic Wall works under the heather on Jæren. Pre-rendered, so the light dial and 3D are inert while it is selected.'
+    note: 'Kartverket’s current terrain-model WMS, which replaced the withdrawn "Høyde DTM skyggerelieff sømløs" service. Read its layers and pick the shaded relief — several of the layers it publishes are dataset-coverage outlines rather than terrain.'
+  },
+  {
+    id: 'kv-nhm',
+    kind: 'discover',
+    name: 'Norway · Kartverket NHM (ArcGIS)',
+    service: 'https://hoydedata.no/arcgis/rest/services/NHM_DTM_25832/ImageServer',
+    bbox: [4.0, 57.8, 31.5, 71.5],
+    attribution: 'Høydedata © Kartverket (CC BY 4.0)',
+    note: 'The national height model as an ArcGIS image service, which exposes shaded relief as a named raster function (skyggerelieff). Rogaland sits in UTM32, so 25832 is the zone to want; if that service name has moved, the discovery panel will say so.'
   },
   {
     id: 'kv-topo',
@@ -1102,6 +1142,7 @@ const state = {
   reliefId: RELIEF_SOURCES[0].id,
   sourceStatus: {},         // relief source id -> 'checking' | 'ok' | 'dead'
   customSource: null,
+  lastService: null,        // last service whose capabilities were read
   light: 315,
   method: 'igor',
   filters: { q: '', categories: [], eras: [], countries: [], verified: false, access: [] },
@@ -1164,6 +1205,8 @@ function probeTile(url, ms = 9000) {
 
 /* Unverified entries stay out of the picker until they answer. */
 async function verifySource(rs) {
+  // a discovery entry is a pointer at a service, not a layer — nothing to probe
+  if (rs.kind === 'discover') { state.sourceStatus[rs.id] = 'ok'; return true; }
   if (!rs.unverified) { state.sourceStatus[rs.id] = 'ok'; return true; }
   if (state.sourceStatus[rs.id] === 'ok' || state.sourceStatus[rs.id] === 'dead') {
     return state.sourceStatus[rs.id] === 'ok';
@@ -1369,6 +1412,7 @@ async function refreshSourceOptions() {
   sel.dataset.sig = sig;
 
   const label = (r) => {
+    if (r.kind === 'discover') return r.name + ' — choose layer…';
     const st = state.sourceStatus[r.id];
     if (!r.unverified || st === 'ok') return r.name;
     if (st === 'checking') return r.name + ' — checking…';
@@ -1377,7 +1421,7 @@ async function refreshSourceOptions() {
   };
   sel.innerHTML =
     inView.map((r) => {
-      const dead = r.unverified && state.sourceStatus[r.id] !== 'ok';
+      const dead = r.kind !== 'discover' && r.unverified && state.sourceStatus[r.id] !== 'ok';
       return `<option value="${esc(r.id)}"${dead ? ' disabled' : ''}>${esc(label(r))}</option>`;
     }).join('') +
     (state.customSource ? `<option value="custom">Custom · pasted endpoint</option>` : '') +
@@ -1393,25 +1437,177 @@ async function refreshSourceOptions() {
   }
 }
 
-/* Endpoints I cannot reach from a build sandbox can still be confirmed here, in
-   the browser, where they are reachable. Paste one and it is live immediately. */
-function addCustomSource() {
-  const url = prompt(
-    'Relief tile URL.\n\n' +
-    'XYZ tiles:  https://host/{z}/{x}/{y}.png\n' +
-    'WMS:        https://host/wms?...&bbox={bbox-epsg-3857}&width=256&height=256\n\n' +
-    'Pre-rendered hillshade is treated as an image overlay. Append  #dem  to the ' +
-    'URL if it serves terrarium-encoded elevation tiles instead.',
-    state.customSource ? state.customSource.tiles[0] : '');
-  if (!url) { $('sel-source').value = state.reliefId; return; }
+/* ---- relief source discovery ----------------------------------------------
+   Geoportals publish what they hold; there is no reason to guess a layer name.
+   The browser can reach these services even where a build sandbox cannot, so
+   the app asks them directly and offers what comes back. */
 
-  const isDem = /#dem$/.test(url.trim());
-  const clean = url.trim().replace(/#dem$/, '');
+function openSourceModal(prefill, note) {
+  $('src-url').value = prefill || (state.customSource ? state.customSource.tiles[0] : '');
+  $('src-result').innerHTML = '';
+  const n = $('src-note');
+  n.textContent = note || '';
+  n.style.display = note ? 'block' : 'none';
+  $('modal-source').classList.add('show');
+  $('sel-source').value = state.reliefId;
+  setTimeout(() => $('src-url').focus(), 50);
+  if (prefill) inspectService();   // a known service can be read straight away
+}
+
+function classifyUrl(u) {
+  if (/\{z\}|\{bbox-epsg-3857\}/i.test(u)) return 'template';
+  if (/\/ImageServer\/?$/i.test(u.split('?')[0])) return 'arcgis';
+  return 'wms';
+}
+
+/* WMS 1.3.0 uses a default namespace; some servers add a prefix. Matching on
+   local name with NS wildcards handles both. */
+async function readWmsCapabilities(base) {
+  const sep = base.includes('?') ? '&' : '?';
+  const res = await fetch(base + sep + 'service=WMS&request=GetCapabilities&version=1.3.0');
+  if (!res.ok) throw new Error('service answered HTTP ' + res.status);
+  const doc = new DOMParser().parseFromString(await res.text(), 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length) throw new Error('response was not XML');
+
+  const local = (el, tag) => [...el.getElementsByTagNameNS('*', tag)];
+  // Direct children only. A descendant search would give a container Layer its
+  // first child's Name, and a Style's Name to anything that has one.
+  const child = (el, tag) => [...el.children].find((c) => c.localName === tag);
+
+  const crs = new Set([...local(doc, 'CRS'), ...local(doc, 'SRS')].map((n) => n.textContent.trim()));
+  const layers = local(doc, 'Layer').map((l) => {
+    // a Layer with no Name of its own is a grouping node and cannot be requested
+    const n = child(l, 'Name'), t = child(l, 'Title');
+    return n ? { name: n.textContent.trim(), title: t ? t.textContent.trim() : '' } : null;
+  }).filter(Boolean);
+
+  if (!layers.length) throw new Error('no named layers in the capabilities document');
+  return { kind: 'wms', base, layers, has3857: crs.has('EPSG:3857') || crs.has('EPSG:900913') };
+}
+
+async function readArcgisService(base) {
+  const clean = base.replace(/\/+$/, '').split('?')[0];
+  const res = await fetch(clean + '?f=json');
+  if (!res.ok) throw new Error('service answered HTTP ' + res.status);
+  const j = await res.json();
+  if (j.error) throw new Error(j.error.message || 'service returned an error');
+  const layers = (j.rasterFunctionInfos || [])
+    .map((f) => ({ name: f.name, title: f.description || '' }))
+    .filter((f) => f.name && f.name.toLowerCase() !== 'none');
+  if (!layers.length) throw new Error('service exposes no named raster functions');
+  return { kind: 'arcgis', base: clean, layers, has3857: true };
+}
+
+function templateFor(info, layerName) {
+  if (info.kind === 'wms') {
+    const sep = info.base.includes('?') ? '&' : '?';
+    return info.base + sep + 'service=WMS&version=1.3.0&request=GetMap&layers=' +
+      encodeURIComponent(layerName) +
+      '&styles=&format=image/png&transparent=true&crs=EPSG:3857' +
+      '&width=256&height=256&bbox={bbox-epsg-3857}';
+  }
+  return info.base + '/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857' +
+    '&size=256,256&format=png&f=image&renderingRule=' +
+    encodeURIComponent(JSON.stringify({ rasterFunction: layerName }));
+}
+
+// A web-mercator bbox around the current view, so the probe asks for ground the
+// service plausibly covers rather than an arbitrary corner of the world.
+function mercBBoxHere(span = 20000) {
+  const R = 6378137;
+  const c = map ? map.getCenter() : { lng: HOME_VIEW.center[0], lat: HOME_VIEW.center[1] };
+  const x = R * c.lng * Math.PI / 180;
+  const y = R * Math.log(Math.tan(Math.PI / 4 + c.lat * Math.PI / 360));
+  return [x - span, y - span, x + span, y + span].map(Math.round).join(',');
+}
+
+/* A WMS reports a bad layer as an XML ServiceException carrying HTTP 200, which
+   an <img> probe sees only as "failed to load". Read the body where CORS allows
+   so the reason is the server's own words. */
+async function probeRelief(url) {
+  const probeUrl = url.replace('{bbox-epsg-3857}', mercBBoxHere());
+  if (await probeTile(probeUrl)) return { ok: true };
+  try {
+    const res = await fetch(probeUrl);
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (ct.includes('xml') || ct.includes('text') || ct.includes('json')) {
+      const body = await res.text();
+      // the (?:\s…)? matters: [^>]* would let this match <ServiceExceptionReport>
+      // and hand back the inner tag along with the text
+      const m = body.match(/<ServiceException(?:\s[^>]*)?>([\s\S]*?)<\/ServiceException>/i);
+      const txt = (m ? m[1] : body)
+        .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      return { ok: false, reason: txt.replace(/\s+/g, ' ').trim().slice(0, 150) };
+    }
+    return { ok: false, reason: 'server answered HTTP ' + res.status };
+  } catch (e) {
+    return { ok: false, reason: 'no image came back' };
+  }
+}
+
+async function inspectService() {
+  const raw = $('src-url').value.trim();
+  const box = $('src-result');
+  if (!raw) { box.innerHTML = ''; return; }
+
+  const mode = classifyUrl(raw);
+  if (mode === 'template') { activateSource(raw, null); return; }
+
+  box.innerHTML = `<p class="hint">Asking the service what it holds…</p>`;
+  try {
+    const info = mode === 'arcgis' ? await readArcgisService(raw) : await readWmsCapabilities(raw);
+    state.lastService = info;
+    box.innerHTML = `
+      <div class="section-rule"><span class="label">${info.layers.length} layer${info.layers.length === 1 ? '' : 's'}</span></div>
+      ${info.kind === 'wms' && !info.has3857
+        ? `<p class="hint" style="color:var(--oxide)">This service does not advertise EPSG:3857. MapLibre cannot reproject a WMS, so the layer will not line up with the map. You can still try it.</p>`
+        : ''}
+      <div id="src-layers" style="margin-top:8px">
+        ${info.layers.map((l, i) => `
+          <button type="button" class="chip layer-row" data-i="${i}">
+            <span class="ln">${esc(l.name)}</span>
+            ${l.title && l.title !== l.name ? `<span class="lt">${esc(l.title)}</span>` : ''}
+          </button>`).join('')}
+      </div>
+      <p class="hint">Pick one and it is fetched for the ground you are looking at.</p>`;
+    box.querySelectorAll('#src-layers .chip').forEach((b) => b.addEventListener('click', () => {
+      const l = info.layers[+b.dataset.i];
+      activateSource(templateFor(info, l.name), l.name);
+    }));
+  } catch (err) {
+    // A cross-origin refusal is not the service being down, and saying so sends
+    // people chasing the wrong problem.
+    const cors = /failed to fetch|networkerror|load failed/i.test(err.message);
+    box.innerHTML = `
+      <div class="section-rule"><span class="label">Could not read it</span></div>
+      <p class="hint" style="color:var(--oxide)">${esc(cors
+        ? 'The service refused a cross-origin read, so its layer list cannot be fetched from a web page. It may still serve tiles perfectly well — paste a full tile template instead.'
+        : err.message)}</p>
+      <p class="hint">A tile template contains <code>{z}</code> or <code>{bbox-epsg-3857}</code>, and is used without inspection.</p>`;
+  }
+}
+
+async function activateSource(template, layerName) {
+  const box = $('src-result');
+  const isDem = /#dem$/.test(template);
+  const tiles = template.replace(/#dem$/, '');
+  box.innerHTML = `<p class="hint">Checking that it returns an image…</p>`;
+
+  const verdict = await probeRelief(tiles);
+  if (!verdict.ok) {
+    box.innerHTML = `
+      <div class="section-rule"><span class="label">No image</span></div>
+      <p class="hint" style="color:var(--oxide)">${esc(verdict.reason)}</p>
+      <p class="hint">Nothing was changed. Try another layer, or a different service.</p>`;
+    return;
+  }
+
   state.customSource = {
     id: 'custom',
     kind: isDem ? 'dem' : 'raster',
-    name: 'Custom · pasted endpoint',
-    tiles: [clean],
+    name: layerName ? 'Custom · ' + layerName : 'Custom · pasted endpoint',
+    tiles: [tiles],
     encoding: 'terrarium',
     tileSize: 256,
     maxzoom: 19,
@@ -1425,7 +1621,9 @@ function addCustomSource() {
   $('sel-source').dataset.sig = '';
   refreshSourceOptions();
   setReliefSource('custom');
-  showToast('Custom source added');
+  $('modal-source').classList.remove('show');
+  if (state.reveal < 5) { $('sl-reveal').value = 60; applyReveal(60); }
+  showToast(layerName ? layerName + ' is live' : 'Custom source is live');
 }
 
 // ---- PINS ------------------------------------------------------------------
@@ -2324,8 +2522,11 @@ function wireUI() {
     applyReveal(next);
   });
   $('sel-source').addEventListener('change', (e) => {
-    if (e.target.value === '__add') addCustomSource();
-    else setReliefSource(e.target.value);
+    const v = e.target.value;
+    if (v === '__add') { openSourceModal(); return; }
+    const rs = RELIEF_SOURCES.find((r) => r.id === v);
+    if (rs && rs.kind === 'discover') { openSourceModal(rs.service, rs.note); return; }
+    setReliefSource(v);
   });
   $('sel-method').addEventListener('change', (e) => applyMethod(e.target.value));
 
@@ -2360,6 +2561,13 @@ function wireUI() {
     state.profile.notice_ack = true;
     await Store.putProfile(state.profile);
   });
+  $('src-cancel').addEventListener('click', () => {
+    $('modal-source').classList.remove('show');
+    $('sel-source').value = state.reliefId;
+  });
+  $('src-go').addEventListener('click', inspectService);
+  $('src-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') inspectService(); });
+
   $('share-close').addEventListener('click', () => $('modal-share').classList.remove('show'));
   $('share-save').addEventListener('click', saveShareCard);
 

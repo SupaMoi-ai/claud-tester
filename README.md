@@ -60,29 +60,64 @@ no API key. At roughly **30 m** it gets the Jæren moraine ridges, gun positions
 cut into hillsides and quarry benches — **not** an individual bunker. That needs
 sub-metre LiDAR.
 
-**Kartverket's national DTM** is the Rogaland entry that does resolve single
-works under the heather. It is pre-rendered WMS, so it is a `raster` source and
-the light dial goes inert while it is selected — the app disables those controls
-and says why rather than leaving them looking broken.
+**Kartverket** is the Rogaland route to sub-metre relief, and the app now points
+at it rather than guessing a layer:
 
-#### The Kartverket endpoint is unverified
+| Entry | Service |
+| --- | --- |
+| Rogaland · Kartverket terrengmodell | `https://wms.geonorge.no/skwms1/wms.terrengmodell` (WMS) |
+| Norway · Kartverket NHM (ArcGIS) | `https://hoydedata.no/arcgis/rest/services/NHM_DTM_25832/ImageServer` |
 
-Every Norwegian geoportal is blocked from the sandbox this was built in, so the
-WMS URL in `RELIEF_SOURCES` is **written from the service's documented shape,
-not confirmed against a live response** — the layer name (`skyggerelieff`) is
-the part most likely to be wrong. Check it against the service's
-`GetCapabilities`.
+Both are pre-rendered, so they are `raster` sources and the light dial goes
+inert while one is selected — the app disables those controls and says why
+rather than leaving them looking broken.
 
-Rather than shipping that as a silent guess, the app **probes unverified
-sources in your browser before offering them**. Until one answers it shows in
-the picker as `— checking…` then `— no response`, disabled, and the map stays on
-the verified global DEM. Nothing breaks if the URL is wrong; you just do not get
-the layer.
+#### These are unconfirmed, and the earlier guess was wrong twice
+
+An earlier version shipped
+`wms.hoyde-dtm-nhm-25833` with a layer called `skyggerelieff`. Both halves were
+wrong:
+
+- That service is **"Høyde DTM skyggerelieff sømløs WMS", which Geonorge records
+  as withdrawn**, replaced by "Digital terrengmodell WMS".
+- **`skyggerelieff` is an ArcGIS raster function**, not a WMS layer name. The URL
+  fused a WMS request with an ArcGIS concept and could never have resolved.
+
+Every Norwegian geoportal is blocked from the sandbox this is built in, so none
+of it was exercised against a live response. Rather than guess a third time,
+those two registry entries are now **pointers at a service, not at a layer**.
+Selecting one opens the discovery panel aimed at it, and the layer list comes
+from the service's own capabilities.
+
+Worth knowing before you pick: the terrengmodell WMS publishes dataset-coverage
+outlines alongside terrain, so not every layer it lists is a hillshade. And
+hillshade (*fjellskygge*) is **not** in the `cache.kartverket.no` WMTS at all —
+that cache serves `topo`, `topograatone`, `toporaster` and `sjokartraster`, so
+there is nothing to hunt for there.
+
+#### Reading a service's layers
+
+**Add a source by URL…** in the relief dock takes a *service base URL* and asks
+the service what it holds:
+
+- **WMS** → `GetCapabilities` is parsed for named layers, and the `CRS` list is
+  checked for `EPSG:3857`. MapLibre cannot reproject a WMS, so a service without
+  it is flagged as won't-line-up.
+- **ArcGIS ImageServer** → `?f=json` is read for named raster functions.
+
+Pick a layer and it is fetched for the ground you are looking at before anything
+is swapped in. A WMS reports a bad layer as an XML `ServiceException` carrying
+HTTP 200, which an image load sees only as "failed" — so the body is read where
+CORS permits and the server's own words are shown.
+
+Two honest failure modes: a service that omits CORS headers cannot have its
+layer list read from a web page at all (it may still serve tiles perfectly well,
+and the panel says so rather than calling it dead), and a layer that returns no
+image leaves the current source untouched.
 
 #### Wiring in a confirmed endpoint
 
-Pick **Add a source by URL…** in the relief dock and paste it. No code edit, and
-you find out immediately whether it renders:
+A ready-made tile template is used as-is, without a capabilities round trip:
 
 ```
 XYZ tiles:  https://host/{z}/{x}/{y}.png
@@ -93,9 +128,12 @@ Append `#dem` if the endpoint serves terrarium-encoded elevation rather than a
 rendered image — that routes it through the hillshade layer so the light dial
 works on it.
 
-Once a URL is confirmed, promote it into `RELIEF_SOURCES` with a `bbox` of
-`[west, south, east, north]` and drop the `unverified` flag. It is then offered
-automatically whenever the viewport centre falls inside that box.
+Once a layer is confirmed, promote it into `RELIEF_SOURCES` as a `raster` or
+`dem` entry with a `bbox` of `[west, south, east, north]`, and it is offered
+automatically whenever the viewport centre falls inside that box. Entries that
+carry `unverified` are probed before being offered and show as `no response`
+until they answer; entries of kind `discover` are service pointers and open the
+panel instead.
 
 #### Lighting
 
