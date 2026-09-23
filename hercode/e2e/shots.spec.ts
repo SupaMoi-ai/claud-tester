@@ -171,8 +171,29 @@ test('walks every screen', async ({ page }) => {
   await page.getByRole('button', { name: /Privacy overview/ }).click();
   await shot(page, '33-privacy-overview');
 
-  // 17. State survives a reload.
+  // 17. Daily review, entered from Me so the walk does not depend on the hour.
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: /Wrap up the day/ }).click();
+  await expect(page.getByRole('heading', { name: 'How did today feel?' })).toBeVisible();
+  await shot(page, '34-daily-review');
+
+  await page.getByRole('radio', { name: 'Good', exact: true }).click();
+  await page.getByRole('button', { name: 'quiet time', exact: true }).click();
+  await page.getByRole('button', { name: 'smaller tasks', exact: true }).click();
+  await page.getByRole('button', { name: 'long day', exact: true }).click();
+  await shot(page, '35-daily-review-filled');
+
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+
+  // 18. It feeds Patterns: the card she just wrote is there.
+  await page.getByRole('button', { name: 'Patterns', exact: true }).click();
+  const fromReview = page.getByText(/You have reported that .* helped on/);
+  await expect(fromReview).toBeVisible();
+  await fromReview.scrollIntoViewIfNeeded();
+  await shot(page, '36-patterns-from-review');
+
+  // 19. State survives a reload.
   await page.reload();
   await expect(page.getByRole('button', { name: 'Brain', exact: true })).toBeVisible();
-  await shot(page, '34-after-reload');
+  await shot(page, '37-after-reload');
 });

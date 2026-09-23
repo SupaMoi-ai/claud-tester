@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { CapacityPicker } from '../../components/CapacityPicker';
 import { Chip } from '../../components/Chip';
+import { ScalePicker } from '../../components/ScalePicker';
 import { Sheet } from '../../components/Sheet';
 import { copy } from '../../copy';
 import type { BrainState, CapacityLevel, Feeling, ISODate } from '../../domain/types';
-import { cn } from '../../lib/cn';
 import { useHerCode } from '../../store/useHerCode';
 
 const BRAIN_STATES: BrainState[] = ['foggy', 'normal', 'sharp'];
@@ -62,30 +62,12 @@ export function MorningCheckIn({ open, date }: { open: boolean; date: ISODate })
     >
       <section className="mb-6">
         <h3 className="mb-2 font-sans text-[15px] font-medium text-ink">{copy.checkIn.energy}</h3>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={energy === value}
-              aria-label={copy.checkIn.energyScale[value - 1]}
-              onClick={() => setEnergy(value)}
-              className={cn(
-                'tap flex flex-1 flex-col items-center justify-end gap-1.5 rounded-card border py-2 transition-colors duration-200',
-                energy === value ? 'border-ink/30 bg-sage/60' : 'border-line bg-surface',
-              )}
-            >
-              <span
-                className="w-2.5 rounded-full bg-ink/70"
-                style={{ height: `${8 + value * 6}px` }}
-                aria-hidden
-              />
-              <span className="text-[11px] leading-none text-muted">{value}</span>
-            </button>
-          ))}
-        </div>
-        <p className="mt-2 text-[13px] text-muted">{copy.checkIn.energyScale[energy - 1]}</p>
+        <ScalePicker
+          value={energy}
+          onChange={setEnergy}
+          labels={copy.checkIn.energyScale}
+          ariaLabel={copy.checkIn.energy}
+        />
       </section>
 
       <section className="mb-6">

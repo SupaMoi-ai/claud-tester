@@ -41,7 +41,8 @@ export type InsightId =
   | 'calls-before-noon'
   | 'capacity-after-social'
   | 'energy-around-cycle'
-  | 'stepped-household';
+  | 'stepped-household'
+  | 'what-helps-most';
 
 export type InsightResult =
   | {
@@ -69,6 +70,7 @@ const MIN_CALLS = 8;
 const MIN_SOCIAL_OCCURRENCES = 4;
 const MIN_CYCLE_ENTRIES = 20;
 const MIN_HOUSEHOLD = 10;
+const MIN_REVIEWS = 8;
 
 const SOCIAL_WINDOW = 6;
 export const CYCLE_LENGTH = 28;
@@ -354,6 +356,56 @@ export function steppedHouseholdCompletion(input: InsightInput): InsightResult {
   };
 }
 
+// --- 5. what she says helps ----------------------------------------------
+
+/**
+ * The thing she has most often said helped, taken from her own daily reviews.
+ *
+ * This is the one insight she writes directly: wrapping up a day changes these
+ * numbers straight away, which is what "the review feeds Patterns" means.
+ */
+export function whatHelpsMost(input: InsightInput): InsightResult {
+  const answered = input.reviews.filter((r) => !r.skipped && r.helped.length > 0);
+
+  if (answered.length < MIN_REVIEWS) {
+    return insufficient('what-helps-most', answered.length);
+  }
+
+  const counts = new Map<string, number>();
+  for (const review of answered) {
+    for (const tag of review.helped) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+
+  const ranked = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+  );
+  const top = ranked[0];
+  if (!top) return insufficient('what-helps-most', answered.length);
+
+  return {
+    status: 'ok',
+    id: 'what-helps-most',
+    text: copy.patterns.text.whatHelpsMost(top[0], top[1], answered.length),
+    sampleSize: answered.length,
+    evidenceRows: ranked.map(
+      ([tag, count]): EvidenceRow => ({
+        label: tag,
+        value: copy.patterns.evidence.helpedOn(count),
+        ...(tag === top[0] ? { detail: copy.patterns.evidence.reviewsCounted(answered.length) } : {}),
+      }),
+    ),
+    chart: {
+      kind: 'bar',
+      unit: copy.patterns.chart.helped,
+      bars: ranked.slice(0, 4).map(([tag, count], i) => ({
+        label: tag,
+        value: count,
+        ...(i === 0 ? { highlight: true } : {}),
+      })),
+    },
+  };
+}
+
 // --- all ------------------------------------------------------------------
 
 /**
@@ -365,6 +417,7 @@ export function buildInsights(input: InsightInput): InsightResult[] {
     capacityAfterSocialEvenings(input),
     callsBeforeNoon(input),
     steppedHouseholdCompletion(input),
+    whatHelpsMost(input),
   ];
 
   if (input.cycleConsent) results.splice(2, 0, energyAroundCyclePhase(input));

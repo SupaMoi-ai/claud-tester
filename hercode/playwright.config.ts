@@ -14,6 +14,9 @@ const executablePath = existsSync(PREINSTALLED_CHROMIUM) ? PREINSTALLED_CHROMIUM
 
 export default defineConfig({
   testDir: './e2e',
+  // One long guided walk, not a suite of small tests: it visits every screen
+  // and waits out the AI shimmer at each stop.
+  timeout: 120_000,
   outputDir: './.playwright',
   reporter: [['list']],
   use: {

@@ -5,11 +5,12 @@ import {
   capacityAfterSocialEvenings,
   energyAroundCyclePhase,
   steppedHouseholdCompletion,
+  whatHelpsMost,
   type InsightInput,
   type InsightResult,
 } from '../domain/insights';
 import { atTime } from '../domain/date';
-import type { HistoryEvent } from '../domain/types';
+import type { HistoryEvent, Review } from '../domain/types';
 import { createSeed } from '../mock/seed';
 
 const TODAY = '2026-09-21';
@@ -115,12 +116,62 @@ describe('insights', () => {
     expect(result.evidenceRows[0]?.detail).toMatch(/^\d+ of \d+ finished$/);
   });
 
+  it('reads what she said helped, from her own reviews', () => {
+    const result = ok(whatHelpsMost(inputFromSeed()));
+
+    expect(result.text).toMatch(
+      /^You have reported that .+ helped on \d+ of the \d+ days you wrapped up\.$/,
+    );
+
+    const chart = result.chart;
+    if (chart.kind !== 'bar') throw new Error('expected a bar chart');
+    expect(chart.bars[0]?.highlight).toBe(true);
+
+    // The headline tag really is the most frequent one.
+    const counts = chart.bars.map((b) => b.value);
+    expect(counts[0]).toBe(Math.max(...counts));
+    expect(result.text).toContain(chart.bars[0]?.label ?? '');
+  });
+
+  it('moves when she wraps up one more day', () => {
+    const base = inputFromSeed();
+    const before = ok(whatHelpsMost(base));
+
+    const extra: Review = {
+      date: TODAY,
+      capacity: 4,
+      helped: ['quiet time'],
+      harder: [],
+    };
+
+    const after = ok(whatHelpsMost({ ...base, reviews: [...base.reviews, extra] }));
+
+    expect(after.sampleSize).toBe(before.sampleSize + 1);
+    expect(after.evidenceRows).not.toEqual(before.evidenceRows);
+  });
+
+  it('ignores a review she skipped', () => {
+    const base = inputFromSeed();
+    const skipped: Review = {
+      date: TODAY,
+      capacity: 3,
+      helped: [],
+      harder: [],
+      skipped: true,
+    };
+
+    expect(whatHelpsMost({ ...base, reviews: [...base.reviews, skipped] }).sampleSize).toBe(
+      ok(whatHelpsMost(base)).sampleSize,
+    );
+  });
+
   it('says nothing at all when there is too little data', () => {
     for (const insight of [
       callsBeforeNoon,
       capacityAfterSocialEvenings,
       energyAroundCyclePhase,
       steppedHouseholdCompletion,
+      whatHelpsMost,
     ]) {
       expect(insight(empty).status).toBe('insufficient');
     }

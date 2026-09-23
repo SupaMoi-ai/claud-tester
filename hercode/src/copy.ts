@@ -218,6 +218,21 @@ export const copy = {
     noTasks: 'Nothing is waiting on you right now.',
   },
 
+  review: {
+    entry: 'Wrap up the day',
+    entryHint: 'Two taps, and it feeds your patterns.',
+    title: 'How did today feel?',
+    subtitle: 'Whatever you put here is only for you.',
+    capacity: 'Today, overall',
+    capacityScale: ['Very hard', 'Hard', 'Middling', 'Good', 'Really good'],
+    helped: 'What helped?',
+    harder: 'What made things harder?',
+    optional: 'Optional, and you can pick more than one.',
+    submit: 'Done',
+    savedTitle: 'Saved',
+    savedBody: 'Patterns has this now.',
+  },
+
   patterns: {
     title: 'Patterns',
     intro: 'Based on your check-ins and what you have finished.',
@@ -244,6 +259,8 @@ export const copy = {
         'Your average energy around this part of your cycle has been about the same as at other times.',
       steppedHousehold:
         'You usually finish household tasks more consistently when they are broken into steps under 10 minutes.',
+      whatHelpsMost: (tag: string, count: number, total: number) =>
+        `You have reported that ${tag} helped on ${count} of the ${total} days you wrapped up.`,
     },
 
     evidence: {
@@ -263,6 +280,8 @@ export const copy = {
       withSmallSteps: 'Broken into small steps',
       withoutSmallSteps: 'Not broken into steps',
       finishedRate: (done: number, total: number) => `${done} of ${total} finished`,
+      helpedOn: (n: number) => `${n} days`,
+      reviewsCounted: (n: number) => `${n} days wrapped up`,
     },
 
     chart: {
@@ -270,6 +289,7 @@ export const copy = {
       energy: 'average energy',
       household: 'finished',
       days: 'days',
+      helped: 'days it helped',
     },
   },
 
@@ -281,6 +301,8 @@ export const copy = {
     decisionsHint: 'Who decides what, so you are not asked every time.',
     privacy: 'Privacy overview',
     privacyHint: 'Everything is private until you share it.',
+    review: 'Wrap up the day',
+    reviewHint: 'How today felt, and what helped.',
     reset: 'Reset demo data',
     resetHint: 'Puts Mia back the way she started.',
     resetConfirmTitle: 'Reset the demo?',

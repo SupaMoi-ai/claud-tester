@@ -1,4 +1,4 @@
-import { ChevronRight, RotateCcw, Shield, Split, Users } from 'lucide-react';
+import { ChevronRight, Moon, RotateCcw, Shield, Split, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { Sheet } from '../../components/Sheet';
@@ -10,7 +10,13 @@ import { useHerCode } from '../../store/useHerCode';
  * The hub. It lists only what exists — Cycle and Notifications appear when
  * their screens do.
  */
-export function MeScreen({ onNavigate }: { onNavigate: (route: MeRoute) => void }) {
+export function MeScreen({
+  onNavigate,
+  onWrapUpDay,
+}: {
+  onNavigate: (route: MeRoute) => void;
+  onWrapUpDay: () => void;
+}) {
   const resetDemoData = useHerCode((s) => s.resetDemoData);
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -47,6 +53,22 @@ export function MeScreen({ onNavigate }: { onNavigate: (route: MeRoute) => void 
             <ChevronRight size={18} aria-hidden className="shrink-0 text-muted" />
           </button>
         ))}
+
+        {/* Not a route: the review is the same sheet Today opens after 18:00. */}
+        <button
+          type="button"
+          onClick={onWrapUpDay}
+          className="tap flex w-full items-center gap-3 rounded-card bg-surface px-4 py-3 text-left shadow-soft transition-colors duration-200 hover:bg-sand/30"
+        >
+          <Moon size={19} aria-hidden className="shrink-0 text-ink/55" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] leading-snug text-ink">{copy.me.review}</span>
+            <span className="mt-0.5 block text-[13px] leading-snug text-muted">
+              {copy.me.reviewHint}
+            </span>
+          </span>
+          <ChevronRight size={18} aria-hidden className="shrink-0 text-muted" />
+        </button>
 
         <button
           type="button"

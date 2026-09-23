@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, HeartHandshake } from 'lucide-react';
+import { ChevronDown, HeartHandshake, Moon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Card, SectionTitle } from '../../components/Card';
 import { TaskRow } from '../../components/TaskRow';
 import { copy } from '../../copy';
 import { buildDayPlan } from '../../domain/buildDayPlan';
 import { CAPACITY_LABEL } from '../../domain/capacity';
+import { isBefore18 } from '../../domain/date';
 import type { Task } from '../../domain/types';
 import { cn } from '../../lib/cn';
 import { useHerCode } from '../../store/useHerCode';
@@ -22,10 +23,12 @@ export function TodayScreen({
   onOverwhelmed,
   onCantStart,
   onOpenCapacity,
+  onWrapUpDay,
 }: {
   onOverwhelmed: () => void;
   onCantStart: (task: Task) => void;
   onOpenCapacity: () => void;
+  onWrapUpDay: () => void;
 }) {
   const profile = useHerCode((s) => s.profile);
   const tasks = useHerCode((s) => s.tasks);
@@ -217,6 +220,19 @@ export function TodayScreen({
         <HeartHandshake size={18} aria-hidden />
         {copy.today.overwhelmed}
       </button>
+
+      {/* The day is worth wrapping up only once it is nearly over. It stays
+          reachable from Me at any hour. */}
+      {!isBefore18(new Date()) ? (
+        <button
+          type="button"
+          onClick={onWrapUpDay}
+          className="tap mt-3 flex w-full items-center justify-center gap-2 rounded-card bg-surface px-5 text-[15px] font-medium text-ink shadow-soft transition-colors duration-200 hover:bg-sand/40"
+        >
+          <Moon size={17} aria-hidden />
+          {copy.review.entry}
+        </button>
+      ) : null}
     </div>
   );
 }

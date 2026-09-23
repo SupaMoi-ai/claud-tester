@@ -13,6 +13,7 @@ import { BroCodePreview } from './features/partner/BroCodePreview';
 import { DecisionLoadScreen } from './features/partner/DecisionLoadScreen';
 import { PartnerSetupScreen } from './features/partner/PartnerSetupScreen';
 import { PatternsScreen } from './features/patterns/PatternsScreen';
+import { DailyReview } from './features/review/DailyReview';
 import { MorningCheckIn } from './features/today/MorningCheckIn';
 import { OverwhelmSheet } from './features/today/OverwhelmSheet';
 import { TodayScreen } from './features/today/TodayScreen';
@@ -43,6 +44,7 @@ export default function App() {
   const [overwhelmOpen, setOverwhelmOpen] = useState(false);
   const [aiRequest, setAiRequest] = useState<AIRequest | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const capacity: CapacityLevel = capacityByDay[today] ?? checkIns[today]?.capacity ?? 'normal';
 
@@ -74,6 +76,7 @@ export default function App() {
             onOverwhelmed={() => setOverwhelmOpen(true)}
             onOpenCapacity={() => setOverwhelmOpen(true)}
             onCantStart={askAboutTask}
+            onWrapUpDay={() => setReviewOpen(true)}
           />
         ) : null}
 
@@ -82,7 +85,9 @@ export default function App() {
 
         {ui.activeTab === 'me' ? (
           <>
-            {ui.meRoute === 'root' ? <MeScreen onNavigate={setMeRoute} /> : null}
+            {ui.meRoute === 'root' ? (
+              <MeScreen onNavigate={setMeRoute} onWrapUpDay={() => setReviewOpen(true)} />
+            ) : null}
 
             {ui.meRoute === 'partner' ? (
               <PartnerSetupScreen
@@ -118,6 +123,8 @@ export default function App() {
       <TabBar active={ui.activeTab} onChange={setActiveTab} />
 
       <MorningCheckIn open={checkInOpen} date={today} />
+
+      <DailyReview open={reviewOpen} onOpenChange={setReviewOpen} date={today} />
 
       <OverwhelmSheet
         open={overwhelmOpen}
