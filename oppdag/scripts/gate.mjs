@@ -4,9 +4,22 @@
  * Answers the only question that matters before any artwork is commissioned:
  * does panning Læreøya work, stay smooth, and hit the right things?
  *
- * Measures real frame rate during a scripted drag, verifies parallax actually
- * moved the layers by different amounts, checks that a tap lands on the
- * intended location, and fails loudly if the WebGL context drops.
+ * Measures real frame rate during a scripted drag, drives Ellie around by
+ * tapping the canvas, and fails loudly if the WebGL context drops.
+ *
+ * STANDING RULE, learned the expensive way: an assertion that cannot fail is
+ * worse than no assertion at all, because it reports a pass.
+ *
+ * The first version of this gate checked dragging by diffing a screenshot
+ * before against one after. Clouds drift on their own, so the frames always
+ * differed and the check always passed — while a transparent overlay div was
+ * swallowing every pointer event and the world had never once responded to
+ * touch. It also "tested" tapping a location by clicking the hidden
+ * accessibility button with `force: true`, which bypasses hit-testing
+ * entirely. Two green ticks, neither capable of going red.
+ *
+ * So: assert on state the engine reports, not on pixels, and never use `force`
+ * on a check whose subject is whether input arrives.
  */
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
@@ -131,10 +144,11 @@ const floorFps = await measurePixiFloor(page);
 const idleFps = await measureFps(page, 1500);
 results.push({ ok: true, msg: `idle ${idleFps} fps (software floor ${floorFps} fps — see note)` });
 
-/* ---- 3. drag-pan: smooth, and it actually moves ------------------------ */
-const before = await page.screenshot();
+/* ---- 3. drag-pan: smooth, and the camera actually moved ---------------- */
+const cameraBefore = await worldState(page);
 const fpsDuringDrag = await measureFpsDuringDrag(page);
-const after = await page.screenshot({ path: join(OUT, '02-world-panned.png') });
+await page.screenshot({ path: join(OUT, '02-world-panned.png') });
+const cameraAfter = await worldState(page);
 
 if (fpsDuringDrag >= Math.max(2, floorFps * 0.4)) {
   pass(`${fpsDuringDrag} fps while dragging (floor ${floorFps}) — scene is not pathological`);
@@ -144,31 +158,106 @@ if (fpsDuringDrag >= Math.max(2, floorFps * 0.4)) {
   );
 }
 
-if (!before.equals(after)) pass('drag moved the world');
-else fail('drag did not change the rendered frame');
+// The drag sweeps ~500px left. Anything under 100 means the input never
+// arrived — which is precisely what an overlay div swallowing pointer events
+// looks like, and precisely what the old screenshot diff could not see.
+const panned = Math.abs((cameraAfter?.camera?.x ?? 0) - (cameraBefore?.camera?.x ?? 0));
+if (panned >= 100) pass(`drag moved the camera ${Math.round(panned)} world units`);
+else fail(`drag moved the camera only ${Math.round(panned)} units — input is not reaching the canvas`);
 
-/* ---- 4. parallax: layers moved by different amounts -------------------- */
-// Sample two columns of pixels far apart vertically: sky (slow) vs foreground
-// (fast). If parallax works, they shift by different amounts during the pan.
-const parallaxOk = await page.evaluate(() => {
-  const c = document.querySelector('canvas');
-  return Boolean(c && c.width > 0);
-});
-if (parallaxOk) pass('layers rendered (visual parallax confirmed by screenshot diff)');
-
-/* ---- 5. tapping a location navigates ----------------------------------- */
+/* ---- 4. tap empty ground: Ellie walks there ---------------------------- */
 await page.goto(`${base}/#/verden`);
-await page.waitForTimeout(2000);
+await waitForWorld(page, 'the tap-to-walk check');
 
-// Havna is the one with something waiting; tap it via its accessibility button.
+const canvasBox = await page.locator('canvas').boundingBox();
+/** Tap a point given as a fraction of the canvas, like a finger. */
+const tapAt = async (fx, fy) => {
+  await page.mouse.click(
+    Math.round(canvasBox.x + canvasBox.width * fx),
+    Math.round(canvasBox.y + canvasBox.height * fy),
+  );
+};
+
+const standing = await worldState(page);
+await tapAt(0.22, 0.62); // empty island, well clear of every location
+await waitForStill(page, 'the walk west');
+const walked = await worldState(page);
+
+const ellieMoved = Math.abs((walked?.actors?.ellie?.x ?? 0) - (standing?.actors?.ellie?.x ?? 0));
+if (ellieMoved >= 80) pass(`tapping open ground walked Ellie ${Math.round(ellieMoved)} units`);
+else fail(`tapping open ground moved Ellie ${Math.round(ellieMoved)} units — tap-to-walk is dead`);
+
+await page.screenshot({ path: join(OUT, '04-walked-west.png') });
+
+/* ---- 5. the sea refuses ------------------------------------------------ */
+const beforeSea = await worldState(page);
+await tapAt(0.5, 0.1); // sky/sea, far outside any walkable rectangle
+await page.waitForTimeout(1400);
+const afterSea = await worldState(page);
+// Reading this while she is still walking would blame the sea for the
+// previous tap, so the check above waits for her to come to rest first.
+
+const seaDrift = Math.abs((afterSea?.actors?.ellie?.x ?? 0) - (beforeSea?.actors?.ellie?.x ?? 0));
+if (seaDrift < 10) pass('tapping the sea left Ellie where she was');
+else fail(`tapping the sea walked Ellie ${Math.round(seaDrift)} units into the water`);
+
+/* ---- 6. Kiki keeps up -------------------------------------------------- */
+const beforeTrip = await worldState(page);
+await tapAt(0.85, 0.62);
+await waitForStill(page, 'the walk east');
+const together = await worldState(page);
+
+// Without this, "nobody moved at all" would satisfy the distance test — the
+// companion would look loyal purely by standing still next to a statue.
+const trip = Math.abs(
+  (together?.actors?.ellie?.x ?? 0) - (beforeTrip?.actors?.ellie?.x ?? 0),
+);
+const gap = Math.hypot(
+  (together?.actors?.kiki?.x ?? 0) - (together?.actors?.ellie?.x ?? 0),
+  (together?.actors?.kiki?.y ?? 0) - (together?.actors?.ellie?.y ?? 0),
+);
+if (trip < 80) {
+  fail(`Ellie only travelled ${Math.round(trip)} units east — nothing was proven about Kiki`);
+} else if (gap <= 110) {
+  pass(`Kiki stayed ${Math.round(gap)} units from Ellie across a ${Math.round(trip)}-unit walk`);
+} else {
+  fail(`Kiki fell ${Math.round(gap)} units behind over a ${Math.round(trip)}-unit walk`);
+}
+
+await page.screenshot({ path: join(OUT, '05-walked-east.png') });
+
+/* ---- 7. tapping a location opens it ------------------------------------
+ *
+ * Two genuinely different paths, kept apart on purpose. The old gate ran only
+ * the second one, with `force: true`, and reported it as proof that tapping
+ * the world worked. It was proof that the accessibility mirror worked.
+ */
+await page.goto(`${base}/#/verden`);
+await waitForWorld(page, 'the Havna tap check');
+
 const havna = page.locator('button[aria-label="Havna"]');
-const havnaCount = await havna.count();
-if (havnaCount > 0) {
-  await havna.first().click({ force: true });
-  await page.waitForTimeout(1500);
+if ((await havna.count()) > 0) {
+  const spot = await havna.first().boundingBox();
+  // A real tap at Havna's on-screen position — no force, nothing bypassed.
+  await page.mouse.click(Math.round(spot.x + spot.width / 2), Math.round(spot.y + spot.height / 2));
+  // She walks there before it opens, so this waits for the walk, not a click.
+  await page.waitForTimeout(6000);
   const url = page.url();
-  if (url.includes('/eventyr/')) pass(`tapping Havna opened ${url.split('#')[1]}`);
+  if (url.includes('/eventyr/')) pass(`tapping Havna in the world opened ${url.split('#')[1]}`);
   else fail(`tapping Havna went nowhere (still ${url.split('#')[1]})`);
+} else {
+  fail('Havna has no on-screen position');
+}
+
+await page.goto(`${base}/#/verden`);
+await waitForWorld(page, 'the keyboard check');
+const havnaA11y = page.locator('button[aria-label="Havna"]');
+if ((await havnaA11y.count()) > 0) {
+  await havnaA11y.first().focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(3000);
+  if (page.url().includes('/eventyr/')) pass('Havna is reachable by keyboard alone');
+  else fail('Havna has a focusable button but Enter does nothing');
 } else {
   fail('no accessibility button for Havna — screen readers cannot reach the world');
 }
@@ -256,6 +345,66 @@ async function measurePixiFloor(p) {
     canvas.remove();
     return fps;
   });
+}
+
+/**
+ * What the world believes right now — camera and actor positions, published by
+ * `WorldCanvas` onto `window.__oppdagWorld`.
+ *
+ * Asserting on this rather than on pixels is the whole point. The canvas is
+ * opaque to the DOM, so the temptation is to diff screenshots; but ambient
+ * motion means two frames always differ, and a diff therefore passes whether
+ * or not anything the child did had any effect.
+ */
+async function worldState(p) {
+  return p.evaluate(() => window.__oppdagWorld ?? null);
+}
+
+/**
+ * Block until Ellie has stopped walking.
+ *
+ * Fixed waits turn into either flakes or false blame: read a position while she
+ * is still moving and the *next* check inherits the motion and reports it as
+ * its own failure. Waiting for the actual condition costs nothing and means a
+ * red light names the right culprit.
+ */
+async function waitForStill(p, label) {
+  try {
+    await p.waitForFunction(
+      () => window.__oppdagWorld?.actors?.ellie?.moving === false,
+      null,
+      { timeout: 12000 },
+    );
+    // One more sample tick, so the published position is the resting one.
+    await p.waitForTimeout(150);
+    return true;
+  } catch {
+    fail(`Ellie never stopped walking during ${label}`);
+    return false;
+  }
+}
+
+/**
+ * Block until the world is built and the cast is on stage.
+ *
+ * Without this, a check that taps too early reads `undefined` for Ellie's
+ * position both before and after, computes a difference of exactly zero, and
+ * reports whatever that zero happens to mean — which is the same class of
+ * mistake as diffing screenshots. Waiting for a named condition, and failing
+ * out loud when it never arrives, is the only honest version.
+ */
+async function waitForWorld(p, label) {
+  try {
+    await p.waitForFunction(
+      () => window.__oppdagWorld?.phase === 'ready' && window.__oppdagWorld?.actors?.ellie,
+      null,
+      { timeout: 15000 },
+    );
+    return true;
+  } catch {
+    fail(`the world never became ready before ${label}`);
+    return false;
+  }
 }
 
 async function measureFps(p, ms) {

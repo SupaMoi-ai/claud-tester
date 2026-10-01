@@ -103,7 +103,7 @@ export function AdventureComplete() {
       </SoftCard>
 
       <div className="mt-8 flex flex-col items-center gap-4 pb-6">
-        <Character who="lumi" mood="happy" size={124} />
+        <Character who="kiki" mood="happy" size={124} />
         <PrimaryButton onClick={() => navigate('/verden')} tone="coral">
           {copy.complete.cta}
         </PrimaryButton>

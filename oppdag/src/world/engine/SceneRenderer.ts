@@ -14,6 +14,7 @@ import type {
   SceneConfig,
   WorldLayer,
 } from './types';
+import { Actor, followLeader } from './Actors';
 import { LAYER_ORDER } from './types';
 import type { Camera } from './Camera';
 
@@ -61,6 +62,8 @@ export class SceneRenderer {
   }[] = [];
 
   private attentionRings: { node: Graphics; phase: number }[] = [];
+  /** Characters that walk around. Keyed by id so callers can drive them. */
+  readonly actors = new Map<string, Actor>();
   private elapsed = 0;
   private scene: SceneConfig;
   private reducedMotion: boolean;
@@ -101,12 +104,14 @@ export class SceneRenderer {
     const paths = [
       ...this.scene.layers.map((l) => l.asset),
       ...this.scene.interactables.map((i) => i.asset),
+      ...(this.scene.actors ?? []).flatMap((a) => Object.values(a.sprites)),
     ].filter((p): p is string => Boolean(p));
 
     await this.preload([...new Set(paths)]);
 
     for (const layer of this.scene.layers) this.addLayer(layer);
     for (const item of this.scene.interactables) this.addInteractable(item);
+    for (const spec of this.scene.actors ?? []) this.addActor(spec);
   }
 
   /* ------------------------------------------------------------ building */
@@ -230,6 +235,19 @@ export class SceneRenderer {
       wrapper.y = layer.position.y;
     }
 
+    // Depth inside the interactive layer is the line the object stands on, the
+    // same rule actors use. That is what lets a child walk *behind* a cottage
+    // instead of permanently in front of it.
+    //
+    // Only in that layer, though. Pixi 8 honours zIndex automatically — there
+    // is no opt-in — so setting it on every band silently re-sorted `mid` by
+    // ground line and drew the sea on top of the island. Everywhere else,
+    // painter's order is the order the scene lists things in, and that is the
+    // contract the scene file is written against.
+    if (layer.layer === 'interactive') {
+      wrapper.zIndex = layer.position.y + layer.size.height;
+    }
+
     const target = this.layers.get(layer.layer);
     target?.addChild(wrapper);
 
@@ -293,6 +311,9 @@ export class SceneRenderer {
 
     wrapper.x = item.x;
     wrapper.y = item.y;
+    // Interactables are centred on x/y, so the line they stand on is half a
+    // height below it.
+    wrapper.zIndex = item.y + item.size.height / 2;
     if (item.dimmed) wrapper.alpha = 0.45;
 
     const layerName = item.layer ?? 'interactive';
@@ -310,6 +331,17 @@ export class SceneRenderer {
     });
 
     this.interactables.push({ config: item, parallax: item.parallax ?? 1 });
+  }
+
+  private addActor(spec: import('./types').ActorSpec) {
+    const actor = new Actor(spec, {
+      front: this.textureFor(spec.sprites.front) ?? undefined,
+      back: this.textureFor(spec.sprites.back) ?? undefined,
+      side: this.textureFor(spec.sprites.side) ?? undefined,
+      rest: this.textureFor(spec.sprites.rest ?? null) ?? undefined,
+    });
+    this.actors.set(spec.id, actor);
+    this.layers.get('interactive')?.addChild(actor.node);
   }
 
   /* -------------------------------------------------------------- frame */
@@ -330,6 +362,30 @@ export class SceneRenderer {
       item.node.x = anchored.x + (item.node.x - item.baseX);
       item.node.y = anchored.y + (item.node.y - item.baseY);
       item.node.scale.set(camera.zoom * (item.node.scale.x < 0 ? -1 : 1));
+    }
+
+    // Followers pick their goal before anyone moves, so a companion reacts to
+    // where its leader is this frame rather than trailing a frame behind.
+    for (const actor of this.actors.values()) {
+      const leaderId = actor.spec.follows;
+      const leader = leaderId ? this.actors.get(leaderId) : undefined;
+      if (leader) followLeader(actor, leader);
+    }
+
+    // Actors move themselves, then get placed like anything else. Depth is by
+    // feet position, so walking behind the cottage puts you behind it.
+    for (const actor of this.actors.values()) {
+      actor.update(deltaMs);
+      const at = camera.toScreen(actor.x, actor.y, 1);
+      actor.node.x = at.x;
+      actor.node.y = at.y;
+      actor.node.scale.set(camera.zoom);
+      actor.node.zIndex = actor.y;
+    }
+    const interactive = this.layers.get('interactive');
+    if (interactive && this.actors.size > 0) {
+      interactive.sortableChildren = true;
+      interactive.sortChildren();
     }
 
     // Attention rings breathe rather than blink — an invitation, not an alarm.
@@ -469,6 +525,30 @@ export class SceneRenderer {
   }
 
   /* --------------------------------------------------------- hit testing */
+
+  /** Is this world point somewhere a character may stand? */
+  isWalkable(worldX: number, worldY: number): boolean {
+    const areas = this.scene.walkable;
+    // A scene that declares no walkable areas is entirely walkable, which
+    // keeps simple scenes simple.
+    if (!areas || areas.length === 0) return true;
+    return areas.some(
+      (a) =>
+        worldX >= a.x &&
+        worldX <= a.x + a.width &&
+        worldY >= a.y &&
+        worldY <= a.y + a.height,
+    );
+  }
+
+  /** The character under a screen point, if any. Actors win over scenery. */
+  hitActor(camera: Camera, screenX: number, screenY: number): string | null {
+    const world = camera.toWorld(screenX, screenY, 1);
+    for (const actor of this.actors.values()) {
+      if (actor.hit(world.x, world.y)) return actor.id;
+    }
+    return null;
+  }
 
   /** Returns the id of the topmost interactable under a screen point. */
   hitTest(camera: Camera, screenX: number, screenY: number): string | null {

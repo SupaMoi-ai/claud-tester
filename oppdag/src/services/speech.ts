@@ -6,7 +6,7 @@
  * preview, and always the case in the automated QA run — it falls back to a
  * mocked transcript that is clearly labelled as mocked in the UI.
  *
- * The fallback is honest on purpose: the child is told Lumi guessed, rather
+ * The fallback is honest on purpose: the child is told Kiki guessed, rather
  * than being shown a fake "we heard you".
  */
 

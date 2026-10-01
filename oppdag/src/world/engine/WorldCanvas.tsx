@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Application } from 'pixi.js';
 import { SceneRenderer } from './SceneRenderer';
 import { Camera } from './Camera';
-import type { SceneConfig, WorldEvents } from './types';
+import type { SceneConfig, WorldApi, WorldEvents } from './types';
 
 interface Props extends WorldEvents {
   scene: SceneConfig;
@@ -23,7 +23,7 @@ const MAX_RESOLUTION = 2;
  * This is the only place in the app that knows Pixi exists. It owns the
  * Application, the camera and the renderer, and it publishes two things
  * upward: taps (by id) and a frame-rate sample. Everything else — what a
- * location means, whether it is unlocked, what Lumi says about it — stays in
+ * location means, whether it is unlocked, what Kiki says about it — stays in
  * React and the existing game state.
  *
  * Accessibility: a canvas is a blank wall to a screen reader, so every
@@ -192,10 +192,19 @@ export function WorldCanvas({
             moved < TAP_SLOP && performance.now() - pointerDownAt < TAP_MS;
           camera.endDrag();
           canvas.releasePointerCapture?.(e.pointerId);
-          if (wasTap) {
-            const hit = renderer.hitTest(camera, p.x, p.y);
-            if (hit) onTapRef.current?.(hit);
-          }
+          if (!wasTap) return;
+
+          // A character under the finger wins over the scenery behind it.
+          const id =
+            renderer.hitActor(camera, p.x, p.y) ??
+            renderer.hitTest(camera, p.x, p.y);
+          const world = camera.toWorld(p.x, p.y, 1);
+          onTapRef.current?.({
+            id,
+            worldX: world.x,
+            worldY: world.y,
+            walkable: renderer.isWalkable(world.x, world.y),
+          });
         };
 
         canvas.addEventListener('pointerdown', onPointerDown);
@@ -225,9 +234,17 @@ export function WorldCanvas({
         let fpsAccum = 0;
         let fpsFrames = 0;
         let overlayAccum = 0;
+        let following: string | null = null;
 
         application.ticker.add((ticker) => {
           const deltaMs = ticker.deltaMS;
+
+          // Following is a gentle pull rather than a lock, and a drag always
+          // wins — the child can look around without the camera fighting back.
+          if (following && !camera.isDragging) {
+            const actor = renderer.actors.get(following);
+            if (actor && actor.isMoving) camera.easeTo(actor.x, actor.y - 40, 0.08);
+          }
           camera.update();
           renderer.update(camera, deltaMs);
 
@@ -245,12 +262,38 @@ export function WorldCanvas({
           if (overlayAccum >= 100) {
             overlayAccum = 0;
             setOverlays(renderer.overlayPositions(camera));
+
+            // Publish what the world actually believes, so the gate can assert
+            // on state rather than on pixels. A screenshot diff cannot tell a
+            // working drag from a drifting cloud; this can.
+            diag({
+              camera: { x: Math.round(camera.x), y: Math.round(camera.y) },
+              actors: Object.fromEntries(
+                [...renderer.actors.values()].map((a) => [
+                  a.id,
+                  { x: Math.round(a.x), y: Math.round(a.y), moving: a.isMoving },
+                ]),
+              ),
+            });
           }
         });
 
+        const api: WorldApi = {
+          walkTo: (actorId, x, y, onArrive) =>
+            renderer.actors.get(actorId)?.walkTo(x, y, onArrive),
+          positionOf: (actorId) => {
+            const actor = renderer.actors.get(actorId);
+            return actor ? { x: actor.x, y: actor.y } : null;
+          },
+          focusOn: (x, y) => camera.easeTo(x, y),
+          followActor: (actorId) => {
+            following = actorId;
+          },
+        };
+
         diag({ phase: 'ready' });
         setReady(true);
-        onReady?.();
+        onReady?.(api);
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         diag({ phase: 'failed', error: message });
@@ -284,16 +327,34 @@ export function WorldCanvas({
         </div>
       )}
 
-      {/* Real buttons over the canvas: invisible, but focusable and announced. */}
-      <div className="absolute inset-0" role="group" aria-label="Læreøya">
+      {/* Real buttons over the canvas: invisible, but focusable and announced.
+       *
+       * `pointer-events-none` on the container is load-bearing and must stay.
+       * This div covers the whole canvas, and a transparent div still
+       * hit-tests — without it, every tap and drag in the world lands here and
+       * the canvas never sees a single pointer event. That is exactly what
+       * happened for three commits: the world rendered perfectly and was
+       * completely inert. The buttons opt back in individually. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        role="group"
+        aria-label="Læreøya"
+      >
         {ready &&
           overlays.map((item) => (
             <button
               key={item.id}
-              onClick={() => onTapRef.current?.(item.id)}
+              onClick={() =>
+                onTapRef.current?.({
+                  id: item.id,
+                  worldX: 0,
+                  worldY: 0,
+                  walkable: false,
+                })
+              }
               aria-label={item.label}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full
-                opacity-0 focus-visible:opacity-100"
+              className="pointer-events-auto absolute -translate-x-1/2
+                -translate-y-1/2 rounded-full opacity-0 focus-visible:opacity-100"
               style={{ left: item.x, top: item.y, width: 88, height: 88 }}
               tabIndex={0}
             />

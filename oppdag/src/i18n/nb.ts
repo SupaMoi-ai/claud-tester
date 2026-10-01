@@ -36,10 +36,10 @@ export const nb = {
 
   splash: {
     hello: 'Hei!',
-    intro: 'Bli med Lumi ut i verden.',
+    intro: 'Bli med Kiki ut i verden.',
     start: 'Start eventyret',
     resume: (name: string) => `Fortsett som ${name}`,
-    demo: 'Bruk demo-profil (Mia)',
+    demo: 'Bruk demo-profil (Ellie)',
     demoHint: 'Hopp rett inn i verdenen med en ferdig profil.',
     parents: 'For voksne',
   },
@@ -77,12 +77,12 @@ export const nb = {
 
     welcomeTitle: (name: string) => `Velkommen, ${name}!`,
     welcomeBody:
-      'Jeg heter Lumi. Jeg kjenner alle de rare og fine stedene i denne verdenen — og jeg finner stadig nye.',
+      'Jeg heter Kiki. Jeg kjenner alle de rare og fine stedene på denne øya — og jeg finner stadig nye.',
     welcomeCta: 'Vis meg!',
   },
 
   check: {
-    lumiIntro:
+    kikiIntro:
       'Før vi drar på eventyr må jeg finne ut hva du allerede kan. Klar?',
     start: 'Klar!',
     progress: (i: number, total: number) => `${i} av ${total}`,
@@ -94,20 +94,22 @@ export const nb = {
   },
 
   world: {
-    /** Lumi's nudge towards the one thing there is to do right now. */
-    lumiInvite:
+    /** Kiki's nudge towards the one thing there is to do right now. */
+    kikiInvite:
       'Radioen nede i havna har knitret hele morgenen. Vil du høre hva det er?',
-    lumiCaughtUp: (name: string) =>
+    kikiCaughtUp: (name: string) =>
       `Vi klarte det, ${name}! Jeg har samlet noen nye rare spørsmål til deg.`,
     /** When a character is tapped in the world. */
-    guideAside: 'Hei! Skal vi finne på noe?',
-    companionAside: 'Kiki maler og legger seg ned i gresset.',
+    guideAside: 'Kiki ser opp på deg. Skal vi finne på noe?',
+    companionAside: 'Kiki maler og stryker seg mot beinet ditt.',
+    /** Tapping the child's own avatar. She answers as herself, not as a menu. */
+    avatarAside: 'Trykk et sted på øya, så går jeg dit!',
     lockedHint: 'Her har jeg ikke vært ennå …',
     locked: 'Kommer snart',
     profileLabel: 'Meg',
     parentLabel: 'For voksne',
     discoveriesLabel: 'Oppdagelser',
-    emptyLumi: 'Jeg leter etter neste spor …',
+    emptyKiki: 'Jeg leter etter neste spor …',
   },
 
   adventure: {
@@ -115,7 +117,7 @@ export const nb = {
     notNow: 'Ikke akkurat nå',
     stageOf: (i: number, total: number) => `Steg ${i} av ${total}`,
     tryAgain: 'Prøv en gang til',
-    helpMe: 'Lumi, hjelp meg',
+    helpMe: 'Kiki, hjelp meg',
     hintAgain: 'Hjelp meg litt mer',
     showMe: 'Vis meg hvordan',
     continue: 'Videre',
@@ -169,7 +171,7 @@ export const nb = {
     title: 'Oppdagelser',
     subtitle: 'Rare spørsmål jeg har samlet til deg.',
     cta: 'Finn ut →',
-    soon: 'Lumi graver fortsatt i denne …',
+    soon: 'Kiki graver fortsatt i denne …',
     soonBody:
       'Dette eventyret er ikke helt ferdig ennå. Men jeg har notert at du lurer på det!',
   },
@@ -237,7 +239,7 @@ export const nb = {
   },
 
   loading: {
-    lumi: 'Jeg leter etter neste spor …',
+    kiki: 'Jeg leter etter neste spor …',
     bolt: 'Bygger noe smart …',
     birk: 'Snuser rundt i skogen …',
     otto: 'Tenker åtte tanker på én gang …',

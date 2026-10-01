@@ -22,7 +22,7 @@ export const isbjornen: Adventure = {
   teaser: 'Radioen fra Svalbard knitrer. Noen trenger hjelp.',
   emoji: '🐻‍❄️',
   locationId: 'havna',
-  heroCharacter: 'lumi',
+  heroCharacter: 'kiki',
   concepts: [
     'subtraksjon-under-20',
     'arktiske-dyr',
@@ -46,10 +46,10 @@ export const isbjornen: Adventure = {
       id: 'apning',
       cta: 'Vi hjelper!',
       lines: [
-        { who: 'lumi', mood: 'curious', text: 'Hysj litt … hører du det? Radioen nede i havna har stått og knitret hele morgenen.' },
-        { who: 'lumi', mood: 'thinking', text: '«Vi har et problem! En liten isbjørn har kommet bort fra mammaen sin.»' },
-        { who: 'lumi', mood: 'curious', text: 'Det er fra Svalbard. Det ligger langt, langt mot nord — der det er is nesten hele året.' },
-        { who: 'lumi', mood: 'excited', text: 'Ungen er helt alene. Skal vi dra og hjelpe?' },
+        { who: 'kiki', mood: 'curious', text: 'Hysj litt … hører du det? Radioen nede i havna har stått og knitret hele morgenen.' },
+        { who: 'kiki', mood: 'thinking', text: '«Vi har et problem! En liten isbjørn har kommet bort fra mammaen sin.»' },
+        { who: 'kiki', mood: 'curious', text: 'Det er fra Svalbard. Det ligger langt, langt mot nord — der det er is nesten hele året.' },
+        { who: 'kiki', mood: 'excited', text: 'Ungen er helt alene. Skal vi dra og hjelpe?' },
       ],
     },
 
@@ -59,8 +59,8 @@ export const isbjornen: Adventure = {
       id: 'avstand',
       conceptId: 'subtraksjon-under-20',
       intro: [
-        { who: 'lumi', mood: 'happy', text: 'Vi er framme! Det knirker i snøen, og det lukter salt og kaldt.' },
-        { who: 'lumi', mood: 'thinking', text: 'Forskningsstasjonen ligger 4 km unna. Vi har allerede gått 1 km.' },
+        { who: 'kiki', mood: 'happy', text: 'Vi er framme! Det knirker i snøen, og det lukter salt og kaldt.' },
+        { who: 'kiki', mood: 'thinking', text: 'Forskningsstasjonen ligger 4 km unna. Vi har allerede gått 1 km.' },
       ],
       variants: {
         easy: {
@@ -91,7 +91,7 @@ export const isbjornen: Adventure = {
         { text: 'Vi skulle gå 4 km og har gått 1. Da tar vi 4 − 1, og det blir 3. Så det er 3 km igjen!' },
       ],
       after: [
-        { who: 'lumi', mood: 'excited', text: 'Tre kilometer! Det klarer vi lett. Kom igjen!' },
+        { who: 'kiki', mood: 'excited', text: 'Tre kilometer! Det klarer vi lett. Kom igjen!' },
       ],
     },
 
@@ -101,8 +101,8 @@ export const isbjornen: Adventure = {
       id: 'pels',
       conceptId: 'arktiske-dyr',
       intro: [
-        { who: 'lumi', mood: 'curious', text: 'Der! Bak snøhaugen … ser du den vesle hvite dusken?' },
-        { who: 'lumi', mood: 'happy', text: 'Det er ungen. Den har gjemt seg for vinden.' },
+        { who: 'kiki', mood: 'curious', text: 'Der! Bak snøhaugen … ser du den vesle hvite dusken?' },
+        { who: 'kiki', mood: 'happy', text: 'Det er ungen. Den har gjemt seg for vinden.' },
       ],
       prompt: 'Isbjørnen ser jo helt hvit ut. Men tror DU at hårene faktisk er hvite?',
       options: [
@@ -115,7 +115,7 @@ export const isbjornen: Adventure = {
       revealBody:
         'Hvert hår er hult inni, som et bittelite sugerør. Lyset spretter rundt inne i det, og da ser det hvitt ut for oss — akkurat som snø egentlig er klar is. Og vet du hva som er under pelsen? Svart hud. Svart suger til seg varmen fra sola, så isbjørnen holder seg varm selv når det er tretti kuldegrader.',
       after: [
-        { who: 'lumi', mood: 'excited', text: 'Gjennomsiktig og svart på én gang. Naturen er litt sprø, spør du meg.' },
+        { who: 'kiki', mood: 'excited', text: 'Gjennomsiktig og svart på én gang. Naturen er litt sprø, spør du meg.' },
       ],
     },
 
@@ -125,7 +125,7 @@ export const isbjornen: Adventure = {
       id: 'beskjed',
       conceptId: 'leseforstaaelse',
       intro: [
-        { who: 'lumi', mood: 'thinking', text: 'Det henger en lapp på døra til stasjonen. Kan du lese den for meg?' },
+        { who: 'kiki', mood: 'thinking', text: 'Det henger en lapp på døra til stasjonen. Kan du lese den for meg?' },
       ],
       from: 'Ingrid, forsker på stasjonen',
       body:
@@ -146,7 +146,7 @@ export const isbjornen: Adventure = {
         { text: 'Det står «Vi så ungen i morges ved den gamle værstasjonen». Så det er der de så den sist. Det med isen mot øst handler om mora.' },
       ],
       after: [
-        { who: 'lumi', mood: 'happy', text: 'Bra lest! Mora er altså østover, på isen. Da vet vi hvilken vei vi skal se.' },
+        { who: 'kiki', mood: 'happy', text: 'Bra lest! Mora er altså østover, på isen. Da vet vi hvilken vei vi skal se.' },
       ],
     },
 
@@ -156,7 +156,7 @@ export const isbjornen: Adventure = {
       id: 'kart',
       conceptId: 'kart-og-sted',
       intro: [
-        { who: 'lumi', mood: 'curious', text: 'Vi må si fra på radioen hvor vi er. Men … hvor ER vi, egentlig?' },
+        { who: 'kiki', mood: 'curious', text: 'Vi må si fra på radioen hvor vi er. Men … hvor ER vi, egentlig?' },
       ],
       prompt: 'Kan du finne Svalbard på kartet?',
       targets: [
@@ -175,7 +175,7 @@ export const isbjornen: Adventure = {
         { text: 'Svalbard er øygruppa helt øverst på kartet, langt nord for Norge. Den lille flekken der oppe.' },
       ],
       after: [
-        { who: 'lumi', mood: 'excited', text: 'Riktig! Vi er nesten på toppen av kartet. Ikke rart det er kaldt.' },
+        { who: 'kiki', mood: 'excited', text: 'Riktig! Vi er nesten på toppen av kartet. Ikke rart det er kaldt.' },
       ],
     },
 
@@ -185,11 +185,11 @@ export const isbjornen: Adventure = {
       id: 'hvileplass',
       conceptId: 'leveomraader',
       intro: [
-        { who: 'lumi', mood: 'thinking', text: 'Ungen skjelver. Den trenger et sted å hvile mens vi venter på mora.' },
+        { who: 'kiki', mood: 'thinking', text: 'Ungen skjelver. Den trenger et sted å hvile mens vi venter på mora.' },
       ],
       prompt: 'Kan du tegne et varmt sted isbjørnungen kan hvile?',
       after: [
-        { who: 'lumi', mood: 'excited', text: 'Den la seg med én gang. Se, den sovner nesten!' },
+        { who: 'kiki', mood: 'excited', text: 'Den la seg med én gang. Se, den sovner nesten!' },
       ],
     },
 
@@ -199,7 +199,7 @@ export const isbjornen: Adventure = {
       id: 'refleksjon',
       conceptId: 'muntlig-refleksjon',
       intro: [
-        { who: 'lumi', mood: 'curious', text: 'Mens vi venter … jeg er kjempenysgjerrig på én ting.' },
+        { who: 'kiki', mood: 'curious', text: 'Mens vi venter … jeg er kjempenysgjerrig på én ting.' },
       ],
       prompt: 'Hva var det kuleste du lærte i dag?',
       after: [],
@@ -211,10 +211,10 @@ export const isbjornen: Adventure = {
       id: 'slutten',
       cta: 'Se hva som skjedde!',
       lines: [
-        { who: 'lumi', mood: 'thinking', text: 'Hysj. Hører du det? Noe tungt som går i snøen …' },
-        { who: 'lumi', mood: 'excited', text: 'DER! Ute på isen mot øst — akkurat der lappen sa!' },
-        { who: 'lumi', mood: 'excited', text: 'Ungen våknet med ett og satte av gårde. Og mamma-bjørnen la seg ned og lot den krype helt inntil.' },
-        { who: 'lumi', mood: 'happy', text: 'De fant hverandre. Og det var du som fant veien.' },
+        { who: 'kiki', mood: 'thinking', text: 'Hysj. Hører du det? Noe tungt som går i snøen …' },
+        { who: 'kiki', mood: 'excited', text: 'DER! Ute på isen mot øst — akkurat der lappen sa!' },
+        { who: 'kiki', mood: 'excited', text: 'Ungen våknet med ett og satte av gårde. Og mamma-bjørnen la seg ned og lot den krype helt inntil.' },
+        { who: 'kiki', mood: 'happy', text: 'De fant hverandre. Og det var du som fant veien.' },
       ],
     },
   ],

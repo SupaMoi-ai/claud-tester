@@ -14,7 +14,7 @@ interface Props {
 /**
  * A guess with no wrong answer.
  *
- * This is the shape Lumi's "Hmm… hva tror DU?" takes in the interface. The
+ * This is the shape Kiki's "Hmm… hva tror DU?" takes in the interface. The
  * child commits to a belief first — including "aner ikke, gjetter!" — and only
  * then gets the explanation. Committing before finding out is what makes the
  * answer stick; being wrong here costs nothing at all.

@@ -206,7 +206,7 @@ export function AdventureEngine({ adventure, onFinish, onLeave }: Props) {
       case 'guessReveal':
         return stage.prompt;
       case 'reading':
-        // The note itself carries the scene, so Lumi asks the question — it
+        // The note itself carries the scene, so Kiki asks the question — it
         // would be a waste of the bubble to fill it with "Hmm …".
         return stage.question;
       case 'mapFind':
@@ -268,7 +268,7 @@ export function AdventureEngine({ adventure, onFinish, onLeave }: Props) {
       {phase === 'task' && isTaskStage(stage) && (
         <div className="mt-6 flex-1 pb-4">
           <CharacterBubble
-            who="lumi"
+            who="kiki"
             mood={settled ? 'excited' : attempts > 1 ? 'thinking' : 'curious'}
             size={112}
             compact

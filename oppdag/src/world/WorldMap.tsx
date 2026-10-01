@@ -27,7 +27,7 @@ export function WorldMap({ unlocked, arriving = [], active = [], onSelect }: Pro
        The pins are positioned as a percentage of THIS box, so the box must
        match the rendered SVG exactly. Letting height drive instead made the
        SVG letterbox inside a taller div and threw every pin out onto the sea.
-       The max-width cap reserves room for the header and Lumi's bubble, so the
+       The max-width cap reserves room for the header and Kiki's bubble, so the
        island still shrinks to fit a short landscape screen rather than pushing
        the primary action below the fold. */
     <div
@@ -35,7 +35,7 @@ export function WorldMap({ unlocked, arriving = [], active = [], onSelect }: Pro
       style={{
         aspectRatio: '1000 / 640',
         /* Ideally the island fills the height left over after the header and
-           Lumi's bubble, but never narrower than 32rem (below that the place
+           Kiki's bubble, but never narrower than 32rem (below that the place
            names collide) and never wider than the screen (a child should see
            their whole world, not a fragment of it). When the floor beats the
            ceiling — a phone — clamp returns the floor and the parent pans.

@@ -43,7 +43,7 @@ export function ChildProfile() {
       }
     >
       <header className="mt-14 flex flex-col items-center text-center sm:mt-10">
-        <Character who="lumi" mood="happy" size={130} />
+        <Character who="kiki" mood="happy" size={130} />
         <h1 className="mt-2 text-huge leading-tight text-ink md:text-giant">
           {profile?.name}
         </h1>

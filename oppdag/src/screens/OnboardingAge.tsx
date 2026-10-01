@@ -42,7 +42,7 @@ export function OnboardingAge() {
       }
     >
       <div className="mt-14 sm:mt-10">
-        <CharacterBubble who="lumi" mood="happy" size={140} speechKey="age" compact>
+        <CharacterBubble who="kiki" mood="happy" size={140} speechKey="age" compact>
           {copy.onboarding.ageTitle(name)}
         </CharacterBubble>
       </div>

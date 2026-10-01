@@ -2,18 +2,27 @@ import type { GameState } from '../state/types';
 import { emptyState } from '../state/types';
 
 /**
- * Mia — the demo child.
+ * Ellie — the demo child, and the first real player.
  *
- * One realistic profile used throughout the prototype so the experience reads
- * as personalised rather than generic. She has done the starting activity and
- * has some early mastery, but has *not* been on the Svalbard adventure — that
- * is the thing a reviewer should get to play.
+ * She has done the starting activity and has some early mastery, but has *not*
+ * been on the Svalbard adventure — that is the thing a reviewer should get to
+ * play.
+ *
+ * NOTE: age and grade are placeholders. Ellie's real age and trinn have not
+ * been given yet, and they matter — the learning engine picks a starting level
+ * from them. Everything else about this profile is correct.
  */
 export const DEMO_CHILD = {
-  name: 'Mia',
+  name: 'Ellie',
   age: 8,
   grade: 3,
   interests: ['dyr', 'tegning', 'verdensrommet', 'bygging'],
+  companion: {
+    id: 'kiki',
+    name: 'Kiki',
+    species: 'katt',
+    assetSet: 'kiki',
+  },
 } as const;
 
 const now = Date.now();
@@ -22,7 +31,7 @@ const daysAgo = (n: number) => now - n * 86_400_000;
 /** A little history, so the parent dashboard and world aren't empty on arrival. */
 export function demoState(): GameState {
   const base = emptyState();
-  const childId = 'mia-demo';
+  const childId = 'ellie-demo';
 
   const mastery = (
     conceptId: string,
@@ -59,6 +68,7 @@ export function demoState(): GameState {
       grade: DEMO_CHILD.grade,
       interests: [...DEMO_CHILD.interests],
       createdAt: daysAgo(9),
+      companion: { ...DEMO_CHILD.companion },
     },
     mastery: {
       'tall-1-20': mastery('tall-1-20', 0.86, 7, 7, daysAgo(2)),

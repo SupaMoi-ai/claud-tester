@@ -72,7 +72,7 @@ export type HitArea =
  * Something the child can tap.
  *
  * Carries only identity and geometry. Whether it is unlocked, what adventure
- * it starts and what Lumi says about it all live in the existing game data —
+ * it starts and what Kiki says about it all live in the existing game data —
  * the engine just reports `id` upward.
  */
 export interface Interactable {
@@ -101,6 +101,38 @@ export interface Interactable {
   attention?: boolean;
 }
 
+/**
+ * A character that moves through the scene.
+ *
+ * Actors are separate from interactables because they are not part of the
+ * layout — their position changes every frame, they sort against the scenery
+ * by depth, and they face the direction they are travelling. The engine moves
+ * and draws them; deciding *where* they should go stays outside.
+ */
+export interface ActorSpec {
+  id: string;
+  /** One image per facing. `side` is mirrored for the opposite direction. */
+  sprites: { front: string; back: string; side: string; rest?: string };
+  /** Rendered height in world units; width follows the artwork's aspect. */
+  height: number;
+  /** Starting position, in world coordinates, at the character's feet. */
+  x: number;
+  y: number;
+  /** World units per second when walking. */
+  speed: number;
+  /** Hit radius for tapping the character itself. */
+  tapRadius: number;
+  label?: string;
+  /**
+   * Trail this other actor. Declared here rather than driven from React so
+   * that "Kiki follows Ellie" is a property of the cast, not a line of game
+   * code that has to remember to run every frame.
+   */
+  follows?: string;
+}
+
+export type Facing = 'front' | 'back' | 'left' | 'right';
+
 export interface SceneConfig {
   id: string;
   /** The full extent of the world in scene coordinates. */
@@ -116,13 +148,40 @@ export interface SceneConfig {
   background: number;
   layers: WorldLayer[];
   interactables: Interactable[];
+  actors?: ActorSpec[];
+  /**
+   * Where a character may stand, in world coordinates. A tap outside these
+   * rectangles is ignored rather than sending Ellie walking into the sea.
+   */
+  walkable?: { x: number; y: number; width: number; height: number }[];
+}
+
+/** Where a tap landed. The engine reports; it never decides what it means. */
+export interface WorldTap {
+  /** Interactable or actor under the finger, if any. */
+  id: string | null;
+  /** World coordinates of the tap, for walking somewhere empty. */
+  worldX: number;
+  worldY: number;
+  /** False when the point is outside every walkable rectangle. */
+  walkable: boolean;
+}
+
+/** Imperative handle for driving the world from React. */
+export interface WorldApi {
+  walkTo: (actorId: string, x: number, y: number, onArrive?: () => void) => void;
+  positionOf: (actorId: string) => { x: number; y: number } | null;
+  /** Glide the camera to a world point — used by story beats. */
+  focusOn: (x: number, y: number) => void;
+  /** Keep the camera centred on an actor as it walks. */
+  followActor: (actorId: string | null) => void;
 }
 
 /** What the engine reports back. It never acts on these itself. */
 export interface WorldEvents {
-  onTap?: (id: string) => void;
-  /** Fires once the scene's assets are ready and the first frame is drawn. */
-  onReady?: () => void;
+  onTap?: (tap: WorldTap) => void;
+  /** Fires once the scene is built, handing over the imperative handle. */
+  onReady?: (api: WorldApi) => void;
   /** Sustained frames-per-second sample, for the performance budget. */
   onFps?: (fps: number) => void;
 }

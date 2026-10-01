@@ -52,7 +52,7 @@ export function Reading({ stage, support, statusFor, disabled, onChoose }: Props
         </p>
       </motion.div>
 
-      {/* The question lives in Lumi's bubble above; repeating it here would
+      {/* The question lives in Kiki's bubble above; repeating it here would
           just push the answers off a tablet screen. */}
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {stage.options.map((option) => (

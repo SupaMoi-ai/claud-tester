@@ -35,7 +35,7 @@ export function OnboardingName() {
         </div>
       }
     >
-      <CharacterBubble who="lumi" mood="happy" size={170} speechKey="name">
+      <CharacterBubble who="kiki" mood="happy" size={170} speechKey="name">
         {copy.onboarding.nameTitle}
       </CharacterBubble>
 

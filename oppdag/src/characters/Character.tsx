@@ -1,30 +1,43 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { Lumi } from './Lumi';
 import { Bolt } from './Bolt';
 import { Birk } from './Birk';
 import { Otto } from './Otto';
 import type { Mood } from './Face';
 
-export type Who = 'lumi' | 'bolt' | 'birk' | 'otto';
+export type Who = 'kiki' | 'bolt' | 'birk' | 'otto';
 export type { Mood };
 
 /**
  * The single entry point for drawing a character.
  *
- * Every call site uses `<Character who=… mood=… />` and nothing else, so when
- * final commissioned illustrations exist they can be dropped in by changing
- * only `RENDERERS` below (or adding an `<img>` branch keyed off the same
- * who/mood pair) — no screen has to be touched.
+ * Every call site uses `<Character who=… mood=… />` and nothing else, which is
+ * what made swapping Lumi out for Kiki a change to this file rather than to
+ * every screen.
+ *
+ * Two kinds of character live behind the same prop: Kiki is real artwork and
+ * renders as an image; the others are still placeholder SVG and render through
+ * `RENDERERS`. Call sites cannot tell the difference, which is the point.
  */
-const RENDERERS: Record<Who, (p: { mood?: Mood }) => React.ReactElement> = {
-  lumi: Lumi,
+const ART: Partial<Record<Who, Record<Mood, string>>> = {
+  // Kiki has poses rather than expressions, so moods map onto the pose that
+  // carries that feeling. A cat says most of it with her tail and her ears.
+  kiki: {
+    idle: 'assets/characters/kiki/front34.webp',
+    curious: 'assets/characters/kiki/front34.webp',
+    happy: 'assets/characters/kiki/pose-hale-opp.webp',
+    excited: 'assets/characters/kiki/pose-hale-opp.webp',
+    thinking: 'assets/characters/kiki/pose-sittende.webp',
+  },
+};
+
+const RENDERERS: Partial<Record<Who, (p: { mood?: Mood }) => React.ReactElement>> = {
   bolt: Bolt,
   birk: Birk,
   otto: Otto,
 };
 
 export const CHARACTER_NAMES: Record<Who, string> = {
-  lumi: 'Lumi',
+  kiki: 'Kiki',
   bolt: 'Bolt',
   birk: 'Birk',
   otto: 'Otto',
@@ -33,7 +46,7 @@ export const CHARACTER_NAMES: Record<Who, string> = {
 interface CharacterProps {
   who: Who;
   mood?: Mood;
-  /** Rendered width in px; the SVG is square. */
+  /** Rendered width in px. The slot is square; artwork is letterboxed into it. */
   size?: number;
   /** Gentle idle breathing. On by default — it is what makes them feel alive. */
   breathing?: boolean;
@@ -51,6 +64,7 @@ export function Character({
   className = '',
 }: CharacterProps) {
   const reduced = useReducedMotion();
+  const art = ART[who]?.[mood];
   const Renderer = RENDERERS[who];
   const animate = breathing && !reduced;
 
@@ -69,16 +83,29 @@ export function Character({
           : undefined
       }
     >
-      <svg
-        viewBox="0 0 200 200"
-        width={size}
-        height={size}
-        role="img"
-        aria-label={CHARACTER_NAMES[who]}
-        style={{ overflow: 'visible' }}
-      >
-        <Renderer mood={mood} />
-      </svg>
+      {art ? (
+        <img
+          src={art}
+          width={size}
+          height={size}
+          alt={CHARACTER_NAMES[who]}
+          // Painted artwork is not square; letterbox it inside the slot rather
+          // than squashing a cat.
+          className="h-full w-full object-contain"
+          draggable={false}
+        />
+      ) : Renderer ? (
+        <svg
+          viewBox="0 0 200 200"
+          width={size}
+          height={size}
+          role="img"
+          aria-label={CHARACTER_NAMES[who]}
+          style={{ overflow: 'visible' }}
+        >
+          <Renderer mood={mood} />
+        </svg>
+      ) : null}
     </motion.div>
   );
 }

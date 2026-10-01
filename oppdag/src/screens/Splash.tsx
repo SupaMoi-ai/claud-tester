@@ -62,7 +62,7 @@ export function Splash() {
           transition={{ delay: 0.15, type: 'spring', stiffness: 220, damping: 22 }}
           className="my-6 sm:my-8"
         >
-          <Character who="lumi" mood="curious" size={230} />
+          <Character who="kiki" mood="curious" size={230} />
         </motion.div>
 
         <motion.div

@@ -86,7 +86,7 @@ export function OnboardingInterests() {
               exit={{ opacity: 0 }}
               className="flex items-center gap-3"
             >
-              <Character who="lumi" mood="excited" size={92} />
+              <Character who="kiki" mood="excited" size={92} />
               <PrimaryButton onClick={submit} tone="coral">
                 {copy.onboarding.interestCta}
               </PrimaryButton>

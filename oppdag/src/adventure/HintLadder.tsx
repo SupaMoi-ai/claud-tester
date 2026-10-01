@@ -54,7 +54,7 @@ export function HintLadder({ hints, support, onAskForMore, visible }: Props) {
             className="overflow-hidden"
           >
             <div className="mb-3 flex items-start gap-3 rounded-lg bg-lavender-soft/70 px-4 py-4">
-              <Character who="lumi" mood="thinking" size={56} breathing={false} className="shrink-0" />
+              <Character who="kiki" mood="thinking" size={56} breathing={false} className="shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-body leading-relaxed text-ink">{hint.text}</p>
                 {hint.visual && (

@@ -17,7 +17,7 @@ import { useCopy } from '../i18n';
  * Personalised from the child's stated interests, and deliberately finite —
  * a hand-written set that ends, not a feed that refills to keep them here.
  * Cards that don't open a built adventure say so honestly rather than
- * pretending; Lumi notes the question down instead.
+ * pretending; Kiki notes the question down instead.
  */
 export function Discoveries() {
   const copy = useCopy();
@@ -129,7 +129,7 @@ export function Discoveries() {
                 {copy.discoveries.soonBody}
               </p>
               <div className="mt-6 flex flex-col items-center gap-4">
-                <Character who="lumi" mood="thinking" size={96} />
+                <Character who="kiki" mood="thinking" size={96} />
                 <PrimaryButton onClick={() => setSoon(null)} tone="sky" size="md">
                   {copy.common.close}
                 </PrimaryButton>

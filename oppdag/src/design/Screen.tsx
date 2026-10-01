@@ -14,7 +14,7 @@ interface ScreenProps {
   /**
    * Lock the screen to exactly one viewport and let a `flex-1` child shrink to
    * fit. The world screen needs this: with `min-h-screen` the page simply grows
-   * and pushes Lumi's speech bubble — the one primary action — below the fold.
+   * and pushes Kiki's speech bubble — the one primary action — below the fold.
    */
   fit?: boolean;
   className?: string;

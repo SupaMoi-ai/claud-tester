@@ -32,7 +32,7 @@ await build({
   logLevel: 'error',
 });
 
-const { ASSET_SLOTS, CHARACTER_SLOTS, CHARACTER_STATES } = await import(
+const { ASSET_SLOTS, CHARACTER_SLOTS, CHARACTER_WANTED } = await import(
   pathToFileURL(outfile).href
 );
 
@@ -104,32 +104,48 @@ for (const [band, slots] of byBand) {
 lines.push('## Characters');
 lines.push('');
 lines.push(
-  'Lumi is the guide who ships with the world; Kiki is the child’s own',
-  'companion. Each needs one image per state. Companion staging rule: Kiki sits',
-  'slightly behind and below the child’s eyeline, looking **up** — attentive,',
-  'not posed.',
+  'Ellie is the child — the avatar the player walks around Læreøya. Kiki is her',
+  'own companion and trails her by the staging rule: slightly behind and below',
+  'her eyeline, looking **up** — attentive, not posed.',
 );
-lines.push('');
-lines.push('| File | Size (1×) | Role |');
-lines.push('| --- | --- | --- |');
-for (const character of CHARACTER_SLOTS) {
-  for (const state of CHARACTER_STATES) {
-    lines.push(
-      `| \`assets/characters/${character.id}/${state}.webp\` | ` +
-        `${character.width}×${character.height} | ${character.role} |`,
-    );
-  }
-}
 lines.push('');
 lines.push(
-  `_${ASSET_SLOTS.length} scene slots, ` +
-    `${CHARACTER_SLOTS.length * CHARACTER_STATES.length} character states._`,
+  'These are sized by **height only**. Width follows whatever the artwork’s own',
+  'aspect ratio is, so a redrawn character with different proportions still',
+  'stands the right height on the ground with no code change. `side` is',
+  'mirrored for the opposite direction, so it only needs drawing once.',
 );
+lines.push('');
+lines.push('| File | Height (1×) | Facing |');
+lines.push('| --- | --- | --- |');
+for (const character of CHARACTER_SLOTS) {
+  for (const { facing, path } of character.facings) {
+    lines.push(`| \`${path}\` | ${character.height} | ${facing} |`);
+  }
+}
+
+const facingCount = CHARACTER_SLOTS.reduce((n, c) => n + c.facings.length, 0);
+
+lines.push('');
+lines.push('### Still wanted');
+lines.push('');
+lines.push(
+  'Walking is conveyed by gait today — a bob, a lean and a small squash — because',
+  'the delivered sheets lay their cycles out at roughly 32 px per frame, too small',
+  'to cut into sprites. Individually exported frames are the single thing that',
+  'would most raise the quality of movement.',
+);
+lines.push('');
+for (const want of CHARACTER_WANTED) {
+  lines.push(`- **${want.id}** — ${want.need}`);
+}
+lines.push('');
+lines.push(`_${ASSET_SLOTS.length} scene slots, ${facingCount} character facings._`);
 lines.push('');
 
 writeFileSync(join(root, 'ASSETS.md'), lines.join('\n'), 'utf8');
 rmSync(tmp, { recursive: true, force: true });
 console.log(
   `ASSETS.md written — ${ASSET_SLOTS.length} scene slots, ` +
-    `${CHARACTER_SLOTS.length * CHARACTER_STATES.length} character states`,
+    `${facingCount} character facings`,
 );

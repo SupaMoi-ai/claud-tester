@@ -9,6 +9,21 @@ export interface ChildProfile {
   grade: number | null;
   interests: string[];
   createdAt: number;
+  /**
+   * The child's own companion — the thing that is *theirs*, as opposed to the
+   * world, which is everyone's. Ellie's is Kiki. It is on the profile rather
+   * than hard-coded because the long-term intent is that a child can end up
+   * with a companion they drew themselves.
+   */
+  companion?: Companion;
+}
+
+export interface Companion {
+  id: string;
+  name: string;
+  species: string;
+  /** Folder under `assets/characters/`. */
+  assetSet: string;
 }
 
 export interface AdventureProgress {

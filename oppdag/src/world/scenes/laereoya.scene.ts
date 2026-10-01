@@ -52,7 +52,7 @@ const C = {
  * the same locations differently. `worldLayout.ts` keeps owning what a place
  * means and what unlocks it.
  */
-const LOCATION_POSITIONS: Record<string, { x: number; y: number }> = {
+export const LOCATION_POSITIONS: Record<string, { x: number; y: number }> = {
   oppfinneroya: { x: 300, y: 572 },
   skoglandet: { x: 470, y: 545 },
   tallfjellet: { x: 700, y: 500 },
@@ -201,7 +201,11 @@ export const laereoyaScene: SceneConfig = {
     {
       id: 'cottage',
       asset: 'assets/worlds/laereoya/mid/cottage.webp',
-      layer: 'mid',
+      // In the sorted layer, not `mid`, so Ellie can walk behind it. Depth is
+      // the line it stands on, so walking along its front keeps her in front
+      // and walking along its back puts her behind — which is most of what
+      // makes a flat painting feel like a place.
+      layer: 'interactive',
       parallax: 1,
       position: { x: 960, y: 505 },
       size: { width: 110, height: 100 },
@@ -227,7 +231,9 @@ export const laereoyaScene: SceneConfig = {
     ].map((t) => ({
       id: t.id,
       asset: `assets/worlds/laereoya/mid/${t.id}.webp`,
-      layer: 'mid' as const,
+      // Sorted, like the cottage — walking into the little wood should put her
+      // among the trees rather than in front of all of them.
+      layer: 'interactive' as const,
       parallax: 1,
       position: { x: t.x, y: t.y },
       size: { width: t.w, height: t.h },
@@ -276,31 +282,59 @@ export const laereoyaScene: SceneConfig = {
         placeholderLabel: location.name,
       };
     }),
-    // Lumi stands by the cottage; Kiki sits slightly behind and below her —
-    // the companion staging rule from the art bible, in world coordinates.
+  ],
+
+  /* ---------------------------------------------------------------------- */
+  /* The cast                                                                */
+  /*                                                                         */
+  /* Ellie is not scenery — she is the child, and she walks. Kiki trails her  */
+  /* by the art bible's staging rule: slightly behind, slightly below, and    */
+  /* sitting down to look up when there is nowhere to be.                     */
+  /* ---------------------------------------------------------------------- */
+  actors: [
     {
-      id: 'character:guide',
-      x: 892,
-      y: 596,
-      hit: { shape: 'circle', radius: 46 },
-      asset: null,
-      size: { width: 86, height: 86 },
-      label: 'Lumi',
-      placeholderColor: C.cloud,
-      placeholderLabel: 'Lumi',
+      id: 'ellie',
+      sprites: {
+        front: 'assets/characters/ellie/front.webp',
+        back: 'assets/characters/ellie/back.webp',
+        side: 'assets/characters/ellie/side.webp',
+      },
+      // She is the person you are, not a detail on the island — at 84 she read
+      // as scenery. Large enough to hold the eye, small enough that the island
+      // still feels like somewhere to go.
+      height: 110,
+      x: 900,
+      y: 598,
+      // Roughly a second and a half to cross between two neighbouring places.
+      speed: 120,
+      tapRadius: 38,
+      label: 'Ellie',
     },
     {
-      id: 'character:companion',
-      x: 944,
-      y: 614,
-      hit: { shape: 'circle', radius: 34 },
-      asset: null,
-      size: { width: 62, height: 62 },
+      id: 'kiki',
+      sprites: {
+        front: 'assets/characters/kiki/front.webp',
+        back: 'assets/characters/kiki/back.webp',
+        side: 'assets/characters/kiki/side.webp',
+        rest: 'assets/characters/kiki/pose-sittende.webp',
+      },
+      height: 50,
+      x: 846,
+      y: 616,
+      // A shade quicker than Ellie, or she can never catch up after a long walk.
+      speed: 148,
+      tapRadius: 32,
       label: 'Kiki',
-      placeholderColor: C.lavender,
-      placeholderLabel: 'Kiki',
+      follows: 'ellie',
     },
   ],
+
+  /**
+   * The island's usable ground. Deliberately smaller than the landmass: the
+   * outer edge of the island reads as cliff and shore, and a child walking to
+   * the exact pixel edge of the world looks like a bug even when it is not.
+   */
+  walkable: [{ x: 250, y: 498, width: 1220, height: 132 }],
 };
 
 /* -------------------------------------------------------------------------- */
@@ -402,14 +436,10 @@ export function buildLaereoyaScene(
   return {
     ...laereoyaScene,
     layers: [...laereoyaScene.layers, ...grown],
-    interactables: laereoyaScene.interactables.map((item) =>
-      item.id.startsWith('character:')
-        ? item
-        : {
-            ...item,
-            dimmed: !unlocked.includes(item.id),
-            attention: active.includes(item.id) && unlocked.includes(item.id),
-          },
-    ),
+    interactables: laereoyaScene.interactables.map((item) => ({
+      ...item,
+      dimmed: !unlocked.includes(item.id),
+      attention: active.includes(item.id) && unlocked.includes(item.id),
+    })),
   };
 }

@@ -1,4 +1,4 @@
-import { buildLaereoyaScene } from './scenes/laereoya.scene';
+import { buildLaereoyaScene, laereoyaScene } from './scenes/laereoya.scene';
 import { LOCATIONS, SCENERY } from './worldLayout';
 import type { SceneConfig } from './engine/types';
 
@@ -86,21 +86,40 @@ export const EXPECTED_SIZE: Record<string, { width: number; height: number }> =
   );
 
 /**
- * Characters are not scene layers — they are driven by the character
- * controller and need a state set rather than a single image, so they are
- * listed separately.
+ * Characters are not scene layers. They move, they face the way they are
+ * going, and they are sized by height alone so that a redrawn sprite with
+ * different proportions still stands the right height on the ground.
+ *
+ * What is listed here is what the engine *uses* — three facings per character.
+ * The delivered sheets contain more than that (expressions, poses, walk and
+ * run cycles); see CHARACTER_WANTED for the pieces that would let the engine
+ * do more than it does today.
  */
-export const CHARACTER_STATES = [
-  'idle',
-  'happy',
-  'curious',
-  'thinking',
-  'talking',
-  'walking',
-  'sleeping',
-] as const;
+export const CHARACTER_SLOTS = (laereoyaScene.actors ?? []).map((actor) => ({
+  id: actor.id,
+  /** Rendered height in world units. Width follows the artwork's own aspect. */
+  height: actor.height,
+  facings: Object.entries(actor.sprites)
+    .filter(([, path]) => Boolean(path))
+    .map(([facing, path]) => ({ facing, path: path as string })),
+}));
 
-export const CHARACTER_SLOTS = [
-  { id: 'lumi', role: 'guide', width: 86, height: 86 },
-  { id: 'kiki', role: 'companion', width: 62, height: 62 },
+/**
+ * Art that would unlock behaviour the engine already has a place for.
+ *
+ * Walking is currently conveyed by gait — a bob, a lean and a small squash —
+ * because the sheets lay their cycles out at roughly 32 px per frame, too
+ * small to cut. Individually exported frames are the one thing that would
+ * visibly raise the quality of movement, and nothing outside `Actors.ts`
+ * changes when they arrive.
+ */
+export const CHARACTER_WANTED = [
+  {
+    id: 'ellie',
+    need: 'walk cycle, 6–8 frames per facing, exported one frame per file at 600 px tall',
+  },
+  {
+    id: 'kiki',
+    need: 'walk cycle, 4–6 frames side view, exported one frame per file at 320 px tall',
+  },
 ] as const;

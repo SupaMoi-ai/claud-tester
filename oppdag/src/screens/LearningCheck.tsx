@@ -18,7 +18,7 @@ type Phase = 'intro' | 'playing' | 'outro';
  * Six tiny interactions that quietly seed the mastery map.
  *
  * Rules held to throughout: no score, no "feil", no progress percentage, and
- * a near miss never blocks the child — after one retry Lumi moves things along
+ * a near miss never blocks the child — after one retry Kiki moves things along
  * warmly. Being stuck must never feel like failing.
  */
 export function LearningCheck() {
@@ -90,8 +90,8 @@ export function LearningCheck() {
   if (phase === 'intro') {
     return (
       <Screen backdrop={<Backdrop kind="hills" />} center width="narrow">
-        <CharacterBubble who="lumi" mood="curious" size={190} speechKey="check-intro">
-          {copy.check.lumiIntro}
+        <CharacterBubble who="kiki" mood="curious" size={190} speechKey="check-intro">
+          {copy.check.kikiIntro}
         </CharacterBubble>
         <div className="mt-8 flex justify-center">
           <PrimaryButton onClick={() => setPhase('playing')} tone="coral">
@@ -107,7 +107,7 @@ export function LearningCheck() {
     return (
       <Screen backdrop={<Backdrop kind="hills" />} center width="narrow">
         <div className="flex flex-col items-center text-center">
-          <Character who="lumi" mood="excited" size={200} />
+          <Character who="kiki" mood="excited" size={200} />
           <h1 className="mt-4 text-huge text-ink md:text-giant">
             {copy.check.outroTitle}
           </h1>
@@ -141,7 +141,7 @@ export function LearningCheck() {
 
       <div className="mt-6">
         <CharacterBubble
-          who="lumi"
+          who="kiki"
           mood={settled ? (rightNow ? 'excited' : 'happy') : 'curious'}
           size={128}
           speechKey={item.id + (settled ? '-done' : '')}

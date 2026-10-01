@@ -168,7 +168,7 @@ export function UnlockModal({ ids, heroId, onClose }: Props) {
         )}
 
         <div className="mt-7 flex flex-col items-center gap-4">
-          <Character who="lumi" mood="excited" size={104} />
+          <Character who="kiki" mood="excited" size={104} />
           <PrimaryButton onClick={onClose} tone="coral">
             {copy.unlock.cta}
           </PrimaryButton>

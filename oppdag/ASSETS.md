@@ -51,11 +51,6 @@ specular highlight, silhouette-first so they read at small sizes.
 | `assets/worlds/laereoya/mid/meadow.webp` | 550×80 | transparent |
 | `assets/worlds/laereoya/mid/shore.webp` | 340×40 | transparent |
 | `assets/worlds/laereoya/mid/river.webp` | 64×195 | transparent |
-| `assets/worlds/laereoya/mid/cottage.webp` | 110×100 | transparent |
-| `assets/worlds/laereoya/mid/tree-a.webp` | 60×92 | transparent; animated: sway |
-| `assets/worlds/laereoya/mid/tree-b.webp` | 50×78 | transparent; animated: sway |
-| `assets/worlds/laereoya/mid/tree-c.webp` | 44×70 | transparent; animated: sway |
-| `assets/worlds/laereoya/mid/tree-d.webp` | 54×86 | transparent; animated: sway |
 | `assets/worlds/laereoya/mid/skog.webp` | 280×105 | transparent; animated: sway |
 | `assets/worlds/laereoya/mid/bro.webp` | 175×42 | transparent |
 | `assets/worlds/laereoya/mid/bat.webp` | 100×76 | transparent; animated: bob |
@@ -63,17 +58,15 @@ specular highlight, silhouette-first so they read at small sizes.
 | `assets/worlds/laereoya/mid/hval.webp` | 155×62 | transparent; animated: bob |
 | `assets/worlds/laereoya/mid/nordlystaarn.webp` | 72×142 | transparent; animated: pulse |
 
-## Foreground framing — closest, moves most
-
-| File | Size (1×) | Notes |
-| --- | --- | --- |
-| `assets/worlds/laereoya/fore/grass-left.webp` | 480×130 | transparent; animated: sway |
-| `assets/worlds/laereoya/fore/branch-right.webp` | 230×110 | transparent; animated: sway |
-
 ## Places the child can tap
 
 | File | Size (1×) | Notes |
 | --- | --- | --- |
+| `assets/worlds/laereoya/mid/cottage.webp` | 110×100 | transparent |
+| `assets/worlds/laereoya/mid/tree-a.webp` | 60×92 | transparent; animated: sway |
+| `assets/worlds/laereoya/mid/tree-b.webp` | 50×78 | transparent; animated: sway |
+| `assets/worlds/laereoya/mid/tree-c.webp` | 44×70 | transparent; animated: sway |
+| `assets/worlds/laereoya/mid/tree-d.webp` | 54×86 | transparent; animated: sway |
 | `assets/worlds/laereoya/interactive/skoglandet.webp` | 104×104 | transparent |
 | `assets/worlds/laereoya/interactive/havna.webp` | 104×104 | transparent |
 | `assets/worlds/laereoya/interactive/tallfjellet.webp` | 104×104 | transparent |
@@ -82,28 +75,42 @@ specular highlight, silhouette-first so they read at small sizes.
 | `assets/worlds/laereoya/interactive/nordlysobservatoriet.webp` | 104×104 | transparent |
 | `assets/worlds/laereoya/interactive/historiedalen.webp` | 104×104 | transparent |
 
+## Foreground framing — closest, moves most
+
+| File | Size (1×) | Notes |
+| --- | --- | --- |
+| `assets/worlds/laereoya/fore/grass-left.webp` | 480×130 | transparent; animated: sway |
+| `assets/worlds/laereoya/fore/branch-right.webp` | 230×110 | transparent; animated: sway |
+
 ## Characters
 
-Lumi is the guide who ships with the world; Kiki is the child’s own
-companion. Each needs one image per state. Companion staging rule: Kiki sits
-slightly behind and below the child’s eyeline, looking **up** — attentive,
-not posed.
+Ellie is the child — the avatar the player walks around Læreøya. Kiki is her
+own companion and trails her by the staging rule: slightly behind and below
+her eyeline, looking **up** — attentive, not posed.
 
-| File | Size (1×) | Role |
+These are sized by **height only**. Width follows whatever the artwork’s own
+aspect ratio is, so a redrawn character with different proportions still
+stands the right height on the ground with no code change. `side` is
+mirrored for the opposite direction, so it only needs drawing once.
+
+| File | Height (1×) | Facing |
 | --- | --- | --- |
-| `assets/characters/lumi/idle.webp` | 86×86 | guide |
-| `assets/characters/lumi/happy.webp` | 86×86 | guide |
-| `assets/characters/lumi/curious.webp` | 86×86 | guide |
-| `assets/characters/lumi/thinking.webp` | 86×86 | guide |
-| `assets/characters/lumi/talking.webp` | 86×86 | guide |
-| `assets/characters/lumi/walking.webp` | 86×86 | guide |
-| `assets/characters/lumi/sleeping.webp` | 86×86 | guide |
-| `assets/characters/kiki/idle.webp` | 62×62 | companion |
-| `assets/characters/kiki/happy.webp` | 62×62 | companion |
-| `assets/characters/kiki/curious.webp` | 62×62 | companion |
-| `assets/characters/kiki/thinking.webp` | 62×62 | companion |
-| `assets/characters/kiki/talking.webp` | 62×62 | companion |
-| `assets/characters/kiki/walking.webp` | 62×62 | companion |
-| `assets/characters/kiki/sleeping.webp` | 62×62 | companion |
+| `assets/characters/ellie/front.webp` | 110 | front |
+| `assets/characters/ellie/back.webp` | 110 | back |
+| `assets/characters/ellie/side.webp` | 110 | side |
+| `assets/characters/kiki/front.webp` | 50 | front |
+| `assets/characters/kiki/back.webp` | 50 | back |
+| `assets/characters/kiki/side.webp` | 50 | side |
+| `assets/characters/kiki/pose-sittende.webp` | 50 | rest |
 
-_31 scene slots, 14 character states._
+### Still wanted
+
+Walking is conveyed by gait today — a bob, a lean and a small squash — because
+the delivered sheets lay their cycles out at roughly 32 px per frame, too small
+to cut into sprites. Individually exported frames are the single thing that
+would most raise the quality of movement.
+
+- **ellie** — walk cycle, 6–8 frames per facing, exported one frame per file at 600 px tall
+- **kiki** — walk cycle, 4–6 frames side view, exported one frame per file at 320 px tall
+
+_31 scene slots, 7 character facings._

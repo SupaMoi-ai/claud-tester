@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Screen } from '../design/Screen';
@@ -6,7 +6,8 @@ import { PrimaryButton } from '../design/PrimaryButton';
 import { SoftCard } from '../design/SoftCard';
 import { Character } from '../characters/Character';
 import { WorldCanvas } from '../world/engine/WorldCanvas';
-import { buildLaereoyaScene } from '../world/scenes/laereoya.scene';
+import { buildLaereoyaScene, LOCATION_POSITIONS } from '../world/scenes/laereoya.scene';
+import type { WorldApi, WorldTap } from '../world/engine/types';
 import { UnlockModal } from '../adventure/UnlockModal';
 import { LOCATIONS, LOCATIONS_BY_ID, type WorldLocation } from '../world/worldLayout';
 import { adventuresAt, ADVENTURES } from '../data/adventures';
@@ -18,7 +19,7 @@ import { useCopy } from '../i18n';
  *
  * Not a menu: an illustrated island the child can look at and immediately want
  * to touch. Chrome is kept to two small corner buttons; everything else is
- * world. Lumi stands at the bottom and suggests exactly one thing to do, so
+ * world. Kiki stands at the bottom and suggests exactly one thing to do, so
  * there is never a question of what the primary action is.
  */
 export function Home() {
@@ -29,8 +30,10 @@ export function Home() {
   const [peek, setPeek] = useState<WorldLocation | null>(null);
   /** A one-line reaction when a character is tapped. */
   const [aside, setAside] = useState<string | null>(null);
+  /** Imperative handle onto the running world. */
+  const worldRef = useRef<WorldApi | null>(null);
 
-  /** The one adventure Lumi is nudging towards right now. */
+  /** The one adventure Kiki is nudging towards right now. */
   const suggestion =
     ADVENTURES.find((a) => !adventures[a.id]?.completedAt) ?? null;
 
@@ -55,23 +58,59 @@ export function Home() {
   };
 
   /**
-   * The world reports an id and nothing else. Deciding what that id *means*
-   * stays here, in React, next to the game state — the renderer never knows
+   * The world reports where a tap landed and what was under it. Deciding what
+   * that *means* stays here, next to the game state — the renderer never knows
    * what an adventure is.
+   *
+   * Ellie walks to whatever was tapped rather than teleporting the screen
+   * there. A place opens when she arrives, so entering an adventure is
+   * something she does, not something a menu does.
    */
-  const handleTap = (id: string) => {
-    if (id.startsWith('character:')) {
-      setAside(
-        id === 'character:companion'
-          ? copy.world.companionAside
-          : copy.world.guideAside,
-      );
-      window.setTimeout(() => setAside(null), 3000);
-      return;
-    }
-    const location = LOCATIONS_BY_ID[id as keyof typeof LOCATIONS_BY_ID];
-    if (location) openLocation(location);
-  };
+  const handleTap = useCallback(
+    (tap: WorldTap) => {
+      const api = worldRef.current;
+
+      if (tap.id === 'kiki') {
+        setAside(copy.world.companionAside);
+        window.setTimeout(() => setAside(null), 3000);
+        return;
+      }
+      if (tap.id === 'ellie') {
+        setAside(copy.world.avatarAside);
+        window.setTimeout(() => setAside(null), 3000);
+        return;
+      }
+
+      const location = tap.id
+        ? LOCATIONS_BY_ID[tap.id as keyof typeof LOCATIONS_BY_ID]
+        : undefined;
+
+      if (location) {
+        const spot = LOCATION_POSITIONS[location.id];
+        // Stop short of the marker so she stands beside a place, not on it.
+        if (api && spot) {
+          api.walkTo('ellie', spot.x, spot.y + 34, () => openLocation(location));
+        } else {
+          openLocation(location);
+        }
+        return;
+      }
+
+      // Empty ground: go for a wander, as long as it is not the sea.
+      if (api && tap.walkable) api.walkTo('ellie', tap.worldX, tap.worldY);
+    },
+    // Rebuilding this handler is free — `WorldCanvas` keeps `onTap` in a ref
+    // rather than an effect dependency, so a new identity never remounts the
+    // world. Which means it can depend on live state honestly: pinning it to
+    // the first render would have left it deciding what is unlocked using a
+    // list from before the child unlocked anything.
+    [copy, unlocked, adventures],
+  );
+
+  const handleReady = useCallback((api: WorldApi) => {
+    worldRef.current = api;
+    api.followActor('ellie');
+  }, []);
 
   const openCount = LOCATIONS.filter((l) => unlocked.includes(l.id)).length;
 
@@ -115,9 +154,9 @@ export function Home() {
 
       {/* ---- the island ---------------------------------------------- */}
       <div className="relative mt-4 min-h-0 flex-1 overflow-hidden rounded-xl">
-        <WorldCanvas scene={scene} onTap={handleTap} />
+        <WorldCanvas scene={scene} onTap={handleTap} onReady={handleReady} />
 
-        {/* Lumi's aside when a character is tapped */}
+        {/* Kiki's aside when a character is tapped */}
         <AnimatePresence>
           {aside && (
             <motion.div
@@ -155,22 +194,22 @@ export function Home() {
         </AnimatePresence>
       </div>
 
-      {/* ---- Lumi + the one obvious action --------------------------- */}
+      {/* ---- Kiki + the one obvious action --------------------------- */}
       <div className="mt-3">
-        {/* Stacks on a phone: side by side, six lines of Lumi wrap into a
+        {/* Stacks on a phone: side by side, six lines of Kiki wrap into a
             column barely wider than the button. */}
         <SoftCard
           padding="sm"
           className="flex flex-col items-center gap-3 sm:flex-row sm:gap-5"
         >
           <div className="flex w-full items-center gap-3 sm:w-auto sm:flex-1">
-            <Character who="lumi" mood="curious" size={96} className="shrink-0" />
+            <Character who="kiki" mood="curious" size={96} className="shrink-0" />
 
             <div className="min-w-0 flex-1">
               <p className="font-display text-body font-semibold leading-snug text-ink sm:text-lead">
                 {suggestion
-                  ? copy.world.lumiInvite
-                  : copy.world.lumiCaughtUp(profile?.name ?? '')}
+                  ? copy.world.kikiInvite
+                  : copy.world.kikiCaughtUp(profile?.name ?? '')}
               </p>
               <p className="mt-1 text-label text-ink-faint">
                 {copy.profile.worldCount(openCount, LOCATIONS.length)}

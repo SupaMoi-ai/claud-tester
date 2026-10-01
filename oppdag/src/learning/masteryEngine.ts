@@ -76,7 +76,7 @@ export function withDecay(m: ChildMastery, now = Date.now()): ChildMastery {
 /**
  * Fold one answered stage into a concept's mastery record.
  *
- * Expressive stages (drawing, telling Lumi what you learned) always count as
+ * Expressive stages (drawing, telling Kiki what you learned) always count as
  * engagement, never as a score — they nudge confidence up a little and are
  * flagged so the parent view describes them as exploration.
  */

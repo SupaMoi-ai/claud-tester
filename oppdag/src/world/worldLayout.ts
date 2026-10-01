@@ -23,7 +23,7 @@ export interface WorldLocation {
   id: LocationId;
   /** Child-facing name — a place, never a subject. */
   name: string;
-  /** What Lumi says about it when it is still closed. */
+  /** What Kiki says about it when it is still closed. */
   teaser: string;
   /** Position on the 1000×640 world viewBox. */
   x: number;
