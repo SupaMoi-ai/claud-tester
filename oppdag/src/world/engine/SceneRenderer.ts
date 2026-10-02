@@ -573,12 +573,35 @@ export class SceneRenderer {
   }
 
   /** Screen positions of every interactable, for DOM overlays and a11y. */
+  /**
+   * Where the mirrored accessibility buttons go, and how big each one is.
+   *
+   * The size matters as much as the position. These buttons are invisible but
+   * real, so one sized larger than the thing it stands for silently eats taps
+   * meant for the ground around it. At a fixed 88px and ten objects in a
+   * scene, they covered most of the path and walking stopped working — the
+   * same failure as the overlay that swallowed every pointer event, in a form
+   * that only appears once a scene has enough objects in it.
+   *
+   * Floored at 44px, the usual minimum comfortable touch target. Section 2.3
+   * asks the layout to keep simultaneously required objects at least one
+   * target apart, which is what keeps that floor from reintroducing the
+   * problem.
+   */
   overlayPositions(camera: Camera) {
-    return this.interactables.map((entry) => ({
-      id: entry.config.id,
-      label: entry.config.label ?? entry.config.id,
-      ...camera.toScreen(entry.config.x, entry.config.y, entry.parallax),
-    }));
+    return this.interactables.map((entry) => {
+      const hit = entry.config.hit;
+      const span =
+        hit.shape === 'circle'
+          ? hit.radius * 2
+          : Math.max(hit.width, hit.height);
+      return {
+        id: entry.config.id,
+        label: entry.config.label ?? entry.config.id,
+        size: Math.max(44, Math.round(span * camera.zoom)),
+        ...camera.toScreen(entry.config.x, entry.config.y, entry.parallax),
+      };
+    });
   }
 
   setReducedMotion(reduced: boolean) {

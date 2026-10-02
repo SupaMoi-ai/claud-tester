@@ -17,6 +17,13 @@ import { ChapterHud } from '../world/ChapterHud';
  * units, so the canvas is held to 9:16 and centred, with the surplus filled by
  * the same cream the interface uses.
  */
+/** What each object answers with until the chapter script takes over. */
+const LABELS: Record<string, string> = Object.fromEntries(
+  (bryggaScene.interactables ?? [])
+    .filter((i) => i.label)
+    .map((i) => [i.id, i.label as string]),
+);
+
 export function Brygga() {
   const worldRef = useRef<WorldApi | null>(null);
   const [where, setWhere] = useState<string | null>(null);
@@ -27,6 +34,16 @@ export function Brygga() {
 
     if (tap.id === 'kiki' || tap.id === 'ellie') {
       setWhere(tap.id === 'kiki' ? 'Kiki ser opp på deg.' : 'Hvor skal vi gå?');
+      window.setTimeout(() => setWhere(null), 2400);
+      return;
+    }
+
+    // Tapping an object names it. The chapter's own responses replace this,
+    // but saying nothing reads as a broken tap, and saying "we can walk here"
+    // about a boathouse reads as a confused one.
+    const object = tap.id ? LABELS[tap.id] : undefined;
+    if (object) {
+      setWhere(object);
       window.setTimeout(() => setWhere(null), 2400);
       return;
     }

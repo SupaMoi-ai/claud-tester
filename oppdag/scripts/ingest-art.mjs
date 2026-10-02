@@ -154,10 +154,21 @@ for (const sheet of SHEETS) {
         };
       }
 
-      /* ---- 1. erase only the magenta connected to the border ------------- */
-      // Magenta-ness: how far red and blue sit above green. Real paint in this
-      // world (terracotta #AE6C52, nose pink #B98985) scores under 0.1; the
-      // key scores 1.0, so 0.45 separates them with room to spare.
+      /* ---- 1. key out the magenta ---------------------------------------- *
+       * Globally, not by flood fill from the border. An earlier version only
+       * erased key that was reachable from the edge, on the theory that this
+       * protects paint which happens to be pink. It does — and it also keeps
+       * every scrap of background trapped inside the artwork: the gaps between
+       * a bundle of twigs, the holes in a basket's weave, the sky through a
+       * birch canopy, the space between a gull's legs. Those came out as solid
+       * magenta blobs, on seven of the first twelve real cut-outs, while a
+       * fixture of plain filled circles passed perfectly.
+       *
+       * The protection was never needed here. Magenta-ness — how far red and
+       * blue sit above green — is 1.0 for the key and at most about 0.13 for
+       * anything in this palette, including terracotta and the nose pink.
+       * A global cut at 0.45 sits in the middle of that gulf.
+       */
       const magenta = (i) => {
         const r = d[i];
         const g = d[i + 1];
@@ -165,41 +176,31 @@ for (const sheet of SHEETS) {
         return ((r + b) / 2 - g) / 255;
       };
 
-      const seen = new Uint8Array(W * H);
-      const stack = [];
-      for (let x = 0; x < W; x += 1) stack.push(x, x + (H - 1) * W);
-      for (let y = 0; y < H; y += 1) stack.push(y * W, W - 1 + y * W);
-
-      while (stack.length) {
-        const p = stack.pop();
-        if (seen[p]) continue;
-        if (magenta(p * 4) < 0.45) continue;
-        seen[p] = 1;
-        const x = p % W;
-        const y = (p - x) / W;
-        if (x > 0) stack.push(p - 1);
-        if (x < W - 1) stack.push(p + 1);
-        if (y > 0) stack.push(p - W);
-        if (y < H - 1) stack.push(p + W);
+      const keyed = new Uint8Array(W * H);
+      for (let p = 0; p < W * H; p += 1) {
+        if (magenta(p * 4) >= 0.45) {
+          keyed[p] = 1;
+          d[p * 4 + 3] = 0;
+        }
       }
-      for (let p = 0; p < W * H; p += 1) if (seen[p]) d[p * 4 + 3] = 0;
 
-      /* ---- 2. despill and feather only the rim --------------------------- */
+      /* ---- 2. despill and feather the rim -------------------------------- */
       // Edge pixels are a blend of paint and key. Touching anything further in
       // would desaturate legitimate pink paint, so the treatment is confined
-      // to pixels within two of an erased one.
+      // to pixels within two of a keyed one — which now includes the inside
+      // edges of every hole, not just the outer silhouette.
       const rim = new Uint8Array(W * H);
       for (let y = 0; y < H; y += 1) {
         for (let x = 0; x < W; x += 1) {
           const p = y * W + x;
-          if (seen[p] || d[p * 4 + 3] === 0) continue;
+          if (keyed[p] || d[p * 4 + 3] === 0) continue;
           let near = false;
           for (let dy = -2; dy <= 2 && !near; dy += 1) {
             for (let dx = -2; dx <= 2; dx += 1) {
               const nx = x + dx;
               const ny = y + dy;
               if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-              if (seen[ny * W + nx]) { near = true; break; }
+              if (keyed[ny * W + nx]) { near = true; break; }
             }
           }
           if (near) rim[p] = 1;
@@ -212,8 +213,8 @@ for (const sheet of SHEETS) {
         const m = magenta(i);
         if (m <= 0.1) continue;
         despilled += 1;
-        // Pull red and blue back down to the green channel's level, which is
-        // what the paint under the blend actually was.
+        // Pull red and blue back down toward green, which is what the paint
+        // under the blend actually was.
         const g = d[i + 1];
         d[i] = Math.min(d[i], g + 30);
         d[i + 2] = Math.min(d[i + 2], g + 30);
@@ -288,6 +289,45 @@ for (const sheet of SHEETS) {
         colRuns = mergeTo(colRuns, spec.cols);
 
         for (const [cx0, cx1] of colRuns) {
+          /* Drop contamination from the neighbouring cell. A band's edge can
+           * clip the top of whatever is drawn below it, and that scrap then
+           * rides along inside this cell's bounding box — a few pixels of
+           * birch canopy sitting under the shells. Anything under a hundredth
+           * of the cell's own ink is not part of the subject: the three
+           * separate shells and every individual twig are each far larger
+           * than that, so nothing real is at risk. */
+          const seen = new Uint8Array((cx1 - cx0 + 1) * (ry1 - ry0 + 1));
+          const cw = cx1 - cx0 + 1;
+          const at = (x, y) => (y - ry0) * cw + (x - cx0);
+          const groups = [];
+          let totalInk = 0;
+          for (let y = ry0; y <= ry1; y += 1) {
+            for (let x = cx0; x <= cx1; x += 1) {
+              if (!opaque(x, y) || seen[at(x, y)]) continue;
+              const cells = [];
+              const stack = [[x, y]];
+              seen[at(x, y)] = 1;
+              while (stack.length) {
+                const [px, py] = stack.pop();
+                cells.push([px, py]);
+                for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                  const nx = px + dx;
+                  const ny = py + dy;
+                  if (nx < cx0 || nx > cx1 || ny < ry0 || ny > ry1) continue;
+                  if (seen[at(nx, ny)] || !opaque(nx, ny)) continue;
+                  seen[at(nx, ny)] = 1;
+                  stack.push([nx, ny]);
+                }
+              }
+              totalInk += cells.length;
+              groups.push(cells);
+            }
+          }
+          for (const g of groups) {
+            if (g.length >= totalInk * 0.01) continue;
+            for (const [px, py] of g) d[(py * W + px) * 4 + 3] = 0;
+          }
+
           let minX = cx1, maxX = cx0, minY = ry1, maxY = ry0;
           for (let y = ry0; y <= ry1; y += 1) {
             for (let x = cx0; x <= cx1; x += 1) {

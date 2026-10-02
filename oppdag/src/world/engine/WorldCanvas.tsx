@@ -51,7 +51,7 @@ export function WorldCanvas({
   onTapRef.current = onTap;
 
   const [overlays, setOverlays] = useState<
-    { id: string; label: string; x: number; y: number }[]
+    { id: string; label: string; x: number; y: number; size: number }[]
   >([]);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -355,7 +355,12 @@ export function WorldCanvas({
               aria-label={item.label}
               className="pointer-events-auto absolute -translate-x-1/2
                 -translate-y-1/2 rounded-full opacity-0 focus-visible:opacity-100"
-              style={{ left: item.x, top: item.y, width: 88, height: 88 }}
+              style={{
+                left: item.x,
+                top: item.y,
+                width: item.size,
+                height: item.size,
+              }}
               tabIndex={0}
             />
           ))}

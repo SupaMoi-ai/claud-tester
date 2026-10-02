@@ -118,7 +118,115 @@ export const bryggaScene: SceneConfig = {
     },
   ],
 
-  interactables: [],
+  /**
+   * The harbour's objects.
+   *
+   * Everything here sits in the sorted layer, so Ellie passes in front of what
+   * is nearer the camera than her feet and behind what is further — which is
+   * most of what makes a flat painting read as a place. x/y is the object's
+   * centre; its depth is the line it stands on, half a height below.
+   *
+   * Positions are placed against the painted plate and checked on screen, not
+   * derived from the specification's anchors: those were authored for a
+   * harbour that had not been painted when they were written.
+   */
+  interactables: [
+    {
+      id: 'boathouse',
+      x: 364,
+      y: 420,
+      hit: { shape: 'rect', width: 110, height: 100 },
+      asset: 'assets/worlds/brygga/props/boathouse.png',
+      size: { width: 110, height: 100 },
+      label: 'Naustet',
+    },
+    {
+      id: 'birch',
+      x: 108,
+      y: 300,
+      hit: { shape: 'rect', width: 119, height: 150 },
+      asset: 'assets/worlds/brygga/props/birch.png',
+      size: { width: 119, height: 150 },
+    },
+    {
+      id: 'boat',
+      x: 372,
+      y: 600,
+      hit: { shape: 'rect', width: 46, height: 40 },
+      asset: 'assets/worlds/brygga/props/boat.png',
+      size: { width: 46, height: 40 },
+      label: 'Robåten',
+    },
+    {
+      id: 'post',
+      x: 300,
+      y: 556,
+      hit: { shape: 'rect', width: 19, height: 45 },
+      asset: 'assets/worlds/brygga/props/post.png',
+      size: { width: 19, height: 45 },
+    },
+    // Milla and her basket, on the sand to the left of the path, where the
+    // visual target puts them.
+    {
+      id: 'milla',
+      x: 166,
+      y: 470,
+      hit: { shape: 'circle', radius: 24 },
+      asset: 'assets/characters/milla/front.png',
+      size: { width: 30, height: 34 },
+      label: 'Milla',
+      attention: true,
+    },
+    {
+      id: 'basket',
+      x: 200,
+      y: 486,
+      hit: { shape: 'circle', radius: 20 },
+      asset: 'assets/worlds/brygga/props/basket-empty.png',
+      size: { width: 44, height: 28 },
+      label: 'Kurven',
+    },
+    // The three shells the counting task is about, spread along the path so
+    // none of them crowds another or the route forward.
+    {
+      id: 'shell-1',
+      x: 205,
+      y: 440,
+      hit: { shape: 'circle', radius: 16 },
+      asset: 'assets/worlds/brygga/props/shells.png',
+      size: { width: 23, height: 14 },
+      label: 'Et skjell',
+    },
+    {
+      id: 'shell-2',
+      x: 276,
+      y: 390,
+      hit: { shape: 'circle', radius: 16 },
+      asset: 'assets/worlds/brygga/props/shells.png',
+      size: { width: 23, height: 14 },
+      label: 'Et skjell',
+    },
+    {
+      id: 'shell-3',
+      x: 232,
+      y: 318,
+      hit: { shape: 'circle', radius: 16 },
+      asset: 'assets/worlds/brygga/props/shells.png',
+      size: { width: 23, height: 14 },
+      label: 'Et skjell',
+    },
+    // The twigs across the path north. Section 4.2: an authored quest
+    // boundary, not a claim that Ellie could not step over a twig.
+    {
+      id: 'twigs',
+      x: 232,
+      y: 258,
+      hit: { shape: 'rect', width: 35, height: 18 },
+      asset: 'assets/worlds/brygga/props/twigs.png',
+      size: { width: 35, height: 18 },
+      label: 'Kvister pa stien',
+    },
+  ],
 
   actors: [
     {
