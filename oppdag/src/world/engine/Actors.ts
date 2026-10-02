@@ -35,6 +35,8 @@ export class Actor {
 
   /** Where it is heading; null when it has arrived. */
   private target: { x: number; y: number } | null = null;
+  /** The waypoints after `target`, when following a route. */
+  private route: { x: number; y: number }[] = [];
   private onArrive: (() => void) | null = null;
 
   constructor(
@@ -65,15 +67,27 @@ export class Actor {
     this.sprite.width = this.spec.height * aspect;
   }
 
-  /** Send the actor walking to a world point. */
+  /** Send the actor walking to a world point, in a straight line. */
   walkTo(x: number, y: number, onArrive?: () => void) {
-    this.target = { x, y };
+    this.followRoute([{ x, y }], onArrive);
+  }
+
+  /**
+   * Walk a route, waypoint by waypoint. `onArrive` fires once, at the last.
+   * An empty route arrives on the next frame, so a caller waiting on arrival
+   * is never left hanging by a walk that was already over.
+   */
+  followRoute(points: { x: number; y: number }[], onArrive?: () => void) {
+    const [first, ...rest] = points;
+    this.target = first ? { ...first } : { x: this.x, y: this.y };
+    this.route = rest.map((p) => ({ ...p }));
     this.onArrive = onArrive ?? null;
     this.resting = false;
   }
 
   stop() {
     this.target = null;
+    this.route = [];
     this.onArrive = null;
   }
 
@@ -102,7 +116,14 @@ export class Actor {
       const distance = Math.hypot(dx, dy);
       const step = this.spec.speed * dt;
 
-      if (distance <= step) {
+      if (distance <= step && this.route.length > 0) {
+        // A waypoint, not the end: turn and keep going without a stop, so a
+        // route reads as one walk rather than a string of short ones.
+        this.x = this.target.x;
+        this.y = this.target.y;
+        this.target = this.route.shift()!;
+        this.moving = true;
+      } else if (distance <= step) {
         this.x = this.target.x;
         this.y = this.target.y;
         this.target = null;

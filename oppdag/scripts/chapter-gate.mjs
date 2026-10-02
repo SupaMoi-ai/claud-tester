@@ -175,6 +175,59 @@ if (start?.objects?.['milla-at-twigs']?.hidden === true) {
   fail('both Millas are on screen at once');
 }
 
+/* ---- a walk the straight line would get wrong ---------------------------
+ *
+ * From the jetty to the far end of its crossbar. In a straight line that is
+ * a walk across the sea; along the path it turns where the jetty meets the
+ * crossbar. Sampled all the way, because "she arrived somewhere sensible"
+ * says nothing about where she was in between.
+ */
+
+/** Tap a world point where a finger would, from the camera's own numbers. */
+async function tapWorld(x, y) {
+  const w = await world();
+  const box = await page.locator('canvas').boundingBox();
+  await page.mouse.click(
+    Math.round(box.x + box.width / 2 + (x - w.camera.x) * w.camera.zoom),
+    Math.round(box.y + box.height / 2 + (y - w.camera.y) * w.camera.zoom),
+  );
+}
+
+/** Walk somewhere, sampling every character the whole way. */
+async function sampledWalk(x, y, what) {
+  await tapWorld(x, y);
+  const samples = [];
+  for (let i = 0; i < 160; i += 1) {
+    await page.waitForTimeout(100);
+    const w = await world();
+    samples.push(w.actors);
+    if (i > 5 && !Object.values(w.actors).some((a) => a.moving)) break;
+  }
+  if (samples.length >= 160) fail(`nobody stopped walking during ${what}`);
+  return samples;
+}
+
+await sampledWalk(236, 690, 'the walk down the jetty');
+const crossing = await sampledWalk(80, 552, 'the walk to the end of the crossbar');
+const ellieEnd = crossing.at(-1).ellie;
+const ellieOff = crossing.filter((a) => !a.ellie.onPath).length;
+const kikiOff = crossing.filter((a) => !a.kiki.onPath).length;
+await page.screenshot({ path: join(OUT, '01b-crossbar.png') });
+
+if (Math.hypot(ellieEnd.x - 80, ellieEnd.y - 552) > 12) {
+  fail(`Ellie stopped at (${ellieEnd.x}, ${ellieEnd.y}), not the end of the crossbar — nothing was proven`);
+} else if (ellieOff === 0) {
+  pass(`Ellie walked from the jetty to the crossbar's end on the path at all ${crossing.length} samples`);
+} else {
+  fail(`Ellie was off the path at ${ellieOff} of ${crossing.length} samples — she walked across the water`);
+}
+// Kiki still follows by the old straight-line rule; section 2.5's companion
+// behaviour is the next piece of work. Reported, so the gap stays visible.
+results.push({
+  ok: true,
+  msg: `(Kiki off the path at ${kikiOff} of ${crossing.length} samples — companion rules not yet built)`,
+});
+
 /* ---- the ask ----------------------------------------------------------- */
 if (!(await tapObject('Milla'))) fail('Milla has no on-screen position to tap');
 await waitForStill('the walk to Milla');

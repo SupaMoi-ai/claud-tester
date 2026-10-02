@@ -16,6 +16,7 @@ import type {
   WorldLayer,
 } from './types';
 import { Actor, followLeader } from './Actors';
+import { buildNavGrid, findPath, type NavGrid, type Point } from './navGrid';
 import { LAYER_ORDER } from './types';
 import type { Camera } from './Camera';
 
@@ -78,6 +79,8 @@ export class SceneRenderer {
   private elapsed = 0;
   private scene: SceneConfig;
   private reducedMotion: boolean;
+  /** Built once from the walkable areas; null when the scene declares none. */
+  private nav: NavGrid | null = null;
 
   constructor(scene: SceneConfig, reducedMotion: boolean) {
     this.scene = scene;
@@ -121,6 +124,9 @@ export class SceneRenderer {
     ].filter((p): p is string => Boolean(p));
 
     await this.preload([...new Set(paths)]);
+
+    const areas = this.scene.walkable ?? [];
+    this.nav = areas.length ? buildNavGrid(areas, this.scene.world) : null;
 
     for (const layer of this.scene.layers) this.addLayer(layer);
     for (const item of this.scene.interactables) this.addInteractable(item);
@@ -607,6 +613,19 @@ export class SceneRenderer {
   /* --------------------------------------------------------- hit testing */
 
   /** Is this world point somewhere a character may stand? */
+  /**
+   * A route for an actor to a world point, or null when there is none.
+   *
+   * A scene with no walkable areas declared is open ground, so the route is
+   * just the point itself — the straight walk every scene had before.
+   */
+  route(actorId: string, to: Point): Point[] | null {
+    const actor = this.actors.get(actorId);
+    if (!actor) return null;
+    if (!this.nav) return [to];
+    return findPath(this.nav, { x: actor.x, y: actor.y }, to);
+  }
+
   isWalkable(worldX: number, worldY: number): boolean {
     const areas = this.scene.walkable;
     // A scene that declares no walkable areas is entirely walkable, which

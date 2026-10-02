@@ -267,11 +267,20 @@ export function WorldCanvas({
             // on state rather than on pixels. A screenshot diff cannot tell a
             // working drag from a drifting cloud; this can.
             diag({
-              camera: { x: Math.round(camera.x), y: Math.round(camera.y) },
+              // Unrounded zoom, so the gate can turn a world point into the
+              // pixel a finger would press.
+              camera: { x: Math.round(camera.x), y: Math.round(camera.y), zoom: camera.zoom },
               actors: Object.fromEntries(
                 [...renderer.actors.values()].map((a) => [
                   a.id,
-                  { x: Math.round(a.x), y: Math.round(a.y), moving: a.isMoving },
+                  {
+                    x: Math.round(a.x),
+                    y: Math.round(a.y),
+                    moving: a.isMoving,
+                    // Sampled through every walk by the gate: a character off
+                    // walkable ground is in the sea or striding across grass.
+                    onPath: renderer.isWalkable(a.x, a.y),
+                  },
                 ]),
               ),
               objects: renderer.describeInteractables(),
@@ -280,8 +289,13 @@ export function WorldCanvas({
         });
 
         const api: WorldApi = {
-          walkTo: (actorId, x, y, onArrive) =>
-            renderer.actors.get(actorId)?.walkTo(x, y, onArrive),
+          // Along the path, not straight at the point. No route means no
+          // walk: staying put beats wading into the sea, and the screen has
+          // already said "we can walk here" for a tap it knows is wrong.
+          walkTo: (actorId, x, y, onArrive) => {
+            const route = renderer.route(actorId, { x, y });
+            if (route) renderer.actors.get(actorId)?.followRoute(route, onArrive);
+          },
           positionOf: (actorId) => {
             const actor = renderer.actors.get(actorId);
             return actor ? { x: actor.x, y: actor.y } : null;
