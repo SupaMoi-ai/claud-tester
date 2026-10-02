@@ -5,49 +5,38 @@ import { useNavigate } from 'react-router-dom';
  *
  * Specification section 5.1, and the visual target for "Velkommen til
  * Læreøya": a journal at top left, the task's progress at top centre, pause at
- * top right, and nothing else. The prompt that produced the target spells out
- * the absences — "no health, XP, coins, timer, or joystick in default
- * tap-to-walk mode" — and they matter more than the presences. A child who is
- * counting shells should see how many shells are left, not a score.
+ * top right, and nothing else. The prompt behind that target spells out the
+ * absences — "no health, XP, coins, timer, or joystick in default tap-to-walk
+ * mode" — and they matter more than the presences. A child who is counting
+ * shells should see how many shells are left, not a score.
  *
- * Progress is drawn as the thing being collected rather than as a number:
- * three shell outlines that fill in. A child who cannot yet read a numeral can
- * still see two empty shells and know what remains.
+ * Progress is drawn as the thing being collected rather than as a number: a
+ * row of shells that fill in. A child who cannot yet read a numeral can still
+ * see two empty shells and know what remains.
+ *
+ * The icons are drawn art, not glyphs. They were hand-built as inline SVG
+ * while the sheet was being made, and the first attempt at a scallop — a plain
+ * arc rising from a base point — drew a convincing umbrella.
  */
 
 interface Props {
   /** How many of the task's pieces exist in total. */
   total: number;
-  /** How many are done. Outlines fill left to right. */
+  /** How many are done. Shells fill left to right. */
   done: number;
   /** Where the pause button goes back to. */
   exitTo?: string;
 }
 
-function Shell({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-6 w-6"
-      aria-hidden
-      fill={filled ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    >
-      {/* A scallop. The bumped top edge is what makes it read as a shell: a
-          plain arc from a base point draws an umbrella instead. */}
-      <path
-        d="M12 20.4C6.6 20.4 3.2 16.2 3.2 12.2c0-2.4 1.5-3.3 2.6-2.1
-           C6.5 7.4 8.8 7.4 9.5 9.6 10.2 7 13.8 7 14.5 9.6c0.7-2.2 3-2.2 3.7
-           0.5 1.1-1.2 2.6-0.3 2.6 2.1 0 4-3.4 8.2-8.8 8.2Z"
-      />
-      <path d="M12 20.1 8.9 10.6" strokeWidth="0.9" />
-      <path d="M12 20.1V9.8" strokeWidth="0.9" />
-      <path d="M12 20.1 15.1 10.6" strokeWidth="0.9" />
-    </svg>
-  );
-}
+/** Icons live in one place so a re-cut sheet lands everywhere at once. */
+const ICON = {
+  journal: 'assets/ui/journal.png',
+  pause: 'assets/ui/pause.png',
+  shellEmpty: 'assets/ui/shell-empty.png',
+  shellFull: 'assets/ui/shell-full.png',
+  speech: 'assets/ui/speech.png',
+  home: 'assets/ui/home.png',
+} as const;
 
 export function ChapterHud({ total, done, exitTo = '/kart' }: Props) {
   const navigate = useNavigate();
@@ -60,34 +49,33 @@ export function ChapterHud({ total, done, exitTo = '/kart' }: Props) {
       <button
         onClick={() => navigate('/dagbok')}
         aria-label="Dagbok"
-        className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 text-ink shadow-soft"
+        className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 shadow-soft"
       >
-        <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden fill="none"
-          stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H10a2 2 0 0 1 2 2v13a1.6 1.6 0 0 0-1.6-1.6H4.5A1.5 1.5 0 0 1 3 16V5.5Z" />
-          <path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H14a2 2 0 0 0-2 2v13a1.6 1.6 0 0 1 1.6-1.6h5.9A1.5 1.5 0 0 0 21 16V5.5Z" />
-        </svg>
+        <img src={ICON.journal} alt="" aria-hidden className="h-7 w-7 object-contain" />
       </button>
 
       <div
-        className="flex items-center gap-2 rounded-full bg-snow/95 px-4 py-2 text-ink shadow-soft"
+        className="flex items-center gap-2 rounded-full bg-snow/95 px-4 py-2 shadow-soft"
         role="status"
         aria-label={`${done} av ${total} skjell`}
       >
         {Array.from({ length: total }, (_, i) => (
-          <Shell key={i} filled={i < done} />
+          <img
+            key={i}
+            src={i < done ? ICON.shellFull : ICON.shellEmpty}
+            alt=""
+            aria-hidden
+            className="h-7 w-7 object-contain"
+          />
         ))}
       </div>
 
       <button
         onClick={() => navigate(exitTo)}
         aria-label="Pause"
-        className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 text-ink shadow-soft"
+        className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 shadow-soft"
       >
-        <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden fill="currentColor">
-          <rect x="6.5" y="4.5" width="3.8" height="15" rx="1.6" />
-          <rect x="13.7" y="4.5" width="3.8" height="15" rx="1.6" />
-        </svg>
+        <img src={ICON.pause} alt="" aria-hidden className="h-6 w-6 object-contain" />
       </button>
     </div>
   );
