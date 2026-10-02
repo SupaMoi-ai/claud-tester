@@ -282,7 +282,9 @@ export const bryggaScene: SceneConfig = {
       sprites: {
         front: 'assets/characters/ellie/front.png',
         back: 'assets/characters/ellie/back.png',
-        side: 'assets/characters/ellie/side.png',
+        // The right-facing drawing: the engine mirrors it for walking left.
+        // `side.png` faces left, and in this slot it made her walk backwards.
+        side: 'assets/characters/ellie/side-right.png',
       },
       // Section 3.2: 66 LU standing height including the beanie ears.
       height: 66,
@@ -298,9 +300,21 @@ export const bryggaScene: SceneConfig = {
       sprites: {
         front: 'assets/characters/kiki/front.png',
         back: 'assets/characters/kiki/back.png',
-        side: 'assets/characters/kiki/side.png',
+        side: 'assets/characters/kiki/side-right.png',
         rest: 'assets/characters/kiki/pose-rest.png',
       },
+      walk: {
+        side: {
+          frames: [1, 2, 3, 4].map((n) => `assets/characters/kiki/walk-side-${n}.png`),
+          // Not 24: the cycle's frame includes her raised tail. Ears to paws
+          // is 396 of the frame's 433 px, and must come out at the standing
+          // drawing's 23.3 units (264 of 272 px at 24), so the frame is
+          // 23.3 * 433 / 396 = 25.5. tests/sprites.test.ts recomputes this.
+          height: 25.5,
+        },
+      },
+      // One full four-frame cycle per 30 units walked: about a body length.
+      stride: 30,
       // Section 3.2: 24 LU standing ear height. She should not reach Ellie's
       // waist, which 24 against 66 satisfies.
       height: 24,

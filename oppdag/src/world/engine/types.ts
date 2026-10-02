@@ -118,8 +118,31 @@ export interface Interactable {
  */
 export interface ActorSpec {
   id: string;
-  /** One image per facing. `side` is mirrored for the opposite direction. */
+  /**
+   * One image per facing, for standing still. `side` must be drawn facing
+   * RIGHT: the engine mirrors it for walking left. A left-facing drawing in
+   * this slot makes the character walk backwards in both directions, which
+   * is exactly what Ellie and Kiki did until the side views were swapped.
+   */
   sprites: { front: string; back: string; side: string; rest?: string };
+  /**
+   * Walk cycles, one per view, frames in playing order. Side frames face
+   * right, like `sprites.side`. A view with no cycle falls back to its
+   * standing drawing and the engine's procedural gait.
+   *
+   * `height` is the frame's rendered height in world units, set per cycle
+   * rather than taken from `height` below. A cycle is cropped differently
+   * from the standing drawing — Kiki's tail goes up above her ears when she
+   * walks — so scaling its frames to the standing height would shrink her
+   * body every time she set off.
+   */
+  walk?: Partial<Record<'front' | 'back' | 'side', { frames: string[]; height: number }>>;
+  /**
+   * World units travelled per full walk cycle. Frames advance with distance,
+   * not time, so the feet keep pace with the ground at any speed and stop
+   * mid-stride when the character does.
+   */
+  stride?: number;
   /** Rendered height in world units; width follows the artwork's aspect. */
   height: number;
   /** Starting position, in world coordinates, at the character's feet. */

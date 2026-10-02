@@ -171,4 +171,17 @@ test('Brygga', async (t) => {
       'Milla clears twigs she is nowhere near',
     );
   });
+
+  await t.test('side views face right, as the engine assumes', () => {
+    // The engine mirrors `side` for walking left. The left-facing drawings are
+    // called side.png; one in this slot makes a character walk backwards both
+    // ways, which Ellie and Kiki both did until it was caught by eye. A name
+    // check is crude, but it is the name that was got wrong.
+    for (const actor of bryggaScene.actors ?? []) {
+      assert.ok(
+        !actor.sprites.side.endsWith('/side.png'),
+        `${actor.id} stands in a left-facing drawing (${actor.sprites.side})`,
+      );
+    }
+  });
 });

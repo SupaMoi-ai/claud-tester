@@ -112,6 +112,30 @@ const SHEETS = [
     dir: 'ui',
     names: ['journal', 'pause', 'shell-empty', 'shell-full', 'speech', 'home'],
   },
+  // Walk cycles: four frames each, registered so the body holds still while
+  // the legs move (see `registerFrames`). Side views face RIGHT; the engine
+  // mirrors them for walking left.
+  //
+  // Anchor bands are fractions of the frame's height. Kiki's head runs from
+  // about a fifth to three fifths down, below the ears. Ellie's must sit above
+  // her hands, which swing forward in every other frame and would drag a
+  // "rightmost ink" anchor with them, so it is the top sixth: the beanie.
+  ...['side', 'front', 'back'].flatMap((view) =>
+    ['kiki', 'ellie'].map((who) => ({
+      file: `${who}-walk-${view}.png`,
+      kind: 'cycle',
+      rows: 1,
+      cols: 4,
+      dir: `characters/${who}`,
+      names: [1, 2, 3, 4].map((n) => `walk-${view}-${n}`),
+      anchor:
+        view === 'side'
+          ? who === 'kiki'
+            ? { kind: 'right', from: 0.2, to: 0.6 }
+            : { kind: 'right', from: 0.03, to: 0.16 }
+          : { kind: 'centre', from: 0, to: who === 'kiki' ? 0.6 : 0.45 },
+    })),
+  ),
   // Milla's talking heads. Section 5.6 puts an 80 LU portrait at the left of
   // every dialogue tray, and the world poses are far too small to crop one
   // from — a 30 LU gull enlarged to 80 is a blur.
@@ -439,6 +463,14 @@ for (const sheet of SHEETS) {
     continue;
   }
 
+  // A walk cycle's frames must line up, or the character twitches every frame.
+  if (sheet.kind === 'cycle') {
+    result.cells = await page.evaluate(registerFrames, {
+      cells: result.cells,
+      anchor: sheet.anchor,
+    });
+  }
+
   const dir = join(OUT, sheet.dir);
   if (!DRY) mkdirSync(dir, { recursive: true });
 
@@ -475,3 +507,79 @@ console.log(
     (problems.length ? `\n${problems.length} sheet(s) FAILED` : ''),
 );
 process.exit(problems.length ? 1 : 0);
+
+/**
+ * Lines up the frames of an animation cycle.
+ *
+ * Cut one by one, each frame is trimmed to its own ink, so a leg stretched
+ * back makes that frame wider and shifts everything else in it. Played in
+ * sequence, the body would jump a few pixels every frame. So every frame is
+ * redrawn into one common canvas with two points held fixed: the feet (the
+ * lowest ink) and an anchor on the body that should not move during a walk.
+ *
+ * The anchor is per sheet, because what holds still depends on the view:
+ *   - `right` — the rightmost ink within a band of rows. For a side view
+ *     facing right, a band through the head finds the nose. The band has to
+ *     avoid anything that swings: on Ellie it must sit above her hands.
+ *   - `centre` — the centre of the ink within a band. For front and back
+ *     views, a band through the head and body, above the legs.
+ *
+ * Runs in the page, where the canvas is.
+ */
+async function registerFrames({ cells, anchor }) {
+  const load = (src) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = src;
+    });
+
+  const frames = [];
+  for (const cell of cells) {
+    const img = await load(cell.dataUrl);
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height).data;
+    const ink = (x, y) => d[(y * c.width + x) * 4 + 3] > 24;
+
+    let feet = 0;
+    for (let y = 0; y < c.height; y += 1) {
+      for (let x = 0; x < c.width; x += 1) if (ink(x, y)) feet = y;
+    }
+
+    const y0 = Math.floor(c.height * anchor.from);
+    const y1 = Math.ceil(c.height * anchor.to);
+    let ax = 0;
+    if (anchor.kind === 'right') {
+      for (let y = y0; y < y1; y += 1) {
+        for (let x = 0; x < c.width; x += 1) if (ink(x, y) && x > ax) ax = x;
+      }
+    } else {
+      let sum = 0;
+      let n = 0;
+      for (let y = y0; y < y1; y += 1) {
+        for (let x = 0; x < c.width; x += 1) if (ink(x, y)) { sum += x; n += 1; }
+      }
+      ax = n ? Math.round(sum / n) : Math.round(c.width / 2);
+    }
+    frames.push({ img, w: c.width, h: c.height, feet, ax });
+  }
+
+  const left = Math.max(...frames.map((f) => f.ax));
+  const right = Math.max(...frames.map((f) => f.w - f.ax));
+  const above = Math.max(...frames.map((f) => f.feet));
+  const below = Math.max(...frames.map((f) => f.h - f.feet));
+  const W = left + right;
+  const H = above + below;
+
+  return frames.map((f) => {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    c.getContext('2d').drawImage(f.img, left - f.ax, above - f.feet);
+    return { dataUrl: c.toDataURL('image/png'), width: W, height: H };
+  });
+}

@@ -11,8 +11,13 @@ import type { ActorSpec, Facing } from './types';
  * them out at roughly 32 px per frame, too small to cut into sprites. So
  * walking is conveyed by gait rather than by frames — a bob, a slight lean
  * and a small squash, timed to a stride. It reads convincingly at world scale
- * and is honest placeholder work: when the cycles are exported individually,
- * `setFrames` is where they go and nothing else changes.
+ * and is honest placeholder work.
+ *
+ * Where a view has a real walk cycle (`spec.walk`), its frames replace the
+ * standing drawing while moving and the procedural gait switches off — the
+ * drawn frames already carry the bob and the swing, and adding the fake one
+ * on top makes the character look seasick. Frames advance with distance, not
+ * time, so the feet keep pace with the ground.
  */
 
 const STRIDE_HZ = 2.6;
@@ -28,6 +33,9 @@ export class Actor {
 
   private sprite: Sprite;
   private textures: Partial<Record<'front' | 'back' | 'side' | 'rest', Texture>>;
+  private cycles: Partial<Record<'front' | 'back' | 'side', Texture[]>>;
+  /** Distance walked, ever. Drives which walk frame shows. */
+  private travelled = 0;
   private facing: Facing = 'front';
   private walkPhase = 0;
   private moving = false;
@@ -42,10 +50,12 @@ export class Actor {
   constructor(
     spec: ActorSpec,
     textures: Partial<Record<'front' | 'back' | 'side' | 'rest', Texture>>,
+    cycles: Partial<Record<'front' | 'back' | 'side', Texture[]>> = {},
   ) {
     this.id = spec.id;
     this.spec = spec;
     this.textures = textures;
+    this.cycles = cycles;
     this.x = spec.x;
     this.y = spec.y;
 
@@ -61,10 +71,24 @@ export class Actor {
   private applyTexture(key: 'front' | 'back' | 'side' | 'rest') {
     const texture = this.textures[key] ?? this.textures.front;
     if (!texture) return;
+    this.show(texture, this.spec.height);
+  }
+
+  private show(texture: Texture, height: number) {
     this.sprite.texture = texture;
     const aspect = texture.width / texture.height;
-    this.sprite.height = this.spec.height;
-    this.sprite.width = this.spec.height * aspect;
+    this.sprite.height = height;
+    this.sprite.width = height * aspect;
+  }
+
+  /** The walk frame for this view right now, or null to use the standing art. */
+  private walkFrame(view: 'front' | 'back' | 'side'): { texture: Texture; height: number } | null {
+    const frames = this.cycles[view];
+    const height = this.spec.walk?.[view]?.height;
+    if (!frames?.length || !height) return null;
+    const stride = this.spec.stride ?? this.spec.height;
+    const i = Math.floor((this.travelled / stride) * frames.length) % frames.length;
+    return { texture: frames[i]!, height };
   }
 
   /** Send the actor walking to a world point, in a straight line. */
@@ -119,6 +143,7 @@ export class Actor {
       if (distance <= step && this.route.length > 0) {
         // A waypoint, not the end: turn and keep going without a stop, so a
         // route reads as one walk rather than a string of short ones.
+        this.travelled += distance;
         this.x = this.target.x;
         this.y = this.target.y;
         this.target = this.route.shift()!;
@@ -133,6 +158,7 @@ export class Actor {
       } else {
         this.x += (dx / distance) * step;
         this.y += (dy / distance) * step;
+        this.travelled += step;
         this.moving = true;
 
         // Face the dominant axis of travel. Vertical wins ties so walking
@@ -153,12 +179,19 @@ export class Actor {
           : this.facing === 'back'
             ? 'back'
             : 'side';
-    this.applyTexture(key);
+    const frame = this.moving && key !== 'rest' ? this.walkFrame(key) : null;
+    if (frame) this.show(frame.texture, frame.height);
+    else this.applyTexture(key);
     this.sprite.scale.x =
       Math.abs(this.sprite.scale.x) * (this.facing === 'left' ? -1 : 1);
 
     /* ---- gait ---------------------------------------------------------- */
-    if (this.moving) {
+    if (frame) {
+      // The drawing walks; the sprite holds still.
+      this.walkPhase = 0;
+      this.sprite.y = 0;
+      this.sprite.rotation = 0;
+    } else if (this.moving) {
       this.walkPhase += dt * STRIDE_HZ * Math.PI * 2;
       const bob = Math.abs(Math.sin(this.walkPhase));
       this.sprite.y = -bob * this.spec.height * 0.035;

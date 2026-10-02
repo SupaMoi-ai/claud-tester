@@ -118,7 +118,10 @@ export class SceneRenderer {
     const paths = [
       ...this.scene.layers.map((l) => l.asset),
       ...this.scene.interactables.map((i) => i.asset),
-      ...(this.scene.actors ?? []).flatMap((a) => Object.values(a.sprites)),
+      ...(this.scene.actors ?? []).flatMap((a) => [
+        ...Object.values(a.sprites),
+        ...Object.values(a.walk ?? {}).flatMap((cycle) => cycle?.frames ?? []),
+      ]),
       // Artwork no layer or object names yet, but a story beat will.
       ...(this.scene.preload ?? []),
     ].filter((p): p is string => Boolean(p));
@@ -419,13 +422,29 @@ export class SceneRenderer {
     if (patch.attention !== undefined) entry.ring.visible = patch.attention;
   }
 
+  /**
+   * An actor's walk cycles as textures. A cycle with any frame missing is
+   * dropped whole: three frames of a four-frame walk is a limp, and the
+   * standing drawing with the procedural gait looks better than a limp.
+   */
+  private cyclesFor(spec: import('./types').ActorSpec) {
+    const out: Partial<Record<'front' | 'back' | 'side', Texture[]>> = {};
+    for (const view of ['front', 'back', 'side'] as const) {
+      const cycle = spec.walk?.[view];
+      if (!cycle) continue;
+      const textures = cycle.frames.map((f) => this.textureFor(f));
+      if (textures.every((t): t is Texture => t !== null)) out[view] = textures;
+    }
+    return out;
+  }
+
   private addActor(spec: import('./types').ActorSpec) {
     const actor = new Actor(spec, {
       front: this.textureFor(spec.sprites.front) ?? undefined,
       back: this.textureFor(spec.sprites.back) ?? undefined,
       side: this.textureFor(spec.sprites.side) ?? undefined,
       rest: this.textureFor(spec.sprites.rest ?? null) ?? undefined,
-    });
+    }, this.cyclesFor(spec));
     this.actors.set(spec.id, actor);
     this.layers.get('interactive')?.addChild(actor.node);
   }

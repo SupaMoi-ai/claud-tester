@@ -19,10 +19,19 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { inflateSync } from 'node:zlib';
 
+import { bryggaScene } from '../src/world/scenes/brygga.scene';
+
 const ROOT = join(process.cwd(), 'public', 'assets', 'characters');
 
-/** Opaque-pixel count per row of an 8-bit RGBA PNG. */
-function inkRows(path: string): number[] {
+interface Decoded {
+  width: number;
+  height: number;
+  /** 1 where the pixel is ink (alpha above 24). Row-major. */
+  ink: Uint8Array;
+}
+
+/** An 8-bit RGBA PNG, reduced to where its ink is. */
+function decode(path: string): Decoded {
   const data = readFileSync(path);
   let i = 8;
   let width = 0;
@@ -45,7 +54,7 @@ function inkRows(path: string): number[] {
 
   const raw = inflateSync(Buffer.concat(idat));
   const stride = width * 4;
-  const rows: number[] = [];
+  const mask = new Uint8Array(width * height);
   let prev = new Uint8Array(stride);
   let pos = 0;
   for (let y = 0; y < height; y += 1) {
@@ -70,12 +79,38 @@ function inkRows(path: string): number[] {
       }
       line[x] = (line[x]! + add) & 255;
     }
-    let ink = 0;
-    for (let x = 3; x < stride; x += 4) if (line[x]! > 24) ink += 1;
-    rows.push(ink);
+    for (let x = 0; x < width; x += 1) if (line[x * 4 + 3]! > 24) mask[y * width + x] = 1;
     prev = line;
   }
-  return rows;
+  return { width, height, ink: mask };
+}
+
+/** Opaque-pixel count per row. */
+function inkRows(path: string): number[] {
+  const { width, height, ink } = decode(path);
+  return Array.from({ length: height }, (_, y) => {
+    let n = 0;
+    for (let x = 0; x < width; x += 1) n += ink[y * width + x]!;
+    return n;
+  });
+}
+
+/**
+ * Ears-to-feet height as a fraction of the image, for a right-facing animal:
+ * the topmost ink in the right part of the image (the head, clear of a tail
+ * held up behind it) down to the lowest ink (the feet).
+ */
+function headToFeet({ width, height, ink }: Decoded): number {
+  let top = height;
+  let feet = 0;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!ink[y * width + x]) continue;
+      if (y > feet) feet = y;
+      if (x >= width * 0.55 && y < top) top = y;
+    }
+  }
+  return (feet - top) / height;
 }
 
 /** Vertical runs of rows that contain any ink. */
@@ -104,5 +139,35 @@ test('character sprites', async (t) => {
   await t.test('every one is a single figure with nothing detached beneath it', () => {
     const broken = files.filter((f) => bands(inkRows(join(ROOT, f))).length !== 1);
     assert.deepEqual(broken, [], `detached strips in: ${broken.join(', ')}`);
+  });
+
+  await t.test('every walk cycle is registered: its frames are one size', () => {
+    for (const actor of bryggaScene.actors ?? []) {
+      for (const [view, cycle] of Object.entries(actor.walk ?? {})) {
+        const sizes = new Set(
+          cycle!.frames.map((f) => {
+            const { width, height } = decode(join(process.cwd(), 'public', f));
+            return `${width}x${height}`;
+          }),
+        );
+        assert.equal(sizes.size, 1, `${actor.id} ${view} frames differ in size: ${[...sizes]}`);
+      }
+    }
+  });
+
+  await t.test("Kiki's body is the same size walking as standing", () => {
+    // The cycle's frames carry their own height because her raised tail makes
+    // the frame taller than her body. Recompute what that height must be for
+    // ears-to-paws to match the standing drawing, and hold the scene to it.
+    const kiki = (bryggaScene.actors ?? []).find((a) => a.id === 'kiki')!;
+    const cycle = kiki.walk?.side;
+    assert.ok(cycle, 'Kiki has no side walk cycle');
+    const standing = headToFeet(decode(join(process.cwd(), 'public', kiki.sprites.side)));
+    const walking = headToFeet(decode(join(process.cwd(), 'public', cycle.frames[0]!)));
+    const expected = (kiki.height * standing) / walking;
+    assert.ok(
+      Math.abs(cycle.height - expected) < 0.5,
+      `walk frames are ${cycle.height} units tall; they should be ${expected.toFixed(1)}`,
+    );
   });
 });

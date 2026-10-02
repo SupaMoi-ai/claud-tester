@@ -297,7 +297,7 @@ export const laereoyaScene: SceneConfig = {
       sprites: {
         front: 'assets/characters/ellie/front.png',
         back: 'assets/characters/ellie/back.png',
-        side: 'assets/characters/ellie/side.png',
+        side: 'assets/characters/ellie/side-right.png', // faces right; mirrored for left
       },
       // She is the person you are, not a detail on the island — at 84 she read
       // as scenery. Large enough to hold the eye, small enough that the island
@@ -315,7 +315,7 @@ export const laereoyaScene: SceneConfig = {
       sprites: {
         front: 'assets/characters/kiki/front.png',
         back: 'assets/characters/kiki/back.png',
-        side: 'assets/characters/kiki/side.png',
+        side: 'assets/characters/kiki/side-right.png', // faces right; mirrored for left
         rest: 'assets/characters/kiki/pose-rest.png',
       },
       // 36% of Ellie, as the study's scale comparison fixes it.
