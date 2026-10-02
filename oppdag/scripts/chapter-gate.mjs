@@ -143,8 +143,24 @@ async function readDialogue(max = 6) {
 const shellsLeft = (w) =>
   ['shell-1', 'shell-2', 'shell-3'].filter((id) => w?.objects?.[id]?.hidden === false).length;
 
+/* ---- the way in -------------------------------------------------------
+ *
+ * Through the front door, as a child gets there: title, demo profile, the
+ * island map, the harbour's marker. The harbour sits behind a profile now,
+ * and going straight to /brygga would only test the redirect.
+ */
+await page.goto(`${base}/#/`);
+await page.evaluate(() => localStorage.clear());
+await page.reload();
+await page.getByRole('button', { name: /demo-profil/ }).click();
+await page.waitForTimeout(1200);
+if (page.url().includes('/kart')) pass('the demo profile lands on the island map');
+else fail(`the demo profile went to ${page.url().split('#')[1]}, not the island map`);
+
+await page.locator('button[aria-label="Brygga"]').click();
+await page.waitForTimeout(600);
+
 /* ---- arrive ------------------------------------------------------------ */
-await page.goto(`${base}/#/brygga`);
 await waitForWorld('the chapter start');
 await page.waitForTimeout(800);
 await page.screenshot({ path: join(OUT, '01-arrival.png') });
@@ -204,10 +220,75 @@ else fail(`the interface shows ${filled} filled shells, not 3`);
 await page.waitForTimeout(1200);
 await page.screenshot({ path: join(OUT, '04-all-three.png') });
 
-/* ---- the thanks, and the path ------------------------------------------ */
+/* ---- the thanks, and the basket ---------------------------------------- */
 const thanksLines = await readDialogue();
-if (thanksLines >= 3) pass(`Milla's thanks ran to ${thanksLines} lines`);
+if (thanksLines >= 2) pass(`Milla's thanks ran to ${thanksLines} lines`);
 else fail(`Milla said ${thanksLines} lines after the shells — the thanks never opened`);
+
+const panel = page.locator('section[aria-label="Milla spør"]');
+if (await panel.count()) pass(`Milla's question opened (${await panel.getAttribute('data-task')})`);
+else fail('the shells were found and no question followed');
+
+// Work the answer out from the question as asked, rather than knowing it:
+// the level is picked by the learning engine and may not be the base one.
+const prompt = (await panel.locator('[role="status"]').textContent()) ?? '';
+const g = Number(/(\d+) rom/.exec(prompt)?.[1]);
+const e = Number(/(\d+) skjell i hvert/.exec(prompt)?.[1]);
+const answer = g * e;
+const cards = panel.locator('button').filter({ hasText: /^\s*\d+/ });
+const values = await cards.allTextContents();
+const numbers = values.map((v) => Number(/\d+/.exec(v)?.[0]));
+if (Number.isFinite(answer) && numbers.includes(answer)) {
+  pass(`asked ${g} × ${e}; the cards are ${numbers.join(', ')}`);
+} else {
+  fail(`could not read a groups question with its answer among the cards: "${prompt}" / ${numbers}`);
+}
+
+// A wrong card must not move the story on. This is the check that fails if
+// the panel ever advances on any tap rather than on the right one.
+const wrong = numbers.find((n) => n !== answer);
+await cards.filter({ hasText: new RegExp(`^\\s*${wrong}(?!\\d)`) }).first().click();
+await page.waitForTimeout(900);
+const afterWrong = await world();
+if ((await panel.count()) && afterWrong?.objects?.twigs?.hidden === false) {
+  pass(`a wrong card (${wrong}) kept the question open and the twigs on the path`);
+} else {
+  fail('a wrong answer advanced the chapter');
+}
+
+// Pull the help ladder to the picture and check it shows the basket asked about.
+await panel.getByRole('button', { name: /hjelp meg/i }).first().click();
+await page.waitForTimeout(400);
+await panel.getByRole('button', { name: /hjelp meg/i }).first().click();
+await page.waitForTimeout(600);
+const picture = panel.locator('[data-groups]').first();
+const shownGroups = Number(await picture.getAttribute('data-groups'));
+const shownEach = Number(await picture.getAttribute('data-each'));
+if (shownGroups === g && shownEach === e) {
+  pass(`the picture hint shows ${shownGroups} compartments of ${shownEach}, as asked`);
+} else {
+  fail(`the picture hint shows ${shownGroups} × ${shownEach} for a ${g} × ${e} question`);
+}
+await page.screenshot({ path: join(OUT, '05a-task-hint.png') });
+
+await cards.filter({ hasText: new RegExp(`^\\s*${answer}(?!\\d)`) }).first().click();
+await page.waitForTimeout(900);
+await page.screenshot({ path: join(OUT, '05b-task-right.png') });
+
+const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('oppdag.v1') ?? '{}'));
+const outcome = (saved.adventures?.brygga?.outcomes ?? []).at(-1);
+if (outcome?.correct && outcome.attempts === 2 && outcome.support === 'visual') {
+  pass('the answer was recorded: right on the second try, with the picture hint');
+} else {
+  fail(`the recorded outcome is ${JSON.stringify(outcome)}, not "right, 2 tries, visual help"`);
+}
+
+await panel.getByRole('button', { name: 'Videre' }).click();
+await page.waitForTimeout(600);
+
+const clearingLines = await readDialogue();
+if (clearingLines >= 2) pass(`Milla's way north ran to ${clearingLines} lines`);
+else fail(`Milla said ${clearingLines} lines after the basket`);
 
 await page.waitForTimeout(2200);
 const opened = await world();
@@ -235,8 +316,8 @@ await page.screenshot({ path: join(OUT, '06-journal.png') });
 if (url.includes('/dagbok')) pass('the journal button opens the journal');
 else fail(`the journal button went to ${url.split('#')[1]} — the route is still dead`);
 
-const cards = await page.locator('article img[src*="journal/"]').count();
-if (cards >= 1) pass(`the journal shows ${cards} earned keepsake(s)`);
+const keepsakes = await page.locator('article img[src*="journal/"]').count();
+if (keepsakes >= 1) pass(`the journal shows ${keepsakes} earned keepsake(s)`);
 else fail('the journal shows nothing after a finished chapter');
 
 /* ---- report ------------------------------------------------------------ */

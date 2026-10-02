@@ -49,7 +49,7 @@ export function NumberChoice({
             disabled={disabled}
             onClick={() => onChoose(String(value))}
           >
-            km
+            {stage.unit ?? ''}
           </ChoiceButton>
         ))}
       </div>

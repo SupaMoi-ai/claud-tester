@@ -14,6 +14,8 @@ export function VisualHintView({ hint }: { hint: VisualHint }) {
       return <NumberLine {...hint} />;
     case 'groups':
       return <Groups {...hint} />;
+    case 'equalGroups':
+      return <EqualGroups {...hint} />;
     case 'highlight':
       return (
         <div className="rounded-md bg-butter-soft px-5 py-4">
@@ -134,6 +136,55 @@ function Groups({ emoji, a, b }: { emoji: string; a: number; b: number }) {
         +
       </span>
       <Row n={b} />
+    </div>
+  );
+}
+
+/**
+ * Multiplication as equal groups: one rounded compartment per group, the same
+ * number in each.
+ *
+ * Every compartment is drawn identically on purpose. The idea being taught is
+ * that the groups are *the same*, so a picture where one group happens to
+ * wrap onto two lines and another does not undermines it — hence a fixed
+ * column count per compartment rather than free wrapping.
+ */
+function EqualGroups({
+  groups,
+  each,
+  image,
+}: {
+  groups: number;
+  each: number;
+  image?: string;
+}) {
+  const columns = each <= 4 ? 2 : 3;
+  return (
+    <div
+      className="flex flex-wrap items-stretch justify-center gap-2 rounded-md bg-sky-soft px-3 py-4"
+      role="img"
+      aria-label={`${groups} rom med ${each} i hvert`}
+      data-groups={groups}
+      data-each={each}
+    >
+      {Array.from({ length: groups }, (_, g) => (
+        <motion.div
+          key={g}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: g * 0.12 }}
+          className="grid gap-1 rounded-lg bg-snow px-2 py-2 shadow-soft"
+          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+        >
+          {Array.from({ length: each }, (_, i) =>
+            image ? (
+              <img key={i} src={image} alt="" aria-hidden className="h-6 w-6 object-contain" />
+            ) : (
+              <span key={i} className="block h-5 w-5 rounded-full bg-sky-deep" aria-hidden />
+            ),
+          )}
+        </motion.div>
+      ))}
     </div>
   );
 }

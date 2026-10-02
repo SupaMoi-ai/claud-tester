@@ -8,9 +8,9 @@ import { emptyState } from '../state/types';
  * been on the Svalbard adventure — that is the thing a reviewer should get to
  * play.
  *
- * NOTE: age and grade are placeholders. Ellie's real age and trinn have not
- * been given yet, and they matter — the learning engine picks a starting level
- * from them. Everything else about this profile is correct.
+ * Ellie is 8 and in 3rd grade (trinn 3) — confirmed, not a guess. It matters:
+ * the learning engine picks a starting level from them, and it is why her
+ * harbour task is multiplication as equal groups rather than counting to three.
  */
 export const DEMO_CHILD = {
   name: 'Ellie',

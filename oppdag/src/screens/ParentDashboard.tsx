@@ -40,7 +40,7 @@ export function ParentDashboard() {
       background="bg-sand"
       overlay={
         <div className="absolute left-5 top-5 z-20">
-          <BackButton onClick={() => navigate('/verden')} label={copy.parent.back} />
+          <BackButton onClick={() => navigate('/kart')} label={copy.parent.back} />
         </div>
       }
     >

@@ -115,7 +115,7 @@ export function LearningCheck() {
             {copy.check.outroBody}
           </p>
           <PrimaryButton
-            onClick={() => navigate('/verden')}
+            onClick={() => navigate('/kart')}
             tone="coral"
             className="mt-8"
           >

@@ -56,6 +56,7 @@ export const isbjornen: Adventure = {
     /* --------------------------------------------- 1: distance (maths) */
     {
       kind: 'numberChoice',
+      unit: 'km',
       id: 'avstand',
       conceptId: 'subtraksjon-under-20',
       intro: [

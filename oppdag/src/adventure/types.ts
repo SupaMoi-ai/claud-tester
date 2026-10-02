@@ -15,6 +15,12 @@ export interface Line {
 export type VisualHint =
   | { kind: 'numberline'; from: number; to: number; walked: number; unit?: string }
   | { kind: 'groups'; emoji: string; a: number; b: number }
+  /**
+   * Multiplication as equal groups: `groups` compartments with `each` in every
+   * one. Not the same picture as `groups`, which is two rows and a plus sign —
+   * that one teaches 3 + 4, and drawn for 3 × 4 it teaches the slip.
+   */
+  | { kind: 'equalGroups'; groups: number; each: number; image?: string }
   | { kind: 'highlight'; sentence: string }
   | { kind: 'pointer'; targetId: string; note: string };
 
@@ -50,6 +56,12 @@ export interface NumberVariant {
 
 export interface NumberChoiceStage extends StageBase {
   kind: 'numberChoice';
+  /**
+   * Written under every number card — "km", "skjell". Data, not code: it was
+   * once hard-coded as "km" in the component, which was right for the only
+   * adventure that existed and wrong for every one after it.
+   */
+  unit?: string;
   variants: Record<Difficulty, NumberVariant>;
   /** [hint, visual hint, guided solution] */
   hints: [Hint, Hint, Hint];

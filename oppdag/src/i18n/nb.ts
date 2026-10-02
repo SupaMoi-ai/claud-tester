@@ -18,8 +18,8 @@ export const nb = {
   },
 
   app: {
-    name: 'OPPDAG',
-    tagline: 'Et helt univers å lære i',
+    name: 'Læreøya',
+    tagline: 'En øy full av ting å oppdage',
   },
 
   common: {
@@ -46,7 +46,7 @@ export const nb = {
 
   parentSetup: {
     title: 'Først et lite ord til deg som er voksen',
-    body: 'OPPDAG er laget for å utforskes fritt. Barnet ditt ser aldri prøver, poeng eller reklame — bare en verden som vokser når de lærer noe.',
+    body: 'Læreøya er laget for å utforskes fritt. Barnet ditt ser aldri prøver, poeng eller reklame — bare en verden som vokser når de lærer noe.',
     points: [
       'Ingen reklame, ingen kjøp inne i spillet.',
       'Ingen chat, ingen profiler, ingen fremmede.',

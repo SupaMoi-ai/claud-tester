@@ -6,7 +6,12 @@ import { bryggaScene, BRYGGA_ANCHORS } from '../world/scenes/brygga.scene';
 import type { WorldApi, WorldTap } from '../world/engine/types';
 import { ChapterHud } from '../world/ChapterHud';
 import { DialogueTray } from '../world/DialogueTray';
+import { BasketTask } from '../world/BasketTask';
 import {
+  CLEARING,
+  chapterTask,
+  gradeOf,
+  type ChapterTask,
   COUNT_WORDS,
   FAREWELL,
   INTRO,
@@ -17,7 +22,10 @@ import {
   type Beat,
   type MillaPortrait,
 } from '../world/scenes/brygga.chapter';
-import { useActions } from '../state/store';
+import { useActions, useGame } from '../state/store';
+import { emptyMomentum, pickDifficulty } from '../learning/adaptive';
+import { readMastery } from '../learning/masteryEngine';
+import type { StageOutcome } from '../learning/types';
 
 /**
  * The harbour, and the first chapter played in it.
@@ -46,7 +54,7 @@ const PORTRAIT: Record<MillaPortrait, string> = {
 };
 
 /** Where the chapter has got to. It only ever moves forwards. */
-type Phase = 'arrival' | 'asked' | 'thanking' | 'open';
+type Phase = 'arrival' | 'asked' | 'thanking' | 'task' | 'open';
 
 /** Close enough to the meadow to count as leaving by it. */
 const EXIT_RADIUS = 40;
@@ -54,6 +62,7 @@ const EXIT_RADIUS = 40;
 export function Brygga() {
   const navigate = useNavigate();
   const actions = useActions();
+  const { profile, mastery } = useGame();
   const worldRef = useRef<WorldApi | null>(null);
 
   const [phase, setPhase] = useState<Phase>('arrival');
@@ -61,6 +70,7 @@ export function Brygga() {
   const [script, setScript] = useState<Beat[] | null>(null);
   const [beat, setBeat] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [task, setTask] = useState<ChapterTask | null>(null);
 
   /** Phase and tally are read inside world callbacks that outlive a render. */
   const phaseRef = useRef<Phase>('arrival');
@@ -125,6 +135,36 @@ export function Brygga() {
     }, 1100);
   }, [say, to]);
 
+  /**
+   * Milla's question at the basket.
+   *
+   * Chosen when it opens, never re-picked: changing the numbers mid-question
+   * would swap the basket under the child's feet. The level comes from the
+   * player's school year and from what the learning engine already knows
+   * about them, not from Ellie — she is the demo child, the game is for 5 to 9.
+   */
+  const openTask = useCallback(() => {
+    to('task');
+    const known = readMastery(mastery, profile?.id ?? 'anon', 'ganging-enkel');
+    setTask(
+      chapterTask(
+        gradeOf(profile),
+        pickDifficulty(emptyMomentum(), known),
+        known.attempts === 0,
+      ),
+    );
+  }, [mastery, profile, to]);
+
+  const solved = useCallback(
+    (outcome: StageOutcome) => actions.recordOutcome('brygga', outcome),
+    [actions],
+  );
+
+  const afterTask = useCallback(() => {
+    setTask(null);
+    open(CLEARING);
+  }, [open]);
+
   const advance = useCallback(() => {
     const beats = script;
     if (!beats) return;
@@ -137,8 +177,9 @@ export function Brygga() {
     setScript(null);
     setBeat(0);
     if (beats === INTRO) beginSearch();
-    if (beats === THANKS) clearThePath();
-  }, [beat, beginSearch, clearThePath, script]);
+    if (beats === THANKS) openTask();
+    if (beats === CLEARING) clearThePath();
+  }, [beat, beginSearch, clearThePath, openTask, script]);
 
   /* -------------------------------------------------------------- taps */
 
@@ -161,8 +202,8 @@ export function Brygga() {
     (tap: WorldTap) => {
       const api = worldRef.current;
       if (!api) return;
-      // A tap during dialogue belongs to the tray, which is above the canvas.
-      if (script) return;
+      // A tap during dialogue or the question belongs to the panel above.
+      if (script || task) return;
 
       if (tap.id === 'milla' || tap.id === 'milla-at-twigs') {
         const beats =
@@ -226,7 +267,7 @@ export function Brygga() {
         window.setTimeout(() => navigate('/kart'), 1400);
       });
     },
-    [actions, collect, navigate, open, say, script],
+    [actions, collect, navigate, open, say, script, task],
   );
 
   const handleReady = useCallback(
@@ -268,7 +309,16 @@ export function Brygga() {
           )}
         </AnimatePresence>
 
-        {toast && !current && (
+        {task && !current && (
+          <BasketTask
+            task={task}
+            portraits={{ talk: PORTRAIT.talk, pleased: PORTRAIT.pleased }}
+            onSolved={solved}
+            onDone={afterTask}
+          />
+        )}
+
+        {toast && !current && !task && (
           <div className="pointer-events-none absolute inset-x-0 bottom-6 mx-auto w-full max-w-xs px-4">
             <p className="rounded-lg bg-snow px-4 py-3 text-center font-display text-body font-semibold text-ink shadow-lifted">
               {toast}

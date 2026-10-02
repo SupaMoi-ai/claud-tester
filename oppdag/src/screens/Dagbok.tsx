@@ -35,7 +35,7 @@ const CARDS: Card[] = [
   {
     id: KEEPSAKES.shells,
     title: 'Tre skjell',
-    note: 'Ett, to, tre. Alle tre lå på stien.',
+    note: 'Tre skjell fra stien, og en full kurv.',
     asset: 'assets/worlds/brygga/journal/skjell.png',
   },
 ];

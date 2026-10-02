@@ -63,7 +63,7 @@ export function ParentGate() {
       width="narrow"
       overlay={
         <div className="absolute left-5 top-5 z-20">
-          <BackButton onClick={() => navigate('/verden')} label={copy.gate.childBack} />
+          <BackButton onClick={() => navigate('/kart')} label={copy.gate.childBack} />
         </div>
       }
     >

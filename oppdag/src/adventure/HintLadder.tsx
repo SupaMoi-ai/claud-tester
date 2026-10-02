@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { SupportLevel } from '../learning/types';
 import type { Hint } from './types';
@@ -12,6 +13,12 @@ interface Props {
   onAskForMore: () => void;
   /** Hidden once the child has got there. */
   visible: boolean;
+  /**
+   * Who gives the hints. Defaults to the illustrated Kiki the adventures use;
+   * the harbour passes its own Kiki sprite, because two different drawings of
+   * the same cat on one screen read as two cats.
+   */
+  helper?: ReactNode;
 }
 
 /**
@@ -21,7 +28,7 @@ interface Props {
  * never revealed automatically after N failures. Even the final rung explains
  * the reasoning rather than just stating the number.
  */
-export function HintLadder({ hints, support, onAskForMore, visible }: Props) {
+export function HintLadder({ hints, support, onAskForMore, visible, helper }: Props) {
   const copy = useCopy();
   if (!visible) return null;
 
@@ -54,7 +61,9 @@ export function HintLadder({ hints, support, onAskForMore, visible }: Props) {
             className="overflow-hidden"
           >
             <div className="mb-3 flex items-start gap-3 rounded-lg bg-lavender-soft/70 px-4 py-4">
-              <Character who="kiki" mood="thinking" size={56} breathing={false} className="shrink-0" />
+              {helper ?? (
+                <Character who="kiki" mood="thinking" size={56} breathing={false} className="shrink-0" />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-body leading-relaxed text-ink">{hint.text}</p>
                 {hint.visual && (

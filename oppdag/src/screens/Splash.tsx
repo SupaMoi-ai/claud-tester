@@ -43,13 +43,17 @@ export function Splash() {
   const actions = useActions();
   const reduced = useReducedMotion();
 
+  // Læreøya is the game: the island map is home. A returning child goes
+  // straight there — "Fortsett som Ellie" used to send them back to the
+  // "what is your name" screen — and a new one goes through onboarding first.
   const begin = () => {
-    navigate(parentAccepted ? '/hei' : '/foreldre/oppsett');
+    if (profile) navigate('/kart');
+    else navigate(parentAccepted ? '/hei' : '/foreldre/oppsett');
   };
 
   const useDemo = () => {
     actions.loadState(demoState());
-    navigate('/verden');
+    navigate('/kart');
   };
 
   /** Standing still is not frozen: a slow breath, anchored at the feet. */
@@ -86,7 +90,7 @@ export function Splash() {
           className="absolute inset-x-0 top-[6%] flex flex-col items-center px-6 text-center"
         >
           <h1 className="font-display text-[clamp(2.5rem,11vh,5rem)] font-semibold leading-none tracking-tight text-ink">
-            OPPDAG
+            {copy.app.name}
           </h1>
           <p className="mt-2 font-display text-[clamp(1rem,2.6vh,1.5rem)] text-ink-soft">
             {copy.app.tagline}

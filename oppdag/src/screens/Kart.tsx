@@ -72,6 +72,26 @@ export function Kart() {
             </span>
           </button>
         ))}
+
+        {/* The map is home now, so it has the two ways out every home has:
+         * the journal, and back to the title. Same icons and buttons as the
+         * chapter HUD, so they read as the same controls everywhere. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">
+          <button
+            onClick={() => navigate('/dagbok')}
+            aria-label="Dagbok"
+            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 shadow-soft"
+          >
+            <img src="assets/ui/journal.png" alt="" aria-hidden className="h-7 w-7 object-contain" />
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            aria-label="Til start"
+            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-xl bg-snow/95 shadow-soft"
+          >
+            <img src="assets/ui/home.png" alt="" aria-hidden className="h-7 w-7 object-contain" />
+          </button>
+        </div>
       </div>
     </div>
   );

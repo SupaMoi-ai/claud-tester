@@ -106,7 +106,11 @@ for (let i = 0; i < count; i += 1) {
     break;
   }
 }
-await page.waitForTimeout(2500);
+await page.waitForTimeout(1200);
+// The demo profile lands on the Læreøya island map now, which is a picture,
+// not a canvas. This gate is about the Pixi world, so go to it explicitly
+// rather than measuring whatever screen the front door happens to open.
+await enterWorld('the first checks');
 
 /* ---- 1. the canvas exists and has a live WebGL context ----------------- */
 const canvasInfo = await page.evaluate(() => {

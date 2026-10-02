@@ -98,9 +98,11 @@ export function App() {
 
         {/* The harbour scene on its own, for walking and looking at while
             the chapter is built on top of it. */}
-        <Route path="/kart" element={<Kart />} />
-        <Route path="/brygga" element={<Brygga />} />
-        <Route path="/dagbok" element={<Dagbok />} />
+        {/* Læreøya — the game. Behind a profile like every other child route:
+         * without one, a finished task would record mastery against "anon". */}
+        <Route path="/kart" element={<RequireProfile><Kart /></RequireProfile>} />
+        <Route path="/brygga" element={<RequireProfile><Brygga /></RequireProfile>} />
+        <Route path="/dagbok" element={<RequireProfile><Dagbok /></RequireProfile>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
