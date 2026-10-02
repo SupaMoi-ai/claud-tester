@@ -18,6 +18,7 @@ import { ParentGate } from './screens/ParentGate';
 import { ParentDashboard } from './screens/ParentDashboard';
 import { LearningMap } from './screens/LearningMap';
 import { Brygga } from './screens/Brygga';
+import { Kart } from './screens/Kart';
 
 /**
  * Keeps a child who hasn't been through onboarding from landing somewhere
@@ -96,6 +97,7 @@ export function App() {
 
         {/* The harbour scene on its own, for walking and looking at while
             the chapter is built on top of it. */}
+        <Route path="/kart" element={<Kart />} />
         <Route path="/brygga" element={<Brygga />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
