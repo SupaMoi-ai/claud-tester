@@ -10,6 +10,7 @@ import {
 import type {
   AmbientSpec,
   Interactable,
+  InteractablePatch,
   LayerName,
   SceneConfig,
   WorldLayer,
@@ -59,6 +60,16 @@ export class SceneRenderer {
   private interactables: {
     config: Interactable;
     parallax: number;
+    /** The object's container, so a chapter can hide it. */
+    node: Container;
+    /** The sprite inside it, so a chapter can swap the artwork. */
+    visual: Container;
+    /** The attention ring, built for every object and shown on demand. */
+    ring: Graphics;
+    /** Hidden objects stay in the list but leave hit-testing and a11y. */
+    hidden: boolean;
+    /** The artwork currently drawn, which a chapter may have swapped. */
+    asset: string | null;
   }[] = [];
 
   private attentionRings: { node: Graphics; phase: number }[] = [];
@@ -105,6 +116,8 @@ export class SceneRenderer {
       ...this.scene.layers.map((l) => l.asset),
       ...this.scene.interactables.map((i) => i.asset),
       ...(this.scene.actors ?? []).flatMap((a) => Object.values(a.sprites)),
+      // Artwork no layer or object names yet, but a story beat will.
+      ...(this.scene.preload ?? []),
     ].filter((p): p is string => Boolean(p));
 
     await this.preload([...new Set(paths)]);
@@ -280,17 +293,19 @@ export class SceneRenderer {
     wrapper.label = item.id;
 
     // A slow ring behind the object — the world's way of saying "over here".
-    if (item.attention) {
-      // Must be wider than the thing it sits behind, or the object hides it.
-      const base =
-        item.hit.shape === 'circle' ? item.hit.radius : item.size.width / 2;
-      const ring = new Graphics().circle(0, 0, base * 1.45).fill({
-        color: 0xf78a77,
-        alpha: 0.35,
-      });
-      wrapper.addChild(ring);
-      this.attentionRings.push({ node: ring, phase: hashPhase(item.id) });
-    }
+    // Built for every object and hidden unless asked for, because a chapter
+    // needs to point at a shell that was ordinary scenery a moment ago, and
+    // building graphics mid-story is how a frame gets dropped at exactly the
+    // moment the child is being invited to look.
+    const base =
+      item.hit.shape === 'circle' ? item.hit.radius : item.size.width / 2;
+    const ring = new Graphics().circle(0, 0, base * 1.45).fill({
+      color: 0xf78a77,
+      alpha: 0.35,
+    });
+    ring.visible = item.attention ?? false;
+    wrapper.addChild(ring);
+    this.attentionRings.push({ node: ring, phase: hashPhase(item.id) });
 
     const visual = texture
       ? new Sprite(texture)
@@ -330,7 +345,72 @@ export class SceneRenderer {
       height: item.size.height,
     });
 
-    this.interactables.push({ config: item, parallax: item.parallax ?? 1 });
+    wrapper.visible = !item.hidden;
+
+    this.interactables.push({
+      config: item,
+      parallax: item.parallax ?? 1,
+      node: wrapper,
+      visual,
+      ring,
+      hidden: item.hidden ?? false,
+      asset: item.asset,
+    });
+  }
+
+  /**
+   * Changes an object the chapter has moved past.
+   *
+   * Hiding is the interesting case, and it is three things, not one: the
+   * object stops being drawn, stops answering taps, and stops being announced
+   * to a screen reader. Leaving any of the three behind leaves a shell that
+   * has visibly been picked up still sitting in the scene as an invisible
+   * 44-pixel button over the path — which is this project's oldest bug wearing
+   * its fourth disguise.
+   */
+  updateInteractable(id: string, patch: InteractablePatch): void {
+    const entry = this.interactables.find((e) => e.config.id === id);
+    if (!entry) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.warn(`[oppdag] updateInteractable: no object called "${id}"`);
+      }
+      return;
+    }
+
+    if (patch.asset !== undefined) {
+      const texture = this.textureFor(patch.asset);
+      if (!texture) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[oppdag] ${patch.asset} was never loaded — add it to the scene's ` +
+              `preload list. Keeping the old artwork.`,
+          );
+        }
+      } else if (entry.visual instanceof Sprite) {
+        entry.visual.texture = texture;
+        // The sprite was sized to the slot, and assigning a texture resets
+        // nothing — but a replacement of a different shape would stretch, so
+        // say so rather than letting the world go quietly wrong.
+        this.checkFit(
+          patch.asset,
+          texture,
+          entry.config.size.width,
+          entry.config.size.height,
+        );
+        entry.visual.width = entry.config.size.width;
+        entry.visual.height = entry.config.size.height;
+        entry.asset = patch.asset;
+      }
+    }
+
+    if (patch.visible !== undefined) {
+      entry.hidden = !patch.visible;
+      entry.node.visible = patch.visible;
+    }
+
+    if (patch.attention !== undefined) entry.ring.visible = patch.attention;
   }
 
   private addActor(spec: import('./types').ActorSpec) {
@@ -555,6 +635,7 @@ export class SceneRenderer {
     // Reverse so things drawn on top win.
     for (let i = this.interactables.length - 1; i >= 0; i -= 1) {
       const entry = this.interactables[i]!;
+      if (entry.hidden) continue;
       const world = camera.toWorld(screenX, screenY, entry.parallax);
       const dx = world.x - entry.config.x;
       const dy = world.y - entry.config.y;
@@ -589,19 +670,37 @@ export class SceneRenderer {
    * problem.
    */
   overlayPositions(camera: Camera) {
-    return this.interactables.map((entry) => {
-      const hit = entry.config.hit;
-      const span =
-        hit.shape === 'circle'
-          ? hit.radius * 2
-          : Math.max(hit.width, hit.height);
-      return {
-        id: entry.config.id,
-        label: entry.config.label ?? entry.config.id,
-        size: Math.max(44, Math.round(span * camera.zoom)),
-        ...camera.toScreen(entry.config.x, entry.config.y, entry.parallax),
-      };
-    });
+    return this.interactables
+      .filter((entry) => !entry.hidden)
+      .map((entry) => {
+        const hit = entry.config.hit;
+        const span =
+          hit.shape === 'circle'
+            ? hit.radius * 2
+            : Math.max(hit.width, hit.height);
+        return {
+          id: entry.config.id,
+          label: entry.config.label ?? entry.config.id,
+          size: Math.max(44, Math.round(span * camera.zoom)),
+          ...camera.toScreen(entry.config.x, entry.config.y, entry.parallax),
+        };
+      });
+  }
+
+  /**
+   * What the scene currently holds, for the QA harness.
+   *
+   * A chapter's progress is otherwise invisible from outside: React state is
+   * not reachable from a test, and a screenshot cannot tell a collected shell
+   * from one hidden behind Ellie's elbow. This reports what the renderer
+   * believes, which is the thing worth asserting on.
+   */
+  describeInteractables(): Record<string, { hidden: boolean; asset: string | null }> {
+    const out: Record<string, { hidden: boolean; asset: string | null }> = {};
+    for (const entry of this.interactables) {
+      out[entry.config.id] = { hidden: entry.hidden, asset: entry.asset };
+    }
+    return out;
   }
 
   setReducedMotion(reduced: boolean) {

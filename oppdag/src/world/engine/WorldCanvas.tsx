@@ -274,6 +274,7 @@ export function WorldCanvas({
                   { x: Math.round(a.x), y: Math.round(a.y), moving: a.isMoving },
                 ]),
               ),
+              objects: renderer.describeInteractables(),
             });
           }
         });
@@ -288,6 +289,14 @@ export function WorldCanvas({
           focusOn: (x, y) => camera.easeTo(x, y),
           followActor: (actorId) => {
             following = actorId;
+          },
+          updateInteractable: (id, patch) => {
+            renderer.updateInteractable(id, patch);
+            // The overlays are republished on a 100ms tick, which would leave
+            // a hidden object's button live for up to a tenth of a second.
+            // Short, but long enough for the tap that collected a shell to be
+            // followed by a tap on the shell that is no longer there.
+            setOverlays(renderer.overlayPositions(camera));
           },
         };
 

@@ -76,6 +76,8 @@ export interface GameState {
   drawings: DrawingRecord[];
   events: ParentEvent[];
   seenDiscoveries: string[];
+  /** Pictures earned in a chapter and kept in the journal. */
+  keepsakes: string[];
   /** Reflection transcripts, kept so the parent can see them. */
   reflections: { id: string; adventureId: string; text: string; at: number }[];
 }
@@ -95,6 +97,7 @@ export function emptyState(): GameState {
     drawings: [],
     events: [],
     seenDiscoveries: [],
+    keepsakes: [],
     reflections: [],
   };
 }

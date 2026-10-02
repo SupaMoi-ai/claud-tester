@@ -103,6 +103,36 @@ const SHEETS = [
     dir: 'ui',
     names: ['journal', 'pause', 'shell-empty', 'shell-full', 'speech', 'home'],
   },
+  // Milla's talking heads. Section 5.6 puts an 80 LU portrait at the left of
+  // every dialogue tray, and the world poses are far too small to crop one
+  // from — a 30 LU gull enlarged to 80 is a blur.
+  {
+    file: 'milla-portraits.png',
+    kind: 'grid',
+    rows: 1,
+    cols: 3,
+    dir: 'characters/milla',
+    names: ['portrait-calm', 'portrait-talk', 'portrait-pleased'],
+  },
+  // The chapter's keepsakes, drawn as pictures rather than as cards: the game
+  // draws the card, so the art must not bring its own border.
+  {
+    file: 'journal-cards.png',
+    kind: 'grid',
+    rows: 1,
+    cols: 2,
+    dir: 'worlds/brygga/journal',
+    names: ['milla', 'skjell'],
+  },
+  // The near layer. Drawn in front of everything, including the characters.
+  {
+    file: 'brygga-fore.png',
+    kind: 'grid',
+    rows: 1,
+    cols: 2,
+    dir: 'worlds/brygga/fore',
+    names: ['birch-branch', 'grass-stone'],
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -220,6 +250,29 @@ for (const sheet of SHEETS) {
         d[i + 2] = Math.min(d[i + 2], g + 30);
         // The more key was in the blend, the less of this pixel is real.
         d[i + 3] = Math.round(d[i + 3] * Math.max(0, 1 - m * 1.6));
+      }
+
+      /* ---- 2b. flecks of key *inside* the paint --------------------------- *
+       * The rim pass only reaches two pixels in from an erased region, which
+       * is right for an antialiased edge and useless against a pink strand the
+       * model painted among the grass blades: those pixels are fully opaque,
+       * nowhere near a keyed one, and survive untouched. Thirty of them came
+       * through the near layer at full alpha.
+       *
+       * The threshold is what makes this safe. Measured across every sheet
+       * delivered so far, real paint reaches 0.165 magenta-ness at its very
+       * pinkest — terracotta, the gull's beak shadow, Kiki's nose. A cut at
+       * 0.25 sits above all of it and below anything that is really key.
+       */
+      let flecks = 0;
+      for (let p = 0; p < W * H; p += 1) {
+        const i = p * 4;
+        if (d[i + 3] <= 24) continue;
+        if (magenta(i) < 0.25) continue;
+        flecks += 1;
+        const g = d[i + 1];
+        d[i] = Math.min(d[i], g + 20);
+        d[i + 2] = Math.min(d[i + 2], g + 20);
       }
       ctx.putImageData(image, 0, 0);
 
@@ -357,10 +410,14 @@ for (const sheet of SHEETS) {
         }
       }
 
-      return { cells, foundRows, foundCells, despilled };
+      return { cells, foundRows, foundCells, despilled, flecks };
     },
     { dataUrl: 'data:image/png;base64,' + b64, spec: sheet },
   );
+
+  if (result.flecks) {
+    console.log(`  · ${sheet.file}: ${result.flecks} key flecks cleaned inside the paint`);
+  }
 
   const expect = sheet.kind === 'plate' ? 1 : sheet.rows * sheet.cols;
   if (result.cells.length !== expect) {

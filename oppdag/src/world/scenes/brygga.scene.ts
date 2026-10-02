@@ -116,6 +116,38 @@ export const bryggaScene: SceneConfig = {
       placeholderColor: 0xa9a65d,
       placeholderLabel: 'Brygga',
     },
+    /**
+     * The near layer.
+     *
+     * Two painted pieces drawn in front of everything, including Ellie, at a
+     * little over world speed. They do one job: stop the harbour reading as a
+     * single flat picture with characters standing on it.
+     *
+     * Both are placed clear of the walkable corridor above — they are scenery
+     * the child cannot tap, and a leaf that swallows a tap on the path is a
+     * bug wearing a mood's clothing. The branch hangs in from the left edge
+     * over the birch; the clump sits on the shore below it. Neither is an
+     * interactable, so neither gets a hit area or an accessibility button.
+     */
+    {
+      id: 'fore-branch',
+      asset: 'assets/worlds/brygga/fore/birch-branch.png',
+      layer: 'fore',
+      parallax: 1.12,
+      position: { x: -6, y: 186 },
+      size: { width: 200, height: 112 },
+      // Hanging, so it turns about its middle rather than about a base.
+      ambient: { kind: 'sway', degrees: 1.4, period: 5200, pivot: 'center' },
+    },
+    {
+      id: 'fore-grass',
+      asset: 'assets/worlds/brygga/fore/grass-stone.png',
+      layer: 'fore',
+      parallax: 1.16,
+      position: { x: -10, y: 462 },
+      size: { width: 140, height: 79 },
+      ambient: { kind: 'sway', degrees: 2, period: 4100, pivot: 'bottom' },
+    },
   ],
 
   /**
@@ -224,7 +256,23 @@ export const bryggaScene: SceneConfig = {
       hit: { shape: 'rect', width: 35, height: 18 },
       asset: 'assets/worlds/brygga/props/twigs.png',
       size: { width: 35, height: 18 },
-      label: 'Kvister pa stien',
+      label: 'Kvister på stien',
+    },
+    // Milla again, up by the twigs, for the one beat where she clears them.
+    // A second placement rather than a moving character: she has three painted
+    // poses and no walk cycle, so walking her would mean sliding a standing
+    // gull across the sand.
+    {
+      id: 'milla-at-twigs',
+      x: 268,
+      y: 256,
+      hit: { shape: 'circle', radius: 24 },
+      asset: 'assets/characters/milla/clear.png',
+      // 50 x 28 is the clear pose's own aspect — she is reaching down, so she
+      // is wider and shorter here than the 30 x 34 standing pose.
+      size: { width: 50, height: 28 },
+      label: 'Milla',
+      hidden: true,
     },
   ],
 
@@ -267,4 +315,14 @@ export const bryggaScene: SceneConfig = {
   ],
 
   walkable: WALKABLE,
+
+  /**
+   * Artwork the chapter swaps in once the shells are found. Loaded with
+   * everything else so the basket fills on the frame Milla thanks the child,
+   * not a moment later.
+   */
+  preload: [
+    'assets/characters/milla/talk.png',
+    'assets/worlds/brygga/props/basket-full.png',
+  ],
 };

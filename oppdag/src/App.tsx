@@ -19,6 +19,7 @@ import { ParentDashboard } from './screens/ParentDashboard';
 import { LearningMap } from './screens/LearningMap';
 import { Brygga } from './screens/Brygga';
 import { Kart } from './screens/Kart';
+import { Dagbok } from './screens/Dagbok';
 
 /**
  * Keeps a child who hasn't been through onboarding from landing somewhere
@@ -99,6 +100,7 @@ export function App() {
             the chapter is built on top of it. */}
         <Route path="/kart" element={<Kart />} />
         <Route path="/brygga" element={<Brygga />} />
+        <Route path="/dagbok" element={<Dagbok />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

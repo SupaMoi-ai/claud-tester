@@ -99,6 +99,13 @@ export interface Interactable {
   dimmed?: boolean;
   /** Something is waiting here. Draws a slow pulsing ring to invite a tap. */
   attention?: boolean;
+  /**
+   * Built, but not in the scene yet — not drawn, not tappable, not announced.
+   * For things a chapter reveals: a character who appears somewhere else
+   * later, a prop that only exists after a story beat. Declared here rather
+   * than hidden from React on the first frame, which shows it for one frame.
+   */
+  hidden?: boolean;
 }
 
 /**
@@ -163,6 +170,30 @@ export interface SceneConfig {
    * rectangles is ignored rather than sending Ellie walking into the sea.
    */
   walkable?: { x: number; y: number; width: number; height: number }[];
+  /**
+   * Artwork a chapter will swap in later — a filled basket, a character's
+   * second pose. Nothing draws these at build time; they are loaded with
+   * everything else so that `updateInteractable` can swap a texture on the
+   * frame it is asked to, rather than popping in a few hundred milliseconds
+   * after the story beat that called for it.
+   */
+  preload?: string[];
+}
+
+/**
+ * What a chapter may change about an object after the scene is built.
+ *
+ * Deliberately three fields. The engine renders and reports; a story that
+ * could reposition and re-shape anything at runtime would make the scene file
+ * stop describing the scene, which is the one thing it is for.
+ */
+export interface InteractablePatch {
+  /** Swap the artwork. The path must be in the scene's `preload`. */
+  asset?: string;
+  /** Hide it: no longer drawn, no longer tappable, no longer announced. */
+  visible?: boolean;
+  /** Turn the "over here" ring on or off. */
+  attention?: boolean;
 }
 
 /** Where a tap landed. The engine reports; it never decides what it means. */
@@ -184,6 +215,8 @@ export interface WorldApi {
   focusOn: (x: number, y: number) => void;
   /** Keep the camera centred on an actor as it walks. */
   followActor: (actorId: string | null) => void;
+  /** Change an object the chapter has moved past — see `InteractablePatch`. */
+  updateInteractable: (id: string, patch: InteractablePatch) => void;
 }
 
 /** What the engine reports back. It never acts on these itself. */

@@ -17,8 +17,18 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { bryggaScene, BRYGGA_ANCHORS } from '../src/world/scenes/brygga.scene';
+import { SHELL_IDS, KEEPSAKES } from '../src/world/scenes/brygga.chapter';
+
+/**
+ * Relative to the working directory, not to this file: the suite is bundled
+ * into `node_modules/.test-build` before it runs, so `import.meta.url` points
+ * at the build output and every asset looks missing.
+ */
+const PUBLIC = join(process.cwd(), 'public');
 
 /** The engine's own rule, restated: no areas declared means anywhere goes. */
 function isWalkable(scene: typeof bryggaScene, x: number, y: number): boolean {
@@ -85,5 +95,80 @@ test('Brygga', async (t) => {
     // Without this the visible world is a property of the handset, and an
     // authored character height stops meaning the same thing on every device.
     assert.equal(bryggaScene.camera.designWidth, 360);
+  });
+
+  await t.test('the near layer keeps off the path', () => {
+    // Foreground pieces are drawn over everything and take no taps, so one
+    // placed across the route is a patch of scene where the child can see the
+    // path, tap it, and have nothing happen. Sampled down the middle of every
+    // walkable band rather than at its corners, because the middle is where
+    // the walking actually happens.
+    const fore = bryggaScene.layers.filter((l) => l.layer === 'fore');
+    assert.ok(fore.length > 0, 'no near layer — this test is watching nothing');
+
+    for (const piece of fore) {
+      for (const band of bryggaScene.walkable ?? []) {
+        const cx = band.x + band.width / 2;
+        for (let y = band.y; y <= band.y + band.height; y += 12) {
+          const over =
+            cx >= piece.position.x &&
+            cx <= piece.position.x + piece.size.width &&
+            y >= piece.position.y &&
+            y <= piece.position.y + piece.size.height;
+          assert.ok(
+            !over,
+            `${piece.id} covers the middle of the path at (${cx}, ${y})`,
+          );
+        }
+      }
+    }
+  });
+
+  await t.test('every piece of artwork the chapter names exists', () => {
+    // A path that is merely misspelled renders as a placeholder block in the
+    // world and as a broken image in the interface, and both look enough like
+    // "not finished yet" to survive a glance.
+    // If this is wrong, every path below "fails" for the same uninteresting
+    // reason, so say so once and clearly.
+    assert.ok(
+      existsSync(join(PUBLIC, 'assets')),
+      `no assets directory under ${PUBLIC} — run the suite from the project root`,
+    );
+
+    const paths = [
+      ...bryggaScene.layers.map((l) => l.asset),
+      ...bryggaScene.interactables.map((i) => i.asset),
+      ...(bryggaScene.actors ?? []).flatMap((a) => Object.values(a.sprites)),
+      ...(bryggaScene.preload ?? []),
+      'assets/characters/milla/portrait-calm.png',
+      'assets/characters/milla/portrait-talk.png',
+      'assets/characters/milla/portrait-pleased.png',
+      'assets/worlds/brygga/journal/milla.png',
+      'assets/worlds/brygga/journal/skjell.png',
+    ].filter((p): p is string => Boolean(p));
+
+    for (const path of new Set(paths)) {
+      assert.ok(existsSync(join(PUBLIC, path)), `${path} is named but not on disk`);
+    }
+  });
+
+  await t.test('the chapter names objects the scene actually has', () => {
+    const ids = new Set(bryggaScene.interactables.map((i) => i.id));
+    for (const id of [...SHELL_IDS, 'milla', 'milla-at-twigs', 'basket', 'twigs']) {
+      assert.ok(ids.has(id), `the chapter drives "${id}", which the scene has not got`);
+    }
+    // Two keepsakes, distinct, or the journal shows one card twice.
+    assert.equal(new Set(Object.values(KEEPSAKES)).size, 2);
+  });
+
+  await t.test('Milla waits at the twigs, and is not in the scene yet', () => {
+    const second = bryggaScene.interactables.find((i) => i.id === 'milla-at-twigs');
+    assert.ok(second?.hidden, 'the second Milla must start hidden, or there are two');
+    const twigs = bryggaScene.interactables.find((i) => i.id === 'twigs');
+    assert.ok(twigs);
+    assert.ok(
+      Math.hypot(second.x - twigs.x, second.y - twigs.y) < 60,
+      'Milla clears twigs she is nowhere near',
+    );
   });
 });

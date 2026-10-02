@@ -38,6 +38,7 @@ type Action =
   | { type: 'save-drawing'; drawing: DrawingRecord }
   | { type: 'save-reflection'; adventureId: string; text: string }
   | { type: 'see-discovery'; id: string }
+  | { type: 'earn-keepsake'; id: string }
   | { type: 'load'; state: GameState }
   | { type: 'reset' };
 
@@ -216,6 +217,14 @@ function reducer(state: GameState, action: Action): GameState {
         ? state
         : { ...state, seenDiscoveries: [...state.seenDiscoveries, action.id] };
 
+    // Keepsakes are earned once and never lost. Playing a chapter again is
+    // allowed to be worth doing for its own sake, so re-earning is a no-op
+    // rather than a duplicate entry in the journal.
+    case 'earn-keepsake':
+      return state.keepsakes.includes(action.id)
+        ? state
+        : { ...state, keepsakes: [...state.keepsakes, action.id] };
+
     default:
       return state;
   }
@@ -243,6 +252,7 @@ interface Store {
     saveDrawing: (drawing: DrawingRecord) => void;
     saveReflection: (adventureId: string, text: string) => void;
     seeDiscovery: (id: string) => void;
+    earnKeepsake: (id: string) => void;
     loadState: (state: GameState) => void;
     reset: () => void;
   };
@@ -283,6 +293,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       saveReflection: (adventureId, text) =>
         dispatch({ type: 'save-reflection', adventureId, text }),
       seeDiscovery: (id) => dispatch({ type: 'see-discovery', id }),
+      earnKeepsake: (id) => dispatch({ type: 'earn-keepsake', id }),
       loadState: (next) => dispatch({ type: 'load', state: next }),
       reset,
     }),
