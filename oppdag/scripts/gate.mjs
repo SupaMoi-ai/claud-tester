@@ -165,8 +165,22 @@ const panned = Math.abs((cameraAfter?.camera?.x ?? 0) - (cameraBefore?.camera?.x
 if (panned >= 100) pass(`drag moved the camera ${Math.round(panned)} world units`);
 else fail(`drag moved the camera only ${Math.round(panned)} units — input is not reaching the canvas`);
 
-/* ---- 4. tap empty ground: Ellie walks there ---------------------------- */
+/* ---- 4. tap empty ground: Ellie walks there ----------------------------
+ *
+ * The reload matters. The drag above pans the camera several hundred units
+ * and `goto` to the same hash is not a navigation, so without it every tap
+ * below lands on different ground than the fraction suggests. That is how
+ * this check spent a while reporting "tap-to-walk is dead" about a world
+ * where tapping walks perfectly well: after the pan, a locked location's hit
+ * area had slid under the chosen point, and a locked location quite correctly
+ * does not walk anyone anywhere.
+ *
+ * Hard-coded fractions were the underlying mistake. The spot is now chosen
+ * against the live positions of the objects, so it stays an empty patch of
+ * island whatever the camera is doing.
+ */
 await page.goto(`${base}/#/verden`);
+await page.reload();
 await waitForWorld(page, 'the tap-to-walk check');
 
 const canvasBox = await page.locator('canvas').boundingBox();
@@ -178,14 +192,66 @@ const tapAt = async (fx, fy) => {
   );
 };
 
-const standing = await worldState(page);
-await tapAt(0.22, 0.62); // empty island, well clear of every location
-await waitForStill(page, 'the walk west');
-const walked = await worldState(page);
+/** Canvas fractions that no object's hit area currently covers. */
+async function clearSpots(nearFx, fy) {
+  const boxes = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="group"] button')].map((b) => {
+      const r = b.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    }),
+  );
+  const out = [];
+  for (let fx = 0.12; fx <= 0.9; fx += 0.04) {
+    const px = canvasBox.x + canvasBox.width * fx;
+    const py = canvasBox.y + canvasBox.height * fy;
+    const clear = boxes.every(
+      (r) => px < r.x - 12 || px > r.x + r.w + 12 || py < r.y - 12 || py > r.y + r.h + 12,
+    );
+    if (clear) out.push(fx);
+  }
+  return out.sort((a, b) => Math.abs(a - nearFx) - Math.abs(b - nearFx));
+}
 
-const ellieMoved = Math.abs((walked?.actors?.ellie?.x ?? 0) - (standing?.actors?.ellie?.x ?? 0));
-if (ellieMoved >= 80) pass(`tapping open ground walked Ellie ${Math.round(ellieMoved)} units`);
-else fail(`tapping open ground moved Ellie ${Math.round(ellieMoved)} units — tap-to-walk is dead`);
+/**
+ * Walk to open ground, trying a few empty spots.
+ *
+ * Several attempts, because "clear of every object" does not imply "walkable"
+ * — the island has shoreline. It stays a real check: if input never reaches
+ * the canvas, every attempt moves her zero, which is the failure it is for.
+ */
+async function walkSomewhere(nearFx, fy, what) {
+  const spots = await clearSpots(nearFx, fy);
+  if (spots.length === 0) return { moved: 0, tried: 0 };
+  let best = 0;
+  let tried = 0;
+  for (const fx of spots.slice(0, 3)) {
+    const before = await worldState(page);
+    await tapAt(fx, fy);
+    await waitForStill(page, what);
+    const after = await worldState(page);
+    tried += 1;
+    best = Math.max(
+      best,
+      Math.hypot(
+        (after?.actors?.ellie?.x ?? 0) - (before?.actors?.ellie?.x ?? 0),
+        (after?.actors?.ellie?.y ?? 0) - (before?.actors?.ellie?.y ?? 0),
+      ),
+    );
+    if (best >= 80) break;
+  }
+  return { moved: best, tried };
+}
+
+const west = await walkSomewhere(0.22, 0.62, 'the walk west');
+const ellieMoved = west.moved;
+if (ellieMoved >= 80) {
+  pass(`tapping open ground walked Ellie ${Math.round(ellieMoved)} units`);
+} else {
+  fail(
+    `${west.tried} taps on empty ground moved Ellie at most ${Math.round(ellieMoved)} units — ` +
+      `tap-to-walk is dead`,
+  );
+}
 
 await page.screenshot({ path: join(OUT, '04-walked-west.png') });
 
@@ -203,14 +269,14 @@ else fail(`tapping the sea walked Ellie ${Math.round(seaDrift)} units into the w
 
 /* ---- 6. Kiki keeps up -------------------------------------------------- */
 const beforeTrip = await worldState(page);
-await tapAt(0.85, 0.62);
-await waitForStill(page, 'the walk east');
+const east = await walkSomewhere(0.85, 0.62, 'the walk east');
 const together = await worldState(page);
 
 // Without this, "nobody moved at all" would satisfy the distance test — the
 // companion would look loyal purely by standing still next to a statue.
-const trip = Math.abs(
-  (together?.actors?.ellie?.x ?? 0) - (beforeTrip?.actors?.ellie?.x ?? 0),
+const trip = Math.max(
+  east.moved,
+  Math.abs((together?.actors?.ellie?.x ?? 0) - (beforeTrip?.actors?.ellie?.x ?? 0)),
 );
 const gap = Math.hypot(
   (together?.actors?.kiki?.x ?? 0) - (together?.actors?.ellie?.x ?? 0),
