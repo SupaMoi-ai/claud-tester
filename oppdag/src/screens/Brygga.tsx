@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { WorldCanvas } from '../world/engine/WorldCanvas';
 import { bryggaScene } from '../world/scenes/brygga.scene';
 import type { WorldApi, WorldTap } from '../world/engine/types';
+import { ChapterHud } from '../world/ChapterHud';
 
 /**
  * The harbour, on its own.
@@ -52,6 +53,9 @@ export function Brygga() {
         style={{ aspectRatio: '9 / 16', maxHeight: '100dvh', maxWidth: '100vw' }}
       >
         <WorldCanvas scene={bryggaScene} onTap={handleTap} onReady={handleReady} />
+
+        {/* Three shells, none collected yet: the counting task is not built. */}
+        <ChapterHud total={3} done={0} />
 
         {where && (
           <div className="pointer-events-none absolute inset-x-0 bottom-6 mx-auto w-full max-w-xs px-4">
