@@ -1,13 +1,40 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Screen } from '../design/Screen';
-import { Backdrop } from '../design/Backdrop';
 import { PrimaryButton } from '../design/PrimaryButton';
-import { Character } from '../characters/Character';
-import { FloatingObject } from '../design/FloatingObject';
 import { useActions, useGame } from '../state/store';
 import { demoState } from '../data/demoChild';
 import { useCopy } from '../i18n';
+
+/**
+ * The title screen.
+ *
+ * A painted harbour with nobody in it, and Ellie and Kiki standing on the
+ * jetty as separate sprites. Section 8.7 is the reason for the split: a
+ * character painted into the background cannot breathe, blink or walk off
+ * when the child presses start, and cutting one out afterwards leaves a halo.
+ *
+ * The painting was commissioned with three zones and the layout keeps to
+ * them: the wordmark in the open sky across the top fifth, the characters on
+ * the jetty's crossbar, the buttons over the near end of the jetty. Every
+ * position is a fraction of the painting, so they stay on the timber at any
+ * size rather than at one.
+ *
+ * The painting is portrait and the comfortable device is a landscape iPad, so
+ * the crisp picture sits in a 9:16 column and the same painting, blurred and
+ * enlarged, fills the rest. A cream margin would be honest but would make the
+ * first screen of the game look like a phone app running on a tablet.
+ */
+
+const PLATE = 'assets/title/title-bg.webp';
+
+/** Where the jetty's crossbar is in the painting, as fractions of it. */
+const STAGE = {
+  /** The line the characters' feet stand on. */
+  feet: 0.675,
+  ellie: { x: 0.45, height: 0.135 },
+  // Section 3.2's proportions: Kiki is 24 LU against Ellie's 66.
+  kiki: { x: 0.585, height: 0.135 * (24 / 66) * 1.25 },
+} as const;
 
 export function Splash() {
   const copy = useCopy();
@@ -25,51 +52,86 @@ export function Splash() {
     navigate('/verden');
   };
 
+  /** Standing still is not frozen: a slow breath, anchored at the feet. */
+  const breathe = (period: number, amount: number) =>
+    reduced
+      ? {}
+      : {
+          animate: { scaleY: [1, 1 + amount, 1] },
+          transition: { duration: period, repeat: Infinity, ease: 'easeInOut' as const },
+        };
+
   return (
-    <Screen backdrop={<Backdrop kind="hills" />} center width="narrow">
-      <div className="flex flex-col items-center text-center">
-        {/* Wordmark */}
+    <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-cream">
+      {/* The same harbour, out of focus, so the surround is part of the
+       * picture rather than a margin around it. */}
+      <img
+        src={PLATE}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
+      />
+
+      <div
+        className="relative overflow-hidden shadow-float"
+        style={{ aspectRatio: '941 / 1672', height: 'min(100dvh, 100vw * 1672 / 941)' }}
+      >
+        <img src={PLATE} alt="" aria-hidden className="absolute inset-0 h-full w-full" />
+
+        {/* ---- the sky: the wordmark ---------------------------------- */}
         <motion.div
-          initial={reduced ? false : { opacity: 0, y: 22, scale: 0.94 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-          className="relative"
+          initial={reduced ? false : { opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 24 }}
+          className="absolute inset-x-0 top-[6%] flex flex-col items-center px-6 text-center"
         >
-          <h1 className="font-display text-[3.5rem] font-semibold leading-none tracking-tight text-ink sm:text-[5rem]">
+          <h1 className="font-display text-[clamp(2.5rem,11vh,5rem)] font-semibold leading-none tracking-tight text-ink">
             OPPDAG
           </h1>
-          <FloatingObject
-            duration={7}
-            distance={7}
-            className="absolute -right-9 -top-5 text-[2rem] sm:-right-12 sm:text-[2.5rem]"
-          >
-            <span aria-hidden>✨</span>
-          </FloatingObject>
+          <p className="mt-2 font-display text-[clamp(1rem,2.6vh,1.5rem)] text-ink-soft">
+            {copy.app.tagline}
+          </p>
         </motion.div>
 
-        <motion.p
-          initial={reduced ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25, duration: 0.6 }}
-          className="mt-3 font-display text-lead text-ink-soft sm:text-title"
-        >
-          {copy.app.tagline}
-        </motion.p>
-
+        {/* ---- the jetty: Ellie and Kiki ------------------------------ */}
         <motion.div
-          initial={reduced ? false : { opacity: 0, y: 26 }}
+          initial={reduced ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, type: 'spring', stiffness: 220, damping: 22 }}
-          className="my-6 sm:my-8"
+          transition={{ delay: 0.3, duration: 0.6 }}
+          aria-hidden
         >
-          <Character who="kiki" mood="curious" size={230} />
+          <motion.img
+            src="assets/characters/ellie/front.png"
+            alt=""
+            className="absolute origin-bottom"
+            style={{
+              height: `${STAGE.ellie.height * 100}%`,
+              left: `${STAGE.ellie.x * 100}%`,
+              bottom: `${(1 - STAGE.feet) * 100}%`,
+              translateX: '-50%',
+            }}
+            {...breathe(3.4, 0.012)}
+          />
+          <motion.img
+            src="assets/characters/kiki/pose-rest.png"
+            alt=""
+            className="absolute origin-bottom"
+            style={{
+              height: `${STAGE.kiki.height * 100}%`,
+              left: `${STAGE.kiki.x * 100}%`,
+              bottom: `${(1 - STAGE.feet) * 100}%`,
+              translateX: '-50%',
+            }}
+            {...breathe(2.6, 0.02)}
+          />
         </motion.div>
 
+        {/* ---- the near jetty: the buttons --------------------------- */}
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="flex w-full max-w-sm flex-col items-center gap-3"
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="absolute inset-x-0 bottom-[5%] flex flex-col items-center gap-3 px-[9%]"
         >
           <PrimaryButton onClick={begin} tone="coral" full>
             {profile ? copy.splash.resume(profile.name) : copy.splash.start}
@@ -81,15 +143,17 @@ export function Splash() {
             </PrimaryButton>
           )}
 
+          {/* On a pill, not bare: faint underlined text over painted planks is
+           * a link nobody can read, and this is the way in for the adult. */}
           <button
             onClick={() => navigate('/port')}
-            className="mt-2 min-h-[3rem] px-4 font-display text-body font-semibold text-ink-faint
-              underline decoration-hairline decoration-2 underline-offset-4 hover:text-ink-soft"
+            className="min-h-[2.75rem] rounded-full bg-snow/90 px-5 font-display text-body
+              font-semibold text-ink-soft shadow-soft hover:text-ink"
           >
             {copy.splash.parents}
           </button>
         </motion.div>
       </div>
-    </Screen>
+    </div>
   );
 }

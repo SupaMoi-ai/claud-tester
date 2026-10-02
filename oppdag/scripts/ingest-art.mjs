@@ -67,6 +67,15 @@ const SHEETS = [
     dir: 'worlds/brygga',
     name: 'ground',
   },
+  // The title screen. A plate, not a sheet: it is the background, so it keeps
+  // every pixel and goes out as opaque WebP. Painted with no one in it, so the
+  // characters standing on the jetty are sprites that can move.
+  {
+    file: 'title-bg.png',
+    kind: 'plate',
+    dir: 'title',
+    name: 'title-bg',
+  },
   {
     file: 'brygga-props.png',
     kind: 'grid',
