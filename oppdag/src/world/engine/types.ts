@@ -143,6 +143,15 @@ export interface SceneConfig {
     /** Clamp so the child can never pan off into empty space. */
     minZoom: number;
     maxZoom: number;
+    /**
+     * Width of the design canvas in world units. Set it and the view scales so
+     * exactly this much world spans the screen, whatever the device — the
+     * specification's FIT viewport (section 2.1), and the reason a character's
+     * authored height means the same thing on every phone. Omit it and one
+     * world unit is one CSS pixel, which makes the visible world a property of
+     * the handset rather than of the design.
+     */
+    designWidth?: number;
   };
   /** Flat background behind every layer. */
   background: number;

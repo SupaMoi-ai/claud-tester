@@ -36,8 +36,11 @@ const H = 1672 / PX_PER_LU;
  * number repeated in two files is a number that will disagree with itself.
  */
 export const BRYGGA_ANCHORS = {
-  ellieSpawn: { x: 236, y: 790 },
-  kikiSpawn: { x: 212, y: 812 },
+  // Ashore on the sand, clear of the jetty's crossbar, as the target opens.
+  // The traced bands put the crossbar at y 528-540 and the sand above it at
+  // 492-528, so 538 still stood her on the timber.
+  ellieSpawn: { x: 236, y: 512 },
+  kikiSpawn: { x: 270, y: 520 },
   millaGround: { x: 300, y: 512 },
   millaApproach: { x: 262, y: 522 },
   basket: { x: 285, y: 528 },
@@ -91,10 +94,14 @@ export const bryggaScene: SceneConfig = {
   // rather than as a hole.
   background: 0x408cad,
   camera: {
-    // Opens on the jetty, where Ellie arrives.
-    start: { x: 236, y: 700 },
+    // Framed as the visual target frames it: Ellie low in the view, the shore
+    // and the way north above her.
+    start: { x: 236, y: 400 },
     minZoom: 1,
     maxZoom: 1,
+    // Section 2.1's design canvas. 360 LU across, so a 9:16 screen shows
+    // 360 x 640 and Ellie's authored 66 LU is a tenth of it on any device.
+    designWidth: 360,
   },
 
   layers: [

@@ -45,9 +45,14 @@ export class Camera {
   /** Set while easing to a target; cleared on any user drag. */
   private target: { x: number; y: number; ease: number } | null = null;
 
+  /** World units across the screen, when the scene asks for a fixed canvas. */
+  private designWidth?: number;
+
   constructor({ viewWidth, viewHeight, scene }: CameraOptions) {
     this.viewWidth = viewWidth;
     this.viewHeight = viewHeight;
+    this.designWidth = scene.camera.designWidth;
+    this.fit();
     this.scene = scene;
     this.x = scene.camera.start.x;
     this.y = scene.camera.start.y;
@@ -57,6 +62,7 @@ export class Camera {
   resize(viewWidth: number, viewHeight: number) {
     this.viewWidth = viewWidth;
     this.viewHeight = viewHeight;
+    this.fit();
     this.clamp();
   }
 
@@ -132,6 +138,12 @@ export class Camera {
    * Keep the view inside the world. When the world is smaller than the view on
    * an axis, centre it rather than letting it drift.
    */
+  /** Scale so the design canvas spans the screen exactly. */
+  private fit() {
+    if (!this.designWidth) return;
+    this.zoom = this.viewWidth / this.designWidth;
+  }
+
   private clamp() {
     const halfW = this.viewWidth / (2 * this.zoom);
     const halfH = this.viewHeight / (2 * this.zoom);
