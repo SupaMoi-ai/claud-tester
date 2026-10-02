@@ -47,18 +47,29 @@ const OUT = resolve(root, flag('out', 'public/assets/characters'));
  */
 const JOBS = [
   /* -- the production sheets, in the locked cel-animation style ----------- *
-   * Five labelled panels each: a face study, then FORFRA / BAKFRA /
-   * VENSTRE / HØYRE. The band starts below the Norwegian captions and to the
-   * right of the face panel, which is drawn at a different scale and would
-   * otherwise be cut as a body view.
+   * Bands start below each section's captions, and to the right of the guide
+   * labels running down the left margin.
    */
   {
-    sheet: '071aa0db-image.png',
+    // The full model study: six aligned views above six expressions, with
+    // guide rules and a palette strip. Supersedes the five-panel sheet.
+    sheet: '6f682b8d-image.png',
     character: 'ellie',
-    band: { top: 0.12, bottom: 0.985, left: 0.27, right: 0.99 },
-    count: 4,
-    names: ['front', 'back', 'side', 'side-right'],
+    band: { top: 0.082, bottom: 0.592, left: 0.06, right: 0.995 },
+    count: 6,
+    names: ['front', 'back', 'side', 'side-right', 'front34', 'back34'],
     format: 'png',
+    stripGuides: true,
+  },
+  {
+    sheet: '6f682b8d-image.png',
+    character: 'ellie',
+    band: { top: 0.625, bottom: 0.875, left: 0.01, right: 0.995 },
+    count: 6,
+    names: ['noytral', 'smil', 'nysgjerrig', 'tenkende', 'overrasket', 'fornoyd'],
+    prefix: 'face-',
+    format: 'png',
+    stripGuides: true,
   },
   {
     // Kiki is seated in every view on this sheet. That is the resting pose the
@@ -72,22 +83,6 @@ const JOBS = [
     prefix: 'rest-',
     format: 'png',
   },
-  {
-    sheet: '8863585a-image.png',
-    character: 'ellie',
-    band: { top: 0.135, bottom: 0.345 },
-    count: 6,
-    names: ['noytral', 'glad', 'ler', 'nysgjerrig', 'overrasket', 'bekymret'],
-    prefix: 'face-',
-  },
-  {
-    sheet: '8863585a-image.png',
-    character: 'ellie',
-    band: { top: 0.42, bottom: 0.612 },
-    count: 6,
-    names: ['lei-seg', 'bestemt', 'irritert', 'entusiastisk', 'trott', 'tenkende'],
-    prefix: 'face-',
-  },
 ];
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -99,7 +94,7 @@ const written = [];
 for (const job of JOBS) {
   const b64 = readFileSync(join(SHEETS, job.sheet)).toString('base64');
   const cuts = await page.evaluate(
-    async ({ dataUrl, band, count, format }) => {
+    async ({ dataUrl, band, count, format, stripGuides }) => {
       const img = new Image();
       await new Promise((r) => {
         img.onload = r;
@@ -165,6 +160,42 @@ for (const job of JOBS) {
         if (y < H - 1) stack.push(p + W);
       }
       ctx.putImageData(image, 0, 0);
+
+      /* ---- 1b. erase the sheet's alignment guides ----------------------- *
+       * A model sheet rules horizontal guides across the whole page — crown,
+       * chin, hip, knee, ground. They pass behind the figures, so they never
+       * mark a character, but they do cross the empty space beside one, and
+       * trimmed to a bounding box that leaves a grey stub poking out of both
+       * shoulders: invisible in a count, obvious in the game.
+       *
+       * The test is thinness, not coverage. Coverage fails because a guide row
+       * is a row of figures PLUS the guide filling the gaps between them, so
+       * it reads as nearly full and erasing it takes the figures with it —
+       * which is exactly what the first attempt did, cutting a band straight
+       * through every drawing. A guide is instead the only thing on the page
+       * that is one to four pixels tall: real drawing, even at a thin edge,
+       * belongs to a taller mass of ink directly above or below it.
+       */
+      if (stripGuides) {
+        const MAX_GUIDE_PX = 4;
+        for (let x = bx0; x < bx1; x += 1) {
+          let runStart = -1;
+          for (let y = by0; y <= by1; y += 1) {
+            const on = y < by1 && d[(y * W + x) * 4 + 3] > 24;
+            if (on && runStart === -1) runStart = y;
+            if ((!on || y === by1) && runStart !== -1) {
+              const runEnd = on ? y : y - 1;
+              if (runEnd - runStart + 1 <= MAX_GUIDE_PX) {
+                for (let f = runStart; f <= runEnd; f += 1) {
+                  d[(f * W + x) * 4 + 3] = 0;
+                }
+              }
+              runStart = -1;
+            }
+          }
+        }
+        ctx.putImageData(image, 0, 0);
+      }
 
       /* ---- 2. find the figures in the band by ink density ---------------- */
       const y0 = by0;
@@ -289,6 +320,7 @@ for (const job of JOBS) {
       band: job.band,
       count: job.count,
       format: job.format ?? 'webp',
+      stripGuides: job.stripGuides ?? false,
     },
   );
 
