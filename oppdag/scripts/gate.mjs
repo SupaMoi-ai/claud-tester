@@ -47,6 +47,12 @@ mkdirSync(OUT, { recursive: true });
 const results = [];
 const fail = (msg) => results.push({ ok: false, msg });
 const pass = (msg) => results.push({ ok: true, msg });
+/**
+ * Set once any world this run entered has lost its WebGL context. Up here
+ * rather than beside the helpers that use it: they run mid-module, and a `let`
+ * declared below them would still be in its temporal dead zone.
+ */
+let contextLost = false;
 
 async function waitForServer(url, tries = 80) {
   for (let i = 0; i < tries; i += 1) {
@@ -114,13 +120,7 @@ if (canvasInfo.found && canvasInfo.width > 0) {
   fail('no canvas rendered');
 }
 
-await page.evaluate(() => {
-  const c = document.querySelector('canvas');
-  window.__contextLost = false;
-  c?.addEventListener('webglcontextlost', () => {
-    window.__contextLost = true;
-  });
-});
+await watchContext();
 
 await page.screenshot({ path: join(OUT, '01-world-initial.png') });
 
@@ -179,9 +179,7 @@ else fail(`drag moved the camera only ${Math.round(panned)} units — input is n
  * against the live positions of the objects, so it stays an empty patch of
  * island whatever the camera is doing.
  */
-await page.goto(`${base}/#/verden`);
-await page.reload();
-await waitForWorld(page, 'the tap-to-walk check');
+await enterWorld('the tap-to-walk check');
 
 const canvasBox = await page.locator('canvas').boundingBox();
 /** Tap a point given as a fraction of the canvas, like a finger. */
@@ -298,16 +296,15 @@ await page.screenshot({ path: join(OUT, '05-walked-east.png') });
  * the second one, with `force: true`, and reported it as proof that tapping
  * the world worked. It was proof that the accessibility mirror worked.
  */
-await page.goto(`${base}/#/verden`);
-await waitForWorld(page, 'the Havna tap check');
+await enterWorld('the Havna tap check');
 
 const havna = page.locator('button[aria-label="Havna"]');
-if ((await havna.count()) > 0) {
+if (await appears(havna)) {
   const spot = await havna.first().boundingBox();
   // A real tap at Havna's on-screen position — no force, nothing bypassed.
   await page.mouse.click(Math.round(spot.x + spot.width / 2), Math.round(spot.y + spot.height / 2));
   // She walks there before it opens, so this waits for the walk, not a click.
-  await page.waitForTimeout(6000);
+  await opens();
   const url = page.url();
   if (url.includes('/eventyr/')) pass(`tapping Havna in the world opened ${url.split('#')[1]}`);
   else fail(`tapping Havna went nowhere (still ${url.split('#')[1]})`);
@@ -315,25 +312,30 @@ if ((await havna.count()) > 0) {
   fail('Havna has no on-screen position');
 }
 
-await page.goto(`${base}/#/verden`);
-await waitForWorld(page, 'the keyboard check');
+await enterWorld('the keyboard check');
 const havnaA11y = page.locator('button[aria-label="Havna"]');
-if ((await havnaA11y.count()) > 0) {
+if (await appears(havnaA11y)) {
   await havnaA11y.first().focus();
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(3000);
+  await opens();
   if (page.url().includes('/eventyr/')) pass('Havna is reachable by keyboard alone');
   else fail('Havna has a focusable button but Enter does nothing');
 } else {
   fail('no accessibility button for Havna — screen readers cannot reach the world');
 }
 
-/* ---- 6. context survived ----------------------------------------------- */
-await page.goto(`${base}/#/verden`);
+/* ---- 6. context survived -----------------------------------------------
+ *
+ * Accumulated across every world the gate entered, not read once at the end.
+ * Each reload above takes the page — and the listener — with it, so a single
+ * read here would only ever see a listener attached a moment ago, and would
+ * pass whatever had happened to the contexts before it.
+ */
+await enterWorld('the context check');
 await page.waitForTimeout(1500);
-const lost = await page.evaluate(() => window.__contextLost === true);
-if (lost) fail('WebGL context was lost');
-else pass('WebGL context stable');
+await noteContext();
+if (contextLost) fail('WebGL context was lost');
+else pass('WebGL context stable across every world the gate entered');
 
 await page.screenshot({ path: join(OUT, '03-world-after-nav.png') });
 
@@ -459,6 +461,80 @@ async function waitForStill(p, label) {
  * mistake as diffing screenshots. Waiting for a named condition, and failing
  * out loud when it never arrives, is the only honest version.
  */
+/**
+ * Go to the world and wait for *this* world to be ready.
+ *
+ * `window.__oppdagWorld` outlives a route change, and the app's
+ * `AnimatePresence mode="wait"` does not mount the next screen until the last
+ * one has finished leaving. So coming back from an adventure, the previous
+ * world's stale `ready` satisfied the wait at once, and the check that
+ * followed counted the Havna button before the new world existed. It passed
+ * on a fast run and failed on a slow one, which is the signature of a race,
+ * not of a flake. Reloading into the route means only the new world can report
+ * ready.
+ */
+/** Fold the current page's context state into the run's, before it goes. */
+async function noteContext() {
+  const lostHere = await page.evaluate(() => window.__contextLost === true).catch(() => false);
+  contextLost = contextLost || lostHere;
+}
+
+/** Listen for context loss on whatever canvas is on the page now. */
+async function watchContext() {
+  await page.evaluate(() => {
+    const c = document.querySelector('canvas');
+    window.__contextLost = false;
+    c?.addEventListener('webglcontextlost', () => {
+      window.__contextLost = true;
+    });
+  });
+}
+
+async function enterWorld(label) {
+  await noteContext();
+  await page.goto(`${base}/#/verden`);
+  // A reload, not just the hash: when the gate is already on /verden, `goto`
+  // to the same hash mounts nothing, and with the diagnostic cleared no world
+  // would ever report ready again. A reload always builds a fresh one — and
+  // the page global goes with it, so no stale `ready` can survive either.
+  await page.reload();
+  const ready = await waitForWorld(page, label);
+  if (ready) await watchContext();
+  return ready;
+}
+
+/**
+ * The accessibility buttons are published on a 100 ms tick after the world
+ * reports ready, so a count taken on the same frame can read zero. Waiting a
+ * bounded time keeps the check able to fail: a world that never mirrors its
+ * locations still has none after five seconds.
+ */
+/**
+ * Wait for a location to open, rather than for a guessed number of seconds.
+ *
+ * Ellie walks to a place before it opens, and walking is time-based but Pixi
+ * caps each frame's step: at software-rendering frame rates a walk takes
+ * noticeably longer than its distance over speed. A fixed three seconds was
+ * enough on a fast run and not on a slow one. Bounded, so a location that
+ * never opens still fails.
+ */
+async function opens() {
+  try {
+    await page.waitForURL(/\/eventyr\//, { timeout: 15000 });
+  } catch {
+    /* the caller reports what the URL is */
+  }
+}
+
+async function appears(locator) {
+  try {
+    await locator.first().waitFor({ state: 'attached', timeout: 5000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function waitForWorld(p, label) {
   try {
     await p.waitForFunction(
