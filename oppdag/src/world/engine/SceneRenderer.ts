@@ -1,0 +1,758 @@
+import {
+  Assets,
+  Container,
+  Graphics,
+  Sprite,
+  Text,
+  Texture,
+  type Application,
+} from 'pixi.js';
+import type {
+  AmbientSpec,
+  Interactable,
+  InteractablePatch,
+  LayerName,
+  SceneConfig,
+  WorldLayer,
+} from './types';
+import { Actor, followLeader } from './Actors';
+import { buildNavGrid, findPath, type NavGrid, type Point } from './navGrid';
+import { LAYER_ORDER } from './types';
+import type { Camera } from './Camera';
+
+/**
+ * Turns a SceneConfig into a live Pixi scene graph.
+ *
+ * Two jobs, both narrow:
+ *   1. Build one container per layer, in painter's order, and put things in them.
+ *   2. Each frame, move those containers according to the camera and parallax,
+ *      and advance any ambient motion.
+ *
+ * It knows nothing about adventures, unlocks or mastery. When an object is
+ * tapped it reports the id and stops.
+ *
+ * Missing artwork is a first-class case, not an error: anything without an
+ * asset (or whose asset fails to load) draws as a labelled block, so the whole
+ * scene stays composable and readable long before an illustrator has touched it.
+ */
+
+interface Placed {
+  /** Wrapper positioned in world space; ambient motion transforms this. */
+  node: Container;
+  parallax: number;
+  ambient?: AmbientSpec;
+  /** Base position, so ambient motion is always relative to the layout. */
+  baseX: number;
+  baseY: number;
+  /** Per-object animation scratch. */
+  phase: number;
+  width: number;
+  height: number;
+  /** Particles/one-offs owned by this object. */
+  extras?: Container;
+  nextEventAt?: number;
+}
+
+export class SceneRenderer {
+  readonly root = new Container();
+
+  private layers = new Map<LayerName, Container>();
+  private placed: Placed[] = [];
+  private interactables: {
+    config: Interactable;
+    parallax: number;
+    /** The object's container, so a chapter can hide it. */
+    node: Container;
+    /** The sprite inside it, so a chapter can swap the artwork. */
+    visual: Container;
+    /** The attention ring, built for every object and shown on demand. */
+    ring: Graphics;
+    /** Hidden objects stay in the list but leave hit-testing and a11y. */
+    hidden: boolean;
+    /** The artwork currently drawn, which a chapter may have swapped. */
+    asset: string | null;
+  }[] = [];
+
+  private attentionRings: { node: Graphics; phase: number }[] = [];
+  /** Characters that walk around. Keyed by id so callers can drive them. */
+  readonly actors = new Map<string, Actor>();
+  private elapsed = 0;
+  private scene: SceneConfig;
+  private reducedMotion: boolean;
+  /** Built once from the walkable areas; null when the scene declares none. */
+  private nav: NavGrid | null = null;
+
+  constructor(scene: SceneConfig, reducedMotion: boolean) {
+    this.scene = scene;
+    this.reducedMotion = reducedMotion;
+
+    for (const name of LAYER_ORDER) {
+      const container = new Container();
+      container.label = name;
+      this.layers.set(name, container);
+      this.root.addChild(container);
+    }
+  }
+
+  /** Resolved textures, keyed by path. Absent or failed assets map to null. */
+  private textures = new Map<string, Texture | null>();
+
+  /**
+   * Builds the scene.
+   *
+   * Assets are fetched **in parallel and with a deadline**, then the scene is
+   * assembled synchronously. Doing it the obvious way — awaiting each sprite as
+   * it is created — meant that during development, when no artwork exists yet,
+   * two dozen failing requests ran end to end and the world stayed blank for
+   * many seconds. Missing art is the normal state for most of this project's
+   * life, so it has to be the fast path, not the slow one.
+   */
+  async build(app: Application): Promise<void> {
+    const background = new Graphics()
+      .rect(0, 0, app.screen.width, app.screen.height)
+      .fill(this.scene.background);
+    background.label = 'background';
+    // Sits behind every layer and never moves.
+    this.root.addChildAt(background, 0);
+
+    const paths = [
+      ...this.scene.layers.map((l) => l.asset),
+      ...this.scene.interactables.map((i) => i.asset),
+      ...(this.scene.actors ?? []).flatMap((a) => [
+        ...Object.values(a.sprites),
+        ...Object.values(a.walk ?? {}).flatMap((cycle) => cycle?.frames ?? []),
+      ]),
+      // Artwork no layer or object names yet, but a story beat will.
+      ...(this.scene.preload ?? []),
+    ].filter((p): p is string => Boolean(p));
+
+    await this.preload([...new Set(paths)]);
+
+    const areas = this.scene.walkable ?? [];
+    this.nav = areas.length ? buildNavGrid(areas, this.scene.world) : null;
+
+    for (const layer of this.scene.layers) this.addLayer(layer);
+    for (const item of this.scene.interactables) this.addInteractable(item);
+    for (const spec of this.scene.actors ?? []) this.addActor(spec);
+  }
+
+  /* ------------------------------------------------------------ building */
+
+  private async preload(paths: string[]): Promise<void> {
+    if (paths.length === 0) return;
+
+    const withDeadline = (path: string) =>
+      Promise.race([
+        Assets.load<Texture>(path).catch(() => null),
+        // A dev server that answers a missing .webp with its SPA fallback can
+        // leave a decode hanging forever. Never let that stall the world.
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+      ]).then((texture) => {
+        this.textures.set(path, (texture as Texture | null) ?? null);
+      });
+
+    await Promise.all(paths.map(withDeadline));
+  }
+
+  private textureFor(path: string | null): Texture | null {
+    return path ? (this.textures.get(path) ?? null) : null;
+  }
+
+  /**
+   * Warns when a dropped-in illustration has a different shape from the slot
+   * it is filling.
+   *
+   * Stretching art to fit is how a hand-painted world starts looking subtly
+   * wrong in a way nobody can name — so this reports the mismatch with the
+   * numbers needed to fix it, and the fix is normally to change the scene to
+   * suit the art rather than the other way round. Dev-only; the scene renders
+   * either way.
+   */
+  private checkFit(path: string | null, texture: Texture | null, w: number, h: number) {
+    if (!import.meta.env.DEV || !path || !texture) return;
+    const actual = texture.width / texture.height;
+    const expected = w / h;
+    if (!isFinite(actual) || !isFinite(expected)) return;
+    const drift = Math.abs(actual - expected) / expected;
+    if (drift > 0.02) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[oppdag] ${path} is ${texture.width}×${texture.height} ` +
+          `(aspect ${actual.toFixed(3)}) but the scene gives it ${w}×${h} ` +
+          `(aspect ${expected.toFixed(3)}). It will be stretched by ` +
+          `${Math.round(drift * 100)}%. Change the slot size in the scene ` +
+          `config to match the artwork.`,
+      );
+    }
+  }
+
+  private placeholder(
+    width: number,
+    height: number,
+    color: number,
+    label?: string,
+  ): Container {
+    const node = new Container();
+    // Opaque, not 0.95: a stack of large translucent rects means every pixel
+    // is blended several times over, which dominates the frame cost long
+    // before anything interesting is happening.
+    const block = new Graphics()
+      .roundRect(0, 0, width, height, Math.min(24, width * 0.06))
+      .fill({ color });
+    node.addChild(block);
+
+    if (label) {
+      const text = new Text({
+        text: label,
+        style: {
+          fontFamily: 'Nunito Variable, sans-serif',
+          fontSize: Math.max(12, Math.min(22, width * 0.09)),
+          fontWeight: '700',
+          fill: 0x3a2e28,
+          align: 'center',
+        },
+      });
+      text.anchor.set(0.5);
+      text.x = width / 2;
+      text.y = height / 2;
+      text.alpha = 0.55;
+      node.addChild(text);
+    }
+    return node;
+  }
+
+  private addLayer(layer: WorldLayer) {
+    const texture = this.textureFor(layer.asset);
+    this.checkFit(layer.asset, texture, layer.size.width, layer.size.height);
+    const wrapper = new Container();
+    wrapper.label = layer.id;
+
+    const visual = texture
+      ? new Sprite(texture)
+      : this.placeholder(
+          layer.size.width,
+          layer.size.height,
+          layer.placeholderColor ?? 0xd8eefa,
+          layer.placeholderLabel,
+        );
+
+    if (texture) {
+      (visual as Sprite).width = layer.size.width;
+      (visual as Sprite).height = layer.size.height;
+    }
+    wrapper.addChild(visual);
+
+    // Sway pivots about the base, which is how a tree actually moves.
+    if (layer.ambient?.kind === 'sway') {
+      const pivot = layer.ambient.pivot ?? 'bottom';
+      wrapper.pivot.set(
+        layer.size.width / 2,
+        pivot === 'bottom' ? layer.size.height : layer.size.height / 2,
+      );
+      wrapper.x = layer.position.x + layer.size.width / 2;
+      wrapper.y =
+        layer.position.y + (pivot === 'bottom' ? layer.size.height : layer.size.height / 2);
+    } else {
+      wrapper.x = layer.position.x;
+      wrapper.y = layer.position.y;
+    }
+
+    // Depth inside the interactive layer is the line the object stands on, the
+    // same rule actors use. That is what lets a child walk *behind* a cottage
+    // instead of permanently in front of it.
+    //
+    // Only in that layer, though. Pixi 8 honours zIndex automatically — there
+    // is no opt-in — so setting it on every band silently re-sorted `mid` by
+    // ground line and drew the sea on top of the island. Everywhere else,
+    // painter's order is the order the scene lists things in, and that is the
+    // contract the scene file is written against.
+    if (layer.layer === 'interactive') {
+      wrapper.zIndex = layer.position.y + layer.size.height;
+    }
+
+    const target = this.layers.get(layer.layer);
+    target?.addChild(wrapper);
+
+    const record: Placed = {
+      node: wrapper,
+      parallax: layer.parallax,
+      ambient: layer.ambient,
+      baseX: wrapper.x,
+      baseY: wrapper.y,
+      // Offsetting by id keeps a row of trees from swaying in lockstep.
+      phase: hashPhase(layer.id),
+      width: layer.size.width,
+      height: layer.size.height,
+    };
+
+    if (layer.ambient?.kind === 'smoke' || layer.ambient?.kind === 'passing') {
+      const extras = new Container();
+      target?.addChild(extras);
+      record.extras = extras;
+      record.nextEventAt = 0;
+    }
+
+    this.placed.push(record);
+  }
+
+  private addInteractable(item: Interactable) {
+    const texture = this.textureFor(item.asset);
+    this.checkFit(item.asset, texture, item.size.width, item.size.height);
+    const wrapper = new Container();
+    wrapper.label = item.id;
+
+    // A slow ring behind the object — the world's way of saying "over here".
+    // Built for every object and hidden unless asked for, because a chapter
+    // needs to point at a shell that was ordinary scenery a moment ago, and
+    // building graphics mid-story is how a frame gets dropped at exactly the
+    // moment the child is being invited to look.
+    const base =
+      item.hit.shape === 'circle' ? item.hit.radius : item.size.width / 2;
+    const ring = new Graphics().circle(0, 0, base * 1.45).fill({
+      color: 0xf78a77,
+      alpha: 0.35,
+    });
+    ring.visible = item.attention ?? false;
+    wrapper.addChild(ring);
+    this.attentionRings.push({ node: ring, phase: hashPhase(item.id) });
+
+    const visual = texture
+      ? new Sprite(texture)
+      : this.placeholder(
+          item.size.width,
+          item.size.height,
+          item.placeholderColor ?? 0xffcf76,
+          item.placeholderLabel ?? item.label,
+        );
+    if (texture) {
+      (visual as Sprite).width = item.size.width;
+      (visual as Sprite).height = item.size.height;
+    }
+    // Anchor on the object's centre so x/y matches the hit area.
+    visual.x = -item.size.width / 2;
+    visual.y = -item.size.height / 2;
+    wrapper.addChild(visual);
+
+    wrapper.x = item.x;
+    wrapper.y = item.y;
+    // Interactables are centred on x/y, so the line they stand on is half a
+    // height below it.
+    wrapper.zIndex = item.y + item.size.height / 2;
+    if (item.dimmed) wrapper.alpha = 0.45;
+
+    const layerName = item.layer ?? 'interactive';
+    this.layers.get(layerName)?.addChild(wrapper);
+
+    this.placed.push({
+      node: wrapper,
+      parallax: item.parallax ?? 1,
+      ambient: item.ambient,
+      baseX: wrapper.x,
+      baseY: wrapper.y,
+      phase: hashPhase(item.id),
+      width: item.size.width,
+      height: item.size.height,
+    });
+
+    wrapper.visible = !item.hidden;
+
+    this.interactables.push({
+      config: item,
+      parallax: item.parallax ?? 1,
+      node: wrapper,
+      visual,
+      ring,
+      hidden: item.hidden ?? false,
+      asset: item.asset,
+    });
+  }
+
+  /**
+   * Changes an object the chapter has moved past.
+   *
+   * Hiding is the interesting case, and it is three things, not one: the
+   * object stops being drawn, stops answering taps, and stops being announced
+   * to a screen reader. Leaving any of the three behind leaves a shell that
+   * has visibly been picked up still sitting in the scene as an invisible
+   * 44-pixel button over the path — which is this project's oldest bug wearing
+   * its fourth disguise.
+   */
+  updateInteractable(id: string, patch: InteractablePatch): void {
+    const entry = this.interactables.find((e) => e.config.id === id);
+    if (!entry) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.warn(`[oppdag] updateInteractable: no object called "${id}"`);
+      }
+      return;
+    }
+
+    if (patch.asset !== undefined) {
+      const texture = this.textureFor(patch.asset);
+      if (!texture) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[oppdag] ${patch.asset} was never loaded — add it to the scene's ` +
+              `preload list. Keeping the old artwork.`,
+          );
+        }
+      } else if (entry.visual instanceof Sprite) {
+        entry.visual.texture = texture;
+        // The sprite was sized to the slot, and assigning a texture resets
+        // nothing — but a replacement of a different shape would stretch, so
+        // say so rather than letting the world go quietly wrong.
+        this.checkFit(
+          patch.asset,
+          texture,
+          entry.config.size.width,
+          entry.config.size.height,
+        );
+        entry.visual.width = entry.config.size.width;
+        entry.visual.height = entry.config.size.height;
+        entry.asset = patch.asset;
+      }
+    }
+
+    if (patch.visible !== undefined) {
+      entry.hidden = !patch.visible;
+      entry.node.visible = patch.visible;
+    }
+
+    if (patch.attention !== undefined) entry.ring.visible = patch.attention;
+  }
+
+  /**
+   * An actor's walk cycles as textures. A cycle with any frame missing is
+   * dropped whole: three frames of a four-frame walk is a limp, and the
+   * standing drawing with the procedural gait looks better than a limp.
+   */
+  private cyclesFor(spec: import('./types').ActorSpec) {
+    const out: Partial<Record<'front' | 'back' | 'side', Texture[]>> = {};
+    for (const view of ['front', 'back', 'side'] as const) {
+      const cycle = spec.walk?.[view];
+      if (!cycle) continue;
+      const textures = cycle.frames.map((f) => this.textureFor(f));
+      if (textures.every((t): t is Texture => t !== null)) out[view] = textures;
+    }
+    return out;
+  }
+
+  private addActor(spec: import('./types').ActorSpec) {
+    const actor = new Actor(spec, {
+      front: this.textureFor(spec.sprites.front) ?? undefined,
+      back: this.textureFor(spec.sprites.back) ?? undefined,
+      side: this.textureFor(spec.sprites.side) ?? undefined,
+      rest: this.textureFor(spec.sprites.rest ?? null) ?? undefined,
+    }, this.cyclesFor(spec));
+    this.actors.set(spec.id, actor);
+    this.layers.get('interactive')?.addChild(actor.node);
+  }
+
+  /* -------------------------------------------------------------- frame */
+
+  update(camera: Camera, deltaMs: number) {
+    this.elapsed += deltaMs;
+
+    for (const name of LAYER_ORDER) {
+      const container = this.layers.get(name);
+      if (container) container.position.set(0, 0);
+    }
+
+    for (const item of this.placed) {
+      this.applyAmbient(item, deltaMs);
+      // Parallax is applied per object rather than per layer, so a foreground
+      // branch and a foreground flower can move at genuinely different rates.
+      const anchored = camera.toScreen(item.baseX, item.baseY, item.parallax);
+      item.node.x = anchored.x + (item.node.x - item.baseX);
+      item.node.y = anchored.y + (item.node.y - item.baseY);
+      item.node.scale.set(camera.zoom * (item.node.scale.x < 0 ? -1 : 1));
+    }
+
+    // Followers pick their goal before anyone moves, so a companion reacts to
+    // where its leader is this frame rather than trailing a frame behind.
+    for (const actor of this.actors.values()) {
+      const leaderId = actor.spec.follows;
+      const leader = leaderId ? this.actors.get(leaderId) : undefined;
+      if (leader) followLeader(actor, leader);
+    }
+
+    // Actors move themselves, then get placed like anything else. Depth is by
+    // feet position, so walking behind the cottage puts you behind it.
+    for (const actor of this.actors.values()) {
+      actor.update(deltaMs);
+      const at = camera.toScreen(actor.x, actor.y, 1);
+      actor.node.x = at.x;
+      actor.node.y = at.y;
+      actor.node.scale.set(camera.zoom);
+      actor.node.zIndex = actor.y;
+    }
+    const interactive = this.layers.get('interactive');
+    if (interactive && this.actors.size > 0) {
+      interactive.sortableChildren = true;
+      interactive.sortChildren();
+    }
+
+    // Attention rings breathe rather than blink — an invitation, not an alarm.
+    if (!this.reducedMotion) {
+      for (const ring of this.attentionRings) {
+        const t = this.elapsed / 1000 + ring.phase;
+        const p = (Math.sin((t * Math.PI * 2) / 2.6) + 1) / 2;
+        ring.node.scale.set(1 + p * 0.28);
+        ring.node.alpha = 0.42 - p * 0.3;
+      }
+    }
+  }
+
+  private applyAmbient(item: Placed, deltaMs: number) {
+    if (!item.ambient) {
+      item.node.x = item.baseX;
+      item.node.y = item.baseY;
+      return;
+    }
+    if (this.reducedMotion) {
+      item.node.x = item.baseX;
+      item.node.y = item.baseY;
+      item.node.rotation = 0;
+      return;
+    }
+
+    const t = this.elapsed / 1000 + item.phase;
+    const a = item.ambient;
+
+    // Reset to base; each ambient kind re-applies its own offset.
+    item.node.x = item.baseX;
+    item.node.y = item.baseY;
+
+    switch (a.kind) {
+      case 'drift': {
+        const span = this.scene.world.width + item.width;
+        let x = item.baseX + ((this.elapsed / 1000) * a.speed + item.phase * span);
+        if (a.wrap !== false) {
+          x = ((x + item.width) % span) - item.width;
+        }
+        item.node.x = x;
+        break;
+      }
+      case 'sway':
+        item.node.rotation =
+          Math.sin((t * Math.PI * 2) / a.period) * (a.degrees * Math.PI) / 180;
+        break;
+      case 'bob':
+        item.node.y = item.baseY + Math.sin((t * Math.PI * 2) / a.period) * a.distance;
+        break;
+      case 'pulse':
+        item.node.alpha =
+          a.min + ((Math.sin((t * Math.PI * 2) / a.period) + 1) / 2) * (a.max - a.min);
+        break;
+      case 'smoke':
+        this.updateSmoke(item, a, deltaMs);
+        break;
+      case 'passing':
+        this.updatePassing(item, a, deltaMs);
+        break;
+    }
+  }
+
+  private updateSmoke(
+    item: Placed,
+    spec: Extract<AmbientSpec, { kind: 'smoke' }>,
+    deltaMs: number,
+  ) {
+    const extras = item.extras;
+    if (!extras) return;
+
+    item.nextEventAt = (item.nextEventAt ?? 0) - deltaMs;
+    if (item.nextEventAt <= 0) {
+      item.nextEventAt = 1000 / Math.max(0.1, spec.rate);
+      const puff = new Graphics().circle(0, 0, 6 + Math.random() * 5).fill({
+        color: 0xffffff,
+        alpha: 0.5,
+      });
+      puff.x = item.baseX + (Math.random() - 0.5) * spec.spread;
+      puff.y = item.baseY;
+      extras.addChild(puff);
+    }
+
+    for (const puff of [...extras.children]) {
+      puff.y -= (spec.rise * deltaMs) / 1000;
+      puff.alpha -= deltaMs / 4000;
+      puff.scale.set(puff.scale.x + deltaMs / 9000);
+      if (puff.alpha <= 0) {
+        extras.removeChild(puff);
+        puff.destroy();
+      }
+    }
+  }
+
+  private updatePassing(
+    item: Placed,
+    spec: Extract<AmbientSpec, { kind: 'passing' }>,
+    deltaMs: number,
+  ) {
+    const extras = item.extras;
+    if (!extras) return;
+
+    item.nextEventAt = (item.nextEventAt ?? 0) - deltaMs;
+    if (item.nextEventAt <= 0) {
+      const [lo, hi] = spec.everyMs;
+      item.nextEventAt = lo + Math.random() * (hi - lo);
+
+      // A small flock, so one bird never looks like a bug.
+      const flock = new Container();
+      for (let i = 0; i < 3; i += 1) {
+        const bird = new Graphics()
+          .moveTo(-7, 0)
+          .quadraticCurveTo(0, -5, 7, 0)
+          .stroke({ color: 0x5b5148, width: 2, alpha: 0.7 });
+        bird.x = i * 18;
+        bird.y = i % 2 === 0 ? 0 : -9;
+        flock.addChild(bird);
+      }
+      flock.y = item.baseY;
+      (flock as Container & { _t?: number })._t = 0;
+      extras.addChild(flock);
+    }
+
+    const width = this.scene.world.width;
+    for (const flock of [...extras.children] as (Container & { _t?: number })[]) {
+      flock._t = (flock._t ?? 0) + deltaMs / spec.durationMs;
+      const p = flock._t;
+      flock.x =
+        spec.from === 'left' ? -80 + p * (width + 160) : width + 80 - p * (width + 160);
+      // A shallow arc reads as flight rather than a slide.
+      flock.y = item.baseY - Math.sin(p * Math.PI) * 40;
+      if (p >= 1) {
+        extras.removeChild(flock);
+        flock.destroy({ children: true });
+      }
+    }
+  }
+
+  /* --------------------------------------------------------- hit testing */
+
+  /** Is this world point somewhere a character may stand? */
+  /**
+   * A route for an actor to a world point, or null when there is none.
+   *
+   * A scene with no walkable areas declared is open ground, so the route is
+   * just the point itself — the straight walk every scene had before.
+   */
+  route(actorId: string, to: Point): Point[] | null {
+    const actor = this.actors.get(actorId);
+    if (!actor) return null;
+    if (!this.nav) return [to];
+    return findPath(this.nav, { x: actor.x, y: actor.y }, to);
+  }
+
+  isWalkable(worldX: number, worldY: number): boolean {
+    const areas = this.scene.walkable;
+    // A scene that declares no walkable areas is entirely walkable, which
+    // keeps simple scenes simple.
+    if (!areas || areas.length === 0) return true;
+    return areas.some(
+      (a) =>
+        worldX >= a.x &&
+        worldX <= a.x + a.width &&
+        worldY >= a.y &&
+        worldY <= a.y + a.height,
+    );
+  }
+
+  /** The character under a screen point, if any. Actors win over scenery. */
+  hitActor(camera: Camera, screenX: number, screenY: number): string | null {
+    const world = camera.toWorld(screenX, screenY, 1);
+    for (const actor of this.actors.values()) {
+      if (actor.hit(world.x, world.y)) return actor.id;
+    }
+    return null;
+  }
+
+  /** Returns the id of the topmost interactable under a screen point. */
+  hitTest(camera: Camera, screenX: number, screenY: number): string | null {
+    // Reverse so things drawn on top win.
+    for (let i = this.interactables.length - 1; i >= 0; i -= 1) {
+      const entry = this.interactables[i]!;
+      if (entry.hidden) continue;
+      const world = camera.toWorld(screenX, screenY, entry.parallax);
+      const dx = world.x - entry.config.x;
+      const dy = world.y - entry.config.y;
+      const hit = entry.config.hit;
+
+      if (hit.shape === 'circle') {
+        if (dx * dx + dy * dy <= hit.radius * hit.radius) return entry.config.id;
+      } else if (
+        Math.abs(dx) <= hit.width / 2 &&
+        Math.abs(dy) <= hit.height / 2
+      ) {
+        return entry.config.id;
+      }
+    }
+    return null;
+  }
+
+  /** Screen positions of every interactable, for DOM overlays and a11y. */
+  /**
+   * Where the mirrored accessibility buttons go, and how big each one is.
+   *
+   * The size matters as much as the position. These buttons are invisible but
+   * real, so one sized larger than the thing it stands for silently eats taps
+   * meant for the ground around it. At a fixed 88px and ten objects in a
+   * scene, they covered most of the path and walking stopped working — the
+   * same failure as the overlay that swallowed every pointer event, in a form
+   * that only appears once a scene has enough objects in it.
+   *
+   * Floored at 44px, the usual minimum comfortable touch target. Section 2.3
+   * asks the layout to keep simultaneously required objects at least one
+   * target apart, which is what keeps that floor from reintroducing the
+   * problem.
+   */
+  overlayPositions(camera: Camera) {
+    return this.interactables
+      .filter((entry) => !entry.hidden)
+      .map((entry) => {
+        const hit = entry.config.hit;
+        const span =
+          hit.shape === 'circle'
+            ? hit.radius * 2
+            : Math.max(hit.width, hit.height);
+        return {
+          id: entry.config.id,
+          label: entry.config.label ?? entry.config.id,
+          size: Math.max(44, Math.round(span * camera.zoom)),
+          ...camera.toScreen(entry.config.x, entry.config.y, entry.parallax),
+        };
+      });
+  }
+
+  /**
+   * What the scene currently holds, for the QA harness.
+   *
+   * A chapter's progress is otherwise invisible from outside: React state is
+   * not reachable from a test, and a screenshot cannot tell a collected shell
+   * from one hidden behind Ellie's elbow. This reports what the renderer
+   * believes, which is the thing worth asserting on.
+   */
+  describeInteractables(): Record<string, { hidden: boolean; asset: string | null }> {
+    const out: Record<string, { hidden: boolean; asset: string | null }> = {};
+    for (const entry of this.interactables) {
+      out[entry.config.id] = { hidden: entry.hidden, asset: entry.asset };
+    }
+    return out;
+  }
+
+  setReducedMotion(reduced: boolean) {
+    this.reducedMotion = reduced;
+  }
+
+  destroy() {
+    this.root.destroy({ children: true });
+  }
+}
+
+/** Stable 0..1 from an id, so phases are varied but reproducible. */
+function hashPhase(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return (hash % 1000) / 1000;
+}

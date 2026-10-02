@@ -1,0 +1,125 @@
+import { buildLaereoyaScene, laereoyaScene } from './scenes/laereoya.scene';
+import { LOCATIONS, SCENERY } from './worldLayout';
+import type { SceneConfig } from './engine/types';
+
+/**
+ * Every piece of artwork the world expects, derived from the scene configs.
+ *
+ * Deliberately *derived* rather than hand-written: a manifest maintained
+ * alongside the scene is a manifest that drifts from it, and then an
+ * illustrator is working from a spec that quietly stopped being true. The
+ * scene is the single source of truth; this reads it.
+ *
+ * The sizes here are layout intent, not a demand. They say how much space the
+ * composition currently gives a thing — an illustration with different
+ * proportions is fine and the scene gets refitted to it, which is a small edit
+ * because the scene is plain data.
+ */
+
+export interface AssetSlot {
+  /** Path relative to `public/`. */
+  path: string;
+  /** Layout width in CSS pixels at 1×. Export at 2× for retina. */
+  width: number;
+  /** Layout height in CSS pixels at 1×. */
+  height: number;
+  /** Which parallax band it belongs to. */
+  band: string;
+  /** The scene object that uses it. */
+  id: string;
+  /** True where the art can be opaque; everything else wants transparency. */
+  opaque: boolean;
+  /** Ambient motion applied to it, if any — affects how it should be drawn. */
+  motion?: string;
+}
+
+/** Layers that legitimately fill their whole box and need no alpha. */
+const OPAQUE_IDS = new Set(['sky-wash', 'sea', 'island']);
+
+function slotsFor(scene: SceneConfig): AssetSlot[] {
+  const slots: AssetSlot[] = [];
+
+  for (const layer of scene.layers) {
+    if (!layer.asset) continue;
+    slots.push({
+      path: layer.asset,
+      width: layer.size.width,
+      height: layer.size.height,
+      band: layer.layer,
+      id: layer.id,
+      opaque: OPAQUE_IDS.has(layer.id),
+      motion: layer.ambient?.kind,
+    });
+  }
+
+  for (const item of scene.interactables) {
+    if (!item.asset) continue;
+    slots.push({
+      path: item.asset,
+      width: item.size.width,
+      height: item.size.height,
+      band: item.layer ?? 'interactive',
+      id: item.id,
+      opaque: false,
+      motion: item.ambient?.kind,
+    });
+  }
+
+  return slots;
+}
+
+/**
+ * The full set, with every unlockable thing switched on so the scenery that
+ * only appears once a child has learned something still shows up in the spec.
+ */
+export const ASSET_SLOTS: AssetSlot[] = slotsFor(
+  buildLaereoyaScene([
+    ...Object.keys(SCENERY),
+    ...LOCATIONS.map((location) => location.id),
+  ]),
+);
+
+/** Expected dimensions by path, for the drop-in size check. */
+export const EXPECTED_SIZE: Record<string, { width: number; height: number }> =
+  Object.fromEntries(
+    ASSET_SLOTS.map((slot) => [slot.path, { width: slot.width, height: slot.height }]),
+  );
+
+/**
+ * Characters are not scene layers. They move, they face the way they are
+ * going, and they are sized by height alone so that a redrawn sprite with
+ * different proportions still stands the right height on the ground.
+ *
+ * What is listed here is what the engine *uses* — three facings per character.
+ * The delivered sheets contain more than that (expressions, poses, walk and
+ * run cycles); see CHARACTER_WANTED for the pieces that would let the engine
+ * do more than it does today.
+ */
+export const CHARACTER_SLOTS = (laereoyaScene.actors ?? []).map((actor) => ({
+  id: actor.id,
+  /** Rendered height in world units. Width follows the artwork's own aspect. */
+  height: actor.height,
+  facings: Object.entries(actor.sprites)
+    .filter(([, path]) => Boolean(path))
+    .map(([facing, path]) => ({ facing, path: path as string })),
+}));
+
+/**
+ * Art that would unlock behaviour the engine already has a place for.
+ *
+ * Walking is currently conveyed by gait — a bob, a lean and a small squash —
+ * because the sheets lay their cycles out at roughly 32 px per frame, too
+ * small to cut. Individually exported frames are the one thing that would
+ * visibly raise the quality of movement, and nothing outside `Actors.ts`
+ * changes when they arrive.
+ */
+export const CHARACTER_WANTED = [
+  {
+    id: 'ellie',
+    need: 'walk cycle, 6–8 frames per facing, exported one frame per file at 600 px tall',
+  },
+  {
+    id: 'kiki',
+    need: 'walk cycle, 4–6 frames side view, exported one frame per file at 320 px tall',
+  },
+] as const;

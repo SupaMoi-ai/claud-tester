@@ -1,0 +1,107 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   OPPDAG — design tokens
+   ---------------------------------------------------------------------------
+   Everything visual comes from here. Screens and components must never
+   hard-code a colour, radius, shadow or timing; they use the utilities these
+   tokens generate (bg-butter, rounded-xxl, shadow-lifted, …).
+   Original Nordic pastel palette — warm rather than sterile.
+   =========================================================================== */
+
+@theme {
+  /* ---- Surfaces ------------------------------------------------------- */
+  --color-cream: #fdf8f0; /* app background — warm off-white */
+  --color-sand: #f7efe2; /* recessed surface */
+  --color-snow: #ffffff; /* cards */
+  --color-arctic: #eef6fb; /* cold scenes (Svalbard) */
+  --color-night: #2a3a57; /* aurora sky, deep water */
+  --color-night-soft: #3f5279;
+
+  /* ---- Character colours (soft) --------------------------------------- */
+  --color-butter: #ffcf76;
+  --color-butter-soft: #ffe9bd;
+  --color-butter-deep: #f0ae3d;
+
+  --color-sky: #8ccdee;
+  --color-sky-soft: #d8eefa;
+  --color-sky-deep: #4ea3d0;
+
+  --color-moss: #84cfa6;
+  --color-moss-soft: #d4efe0;
+  --color-moss-deep: #4aa77b;
+
+  --color-coral: #f78a77;
+  --color-coral-soft: #fcdad2;
+  --color-coral-deep: #de6450;
+
+  --color-lavender: #b8a5e4;
+  --color-lavender-soft: #e7defa;
+  --color-lavender-deep: #8b73c4;
+
+  --color-berry: #e8698d; /* reserved for magical moments */
+  --color-berry-soft: #fbd9e3;
+
+  /* ---- Typography colours --------------------------------------------- */
+  --color-ink: #3a2e28; /* warm charcoal-brown */
+  --color-ink-soft: #7b6b60;
+  --color-ink-faint: #b6aa9f;
+  --color-hairline: #ece0d1;
+
+  /* ---- Typefaces ------------------------------------------------------- */
+  --font-display: 'Fredoka Variable', 'Fredoka', ui-rounded, 'Segoe UI Rounded',
+    system-ui, sans-serif;
+  --font-text: 'Nunito Variable', 'Nunito', system-ui, -apple-system, sans-serif;
+
+  /* ---- Type scale — oversized and confident ---------------------------- */
+  --text-nano: 0.75rem;
+  --text-nano--line-height: 1.4;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.45;
+  --text-body: 1.125rem;
+  --text-body--line-height: 1.6;
+  --text-read: 1.3125rem; /* reading passages */
+  --text-read--line-height: 1.7;
+  --text-lead: 1.5rem;
+  --text-lead--line-height: 1.45;
+  --text-title: 2rem;
+  --text-title--line-height: 1.2;
+  --text-huge: 2.75rem;
+  --text-huge--line-height: 1.1;
+  --text-giant: 3.75rem;
+  --text-giant--line-height: 1.02;
+
+  /* ---- Radii — almost nothing has a sharp corner ----------------------- */
+  --radius-xs: 0.625rem;
+  --radius-sm: 1rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --radius-xl: 2.75rem;
+  --radius-xxl: 3.5rem;
+
+  /* ---- Shadows — soft, never harsh ------------------------------------ */
+  --shadow-soft: 0 2px 6px rgba(58, 46, 40, 0.05), 0 8px 24px rgba(58, 46, 40, 0.05);
+  --shadow-lifted: 0 4px 10px rgba(58, 46, 40, 0.06), 0 18px 40px rgba(58, 46, 40, 0.09);
+  --shadow-float: 0 10px 20px rgba(58, 46, 40, 0.08), 0 30px 60px rgba(58, 46, 40, 0.1);
+  --shadow-inset: inset 0 2px 6px rgba(58, 46, 40, 0.07);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Non-utility tokens (read via var() inside components / framer-motion). */
+:root {
+  --blob-a: 46% 54% 58% 42% / 52% 46% 54% 48%;
+  --blob-b: 62% 38% 41% 59% / 45% 56% 44% 55%;
+  --blob-c: 38% 62% 51% 49% / 60% 39% 61% 40%;
+
+  --dur-quick: 0.18s;
+  --dur-calm: 0.45s;
+  --dur-slow: 0.9s;
+  --dur-breath: 4.4s;
+  --dur-drift: 26s;
+
+  /* Minimum comfortable touch target for a 6-year-old on an iPad. */
+  --tap: 4rem;
+}
