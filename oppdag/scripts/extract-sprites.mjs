@@ -72,16 +72,27 @@ const JOBS = [
     stripGuides: true,
   },
   {
-    // Kiki is seated in every view on this sheet. That is the resting pose the
-    // companion sits in when Ellie stops, not a walking facing — hence the
-    // rest- prefix, and hence a second sheet of standing views is still needed.
-    sheet: 'e639fc34-image.png',
+    // The full study. Six STANDING views, which is what the companion walks
+    // on; the earlier sheet was seated throughout and could only ever rest.
+    sheet: '7bce743b-image.png',
     character: 'kiki',
-    band: { top: 0.14, bottom: 0.985, left: 0.25, right: 0.99 },
-    count: 4,
-    names: ['front', 'back', 'side', 'side-right'],
-    prefix: 'rest-',
+    band: { top: 0.105, bottom: 0.41, left: 0.05, right: 0.995 },
+    count: 6,
+    names: ['front', 'back', 'side', 'side-right', 'front34', 'back34'],
     format: 'png',
+    stripGuides: true,
+  },
+  {
+    // The pose row. Stops short of the scale-comparison panel on the right,
+    // which is a diagram rather than artwork.
+    sheet: '7bce743b-image.png',
+    character: 'kiki',
+    band: { top: 0.46, bottom: 0.79, left: 0.015, right: 0.76 },
+    count: 4,
+    names: ['rest', 'sleeping', 'tilt', 'tail-up'],
+    prefix: 'pose-',
+    format: 'png',
+    stripGuides: true,
   },
 ];
 
@@ -162,22 +173,31 @@ for (const job of JOBS) {
       ctx.putImageData(image, 0, 0);
 
       /* ---- 1b. erase the sheet's alignment guides ----------------------- *
-       * A model sheet rules horizontal guides across the whole page — crown,
-       * chin, hip, knee, ground. They pass behind the figures, so they never
-       * mark a character, but they do cross the empty space beside one, and
-       * trimmed to a bounding box that leaves a grey stub poking out of both
+       * A model sheet rules horizontal guides across the page — crown, chin,
+       * hip, knee, ground. They pass behind the figures, so they never mark a
+       * character, but they do cross the empty space beside one, and trimmed
+       * to a bounding box that leaves a grey stub poking out of both
        * shoulders: invisible in a count, obvious in the game.
        *
-       * The test is thinness, not coverage. Coverage fails because a guide row
-       * is a row of figures PLUS the guide filling the gaps between them, so
-       * it reads as nearly full and erasing it takes the figures with it —
-       * which is exactly what the first attempt did, cutting a band straight
-       * through every drawing. A guide is instead the only thing on the page
-       * that is one to four pixels tall: real drawing, even at a thin edge,
-       * belongs to a taller mass of ink directly above or below it.
+       * Two properties together identify one, and both are needed.
+       *
+       * THIN. A guide is one to four pixels tall. Real drawing, even at a thin
+       * edge, belongs to a taller mass of ink directly above or below it.
+       * Coverage is useless here: a guide row is a row of figures PLUS the
+       * guide filling the gaps, so it reads as nearly full, and erasing on
+       * that basis cuts a band straight through every drawing.
+       *
+       * LONG AND LEVEL. Thinness alone would also erase a cat's whiskers,
+       * which are thin everywhere. A whisker is a short diagonal, so at any
+       * single row it spans a handful of pixels; a guide runs level across a
+       * whole gap. Requiring an unbroken horizontal run keeps the whiskers.
        */
       if (stripGuides) {
         const MAX_GUIDE_PX = 4;
+        const bandW = bx1 - bx0;
+
+        // How tall the ink is through each pixel, column by column.
+        const thin = new Uint8Array(W * H);
         for (let x = bx0; x < bx1; x += 1) {
           let runStart = -1;
           for (let y = by0; y <= by1; y += 1) {
@@ -186,12 +206,35 @@ for (const job of JOBS) {
             if ((!on || y === by1) && runStart !== -1) {
               const runEnd = on ? y : y - 1;
               if (runEnd - runStart + 1 <= MAX_GUIDE_PX) {
-                for (let f = runStart; f <= runEnd; f += 1) {
-                  d[(f * W + x) * 4 + 3] = 0;
-                }
+                for (let f = runStart; f <= runEnd; f += 1) thin[f * W + x] = 1;
               }
               runStart = -1;
             }
+          }
+        }
+
+        // A guide is thin ink that reaches across the page. Measuring the
+        // row's extent rather than its longest unbroken run is what catches
+        // the fragments either side of a figure: the rule is interrupted by
+        // every body it passes behind, so no single piece of it is long, but
+        // the first and last piece are still half a page apart. Whiskers are
+        // thin too and survive, because they stay bunched around one muzzle —
+        // wide extent AND substantial total ink is a combination only a ruled
+        // line produces.
+        for (let y = by0; y < by1; y += 1) {
+          let first = -1;
+          let last = -1;
+          let count = 0;
+          for (let x = bx0; x < bx1; x += 1) {
+            if (!thin[y * W + x]) continue;
+            if (first === -1) first = x;
+            last = x;
+            count += 1;
+          }
+          if (first === -1) continue;
+          if (last - first < bandW * 0.5 || count < bandW * 0.25) continue;
+          for (let x = bx0; x < bx1; x += 1) {
+            if (thin[y * W + x]) d[(y * W + x) * 4 + 3] = 0;
           }
         }
         ctx.putImageData(image, 0, 0);

@@ -312,18 +312,14 @@ export const laereoyaScene: SceneConfig = {
     },
     {
       id: 'kiki',
-      // Every delivered Kiki view is SEATED, so she currently sits in all four
-      // slots and slides rather than walks. The cat is right — silver-grey, as
-      // the specification requires, superseding the brown bushy one — but the
-      // poses are not. A sheet of standing views replaces front/back/side and
-      // nothing else here changes.
       sprites: {
-        front: 'assets/characters/kiki/rest-front.png',
-        back: 'assets/characters/kiki/rest-back.png',
-        side: 'assets/characters/kiki/rest-side.png',
-        rest: 'assets/characters/kiki/rest-front.png',
+        front: 'assets/characters/kiki/front.png',
+        back: 'assets/characters/kiki/back.png',
+        side: 'assets/characters/kiki/side.png',
+        rest: 'assets/characters/kiki/pose-rest.png',
       },
-      height: 50,
+      // 36% of Ellie, as the study's scale comparison fixes it.
+      height: 40,
       x: 846,
       y: 616,
       // A shade quicker than Ellie, or she can never catch up after a long walk.

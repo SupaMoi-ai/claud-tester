@@ -131,13 +131,11 @@ export const bryggaScene: SceneConfig = {
     },
     {
       id: 'kiki',
-      // Seated in every delivered view; see the note in laereoya.scene.ts.
-      // Standing views replace front/back/side when they arrive.
       sprites: {
-        front: 'assets/characters/kiki/rest-front.png',
-        back: 'assets/characters/kiki/rest-back.png',
-        side: 'assets/characters/kiki/rest-side.png',
-        rest: 'assets/characters/kiki/rest-front.png',
+        front: 'assets/characters/kiki/front.png',
+        back: 'assets/characters/kiki/back.png',
+        side: 'assets/characters/kiki/side.png',
+        rest: 'assets/characters/kiki/pose-rest.png',
       },
       // Section 3.2: 24 LU standing ear height. She should not reach Ellie's
       // waist, which 24 against 66 satisfies.
