@@ -21,7 +21,7 @@
  */
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -38,21 +38,39 @@ const SHEETS = flag(
   'sheets',
   '/root/.claude/uploads/13a94ff5-1804-5bb1-95b9-77a941697020',
 );
-const OUT = join(root, flag('out', 'public/assets/characters'));
+// resolve, not join: an absolute --out must land where it says.
+const OUT = resolve(root, flag('out', 'public/assets/characters'));
 
 /**
  * Regions are fractions of the sheet, so they survive a re-export at another
  * resolution. `count` is how many figures sit side by side in that band.
  */
 const JOBS = [
+  /* -- the production sheets, in the locked cel-animation style ----------- *
+   * Five labelled panels each: a face study, then FORFRA / BAKFRA /
+   * VENSTRE / HØYRE. The band starts below the Norwegian captions and to the
+   * right of the face panel, which is drawn at a different scale and would
+   * otherwise be cut as a body view.
+   */
   {
-    sheet: 'b41304bd-image.png',
+    sheet: '071aa0db-image.png',
     character: 'ellie',
-    // Below the title block (which otherwise merges into the BACK figure)
-    // and above the FRONT/SIDE/BACK captions.
-    band: { top: 0.085, bottom: 0.5, left: 0.03, right: 0.99 },
+    band: { top: 0.12, bottom: 0.985, left: 0.27, right: 0.99 },
     count: 4,
-    names: ['front', 'front34', 'side', 'back'],
+    names: ['front', 'back', 'side', 'side-right'],
+    format: 'png',
+  },
+  {
+    // Kiki is seated in every view on this sheet. That is the resting pose the
+    // companion sits in when Ellie stops, not a walking facing — hence the
+    // rest- prefix, and hence a second sheet of standing views is still needed.
+    sheet: 'e639fc34-image.png',
+    character: 'kiki',
+    band: { top: 0.14, bottom: 0.985, left: 0.25, right: 0.99 },
+    count: 4,
+    names: ['front', 'back', 'side', 'side-right'],
+    prefix: 'rest-',
+    format: 'png',
   },
   {
     sheet: '8863585a-image.png',
@@ -70,23 +88,6 @@ const JOBS = [
     names: ['lei-seg', 'bestemt', 'irritert', 'entusiastisk', 'trott', 'tenkende'],
     prefix: 'face-',
   },
-  {
-    sheet: 'a0aedfdb-image.png',
-    character: 'kiki',
-    // Excludes the FARGEPALETT swatches on the right.
-    band: { top: 0.075, bottom: 0.41, left: 0.17, right: 0.78 },
-    count: 4,
-    names: ['front', 'front34', 'side', 'back'],
-  },
-  {
-    sheet: 'a0aedfdb-image.png',
-    character: 'kiki',
-    // Just the POSER panel — not POTER OG BEN left or STØRRELSE right.
-    band: { top: 0.775, bottom: 0.915, left: 0.34, right: 0.72 },
-    count: 3,
-    names: ['sittende', 'gaaende', 'hale-opp'],
-    prefix: 'pose-',
-  },
 ];
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
@@ -98,7 +99,7 @@ const written = [];
 for (const job of JOBS) {
   const b64 = readFileSync(join(SHEETS, job.sheet)).toString('base64');
   const cuts = await page.evaluate(
-    async ({ dataUrl, band, count }) => {
+    async ({ dataUrl, band, count, format }) => {
       const img = new Image();
       await new Promise((r) => {
         img.onload = r;
@@ -117,7 +118,18 @@ for (const job of JOBS) {
       const d = image.data;
 
       /* ---- 1. erase only background connected to the border -------------- */
-      const seed = [d[0], d[1], d[2]];
+      const by0 = Math.round(band.top * H);
+      const by1 = Math.round(band.bottom * H);
+      const bx0 = Math.round((band.left ?? 0) * W);
+      const bx1 = Math.round((band.right ?? 1) * W);
+
+      // Seed from the band's own perimeter as well as the image's. A sheet
+      // drawn inside a rounded border frame never lets its cream reach the
+      // image edge, so seeding only from the edge leaves the entire page
+      // opaque and every figure merges into one blob. The band edges sit in
+      // clear background inside each panel, so they always reach it.
+      const seedAt = Math.min(W * H - 1, Math.max(0, by0 * W + bx0 + 2));
+      const seed = [d[seedAt * 4], d[seedAt * 4 + 1], d[seedAt * 4 + 2]];
       const TOL = 26;
       const near = (i) =>
         Math.abs(d[i] - seed[0]) < TOL &&
@@ -131,6 +143,12 @@ for (const job of JOBS) {
       }
       for (let y = 0; y < H; y += 1) {
         stack.push(y * W, W - 1 + y * W);
+      }
+      for (let x = bx0; x < bx1; x += 1) {
+        stack.push(x + by0 * W, x + (by1 - 1) * W);
+      }
+      for (let y = by0; y < by1; y += 1) {
+        stack.push(bx0 + y * W, bx1 - 1 + y * W);
       }
       while (stack.length) {
         const p = stack.pop();
@@ -149,10 +167,10 @@ for (const job of JOBS) {
       ctx.putImageData(image, 0, 0);
 
       /* ---- 2. find the figures in the band by ink density ---------------- */
-      const y0 = Math.round(band.top * H);
-      const y1 = Math.round(band.bottom * H);
-      const x0 = Math.round((band.left ?? 0) * W);
-      const x1 = Math.round((band.right ?? 1) * W);
+      const y0 = by0;
+      const y1 = by1;
+      const x0 = bx0;
+      const x1 = bx1;
       const colInk = new Float32Array(W);
       for (let y = y0; y < y1; y += 1) {
         for (let x = x0; x < x1; x += 1) {
@@ -212,6 +230,37 @@ for (const job of JOBS) {
         }
         if (maxX <= minX || maxY <= minY) continue;
 
+        /* ---- 3a. strip panel rules caught by the bounding box ------------ *
+         * A model sheet draws a baseline under each figure. It is a solid row
+         * spanning the full cell with a transparent gap above it, so the box
+         * stretches down to the rule and the sprite's bottom edge stops being
+         * the character's feet. Anchored at (0.5, 1) that floats her above the
+         * ground by the height of the gap — small, consistent, and invisible
+         * in any test that is not a screenshot. Measured on these sheets:
+         * three rules under Ellie, six under Kiki.
+         */
+        const rowSpan = (y) => {
+          let n = 0;
+          for (let x = minX; x <= maxX; x += 1) {
+            if (d[(y * W + x) * 4 + 3] > 24) n += 1;
+          }
+          return n;
+        };
+        const full = (maxX - minX + 1) * 0.95;
+        for (let guard = 0; guard < 64; guard += 1) {
+          const before = maxY;
+          while (maxY > minY && rowSpan(maxY) >= full) maxY -= 1;
+          while (maxY > minY && rowSpan(maxY) === 0) maxY -= 1;
+          if (maxY === before) break;
+        }
+        for (let guard = 0; guard < 64; guard += 1) {
+          const before = minY;
+          while (minY < maxY && rowSpan(minY) >= full) minY += 1;
+          while (minY < maxY && rowSpan(minY) === 0) minY += 1;
+          if (minY === before) break;
+        }
+        if (maxY <= minY) continue;
+
         const pad = 4;
         const sx = Math.max(0, minX - pad);
         const sy = Math.max(0, minY - pad);
@@ -225,14 +274,22 @@ for (const job of JOBS) {
         // WebP with alpha: roughly a quarter the bytes of PNG for painted
         // art with soft edges, which matters on a tablet over mobile data.
         results.push({
-          dataUrl: out.toDataURL('image/webp', 0.92),
+          dataUrl:
+            format === 'png'
+              ? out.toDataURL('image/png')
+              : out.toDataURL('image/webp', 0.92),
           width: sw,
           height: sh,
         });
       }
       return results;
     },
-    { dataUrl: 'data:image/png;base64,' + b64, band: job.band, count: job.count },
+    {
+      dataUrl: 'data:image/png;base64,' + b64,
+      band: job.band,
+      count: job.count,
+      format: job.format ?? 'webp',
+    },
   );
 
   const dir = join(OUT, job.character);
@@ -240,11 +297,12 @@ for (const job of JOBS) {
 
   cuts.forEach((cut, i) => {
     const name = (job.prefix ?? '') + (job.names[i] ?? `part-${i}`);
-    const file = join(dir, `${name}.webp`);
+    const ext = job.format ?? 'webp';
+    const file = join(dir, `${name}.${ext}`);
     const bytes = Buffer.from(cut.dataUrl.split(',')[1], 'base64');
     writeFileSync(file, bytes);
     written.push({
-      file: `${job.character}/${name}.webp`,
+      file: `${job.character}/${name}.${ext}`,
       w: cut.width,
       h: cut.height,
       kb: Math.round(bytes.length / 1024),

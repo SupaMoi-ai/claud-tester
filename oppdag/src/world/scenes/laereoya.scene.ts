@@ -295,9 +295,9 @@ export const laereoyaScene: SceneConfig = {
     {
       id: 'ellie',
       sprites: {
-        front: 'assets/characters/ellie/front.webp',
-        back: 'assets/characters/ellie/back.webp',
-        side: 'assets/characters/ellie/side.webp',
+        front: 'assets/characters/ellie/front.png',
+        back: 'assets/characters/ellie/back.png',
+        side: 'assets/characters/ellie/side.png',
       },
       // She is the person you are, not a detail on the island — at 84 she read
       // as scenery. Large enough to hold the eye, small enough that the island
@@ -312,11 +312,16 @@ export const laereoyaScene: SceneConfig = {
     },
     {
       id: 'kiki',
+      // Every delivered Kiki view is SEATED, so she currently sits in all four
+      // slots and slides rather than walks. The cat is right — silver-grey, as
+      // the specification requires, superseding the brown bushy one — but the
+      // poses are not. A sheet of standing views replaces front/back/side and
+      // nothing else here changes.
       sprites: {
-        front: 'assets/characters/kiki/front.webp',
-        back: 'assets/characters/kiki/back.webp',
-        side: 'assets/characters/kiki/side.webp',
-        rest: 'assets/characters/kiki/pose-sittende.webp',
+        front: 'assets/characters/kiki/rest-front.png',
+        back: 'assets/characters/kiki/rest-back.png',
+        side: 'assets/characters/kiki/rest-side.png',
+        rest: 'assets/characters/kiki/rest-front.png',
       },
       height: 50,
       x: 846,
